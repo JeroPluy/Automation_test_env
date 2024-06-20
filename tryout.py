@@ -1,79 +1,99 @@
+import json
+from os import path
 from typing import Any, Tuple
+
 import customtkinter
-import appLang
+
 import customWidgets as cW
 
-customtkinter.set_default_color_theme("theme.json")
-customtkinter.set_appearance_mode("light")
 
-class customNavigation(cW.NavigationFrame):
-    def __init__(self, master, com_backwards, com_forward, objects: int = 2, values: Tuple[str] = ...):
-        super().__init__(master, com_backwards, com_forward, objects, values)
-        self.version_option = customtkinter.CTkOptionMenu(self, values=appLang.OPTIONS, width=130, height=30, command=self.version_select)
-        self.version_option.grid(row=0, column=1, padx=(0,15), sticky="we")
-
-    def version_select(self, choice):
-        print("optionmenu dropdown clicked:", str(choice))
-
-        
-class AutoamtionInsertionFrame(customtkinter.CTkFrame):
-    """_summary_
+def load_settings():
+    #print(path.join(path.dirname(path.realpath(__file__))))
+    with open("settings.json", "r") as json_settings:
+        return json.load(json_settings)
+    
+def load_language(lang):
+    with open("appLang.json", "r", encoding="utf8") as json_lang:
+        langs = json.load(json_lang)
+        selected_lang = {}
+        for key in langs:
+            selected_lang[key] = langs.get(key)[lang]
+        print(selected_lang)
+        return selected_lang
+    
+class BlankWindow(customtkinter.CTk):
+    """
+        Basic Window for the application  
 
     Args:
-        customtkinter (_type_): _description_
+        customtkinter (_type_): standard custom tkinter node for a ctk application
+    
     """
-    def __init__(self, master,**kwargs):
-        super().__init__(master, fg_color = "transparent",**kwargs)
-        self.grid_columnconfigure(0,weight=1)
-
-        self.textbox = customtkinter.CTkTextbox(self, width=330, height=132, font=("Roboto", 16), wrap="none")
-        self.textbox.grid(row=0,column=0, sticky="news", rowspan=2, padx=(0,10))
-
-        self.add_btn = cW.acceptButton(self, width=60, height=60, corner_radius=12, kind=1, command=self.textbox_add) 
-        self.add_btn.grid(row=0, column=1, sticky="nw", pady=(0,5))
-
-        self.del_btn = cW.deleteButton(self, width=60, height=60, corner_radius=12, kind=0, command=self.textbox_del) 
-        self.del_btn.grid(row=1, column=1, sticky="nw", pady=(5,0))
-        
-
-    def textbox_del(self):
-        self.textbox.delete("0.0", "end")
-
-    def textbox_add(self):
-        self.textbox.insert("0.0", " Text ")
-
-    def safe_text(self):
-        self.text = self.textbox.get("0.0", "end")  # get text from line 0 character 0 till the end
-
-
-class AutoamtionAdditon(customtkinter.CTk):
-    """_summary_
-
-    Args:
-        customtkinter (_type_): _description_
-    """
-    def __init__(self, title):
-        super().__init__()
-        self.title("my app")
+    def __init__(self, fg_color: str | Tuple[str] | None = None, **kwargs):
+        super().__init__(fg_color, **kwargs)
+        self.title("title of the App")
         self.geometry("600x600")
-        self.grid_columnconfigure(0, weight=1)
-        self.title = customtkinter.CTkLabel(self, text=title, fg_color="#212226", font=("Roboto", 16), text_color="#D9DADE")
-        self.title.grid(row=0, column=0,sticky="ew")
+        self.settings = load_settings()
+        self.lang = load_language(self.settings["LANG"])
+        customtkinter.set_default_color_theme("theme.json")
+        customtkinter.set_appearance_mode(self.settings["mode"])   
 
-        self.entry = customtkinter.CTkEntry(self, placeholder_text=appLang.NAME[appLang.LANG], font=("Roboto", 16) )
-        self.entry.grid(row=1, column=0, sticky="we", padx=50, pady=(10,10))
+        
+class ToplevelWindow(customtkinter.CTkToplevel):
+    def __init__(self, root=customtkinter.CTk, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.title("Testwindow")  
+        self.resizable(False, False)   
+        self.attributes("-topmost",True)  
 
-        self.insertion_frame = AutoamtionInsertionFrame(self)
-        self.insertion_frame.grid(row=2, column=0, padx=(50,50),pady=(10,23), sticky="news")
+        # center the toplevel window
+        x = root.winfo_x() + root.winfo_width()//2 - self.winfo_width()//2
+        y = root.winfo_y() + root.winfo_height()//2 - self.winfo_height()//2
+        self.geometry(f"+{x}+{y}")
 
-        self.navigaton_frame = customNavigation(self, objects=2, com_backwards=self.backwards, com_forward=self.forwards, values=[appLang.BACK[appLang.LANG], appLang.NEXT[appLang.LANG]])
-        self.navigaton_frame.grid(row=3, column=0, padx=(50,50),pady=(0,15), sticky="news")
 
-    def backwards(self):
-        print("did nothing")
+class TestWindow(BlankWindow):
+    def __init__(self, fg_color: str | Tuple[str] | None = None, **kwargs):
+        super().__init__(fg_color, **kwargs)
+        self.label = customtkinter.CTkLabel(self, text="Testlabe")
+        self.button = customtkinter.CTkButton(self, text="testbutton", command=self.change_theme)
+        self.frame = customtkinter.CTkFrame(self)
+        self.frame_into_frame = customtkinter.CTkFrame(self.frame)
+        self.window_btn = customtkinter.CTkButton(self, text="new window", command=self.createWindow)
+        self.entry = customtkinter.CTkEntry(self, placeholder_text="placeholderText")
+        self.entry2 = customtkinter.CTkEntry(self, placeholder_text="placeholderText")
+        self.disabled_btn = customtkinter.CTkButton(self, text="diabled", state="disabled")
+        self.round_btn = customtkinter.CTkButton(self, text="new window", corner_radius=13)
+        self.label.grid(row=0, column=0, sticky="we")
+        self.button.grid(row=1, column=0, sticky="we")
+        self.frame.grid(row=2, column=0, sticky="we")
+        self.frame_into_frame.grid(row=0, column=0, sticky="n", padx=(10,10), pady=(10,10))
+        self.window_btn.grid(row=3, column=0, sticky="n")
+        self.toplevel_window = None
+        self.entry.grid(row=4, column=0, sticky="n")
+        self.entry2.grid(row=5, column=0, sticky="n")
+        self.disabled_btn.grid(row=6, column=0, sticky="n")
+        self.round_btn.grid(row=7, column=0, sticky="n")
 
-    def forwards(self):
-        print("did nothing")
+        
+        
+    def change_theme(self):
+        self.current_theme = self.settings["mode"]
+        if self.current_theme == "light":
+            self.settings["mode"] = "dark"
+        else:
+            self.settings["mode"] = "light"
+        customtkinter.set_appearance_mode(self.settings["mode"])
 
-app = AutoamtionAdditon(appLang.NEWAUTO)
-app.mainloop()
+    def createWindow(self):
+        if self.toplevel_window is None or not self.toplevel_window.winfo_exists():
+            self.toplevel_window = ToplevelWindow(root=self)
+            # disables other main window until its closed
+            self.toplevel_window.grab_set()
+        else:
+            self.toplevel_window.focus()
+
+if __name__ == "__main__":
+    #app = AutoamtionAdditon(self.lang["PROJECT"] + "/" + self.lang["NEW_A"])
+    app = TestWindow()
+    app.mainloop()

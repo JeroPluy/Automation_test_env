@@ -1,0 +1,10 @@
+{
+    "BACK" : ["Zurück", "Back"],
+    "NEXT" : ["Hinzufügen", "Add"],
+    "IMPORT" : ["Hinzufügen", "Import"],
+    "DELETE" : ["Löschen", "Delete"],
+    "PROJECT" : ["Projekt1", "Project1"],
+    "AUTO_NAME" : ["Automation-Name", "automation name"],
+    "NEW_A" : ["neue Automation", "new automation"],
+    "ACCEPT" : ["Bestätigen", "Accept"]
+}
