@@ -63,7 +63,10 @@ class TestWindow(BlankWindow):
         self.entry = customtkinter.CTkEntry(self, placeholder_text="placeholderText")
         self.entry2 = customtkinter.CTkEntry(self, placeholder_text="placeholderText")
         self.disabled_btn = customtkinter.CTkButton(self, text="diabled", state="disabled")
-        self.round_btn = customtkinter.CTkButton(self, text="new window", corner_radius=13)
+        self.round_btn = customtkinter.CTkButton(self, text="round btn", corner_radius=13)
+        self.checkbox = customtkinter.CTkCheckBox(self, text="checkbox text", command=self.disableIt)
+        self.checkbox2 = customtkinter.CTkCheckBox(self, text="checkbox 2", command=self.toggleAll)
+        self.switch = customtkinter.CTkSwitch(self, text="switch text")
         self.label.grid(row=0, column=0, sticky="we")
         self.button.grid(row=1, column=0, sticky="we")
         self.frame.grid(row=2, column=0, sticky="we")
@@ -74,6 +77,9 @@ class TestWindow(BlankWindow):
         self.entry2.grid(row=5, column=0, sticky="n")
         self.disabled_btn.grid(row=6, column=0, sticky="n")
         self.round_btn.grid(row=7, column=0, sticky="n")
+        self.checkbox.grid(row=8, column=1, sticky="n")
+        self.checkbox2.grid(row=9, column=1, sticky="n")
+
 
         
         
@@ -92,6 +98,13 @@ class TestWindow(BlankWindow):
             self.toplevel_window.grab_set()
         else:
             self.toplevel_window.focus()
+    
+    def disableIt(self):
+        self.checkbox.configure(state="disabled")
+
+    def toggleAll(self):
+        # weird interaction between the disable command and toggle, because its only in normal state available
+        self.checkbox.deselect()
 
 if __name__ == "__main__":
     #app = AutoamtionAdditon(self.lang["PROJECT"] + "/" + self.lang["NEW_A"])
