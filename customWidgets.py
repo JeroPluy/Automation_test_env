@@ -1,3 +1,4 @@
+from abc import abstractmethod
 from os import path
 from typing import Any, Callable, Tuple
 
@@ -44,6 +45,13 @@ class NavigationButtons(CTkFrame):
         if (objects >= 2):
             self.next_btn = CTkButton(self, text=self.values[1], width=130, height=30, command=com_forward)
             self.next_btn.grid(row=0, column=2, padx=(0,0), sticky="e")
+
+    @abstractmethod
+    def nav_back():
+        pass
+    @abstractmethod
+    def nav_forwards():
+        pass
 
 class NavigationBar(CTkLabel):
         def __init__(self, master: Any, width: int = 0, height: int = 28, corner_radius: int | None = None, bg_color: str | Tuple[str] = "transparent", fg_color = None, text_color = None, text_color_disabled = None, text = None, font: Tuple | CTkFont | None = None, image = None, compound: str = "center", anchor: str = "center", wraplength: int = 0, auto_path: str | Tuple[str] = "undefined", mode:str = "light", **kwargs):
