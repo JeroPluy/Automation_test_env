@@ -4,7 +4,7 @@ from typing import Any, Tuple
 
 import customtkinter
 
-import customWidgets as cW
+import customWidgets.customWidgets as cW
 
 
 def load_settings():
