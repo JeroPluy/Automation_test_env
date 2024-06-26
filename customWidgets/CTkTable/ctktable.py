@@ -26,12 +26,12 @@ class CTkTable(customtkinter.CTkFrame):
         text_color: tuple = None,
         border_color: Tuple = None,
         font: tuple = None,
-        header_color: str or tuple = None,
+        header_color: str | tuple = None,
         corner_radius: int = 25,
         write: str = False,
         command = None,
         anchor: str = "c",
-        hover_color: str or tuple = None,
+        hover_color: str | tuple = None,
         hover: bool = False,
         justify: str = "center",
         wraplength: int = 1000,
@@ -72,7 +72,7 @@ class CTkTable(customtkinter.CTkFrame):
         self.wraplength = wraplength
         self.hover = hover 
         self.border_width = border_width
-        self.hover_color = customtkinter.ThemeManager.theme["CTkButton"]["hover_color"] if hover_color is None else hover_color
+        self.hover_color = customtkinter.ThemeManager.theme["CTkSwitch"]["progress_color"] if hover_color is None else hover_color
         self.orient = orientation
         self.border_color = customtkinter.ThemeManager.theme["CTkEntry"]["border_color"] if border_color is None else border_color
         self.inside_frame = customtkinter.CTkFrame(self, border_width=0, fg_color="transparent")
@@ -119,7 +119,7 @@ class CTkTable(customtkinter.CTkFrame):
                     else:
                         if j==0:
                             fg = self.header_color
-                
+
                 corner_radius = self.corner
                 if (self.border_width>=5) and (self.corner>=5):
                     tr = self.border_color
@@ -328,7 +328,7 @@ class CTkTable(customtkinter.CTkFrame):
                 row_data.append(self.data[i,j]["value"])
             self.values.append(row_data)
             
-    def edit_row(self, row, value=None, **kwargs):
+    def edit_row(self, row:int, value=None, **kwargs):
         """ edit all parameters of a single row """
         for i in range(self.columns):
             self.frame[row, i].configure(require_redraw=True, **kwargs)
