@@ -35,15 +35,15 @@ class NavigationButtons(CTkFrame):
     Args:
         customtkinter (_type_): _description_
     """
-    def __init__(self, master, com_backwards, com_forward,  objects:int = 2, values: Tuple[str] = None):
+    def __init__(self, master, objects:int = 2, values: Tuple[str] = None):
         super().__init__(master, fg_color = "transparent")
         self.values = values
         self.grid_columnconfigure((0,1,2),weight=1)
         if (objects >= 1):
-            self.back_btn = CTkButton(self, text=self.values[0], width=130, height=30, command=com_backwards)
+            self.back_btn = CTkButton(self, text=self.values[0], width=130, height=30, command=self.nav_back)
             self.back_btn.grid(row=0, column=0, padx=(0,15), sticky="w")
         if (objects >= 2):
-            self.next_btn = CTkButton(self, text=self.values[1], width=130, height=30, command=com_forward)
+            self.next_btn = CTkButton(self, text=self.values[1], width=130, height=30, command=self.nav_forwards)
             self.next_btn.grid(row=0, column=2, padx=(0,0), sticky="e")
 
     @abstractmethod

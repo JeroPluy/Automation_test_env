@@ -17,7 +17,7 @@ from customWidgets.CTkXYFrame.ctk_xyframe import CTkXYFrame
 #ctkrangeslider
 
 
-import customWidgets as cW
+import customWidgets.customWidgets as cW
 
 
 def load_settings():
@@ -140,7 +140,10 @@ class TestWindow(BlankWindow):
         table_header = ["overview", "first", "second", "third", "fourth", "fifth"]
         table_data = [[x for x in range(5)] for x in range(10)]
         table_data.insert(0,table_header)
-        self.table = CTkTable(self.scrollable_frame, corner_radius=0, wraplength=200 ,values=table_data, header_color="#1D91DA", hover_color=["#86C8F3","#0e5c96"], write=False)
+        self.table = CTkTable(self.scrollable_frame, corner_radius=0, wraplength=200 ,values=table_data, header_color="#1D91DA", write=False, hover=True, command=self.select_row_and_data)
+        self.selected_tb_data = None
+
+        self.navigation_btns = cW.NavigationButtons(self,)
 
         self.scrollable_frame.grid(row=0, column=0, rowspan=3)
 
@@ -167,6 +170,7 @@ class TestWindow(BlankWindow):
         self.frame_into_frame.grid(row=0, column=0, sticky="wn", padx=(10,10), pady=(10,10))
 
 
+
         self.text_box.grid(row=1, column=1, sticky="news")
         self.text_undo_btn.grid(row=2,column=1, sticky="news")
 
@@ -182,6 +186,8 @@ class TestWindow(BlankWindow):
         self.button_img.grid(row=7, column=1, sticky="news")
 
         self.rb_frame.grid(row=8, column=1, sticky="news")
+
+        self.navigation_btns.grid(row=0, column=2)
         
         self.grid_columnconfigure(0, weight=1)
         self.grid_columnconfigure(1, weight=1)
@@ -251,6 +257,14 @@ class TestWindow(BlankWindow):
         self.rotating = not self.rotating
         if self.rotating:
             self.animate_the_clock()
+    
+    def select_row_and_data(self, data):
+        # self.data[i,j] = {"row": i, "column" : j, "value" : value, "args": args}
+        if self.selected_tb_data is not None:
+            self.table.deselect_row(self.selected_tb_data["row"])
+        self.selected_tb_data = data
+        print(self.selected_tb_data)
+        self.table.select_row(self.selected_tb_data.get("row"))
 
 
 if __name__ == "__main__":
