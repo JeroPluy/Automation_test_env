@@ -1,6 +1,7 @@
 {
     "BACK" : ["Zurück", "Back"],
-    "NEXT" : ["Hinzufügen", "Add"],
+    "ADD" : ["Hinzufügen", "Add"],
+    "NEXT" : ["Fortfahren", "Next"],
     "IMPORT" : ["Hinzufügen", "Import"],
     "DELETE" : ["Löschen", "Delete"],
     "PROJECT" : ["Projekt1", "Project1"],

@@ -22,11 +22,11 @@ import customWidgets.customWidgets as cW
 
 def load_settings():
     #print(path.join(path.dirname(path.realpath(__file__))))
-    with open("settings.json", "r") as json_settings:
+    with open("settings/settings.json", "r") as json_settings:
         return json.load(json_settings)
     
 def load_language(lang):
-    with open("appLang.json", "r", encoding="utf8") as json_lang:
+    with open("settings/appLang.json", "r", encoding="utf8") as json_lang:
         langs = json.load(json_lang)
         selected_lang = {}
         for key in langs:
@@ -47,7 +47,7 @@ class BlankWindow(customtkinter.CTk):
         self.geometry("800x800")
         self.settings = load_settings()
         self.lang = load_language(self.settings["LANG"])
-        customtkinter.set_default_color_theme("theme.json")
+        customtkinter.set_default_color_theme("settings/theme.json")
         customtkinter.set_appearance_mode(self.settings["mode"])  
 
         
@@ -143,7 +143,7 @@ class TestWindow(BlankWindow):
         self.table = CTkTable(self.scrollable_frame, corner_radius=0, wraplength=200 ,values=table_data, header_color="#1D91DA", write=False, hover=True, command=self.select_row_and_data)
         self.selected_tb_data = None
 
-        self.navigation_btns = cW.NavigationButtons(self,)
+        self.navigation_btns = cW.NavigationButtons(self, values=[self.lang["BACK"], self.lang["NEXT"]])
 
         self.scrollable_frame.grid(row=0, column=0, rowspan=3)
 

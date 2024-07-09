@@ -47,10 +47,11 @@ class NavigationButtons(CTkFrame):
             self.next_btn.grid(row=0, column=2, padx=(0,0), sticky="e")
 
     @abstractmethod
-    def nav_back():
+    def nav_back(self):
         pass
+
     @abstractmethod
-    def nav_forwards():
+    def nav_forwards(self):
         pass
 
 class NavigationBar(CTkLabel):

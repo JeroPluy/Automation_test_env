@@ -9,11 +9,11 @@ import customWidgets.customWidgets as cW
 
 def load_settings():
     #print(path.join(path.dirname(path.realpath(__file__))))
-    with open("settings.json", "r") as json_settings:
+    with open("settings/settings.json", "r") as json_settings:
         return json.load(json_settings)
     
 def load_language(lang):
-    with open("appLang.json", "r", encoding="utf8") as json_lang:
+    with open("settings/appLang.json", "r", encoding="utf8") as json_lang:
         langs = json.load(json_lang)
         selected_lang = {}
         for key in langs:
@@ -34,7 +34,7 @@ class BlankWindow(customtkinter.CTk):
         self.geometry("600x600")
         self.settings = load_settings()
         self.lang = load_language(self.settings["LANG"])
-        customtkinter.set_default_color_theme("theme.json")
+        customtkinter.set_default_color_theme("settings/theme.json")
         customtkinter.set_appearance_mode(self.settings["mode"])   
 
 class BlankToplevelWindow(customtkinter.CTkToplevel):
@@ -54,14 +54,19 @@ class BlankToplevelWindow(customtkinter.CTkToplevel):
 
 
 class customNavButtons(cW.NavigationButtons):
-    def __init__(self, master, com_backwards, com_forward, objects: int = 2, values: Tuple[str] = ...):
-        super().__init__(master, com_backwards, com_forward, objects, values)
+    def __init__(self, master, objects: int = 2, values: Tuple[str] = None):
+        super().__init__(master, objects, values)
         self.version_option = customtkinter.CTkOptionMenu(self, values=master.settings["HA_VERSIONS"], width=130, height=30, command=self.version_select)
         self.version_option.grid(row=0, column=1, padx=(0,15), sticky="we")
 
+    def nav_back(self):
+        print("go back")
+        
+    def nav_forwards(self):
+        print("go next")
+
     def version_select(self, choice):
         print("optionmenu dropdown clicked:", str(choice))
-
 
 
 class AutoamtionInsertionFrame(customtkinter.CTkFrame):
@@ -116,14 +121,9 @@ class AutoamtionAdditon(BlankWindow):
         self.insertion_frame = AutoamtionInsertionFrame(self)
         self.insertion_frame.grid(row=2, column=0, padx=(50,50),pady=(10,23), sticky="news")
 
-        self.navigaton_buttons = customNavButtons(self, objects=2, com_backwards=self.backwards, com_forward=self.forwards, values=[self.lang["BACK"], self.lang["NEXT"]])
+        self.navigaton_buttons = customNavButtons(self, objects=2, values=[self.lang["BACK"], self.lang["NEXT"]])
         self.navigaton_buttons.grid(row=3, column=0, padx=(50,50),pady=(0,15), sticky="news")
 
-    def backwards(self):
-        print("did nothing")
-
-    def forwards(self):
-        print("did nothing")
 
 if __name__ == "__main__":
     app = AutoamtionAdditon(project="project1")
