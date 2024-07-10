@@ -1,7 +1,6 @@
 -- AUTOMATION
 /* basic information of automations */
 
-
 CREATE TABLE automation
 (
     a_id          INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -37,7 +36,6 @@ CREATE TABLE integration
 
 -- ENTITY
 /* represents entities from Home Assistant */
-
 
 CREATE TABLE entity
 (

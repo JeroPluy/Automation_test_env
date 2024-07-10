@@ -18,6 +18,7 @@ from customWidgets.CTkXYFrame.ctk_xyframe import CTkXYFrame
 
 
 import customWidgets.customWidgets as cW
+import db
 
 
 def load_settings():
@@ -34,8 +35,7 @@ def load_language(lang):
         return selected_lang
     
 class BlankWindow(customtkinter.CTk):
-    """
-        Basic Window for the application  
+    """Basic Window for the application  
 
     Args:
         customtkinter (_type_): standard custom tkinter node for a ctk application
@@ -269,5 +269,6 @@ class TestWindow(BlankWindow):
 
 if __name__ == "__main__":
     #app = AutoamtionAdditon(self.lang["PROJECT"] + "/" + self.lang["NEW_A"])
-    app = TestWindow()
-    app.mainloop()
+    # app = TestWindow()
+    # app.mainloop()
+    db.init_db()
