@@ -104,9 +104,9 @@ VALUES	(4, 12),
 
 /* camera */
 INSERT INTO possible_values(pv_id, p_value)
-VALUES  (17,'idle'),
-        (18, 'recording'),
-        (19, 'streaming'),
+VALUES  (17,    'idle'),                --The camera observes.
+        (18,    'recording'),           --The camera records the recording.
+        (19,    'streaming'),           --The camera streams the recording.
 
 INSERT INTO integration_values(i_id, pv_id)
 VALUES	(5, 12),
@@ -116,3 +116,7 @@ VALUES	(5, 12),
         (5, 19);
 
 /* climate */
+humidity, temperature - real 
+climate: "auto", "off", "cool", "heat", "dry", "fan_only"
+fan: "low", "medium", "high", "on"
+swing:
