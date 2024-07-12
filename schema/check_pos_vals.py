@@ -58,7 +58,7 @@ for e in all_added:
     if e[1] not in possible_values:
         possible_values[e[1]] = e[0]
 
-print(len(possible_values.items()))
+print("values: " + str(len(possible_values.items())))
 
 counter = 1
 
