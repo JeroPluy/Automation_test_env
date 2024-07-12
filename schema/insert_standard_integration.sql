@@ -228,6 +228,11 @@ VALUES  (47,     'closed'),             --The cover has reach the closed positio
 INSERT INTO integration_values(i_id, pv_id)
 VALUES  (8, 12),
         (8, 13),
+        (8, 47),
+        (8, 48),
+        (8, 49),
+        (8, 50),
+
 
 
 /* date

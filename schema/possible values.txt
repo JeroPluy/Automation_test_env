@@ -8,12 +8,12 @@
 (8,     'pending'),	            --The alarm is pending (towards triggered).
 (9,     'arming'),	            --The alarm is arming.
 (10,    'disarming'),	        --The alarm is disarming.
-(11,    'triggered');           --The alarm is triggered.
+(11,    'triggered'),           --The alarm is triggered.
 (12,    'unknown'),	            --Unknown state.
 (13,    'unavailable'),         --The sensor is not reachable.
 (14,    'on'),	                --The sensor detects something.
-(15,    'off');	                --The sensor detects nothing.
-(16,    'pressed');             --The button is pressed.
+(15,    'off'),	                --The sensor detects nothing.
+(16,    'pressed'),             --The button is pressed.
 (17,    'idle'),                --The camera observes.
 (18,    'recording'),           --The camera records the recording.
 (19,    'streaming'),           --The camera streams the recording.
@@ -37,14 +37,14 @@
 (37,    'fan_high'),            --The fan speed is high.
 (38,    'fan_middle'),          --The fan stays in the middle.
 (39,    'fan_focus'),           --The fan focuses in on direction.
-(40,    'fan_diffuse')          --The fan diffuse in all possible directions.
+(40,    'fan_diffuse'),         --The fan diffuse in all possible directions.
 (41,    'swing_off'),           --The fan don't swing.
 (42,    'swing_on'),            --The fan swings.
 (43,    'swing_vertical'),      --The fan swings vertically.
 (44,    'swing_horizontal'),    --The fan swings horizontally.
-(45,    'swing_both');          --The fan swings in both directions.
-(46,    'text')                 --The said text in the converstation.
-(47,     'closed'),             --The cover has reach the closed position.
-(48,     'closing'),            --The cover is in the process of closing to reach a set position.
-(49,     'open'),               --The cover has reached the open position.
-(50,     'opening'),            --The cover is in the process of opening to reach a set position
+(45,    'swing_both'),          --The fan swings in both directions.
+(46,    'text'),                --The said text in the converstation.
+(47,    'closed'),              --The cover has reach the closed position.
+(48,    'closing'),             --The cover is in the process of closing to reach a set position.
+(49,    'open'),                --The cover has reached the open position.
+(50,    'opening'),             --The cover is in the process of opening to reach a set position
