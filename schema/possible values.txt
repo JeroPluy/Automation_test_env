@@ -1,0 +1,50 @@
+(1,     'None'),	            --Unknown state.
+(2,     'disarmed'),	        --The alarm is disarmed (off).
+(3,     'armed_home'),	        --The alarm is armed in home mode.
+(4,     'armed_away'),	        --The alarm is armed in away mode.
+(5,     'armed_night'),	        --The alarm is armed in night mode.
+(6,     'armed_vacation'),	    --The alarm is armed in vacation mode.
+(7,     'armed_custom_bypass'), --The alarm is armed in bypass mode.
+(8,     'pending'),	            --The alarm is pending (towards triggered).
+(9,     'arming'),	            --The alarm is arming.
+(10,    'disarming'),	        --The alarm is disarming.
+(11,    'triggered');           --The alarm is triggered.
+(12,    'unknown'),	            --Unknown state.
+(13,    'unavailable'),         --The sensor is not reachable.
+(14,    'on'),	                --The sensor detects something.
+(15,    'off');	                --The sensor detects nothing.
+(16,    'pressed');             --The button is pressed.
+(17,    'idle'),                --The camera observes.
+(18,    'recording'),           --The camera records the recording.
+(19,    'streaming'),           --The camera streams the recording.
+(20,    'auto'),                --The device is set to a schedule, learned behavior, AI.
+(21,    'cool'),                --The device is set to cool to a target temperature.
+(22,    'heat'),                --The device is set to heat to a target temperature.
+(23,    'heat_cool'),           --The device is set to heat/cool to a target temperature range.
+(24,    'dry'),                 --The device is set to dry/humidity mode.
+(25,    'fan_only'),            --The device only has the fan on. No heating or cooling taking place.
+(26,    'preheating'),          --Device is preheating.
+(27,    'heating'),             --Device is heating.
+(28,    'cooling'),             --Device is cooling.
+(29,    'drying'),              --Device is drying.
+(30,    'fan'),                 --Device has fan on.
+(31,    'defrosting'),          --Device is defrosting.
+(32,    'fan_on'),              --The fan is on.
+(33,    'fan_off'),             --The fan off.
+(34,    'fan_auto'),            --The fan turns on automatically.
+(35,    'fan_low'),             --The fan speed is low.
+(36,    'fan_medium'),          --The fan speed is medium.
+(37,    'fan_high'),            --The fan speed is high.
+(38,    'fan_middle'),          --The fan stays in the middle.
+(39,    'fan_focus'),           --The fan focuses in on direction.
+(40,    'fan_diffuse')          --The fan diffuse in all possible directions.
+(41,    'swing_off'),           --The fan don't swing.
+(42,    'swing_on'),            --The fan swings.
+(43,    'swing_vertical'),      --The fan swings vertically.
+(44,    'swing_horizontal'),    --The fan swings horizontally.
+(45,    'swing_both');          --The fan swings in both directions.
+(46,    'text')                 --The said text in the converstation.
+(47,     'closed'),             --The cover has reach the closed position.
+(48,     'closing'),            --The cover is in the process of closing to reach a set position.
+(49,     'open'),               --The cover has reached the open position.
+(50,     'opening'),            --The cover is in the process of opening to reach a set position
