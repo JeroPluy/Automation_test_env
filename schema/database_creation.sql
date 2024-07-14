@@ -50,8 +50,8 @@ CREATE TABLE entity
 
 CREATE TABLE integration_values 
 (
-    i_id INTEGER NOT NULL,
-    pv_id INTEGER NOT NULL,
+    i_id    INTEGER NOT NULL,
+    pv_id   INTEGER NOT NULL,
     PRIMARY KEY (i_id, pv_id),
     FOREIGN KEY (i_id) REFERENCES integration(i_id),
     FOREIGN KEY (pv_id) REFERENCES possible_values(pv_id)
@@ -62,8 +62,9 @@ CREATE TABLE integration_values
 
 CREATE TABLE possible_values
 (
-    pv_id    INTEGER PRIMARY KEY AUTOINCREMENT,
-    p_value  NUMERIC NOT NULL,
+    pv_id       INTEGER PRIMARY KEY AUTOINCREMENT,
+    property    INTEGER NOT NULL,    
+    p_value     NUMERIC NOT NULL,
 	PRIMARY KEY (pv_id)
 );
 
@@ -87,11 +88,11 @@ CREATE TABLE automation_entity
 
 CREATE TABLE test_case
 (
-    case_id     INTEGER PRIMARY KEY AUTOINCREMENT,
-    c_timestamp TEXT NOT NULL, -- Using TEXT for datetime
-    requirement NUMERIC,
-    case_priority  INTEGER,
-    a_id        INTEGER NOT NULL,
+    case_id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    c_timestamp     TEXT NOT NULL, -- Using TEXT for datetime
+    requirement     NUMERIC,
+    case_priority   INTEGER,
+    a_id            INTEGER NOT NULL,
     FOREIGN KEY (a_id) REFERENCES automation (a_id)
 );
 

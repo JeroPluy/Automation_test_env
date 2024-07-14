@@ -45,23 +45,23 @@ VALUES  (1,     'alarm_control_panel'),
 /* import the values from standard integrations */
 
 /* alarm_control_panel 
-        states / inputs extracted from:
+        states(main) / attributes extracted from:
         https://developers.home-assistant.io/docs/core/entity/alarm-control-panel
 */
-INSERT INTO possible_values(pv_id, p_value)
-VALUES  (1,     'None'),	        --Unknown state.
-        (2,     'disarmed'),	        --The alarm is disarmed (off).
-        (3,     'armed_home'),	        --The alarm is armed in home mode.
-        (4,     'armed_away'),	        --The alarm is armed in away mode.
-        (5,     'armed_night'),	        --The alarm is armed in night mode.
-        (6,     'armed_vacation'),	--The alarm is armed in vacation mode.
-        (7,     'armed_custom_bypass'), --The alarm is armed in bypass mode.
-        (8,     'pending'),	        --The alarm is pending (towards triggered).
-        (9,     'arming'),	        --The alarm is arming.
-        (10,    'disarming'),	        --The alarm is disarming.
-        (11,    'triggered');           --The alarm is triggered.
-        (12,    'unknown'),	        --Unknown state.
-        (13,    'unavailable'),         --The entity is not reachable.
+INSERT INTO possible_values(pv_id, property, p_value)
+VALUES  (1,     'main',     'None'),	                --Unknown state.
+        (2,     'main',     'disarmed'),	        --The alarm is disarmed (off).
+        (3,     'main',     'armed_home'),	        --The alarm is armed in home mode.
+        (4,     'main',     'armed_away'),	        --The alarm is armed in away mode.
+        (5,     'main',     'armed_night'),	        --The alarm is armed in night mode.
+        (6,     'main',     'armed_vacation'),	        --The alarm is armed in vacation mode.
+        (7,     'main',     'armed_custom_bypass'),     --The alarm is armed in bypass mode.
+        (8,     'main',     'pending'),	                --The alarm is pending (towards triggered).
+        (9,     'main',     'arming'),	                --The alarm is arming.
+        (10,    'main',     'disarming'),	        --The alarm is disarming.
+        (11,    'main',     'triggered');               --The alarm is triggered.
+        (12,    'main',     'unknown'),	                --Unknown state.
+        (13,    'main',     'unavailable');             --The entity is not reachable.
 
 INSERT INTO integration_values(i_id, pv_id)
 VALUES	(1, 1),
@@ -78,14 +78,29 @@ VALUES	(1, 1),
         (1, 12),
         (1, 13);
 
+-- ATTRIBUTES --
+INSERT INTO possible_values(pv_id, property, p_value)
+VALUES  (,      'code_format',          'number'),      --The code format of the alarm control panel.
+        (,      'code_format',          'text'),        --The code format of the alarm control panel.
+        (,      'changed_by',           'string'),      --The alarm control panel got changed by a user.
+        (,      'code_arm_required',    'string'),      --The code required to arm the alarm control panel.
+        (,      'supported_features',   'int');         --The count of supported features of the alarm control panel.
+
+INSERT INTO integration_values(i_id, pv_id)
+VALUES	(1, ),
+        (1, ),
+        (1, ),
+        (1, ),
+        (1, );
+
 /* binary_sensor 
-        states / inputs extracted from:
+        states(main) / attributes extracted from:
         https://developers.home-assistant.io/docs/core/entity/binary-sensor
         https://github.com/home-assistant/core/blob/dev/homeassistant/components/binary_sensor
 */
-INSERT INTO possible_values(pv_id, p_value)
-VALUES  (14,    'on'),	                --The sensor detects something.
-        (15,    'off');	                --The sensor detects nothing.
+INSERT INTO possible_values(pv_id, property, p_value)
+VALUES  (14,    'main',     'on'),	                --The sensor detects something.
+        (15,    'main',     'off');	                --The sensor detects nothing.
 
 INSERT INTO integration_values(i_id, pv_id)
 VALUES	(2, 12),
@@ -93,9 +108,69 @@ VALUES	(2, 12),
         (2, 14),
         (2, 15);
 
+-- ATTRIBUTES --
+INSERT INTO possible_values(pv_id, property, p_value)
+VALUES  (,      'device_class',         'battery'),     --The device class of the binary sensor.
+        (,      'device_class',         'battery_charging'),    --The device class of the binary sensor.
+        (,      'device_class',         'co'),          --The device class of the binary sensor.
+        (,      'device_class',         'cold'),        --The device class of the binary sensor.
+        (,      'device_class',         'connectivity'),--The device class of the binary sensor.
+        (,      'device_class',         'door'),        --The device class of the binary sensor.
+        (,      'device_class',         'garage_door'), --The device class of the binary sensor.
+        (,      'device_class',         'gas'),         --The device class of the binary sensor.
+        (,      'device_class',         'heat'),        --The device class of the binary sensor.
+        (,      'device_class',         'light'),       --The device class of the binary sensor.
+        (,      'device_class',         'lock'),        --The device class of the binary sensor.
+        (,      'device_class',         'moisture'),    --The device class of the binary sensor.
+        (,      'device_class',         'motion'),      --The device class of the binary sensor.
+        (,      'device_class',         'moving'),      --The device class of the binary sensor.
+        (,      'device_class',         'occupancy'),   --The device class of the binary sensor.
+        (,      'device_class',         'opening'),     --The device class of the binary sensor.
+        (,      'device_class',         'plug'),        --The device class of the binary sensor.
+        (,      'device_class',         'power'),       --The device class of the binary sensor.
+        (,      'device_class',         'presence'),    --The device class of the binary sensor.
+        (,      'device_class',         'problem'),     --The device class of the binary sensor.
+        (,      'device_class',         'running'),     --The device class of the binary sensor.
+        (,      'device_class',         'safety'),      --The device class of the binary sensor.
+        (,      'device_class',         'smoke'),       --The device class of the binary sensor.
+        (,      'device_class',         'sound'),       --The device class of the binary sensor.
+        (,      'device_class',         'tamper'),      --The device class of the binary sensor.
+        (,      'device_class',         'update'),      --The device class of the binary sensor.
+        (,      'device_class',         'vibration'),   --The device class of the binary sensor.
+        (,      'device_class',         'window');      --The device class of the binary sensor.
+
+INSERT INTO integration_values(i_id, pv_id)
+VALUES	(2, ),
+        (2, ),
+        (2, ),
+        (2, ),
+        (2, ),
+        (2, ),
+        (2, ),
+        (2, ),
+        (2, ),
+        (2, ),
+        (2, ),
+        (2, ),
+        (2, ),
+        (2, ),
+        (2, ),
+        (2, ),
+        (2, ),
+        (2, ),
+        (2, ),
+        (2, ),
+        (2, ),
+        (2, ),
+        (2, ),
+        (2, ),
+        (2, ),
+        (2, ),
+        (2, ),
+        (2, );
 
 /* button 
-        states / inputs extracted from:
+        states(main) / attributes extracted from:
         https://github.com/home-assistant/core/blob/dev/homeassistant/components/button
 */
 INSERT INTO integration_values(i_id, pv_id)
@@ -104,7 +179,7 @@ VALUES	(3, 12),
 
 
 /* calendar
-        states / inputs extracted from:
+        states(main) / attributes extracted from:
         https://developers.home-assistant.io/docs/core/entity/calendar
         https://github.com/home-assistant/core/tree/dev/homeassistant/components/calendar
 */
@@ -114,16 +189,33 @@ VALUES	(4, 12),
         (4, 14),
         (4, 15);
 
+-- ATTRIBUTES --
+INSERT INTO possible_values(pv_id, property, p_value)
+VALUES  (,      'description',          'string'),      --The calender description.
+        (,      'message',              'string'),      --The calender message.
+        (,      'all_day',              'string'),      --The calender event is all day.
+        (,      'start_time',           'string'),      --The calender event start time.
+        (,      'end_time',             'string'),      --The calender event end time.
+        (,      'location',             'string');      --The calender event location.
+
+INSERT INTO integration_values(i_id, pv_id)
+VALUES	(4, ),
+        (4, ),
+        (4, ),
+        (4, ),
+        (4, ),
+        (4, );
+
 /* camera 
-        states / inputs extracted from:
+        states(main) / attributes extracted from:
         https://developers.home-assistant.io/docs/core/entity/camera
         https://github.com/home-assistant/core/tree/dev/homeassistant/components/camera
 
 */
-INSERT INTO possible_values(pv_id, p_value)
-VALUES  (16,    'idle'),                --The camera observes.
-        (17,    'recording'),           --The camera records the recording.
-        (18,    'streaming');           --The camera streams the recording.
+INSERT INTO possible_values(pv_id, property, p_value)
+VALUES  (16,    'main',     'idle'),                    --The camera observes.
+        (17,    'main',     'recording'),               --The camera records the recording.
+        (18,    'main',     'streaming');               --The camera streams the recording.
 
 INSERT INTO integration_values(i_id, pv_id)
 VALUES	(5, 12),
@@ -132,47 +224,31 @@ VALUES	(5, 12),
         (5, 17),
         (5, 18);
 
+-- ATTRIBUTES --
+INSERT INTO possible_values(pv_id, property, p_value)
+VALUES  (,      'frontend_stream_type', 'hls'),         --The streaming format in the ui of the camera.
+        (,      'frontend_stream_type', 'web_rtc');     --The streaming format in the ui of the camera.
+
+INSERT INTO integration_values(i_id, pv_id)
+VALUES	(5, ),
+        (5, ); -- supp features
+
+
 /* climate  
-        states / inputs extracted from:
+        states(main) / attributes extracted from:
         https://github.com/home-assistant/core/blob/dev/homeassistant/components/climate
         https://www.home-assistant.io/integrations/climate.mqtt/ 
         https://www.home-assistant.io/integrations/climate/
         https://developers.home-assistant.io/docs/core/entity/climate/
 */
-INSERT INTO possible_values(i_id, pv_id)
-VALUES  (19,    'auto'),                --The device is set to a schedule, learned behavior, AI.
-        (20,    'cool'),                --The device is set to cool to a target temperature.
-        (21,    'heat'),                --The device is set to heat to a target temperature.
-        (22,    'heat_cool'),           --The device is set to heat/cool to a target temperature range.
-        (23,    'dry'),                 --The device is set to dry/humidity mode.
-        (24,    'fan_only'),            --The device only has the fan on. No heating or cooling taking place.
-        --- everything below are attributes --- 
-        /*
-        (25,    'preheating'),          --Device is preheating.
-        (26,    'heating'),             --Device is heating.
-        (27,    'cooling'),             --Device is cooling.
-        (28,    'drying'),              --Device is drying.
-        (29,    'fan'),                 --Device has fan on.
-        (30,    'defrosting'),          --Device is defrosting.
-        -- fan_modes --
-        (31,    'fan_on'),              --The fan is on.
-        (32,    'fan_off'),             --The fan off.
-        (33,    'fan_auto'),            --The fan turns on automatically.
-        (34,    'fan_low'),             --The fan speed is low.
-        (35,    'fan_medium'),          --The fan speed is medium.
-        (36,    'fan_high'),            --The fan speed is high.
-        (37,    'fan_middle'),          --The fan stays in the middle.
-        (38,    'fan_focus'),           --The fan focuses in on direction.
-        (39,    'fan_diffuse')          --The fan diffuse in all possible directions.
-        -- swing_modes --
-        (40,    'swing_off'),           --The fan don't swing.
-        (41,    'swing_on'),            --The fan swings.
-        (42,    'swing_vertical'),      --The fan swings vertically.
-        (43,    'swing_horizontal'),    --The fan swings horizontally.
-        (44,    'swing_both');          --The fan swings in both directions.
-        */
+INSERT INTO possible_values(pv_id, property, p_value)
+VALUES  (19,    'main',     'auto'),                    --The device is set to a schedule, learned behavior, AI.
+        (20,    'main',     'cool'),                    --The device is set to cool to a target temperature.
+        (21,    'main',     'heat'),                    --The device is set to heat to a target temperature.
+        (22,    'main',     'heat_cool'),               --The device is set to heat/cool to a target temperature range.
+        (23,    'main',     'dry'),                     --The device is set to dry/humidity mode.
+        (24,    'main',     'fan_only');                --The device only has the fan on. No heating or cooling taking place.
 
---not included: humidity, temperature - real
 INSERT INTO integration_values(i_id, pv_id)
 VALUES  (6, 12),
         (6, 13),
@@ -182,37 +258,98 @@ VALUES  (6, 12),
         (6, 22),
         (6, 23),
         (6, 24);
-        /*
-        (6, 25),
-        (6, 26),
-        (6, 27),
-        (6, 28),
-        (6, 29),
-        (6, 30),
-        (6, 31),
-        (6, 32),
-        (6, 33),
-        (6, 34),
-        (6, 35),
-        (6, 36),
-        (6, 37),
-        (6, 38),
-        (6, 39),
-        (6, 40),
-        (6, 41),
-        (6, 42),
-        (6, 43),
-        (6, 44),
-        (6, 45);
-        */
+
+-- ATTRIBUTES --
+INSERT INTO possible_values(pv_id, property, p_value)
+VALUES  (,      'current_humidity',     'float'),       --The current humidity.
+        (,      'current_temperature',  'float'),       --The current temperature.
+        (,      'max_humidity',         'float'),       --The maximum humidity.
+        (,      'max_temp',             'float'),       --The maximum temperature in temperature_unit.
+        (,      'min_humidity',         'float'),       --The minimum humidity.
+        (,      'min_temp',             'float'),       --The minimum temperature in temperature_unit.
+        (,      'precision',            'float'),       --The precision of the temperature in the system. Defaults to tenths for TEMP_CELSIUS, whole number otherwise.
+        (,      'humidity',             'float'),       --The target humidity the device is trying to reach.
+        (,      'temperature',          'float'),       --The temperature currently set to be reached.
+        (,      'target_temp_high',     'float'),       --The upper bound target temperature.
+        (,      'target_temp_low',      'float'),       --The lower bound target temperature
+        (,      'target_temp_step',     'integer'),     --The supported step size a target temperature can be increased or decreased
+        (,      'temperature_unit',     'string'),      --The unit of temperature measurement for the system (TEMP_CELSIUS or TEMP_FAHRENHEIT).
+        (,      'hvac_action',          'preheating'),  --Device is preheating.
+        (,      'hvac_action',          'heating'),     --Device is heating.
+        (,      'hvac_action',          'cooling'),     --Device is cooling.
+        (,      'hvac_action',          'drying'),      --Device is drying.
+        (,      'hvac_action',          'fan'),         --Device has fan on.
+        (,      'hvac_action',          'defrosting'),  --Device is defrosting.
+        (,      'hvac_action',          'off'),         --Device is off.
+        (,      'hvac_action',          'idle'),        --Device is doing nothing.        
+        (,      'fan_mode',             'on'),          --The fan on.
+        (,      'fan_mode',             'off'),         --The fan off.
+        (,      'fan_mode',             'auto_high'),   --The fan turns on automatically high.
+        (,      'fan_mode',             'auto_low'),    --The fan turns on automatically low.
+        (,      'fan_mode',             'on_low'),      --The fan speed is low.
+        (,      'fan_mode',             'on_medium'),   --The fan speed is medium.
+        (,      'fan_mode',             'on_high'),     --The fan speed is high.
+        (,      'fan_mode',             'middle'),      --The fan stayes in the middle.
+        (,      'fan_mode',             'focus'),       --The fan focuses in on direction.
+        (,      'fan_mode',             'diffuse'),     --The fan diffuse in all possible directions.
+        (,      'swing_mode',           'off'),         --The fan don't swing.
+        (,      'swing_mode',           'auto'),        --The fan swings automatically.
+        (,      'swing_mode',           '1'),           --The fan swings with speed 1.
+        (,      'swing_mode',           '2'),           --The fan swings with speed 2.
+        (,      'swing_mode',           '3'),           --The fan swings with speed 3.
+        (,      'swing_mode',           'vertical'),    --The fan swings vertically.
+        (,      'swing_mode',           'horizontal'),  --The fan swings horizontally.
+        (,      'swing_mode',           'both');        --The fan swings in both directions.
+
+INSERT INTO integration_values(i_id, pv_id)
+VALUES	(6, ),
+        (6, ),
+        (6, ),
+        (6, ),
+        (6, ),
+        (6, ),
+        (6, ),
+        (6, ),
+        (6, ),
+        (6, ),
+        (6, ),
+        (6, ),
+        (6, ),
+        (6, ),
+        (6, ),
+        (6, ),
+        (6, ),
+        (6, ),
+        (6, ),
+        (6, ),
+        (6, ),
+        (6, ),
+        (6, ),
+        (6, ),
+        (6, ),
+        (6, ),
+        (6, ),
+        (6, ),
+        (6, ),
+        (6, ),
+        (6, ),
+        (6, ),
+        (6, ),
+        (6, ),
+        (6, ),
+        (6, ),
+        (6, ),
+        (6, ),
+        (6, ),
+        (6, ); -- supp features
 
 /* conversation 
-        states / inputs extracted from:
+        states(main) / attributes extracted from:
         https://www.home-assistant.io/integrations/conversation/
         https://developers.home-assistant.io/docs/core/entity/conversation
 */
-INSERT INTO possible_values(i_id, pv_id)
-VALUES  (25,     'text')                --The scentence in the converstation.
+INSERT INTO possible_values(pv_id, property, p_value)
+VALUES  (25,    'main',     'string')                       --The scentence in the converstation.
 
 INSERT INTO integration_values(i_id, pv_id)
 VALUES  (7, 12),
@@ -220,15 +357,15 @@ VALUES  (7, 12),
         (7, 25);
 
 /* cover
-        states / inputs extracted from:
+        states(main) / attributes extracted from:
         https://developers.home-assistant.io/docs/core/entity/cover
 
 */
-INSERT INTO possible_values(i_id, pv_id)
-VALUES  (26,     'closed'),             --The cover has reach the closed position.
-        (27,     'closing'),            --The cover is in the process of closing to reach a set position.
-        (28,     'open'),               --The cover has reached the open position.
-        (29,     'opening');            --The cover is in the process of opening to reach a set position
+INSERT INTO possible_values(pv_id, property, p_value)
+VALUES  (26,    'main',     'closed'),                 --The cover has reach the closed position.
+        (27,    'main',     'closing'),                --The cover is in the process of closing to reach a set position.
+        (28,    'main',     'open'),                   --The cover has reached the open position.
+        (29,    'main',     'opening');                --The cover is in the process of opening to reach a set position.
 
 INSERT INTO integration_values(i_id, pv_id)
 VALUES  (8, 12),
@@ -238,8 +375,34 @@ VALUES  (8, 12),
         (8, 28),
         (8, 29);
 
+-- ATTRIBUTES --
+INSERT INTO possible_values(pv_id, property, p_value)
+VALUES  (,      'device_class',         'awning'),      --The device class of the binary sensor.
+        (,      'device_class',         'blind'),       --The device class of the binary sensor.
+        (,      'device_class',         'curtain'),     --The device class of the binary sensor.
+        (,      'device_class',         'damper'),      --The device class of the binary sensor.
+        (,      'device_class',         'garage'),      --The device class of the binary sensor.
+        (,      'device_class',         'gate'),        --The device class of the binary sensor.
+        (,      'device_class',         'shade'),       --The device class of the binary sensor.(,    'device_class',           'awning'),                 --The device class of the binary sensor.
+        (,      'device_class',         'sutter');      --The device class of the binary sensor.
+
+
+INSERT INTO integration_values(i_id, pv_id)
+VALUES  (8, ),
+        (8, ),
+        (8, ),
+        (8, ),
+        (8, ),
+        (8, ),
+        (8, ),--dev_class door
+        (8, ),
+        (8, ),
+        (8, ),
+        (8, ),--dev_class window
+        (8, );-- supp features
+
 /* date
-        states / inputs extracted from:
+        states(main) / attributes extracted from:
         https://developers.home-assistant.io/docs/core/entity/date
         https://github.com/home-assistant/core/tree/dev/homeassistant/components/date
 */
@@ -249,7 +412,7 @@ VALUES  (9, 12),
         (9, 25);
 
 /* datetime
-        states / inputs extracted from:
+        states(main) / attributes extracted from:
         https://developers.home-assistant.io/docs/core/entity/datetime
         https://github.com/home-assistant/core/tree/dev/homeassistant/components/datetime
 */
@@ -259,12 +422,13 @@ VALUES  (10, 12),
         (10, 25);
 
 /* device_tracer
-        states / inputs extracted from:
+        states(main) / attributes extracted from:
         https://developers.home-assistant.io/docs/core/entity/device-tracker
+        https://github.com/home-assistant/core/blob/dev/homeassistant/components/device_tracker
 */
-INSERT INTO possible_values(i_id, pv_id)
-VALUES  (30,     'home'),               --The device is home.
-        (31,     'not_home');           --The cover is not home.
+INSERT INTO possible_values(pv_id, property, p_value)
+VALUES  (30,    'main',     'home'),                   --The device is home.
+        (31,    'main',     'not_home');               --The cover is not home.
 
 INSERT INTO integration_values(i_id, pv_id)
 VALUES  (11, 12),
@@ -272,18 +436,93 @@ VALUES  (11, 12),
         (11, 30),
         (11, 31):
 
+-- ATTRIBUTES --
+INSERT INTO possible_values(pv_id, property, p_value)
+VALUES  (,      'source_type',          'gps'),         --The source of the device connection.
+        (,      'source_type',          'router'),      --The source of the device connection.
+        (,      'source_type',          'bluetooth'),   --The source of the device connection.
+        (,      'source_type',          'bluetooth_le'),--The source of the device connection.
+        (,      'longitude',            'float'),       --The source of the device connection.
+        (,      'latitude',             'float'),       --The source of the device connection.
+        (,      'location_accuracy',    'string'),      --The source of the device connection.
+        (,      'battery',              'int');         --The source of the device connection.
+
+INSERT INTO integration_values(i_id, pv_id)
+VALUES  (11, ),
+        (11, ),
+        (11, ),
+        (11, ),
+        (11, ),
+        (11, ),
+        (11, ),
+        (11, );
+
 /* event
-        states / inputs extracted from:
+        states(main) / attributes extracted from:
         https://developers.home-assistant.io/docs/core/entity/event
         https://github.com/home-assistant/core/blob/dev/homeassistant/components/event
+        https://www.home-assistant.io/docs/configuration/events/
 */
 INSERT INTO integration_values(i_id, pv_id)
 VALUES  (12, 12),
         (12, 13),
-        (12, 25);
+        (12, 25); -- time_fired
+
+-- ATTRIBUTES --
+INSERT INTO possible_values(pv_id, property, p_value)
+VALUES  (,      'event_type',           'pressed'),             --The event of a button press.
+        (,      'event_type',           'call_service'),        --The event of a service called.
+        (,      'event_type',           'component_loaded'),    --The event of component loaded.
+        (,      'event_type',           'core_config_updated'), --The event of update the core config.
+        (,      'event_type',           'data_entry_flow_progressed'),  --The event of data entry flow progresses.
+        (,      'event_type',           'homeassistant_start'), --The event of home assistant starting.
+        (,      'event_type',           'homeassistant_started'),       --The event ofhome assistant started.
+        (,      'event_type',           'homeassistant_stop'),  --The event home assistant stopped.
+        (,      'event_type',           'homeassistant_final_write'),   --The event home assistant makes it final write befor shutting down.
+        (,      'event_type',           'logbook_entry'),       --The event of making a logbook entry.
+        (,      'event_type',           'service_registered'),  --The event of register a new service.
+        (,      'event_type',           'service_removed'),     --The event of removing a service.
+        (,      'event_type',           'state_changed'),       --The event of state change of an entity.
+        (,      'event_type',           'themes_updated'),      --The event of the theme change in the ui.
+        (,      'event_type',           'user_added'),          --The event for a new user.
+        (,      'event_type',           'user_removed'),        --The event to remove a user.
+        (,      'event_type',           'automation_reloaded'), --The event of reloading the automation.yaml files.
+        (,      'event_type',           'automation_triggered'),--The event of triggering an automation.
+        (,      'event_type',           'scene_reloaded'),      --The event of reload a scene. 
+        (,      'event_type',           'script_started'),      --The event of the start of a script.
+        (,      'event_type',           'area_registry_updated'),       --The event of an area update.
+        (,      'event_type',           'category_registry_updated'),   --The event of a category registry update.
+        (,      'event_type',           'device_registry_updated'),     --The event of a device registry update.
+        (,      'event_type',           'entity_registry_updated');     --The event of a entity registry update.
+
+INSERT INTO integration_values(i_id, pv_id)
+VALUES  (12, ),
+        (12, ),
+        (12, ),
+        (12, ),
+        (12, ),
+        (12, ),
+        (12, ),
+        (12, ),
+        (12, ),
+        (12, ),
+        (12, ),
+        (12, ),
+        (12, ),
+        (12, ),
+        (12, ),
+        (12, ),
+        (12, ),
+        (12, ),
+        (12, ),
+        (12, ),
+        (12, ),
+        (12, ),
+        (12, ),
+        (12, );
 
 /* fan
-        states / inputs extracted from:
+        states(main) / attributes extracted from:
         https://developers.home-assistant.io/docs/core/entity/fan
         https://github.com/home-assistant/core/tree/dev/homeassistant/components/fan
 */
@@ -293,8 +532,24 @@ VALUES  (13, 12),
         (13, 14),
         (13, 15);
 
+-- ATTRIBUTES --
+INSERT INTO possible_values(pv_id, property, p_value)
+VALUES  (,      'percentage',           'integer'),     --The current speed percentage. Must be a value between 0 (off) and 100.
+        (,      'percentage_step',      'integer'),     --The steps for the speed percentage. Must be a value between 1 and 100.
+        (,      'oscillating',          'bool'),        --The if the fan is oscillating.
+        (,      'direction',            'forward'),     --The fan spinns forward.
+        (,      'direction',            'reverse');     --The fan spinns reverse.
+
+INSERT INTO integration_values(i_id, pv_id)
+VALUES  (13, ),
+        (13, ),
+        (13, ),
+        (13, ),
+        (13, ),
+        (13, ); -- supp features
+
 /* humidifier
-        states / inputs extracted from:
+        states(main) / attributes extracted from:
         https://developers.home-assistant.io/docs/core/entity/humidifier
         https://github.com/home-assistant/core/tree/dev/homeassistant/components/humidifier
 */
@@ -304,8 +559,32 @@ VALUES  (14, 12),
         (14, 14),
         (14, 15);
 
+-- ATTRIBUTES --
+INSERT INTO possible_values(pv_id, property, p_value)
+VALUES  (,      'action',               'off'),         --The humidifier is off.
+        (,      'action',               'idle'),        --The humidifier does nothing.
+        (,      'action',               'humidifying'), --The humidifier humidifying the air.
+        (,      'action',               'drying'),      --The humidifier drying the air.
+        (,      'device_class',         'humidifier'),  --The humidifier is a humidifier.
+        (,      'device_class',         'dehumidifier');--The humidifier is a dehumidifier.
+
+
+INSERT INTO integration_values(i_id, pv_id)
+VALUES  (14, ), --min hum
+        (14, ), --max hum
+        (14, ), --curr hum
+        (14, ), --hum
+        (14, ),
+        (14, ),
+        (14, ),
+        (14, ),
+        (14, ),
+        (14, ),
+        (14, ); -- supp features
+
+
 /* image
-        states / inputs extracted from:
+        states(main) / attributes extracted from:
         https://developers.home-assistant.io/docs/core/entity/image
 */
 INSERT INTO integration_values(i_id, pv_id)
@@ -314,16 +593,16 @@ VALUES  (15, 12),
         (15, 25);
 
 /* lawn_mower
-        states / inputs extracted from:
+        states(main) / attributes extracted from:
         https://developers.home-assistant.io/docs/core/entity/lawn-mower
         https://github.com/home-assistant/core/tree/dev/homeassistant/components/lawn_mower
 
 */
-INSERT INTO possible_values(i_id, pv_id)
-VALUES  (32,    "mowing"), 	        --The lawn mower is currently mowing.
-        (33,    "docked"),	        --The lawn mower is done mowing and is currently docked.
-        (34,    "paused"),	        --The lawn mower was active and is now paused.
-        (35,    "error");       	--The lawn mower encountered an error while active and needs assistance.
+INSERT INTO possible_values(pv_id, property, p_value)
+VALUES  (32,    'main',     'mowing'), 	                --The lawn mower is currently mowing.
+        (33,    'main',     'docked'),	                --The lawn mower is done mowing and is currently docked.
+        (34,    'main',     'paused'),	                --The lawn mower was active and is now paused.
+        (35,    'main',     'error');       	        --The lawn mower encountered an error while active and needs assistance.
 
 INSERT INTO integration_values(i_id, pv_id)
 VALUES  (16, 12),
@@ -334,8 +613,9 @@ VALUES  (16, 12),
         (16, 35);
 
 /* light
-        states / inputs extracted from:
+        states(main) / attributes extracted from:
         https://developers.home-assistant.io/docs/core/entity/light
+        https://github.com/home-assistant/core/blob/dev/homeassistant/components/light
 */
 INSERT INTO integration_values(i_id, pv_id)
 VALUES  (17, 12),
@@ -343,16 +623,45 @@ VALUES  (17, 12),
         (17, 14),
         (17, 15);
 
+-- ATTRIBUTES --
+INSERT INTO possible_values(pv_id, property, p_value)
+VALUES  (,      'effect',               'rainbow'),     --The light makes a rainbow effect.
+        (,      'effect',               'none'),        --The light makes no effect.
+        (,      'min_color_temp_kelvin','int'),         --The minimal color value.
+        (,      'max_color_temp_kelvin','int'),         --The maximal color value.
+        (,      'color_mode',           'color_temp'),  --The ui color setting.
+        (,      'color_mode',           'hs'),          --The ui color setting.
+        (,      'brightness',           'integer'),     --The brightness of the light.
+        (,      'color_temp_kelvin',    'integer'),     --The color of the light as kelvin number.
+        (,      'hs_color',             'tuple[float, float]'),         --The color of the light in hs-format.
+        (,      'rgb_color',            'tuple[int, int, int]'),        --The color of the light in rgb-format.
+        (,      'xy_color',             'tuple[float, float]'),         --The color of the light in xy-format.
+        (,      'rgbw_color',           'tuple[int, int, int, int]'),   --The color of the light in rgbw-format.
+        (,      'rgbww_color',          'tuple[int, int, int, int, int]');      --The color of the light in rgbww-format.
+
+INSERT INTO integration_values(i_id, pv_id)
+VALUES  (17, ),
+        (17, ),
+        (17, ),
+        (17, ),
+        (17, ),
+        (17, ),
+        (17, ),
+        (17, ),
+        (17, ),
+        (17, ),
+        (17, ); -- supp features
+
 /* lock
-        states / inputs extracted from:
+        states(main) / attributes extracted from:
         https://developers.home-assistant.io/docs/core/entity/lock
 */
-INSERT INTO possible_values(i_id, pv_id)
-VALUES  (36,    "jammed"),              --The lock is unabled to toggle.
-        (37,    "locked"),              --The lock is locked.
-        (38,    "locking"),             --The lock is looking.
-        (39,    "unlocked"),            --The lock is unlocked.
-        (40,    "unlocking");           --The lock is unlooking.
+INSERT INTO possible_values(pv_id, property, p_value)
+VALUES  (36,    'main',     'jammed'),                  --The lock is unabled to toggle.
+        (37,    'main',     'locked'),                  --The lock is locked.
+        (38,    'main',     'locking'),                 --The lock is looking.
+        (39,    'main',     'unlocked'),                --The lock is unlocked.
+        (40,    'main',     'unlocking');               --The lock is unlooking.
 
 INSERT INTO integration_values(i_id, pv_id)
 VALUES  (18, 12),
@@ -365,14 +674,21 @@ VALUES  (18, 12),
         (18, 39),
         (18, 40);
 
+-- ATTRIBUTES --
+INSERT INTO integration_values(i_id, pv_id)
+VALUES  (18, ), -- code_format num
+        (18, ), -- code_format text
+        (18, ), -- changed_by 
+        (18, ); -- supp features
+
 /* media_player
-        states / inputs extracted from:
+        states(main) / attributes extracted from:
         https://developers.home-assistant.io/docs/core/entity/media-player
 */
-INSERT INTO possible_values(i_id, pv_id)
-VALUES  (41,    "playing"),             --The media player playimg something.
-        (42,    "standby"),             --The media player is in standby mode.
-        (43,    "buffering");           --The media player buffering something.
+INSERT INTO possible_values(pv_id, property, p_value)
+VALUES  (41,    'main',     'playing'),                 --The media player playimg something.
+        (42,    'main',     'standby'),                 --The media player is in standby mode.
+        (43,    'main',     'buffering');               --The media player buffering something.
 
 INSERT INTO integration_values(i_id, pv_id)
 VALUES  (19, 12),
@@ -385,134 +701,243 @@ VALUES  (19, 12),
         (19, 42),
         (19, 43),
 
+-- ATTRIBUTES --
+INSERT INTO possible_values(pv_id, property, p_value)
+VALUES  (,      'volume_level',         'float '),      --The volume level of the media player in the range (0..1).
+        (,      'is_volume_muted',      'bool'),        --Its true if volume is currently muted.
+        (,      'volume_step',          'float'),       --The volume step to use for the volume_up and volume_down services.
+        (,      'media_content_id',     'string'),      --The content ID of current playing media.
+        (,      'media_content_type',   'album'),       --The content type of current playing media.
+        (,      'media_content_type',   'app'),          --The content type of current playing media.
+        (,      'media_content_type',   'artist'),      --The content type of current playing media.
+        (,      'media_content_type',   'channel'),     --The content type of current playing media.
+        (,      'media_content_type',   'channels'),    --The content type of current playing media.
+        (,      'media_content_type',   'composer'),    --The content type of current playing media.
+        (,      'media_content_type',   'contibuting_artist'),  --The content type of current playing media.
+        (,      'media_content_type',   'episode'),     --The content type of current playing media.
+        (,      'media_content_type',   'game'),        --The content type of current playing media.
+        (,      'media_content_type',   'genre'),       --The content type of current playing media.
+        (,      'media_content_type',   'image'),       --The content type of current playing media.
+        (,      'media_content_type',   'movie'),       --The content type of current playing media.
+        (,      'media_content_type',   'music'),       --The content type of current playing media.
+        (,      'media_content_type',   'playlist'),    --The content type of current playing media.
+        (,      'media_content_type',   'podcast'),     --The content type of current playing media.
+        (,      'media_content_type',   'season'),      --The content type of current playing media.
+        (,      'media_content_type',   'track'),       --The content type of current playing media.
+        (,      'media_content_type',   'tvshow'),      --The content type of current playing media.
+        (,      'media_content_type',   'url'),         --The content type of current playing media.
+        (,      'media_content_type',   'video'),       --The content type of current playing media.
+        (,      'app_name',             'string'),      --The name of the current running app.
+        (,      'group_members',        'list[str]'),   --A dynamic list of player entities which are currently grouped together for synchronous playback.
+        (,      'media_album_artist',   'string'),      --The album artist of current playing media, music track only.
+        (,      'media_album_name',     'string'),      --The album name of current playing media, music track only.
+        (,      'media_artist',         'string'),      --The artist of current playing media, music track only.
+        (,      'media_channel',        'string'),      --The channel currently playing.
+        (,      'media_duration',       'integer'),     --The duration of current playing media in seconds.
+        (,      'media_episode',        'string'),      --The episode of current playing media, TV show only.
+        (,      'media_playlist',       'string'),      --The duration of current playing media in seconds.
+        (,      'media_position',       'integer'),     --The episode of current playing media, TV show only
+        (,      'media_season',         'string'),      --The duration of current playing media in seconds.
+        (,      'media_series_title',   'string'),      --The episode of current playing media, TV show only
+        (,      'media_title',          'string'),      --The duration of current playing media in seconds.
+        (,      'media_track',          'integer'),     --The track number of current playing media, music track only.
+        (,      'repeat',               'off'),         --The current repeat mode.
+        (,      'repeat',               'one'),         --The current repeat mode.
+        (,      'repeat',               'all'),         --The current repeat mode.
+        (,      'shuffle',              'bool'),        --True if shuffle is enabled.
+        (,      'source',               'dvd'),         --The currently selected input source for the media player.
+        (,      'source',               'youtube'),     --The currently selected input source for the media player.
+        (,      'sound_mode',           'music'),       --The current sound mode of the media player.
+        (,      'sound_mode',           'movie'),       --The current sound mode of the media player.
+        (,      'device_class',         'tv'),          --The media player is a tv.
+        (,      'device_class',         'speaker'),     --The media player is a speaker.
+        (,      'device_class',         'receiver');    --The media player is a receiver.
+
+INSERT INTO integration_values(i_id, pv_id)
+VALUES  (19, ),
+        (19, ),
+        (19, ),
+        (19, ),
+        (19, ),
+        (19, ),
+        (19, ),
+        (19, ),
+        (19, ),
+        (19, ),
+        (19, ),
+        (19, ),
+        (19, ),
+        (19, ),
+        (19, ),
+        (19, ),
+        (19, ),
+        (19, ),
+        (19, ),
+        (19, ),
+        (19, ),
+        (19, ),
+        (19, ),
+        (19, ),
+        (19, ),
+        (19, ),
+        (19, ),
+        (19, ),
+        (19, ),
+        (19, ),
+        (19, ),
+        (19, ),
+        (19, ),
+        (19, ),
+        (19, ),
+        (19, ),
+        (19, ),
+        (19, ),
+        (19, ),
+        (19, ),
+        (19, ),
+        (19, ),
+        (19, ),
+        (19, ),
+        (19, ),
+        (19, ),
+        (19, ),
+        (19, ),
+        (19, ),
+        (19, ); -- supp features
+
 /* notify
-        states / inputs extracted from:
+        states(main) / attributes extracted from:
         https://developers.home-assistant.io/docs/core/entity/notify
 */
 INSERT INTO integration_values(i_id, pv_id)
-VALUES
+VALUES  (20, 12),
+        (20, 13);
+
+-- ATTRIBUTES --
+INSERT INTO integration_values(i_id, pv_id)
+VALUES  (19, ); -- supp features
 
 /* number
-        states / inputs extracted from:
+        states(main) / attributes extracted from:
         https://developers.home-assistant.io/docs/core/entity/number
 */
 INSERT INTO integration_values(i_id, pv_id)
 VALUES
 
 /* remote
-        states / inputs extracted from:
+        states(main) / attributes extracted from:
         https://developers.home-assistant.io/docs/core/entity/remote
 */
 INSERT INTO integration_values(i_id, pv_id)
 VALUES
 
 /* scene
-        states / inputs extracted from:
+        states(main) / attributes extracted from:
         https://developers.home-assistant.io/docs/core/entity/scene
 */
 INSERT INTO integration_values(i_id, pv_id)
 VALUES
 
 /* select
-        states / inputs extracted from:
+        states(main) / attributes extracted from:
         https://developers.home-assistant.io/docs/core/entity/select
 */
 INSERT INTO integration_values(i_id, pv_id)
 VALUES
 
 /* sensor
-        states / inputs extracted from:
+        states(main) / attributes extracted from:
         https://developers.home-assistant.io/docs/core/entity/sensor
 */
 INSERT INTO integration_values(i_id, pv_id)
 VALUES
 
 /* siren
-        states / inputs extracted from:
+        states(main) / attributes extracted from:
         https://developers.home-assistant.io/docs/core/entity/siren
 */
 INSERT INTO integration_values(i_id, pv_id)
 VALUES
 
 /* stt
-        states / inputs extracted from:
+        states(main) / attributes extracted from:
         https://developers.home-assistant.io/docs/core/entity/stt
 */
 INSERT INTO integration_values(i_id, pv_id)
 VALUES
 
 /* switch
-        states / inputs extracted from:
+        states(main) / attributes extracted from:
         https://developers.home-assistant.io/docs/core/entity/switch
 */
 INSERT INTO integration_values(i_id, pv_id)
 VALUES
 
 /* text
-        states / inputs extracted from:
+        states(main) / attributes extracted from:
         https://developers.home-assistant.io/docs/core/entity/text
 */
 INSERT INTO integration_values(i_id, pv_id)
 VALUES
 
 /* time
-        states / inputs extracted from:
+        states(main) / attributes extracted from:
         https://developers.home-assistant.io/docs/core/entity/time
 */
 INSERT INTO integration_values(i_id, pv_id)
 VALUES
 
 /* todo
-        states / inputs extracted from:
+        states(main) / attributes extracted from:
         https://developers.home-assistant.io/docs/core/entity/todo
 */
 INSERT INTO integration_values(i_id, pv_id)
 VALUES
 
 /* tts
-        states / inputs extracted from:
+        states(main) / attributes extracted from:
         https://developers.home-assistant.io/docs/core/entity/tts
 */
 INSERT INTO integration_values(i_id, pv_id)
 VALUES
 
 /* update
-        states / inputs extracted from:
+        states(main) / attributes extracted from:
         https://developers.home-assistant.io/docs/core/entity/update
 */
 INSERT INTO integration_values(i_id, pv_id)
 VALUES
 
 /* vacuum
-        states / inputs extracted from:
+        states(main) / attributes extracted from:
         https://developers.home-assistant.io/docs/core/entity/vacuum
 */
 INSERT INTO integration_values(i_id, pv_id)
 VALUES
 
 /* valve
-        states / inputs extracted from:
+        states(main) / attributes extracted from:
         https://developers.home-assistant.io/docs/core/entity/valve
 */
 INSERT INTO integration_values(i_id, pv_id)
 VALUES
 
 /* wake_word
-        states / inputs extracted from:
+        states(main) / attributes extracted from:
         https://developers.home-assistant.io/docs/core/entity/wake_word
 */
 INSERT INTO integration_values(i_id, pv_id)
 VALUES
 
 /* water_heater
-        states / inputs extracted from:
+        states(main) / attributes extracted from:
         https://developers.home-assistant.io/docs/core/entity/water-heater
 */
 INSERT INTO integration_values(i_id, pv_id)
 VALUES
 
 /* weather
-        states / inputs extracted from:
+        states(main) / attributes extracted from:
         https://developers.home-assistant.io/docs/core/entity/weather
 */
 INSERT INTO integration_values(i_id, pv_id)
