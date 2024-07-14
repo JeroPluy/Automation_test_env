@@ -728,7 +728,7 @@ VALUES  (,      'volume_level',         'float '),      --The volume level of th
         (,      'media_content_type',   'url'),         --The content type of current playing media.
         (,      'media_content_type',   'video'),       --The content type of current playing media.
         (,      'app_name',             'string'),      --The name of the current running app.
-        (,      'group_members',        'list[str]'),   --A dynamic list of player entities which are currently grouped together for synchronous playback.
+        (,      'group_members',        'list[string]'),   --A dynamic list of player entities which are currently grouped together for synchronous playback.
         (,      'media_album_artist',   'string'),      --The album artist of current playing media, music track only.
         (,      'media_album_name',     'string'),      --The album name of current playing media, music track only.
         (,      'media_artist',         'string'),      --The artist of current playing media, music track only.
@@ -815,130 +815,187 @@ VALUES  (20, 12),
 
 -- ATTRIBUTES --
 INSERT INTO integration_values(i_id, pv_id)
-VALUES  (19, ); -- supp features
+VALUES  (20, ); -- supp features
 
 /* number
         states(main) / attributes extracted from:
         https://developers.home-assistant.io/docs/core/entity/number
 */
+INSERT INTO possible_values(pv_id, property, p_value)
+VALUES  (44,    'main',     'float'),                   --The number of the entity.
+
 INSERT INTO integration_values(i_id, pv_id)
-VALUES
+VALUES  (21, 12),
+        (21, 13),
+        (21, 44);
+
+-- ATTRIBUTES --
+INSERT INTO possible_values(pv_id, property, p_value)
+VALUES  (,      'min',                  'float '),      --The minimum accepted value in the number's (inclusive).
+        (,      'max',                  'float'),       --The maximum accepted value in the number's (inclusive).
+        (,      'step',                 'float'),       --Defines the resolution of the values, i.e. the smallest increment or decrement in the number's.
+        (,      'mode',                 'string'),      --Defines how the number should be displayed in the UI. Can be box, slider or auto.
+
+
+INSERT INTO integration_values(i_id, pv_id)
+VALUES  (21, ),
+        (21, ),
+        (21, ),
+        (21, );
 
 /* remote
         states(main) / attributes extracted from:
         https://developers.home-assistant.io/docs/core/entity/remote
+        https://github.com/home-assistant/core/tree/dev/homeassistant/components/remote
 */
 INSERT INTO integration_values(i_id, pv_id)
-VALUES
+VALUES  (22, 12),
+        (22, 13),
+        (22, 25);
+
+-- ATTRIBUTES --
+INSERT INTO possible_values(pv_id, property, p_value)
+VALUES  (,      'activity',             'string'),      --The minimum accepted value in the number's (inclusive).
+        (,      'current_activity',     'string');      --The maximum accepted value in the number's (inclusive).
+
+
+INSERT INTO integration_values(i_id, pv_id)
+VALUES  (22, ),
+        (22, );
 
 /* scene
         states(main) / attributes extracted from:
         https://developers.home-assistant.io/docs/core/entity/scene
+        https://github.com/home-assistant/core/blob/dev/homeassistant/components/scene/__init__.py
 */
 INSERT INTO integration_values(i_id, pv_id)
-VALUES
+VALUES  (23, 12),
+        (23, 13),
+        (23, 25);
+
+-- ATTRIBUTES --
+INSERT INTO possible_values(pv_id, property, p_value)
+VALUES  (,      'id',                   'string'),      --The id of the scene.
+        (,      'entity_id',            'string');      --The id of the entity in the scene.
+
+
+INSERT INTO integration_values(i_id, pv_id)
+VALUES  (23, ),
+        (23, );
 
 /* select
         states(main) / attributes extracted from:
         https://developers.home-assistant.io/docs/core/entity/select
 */
+INSERT INTO possible_values(pv_id, property, p_value)
+VALUES  (45,    'main', 	'option');              --The one of the options of the select.
+
 INSERT INTO integration_values(i_id, pv_id)
-VALUES
+VALUES  (24, 12),
+        (24, 13),
+        (24, 45);
+
+-- ATTRIBUTES --
+INSERT INTO possible_values(pv_id, property, p_value)
+VALUES  (,      'options',              'list[string]');--All options of the select.
+
+INSERT INTO integration_values(i_id, pv_id)
+VALUES  (24, );
 
 /* sensor
         states(main) / attributes extracted from:
         https://developers.home-assistant.io/docs/core/entity/sensor
 */
 INSERT INTO integration_values(i_id, pv_id)
-VALUES
+VALUES  (25, ),
 
 /* siren
         states(main) / attributes extracted from:
         https://developers.home-assistant.io/docs/core/entity/siren
 */
 INSERT INTO integration_values(i_id, pv_id)
-VALUES
+VALUES  (26, ),
 
 /* stt
         states(main) / attributes extracted from:
         https://developers.home-assistant.io/docs/core/entity/stt
 */
 INSERT INTO integration_values(i_id, pv_id)
-VALUES
+VALUES  (27, ),
 
 /* switch
         states(main) / attributes extracted from:
         https://developers.home-assistant.io/docs/core/entity/switch
 */
 INSERT INTO integration_values(i_id, pv_id)
-VALUES
+VALUES  (28, ),
 
 /* text
         states(main) / attributes extracted from:
         https://developers.home-assistant.io/docs/core/entity/text
 */
 INSERT INTO integration_values(i_id, pv_id)
-VALUES
+VALUES  (29, ),
 
 /* time
         states(main) / attributes extracted from:
         https://developers.home-assistant.io/docs/core/entity/time
 */
 INSERT INTO integration_values(i_id, pv_id)
-VALUES
+VALUES  (30, ),
 
 /* todo
         states(main) / attributes extracted from:
         https://developers.home-assistant.io/docs/core/entity/todo
 */
 INSERT INTO integration_values(i_id, pv_id)
-VALUES
+VALUES  (31, ),
 
 /* tts
         states(main) / attributes extracted from:
         https://developers.home-assistant.io/docs/core/entity/tts
 */
 INSERT INTO integration_values(i_id, pv_id)
-VALUES
+VALUES  (32, ),
 
 /* update
         states(main) / attributes extracted from:
         https://developers.home-assistant.io/docs/core/entity/update
 */
 INSERT INTO integration_values(i_id, pv_id)
-VALUES
+VALUES  (33, ),
 
 /* vacuum
         states(main) / attributes extracted from:
         https://developers.home-assistant.io/docs/core/entity/vacuum
 */
 INSERT INTO integration_values(i_id, pv_id)
-VALUES
+VALUES  (34, ),
 
 /* valve
         states(main) / attributes extracted from:
         https://developers.home-assistant.io/docs/core/entity/valve
 */
 INSERT INTO integration_values(i_id, pv_id)
-VALUES
+VALUES  (35, ),
 
 /* wake_word
         states(main) / attributes extracted from:
         https://developers.home-assistant.io/docs/core/entity/wake_word
 */
 INSERT INTO integration_values(i_id, pv_id)
-VALUES
+VALUES  (36, ),
 
 /* water_heater
         states(main) / attributes extracted from:
         https://developers.home-assistant.io/docs/core/entity/water-heater
 */
 INSERT INTO integration_values(i_id, pv_id)
-VALUES
+VALUES  (37, ),
 
 /* weather
         states(main) / attributes extracted from:
         https://developers.home-assistant.io/docs/core/entity/weather
 */
 INSERT INTO integration_values(i_id, pv_id)
-VALUES
+VALUES  (38, ),

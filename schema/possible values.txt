@@ -41,8 +41,8 @@
 (41,    'main',     'playing'),                 --The media player playimg something.
 (42,    'main',     'standby'),                 --The media player is in standby mode.
 (43,    'main',     'buffering');               --The media player buffering something.
-
-
+(44,    'main',     'float'),                   --The number of the entity.
+(45,    'main', 	'option');                  --The id of the scene.
 
 
 -- Attributes --
@@ -237,3 +237,10 @@
 (,      'device_class',         'tv'),          --The media player is a tv.
 (,      'device_class',         'speaker'),     --The media player is a speaker.
 (,      'device_class',         'receiver');    --The media player is a receiver.
+(,      'min',                  'float '),      --The minimum accepted value in the number's (inclusive).
+(,      'max',                  'float'),       --The maximum accepted value in the number's (inclusive).
+(,      'step',                 'float'),       --Defines the resolution of the values, i.e. the smallest increment or decrement in the number's.
+(,      'mode',                 'string'),      --Defines how the number should be displayed in the UI. Can be box, slider or auto.
+(,      'id',                   'string'),      --The id of the scene.
+(,      'entity_id',            'string');      --The id of the entity in the scene.
+(,      'options', 	            'list[string]');--All options of the select.
