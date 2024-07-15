@@ -45,6 +45,16 @@ CREATE TABLE entity
     FOREIGN KEY (i_id) REFERENCES integration (i_id)
 );
 
+-- POSSIBLE VALUE
+/* possible values of the integrations */
+
+CREATE TABLE possible_values
+(
+    pv_id       INTEGER PRIMARY KEY AUTOINCREMENT,
+    property    TEXT NOT NULL,    
+    p_value     NUMERIC NOT NULL
+);
+
 -- INTEGRATION VALUE
 /* values of the integrations */
 
@@ -55,17 +65,6 @@ CREATE TABLE integration_values
     PRIMARY KEY (i_id, pv_id),
     FOREIGN KEY (i_id) REFERENCES integration(i_id),
     FOREIGN KEY (pv_id) REFERENCES possible_values(pv_id)
-);
-
--- POSSIBLE VALUE
-/* possible values of the integrations */
-
-CREATE TABLE possible_values
-(
-    pv_id       INTEGER PRIMARY KEY AUTOINCREMENT,
-    property    INTEGER NOT NULL,    
-    p_value     NUMERIC NOT NULL,
-	PRIMARY KEY (pv_id)
 );
 
 -- AUTOMATION ENTITY
@@ -168,3 +167,4 @@ CREATE TABLE test_execution_output
     FOREIGN KEY (te_id) REFERENCES test_execution (te_id),
     FOREIGN KEY (a_id, e_id, p_role, position) REFERENCES automation_entity (a_id, e_id, p_role, position)
 );
+

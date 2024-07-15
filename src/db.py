@@ -1,12 +1,12 @@
 import sqlite3 as sqlite
 import os.path
 
-DATABASE = "data/automation_test_env.sqlite"
-INIT_FILE = "schema/database_creation.sql"
-INTEG_DATA = "schema/standard_integration.sql"
+DATABASE = os.path.join("data", "automation_test_env.sqlite")
+INIT_FILE = os.path.join("schema", "database_creation.sql")
+INTEG_DATA = os.path.join("schema", "standard_integration.sql")
 
 def init_db():
-    """Initialize the database model in sqlite 
+    """Initialize the database model in sqlite and load the base data
     
     needed sql-Files: 
         -   ../schema/database_creation.spl
@@ -16,7 +16,7 @@ def init_db():
     if os.path.isfile(DATABASE):
         return
     else:
-        with open (INIT_FILE) as model_creator:
+        with open(INIT_FILE) as model_creator:
             automation_test_env_model = model_creator.read()
 
             # con = connection to the db
@@ -28,11 +28,11 @@ def init_db():
                 con.commit()
             
             # load base data for the data base
-            load_data_foundation()
+            # load_data_foundation()
 
 
 def load_data_foundation():
-    """load the standard integration names and their possible values
+    """load the standard integration names and their possible values into the database
 
     needed sql-Files: 
         -   schema/standard_integration.sql
@@ -51,6 +51,8 @@ def load_data_foundation():
     except sqlite.IntegrityError as e:
         print(str(e) + " - data already loaded")
 
+# just a test function
+# TODO: remove 
 def get_db_path():
     print(os.path.isfile(INIT_FILE))
     print(os.path.isfile(INTEG_DATA))

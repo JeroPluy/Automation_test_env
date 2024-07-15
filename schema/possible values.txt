@@ -44,6 +44,29 @@
 (44,    'main',     'float'),                   --The number of the entity.
 (45,    'main', 	'option'),                  --The id of the scene.
 (46,    'main',     'integer'),                 --A TodoListEntity state is the count of incomplete items in the To-do list.
+(47,    'main',     'cleaning'),                --The vacuum is cleaning.
+(48,    'main',     'returning'),               --The vacuum is returning to the dock.
+(49,    'main',     'eco'),                     --The water heater is in eco mode.
+(50,    'main',     'electric'),                --The water heater is in electric mode.
+(51,    'main',     'performance'),             --The water heater is in high performance mode.
+(52,    'main',     'high_demand'),             --The water heater is in high performance mode.
+(53,    'main',     'heat_pump'),               --The water heater is in heat pump mode.
+(54,    'main',     'gas'),                     --The water heater is in gas mode.
+(55,    'main',     'clear-night'),             --The weather is clear at night.
+(56,    'main',     'cloudy'),                   --The weather is cloudy.
+(57,    'main',     'exceptional'),              --The weather is exceptional.
+(58,    'main',     'fog'),                      --The weather is foggy.
+(59,    'main',     'hail'),                     --The weather is hailing.
+(60,    'main',     'lightning'),                --The weather is lightning.
+(61,    'main',     'lightning-rainy'),          --The weather is lightning and rainy.
+(62,    'main',     'partlycloudy'),             --The weather is partly cloudy.
+(63,    'main',     'pouring'),                  --The weather is pouring.
+(64,    'main',     'rainy'),                    --The weather is rainy.
+(65,    'main',     'snowy'),                    --The weather is snowy.
+(66,    'main',     'snowy-rainy'),              --The weather is snowy and rainy.
+(67,    'main',     'sunny'),                    --The weather is sunny.
+(68,    'main',     'windy'),                    --The weather is windy.
+(69,    'main',     'windy-variant'),            --The weather is windy and variant.
 
 -- Attributes --
 (,      'code_format',          'number'),                              --The code format of the alarm control panel.
@@ -280,3 +303,33 @@
 (,      'available_tones',      'list[string]'),                        --The list of possible sounds for the siren.
 (,      'device_class',         'switch'),                              --The device class of the switch.
 (,      'device_class',         'outlet'),                              --The device class of the switch.
+(,      'battery_icon',         'string'),                              --The time the vacuum has been cleaning.
+(,      'cleaned_area',         'float'),                               --The percentage of the area that has been cleaned.
+(,      'fan_speed',            'min'),                                 --The speed of the vacuum fan.
+(,      'fan_speed',            'medium'),                              --The speed of the vacuum fan.
+(,      'fan_speed',            'high'),                                --The speed of the vacuum fan.
+(,      'fan_speed',            'max'),                                 --The speed of the vacuum fan.
+(,      'operation_mode',       'eco'),                                 --The operation mode of the water heater.
+(,      'operation_mode',       'electric'),                            --The operation mode of the water heater.
+(,      'operation_mode',       'performance'),                         --The operation mode of the water heater.
+(,      'operation_mode',       'high_demand'),                         --The operation mode of the water heater.
+(,      'operation_mode',       'heat_pump'),                           --The operation mode of the water heater.
+(,      'operation_mode',       'gas'),                                 --The operation mode of the water heater.
+(,      'operation_mode',       'off'),                                 --The operation mode of the water heater.
+(,      'away_mode',            'on'),                                  --The away mode of the water heater.
+(,      'away_mode',            'off'),                                 --The away mode of the water heater.
+(,      'attribution',          'string'),      --The attributor of the weather.
+(,      'apparent_temperature', 'float'),       --The current apparent (feels-like) temperature in °C or °F.
+(,      'pressure',             'flaot'),       --The pressure of the weather.
+(,      'pressure_unit',        'string'),      --The pressure unit of the weather.
+(,      'wind_speed',           'float'),       --The wind bearing of the weather.
+(,      'wind_speed_unit',      'string'),      --The wind speed unit of the weather.
+(,      'wind_bearing',         'string'),      --The current wind bearing in azimuth angle (degrees) or 1-3 letter cardinal direction.
+(,      'wind_gust_speed',      'float'),       --he current wind gust speed.
+(,      'visibility',           'float'),       --The visibility of the weather.
+(,      'visibility_unit',      'string'),      --The visibility unit of the weather.
+(,      'cloud_coverage',       'int'),         --The cloud coverage of the weather.
+(,      'dew_point',            'float')        --The dew point temperature in °C or °F.
+(,      'ozone',                'float'),       --The current ozone level of the weather.
+(,      'uv_index',             'float'),       --The uv index of the weather.
+(,      'precipitation_unit',   'string'),      -- The precipitation unit in mm or in.
