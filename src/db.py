@@ -56,3 +56,6 @@ def load_data_foundation():
 def get_db_path():
     print(os.path.isfile(INIT_FILE))
     print(os.path.isfile(INTEG_DATA))
+
+if __name__ == "__main__":
+    init_db()

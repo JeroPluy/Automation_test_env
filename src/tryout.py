@@ -269,6 +269,5 @@ class TestWindow(BlankWindow):
 
 if __name__ == "__main__":
     #app = AutoamtionAdditon(self.lang["PROJECT"] + "/" + self.lang["NEW_A"])
-    # app = TestWindow()
-    # app.mainloop()
-    db.init_db()
+    app = TestWindow()
+    app.mainloop()

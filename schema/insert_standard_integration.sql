@@ -30,21 +30,22 @@ VALUES  (1,     'alarm_control_panel'),
         (22,    'remote'),
         (23,    'scene'),
         (24,    'select'),
-        (25,    'sensor'),
-        (26,    'sensor_enum'),
-        (27,    'siren'),
-        (28,    'stt'),
-        (29,    'switch'),
-        (30,    'text'),
-        (31,    'time'),
-        (32,    'todo'),
-        (33,    'tts'),
-        (34,    'update'),
-        (35,    'vacuum'),
-        (36,    'valve'),
-        (37,    'wake_word'),
-        (38,    'water_heater'),
-        (39,    'weather');
+        (25,    'sensor_float'),
+        (26,    'sensor_string'),
+        (27,    'sensor_enum'),
+        (28,    'siren'),
+        (29,    'stt'),
+        (30,    'switch'),
+        (31,    'text'),
+        (32,    'time'),
+        (33,    'todo'),
+        (34,    'tts'),
+        (35,    'update'),
+        (36,    'vacuum'),
+        (37,    'valve'),
+        (38,    'wake_word'),
+        (39,    'water_heater'),
+        (40,    'weather');
 
 -- POSSIBLE VALUES --
 /* import the values from standard integrations */
@@ -915,7 +916,7 @@ VALUES  (271,   'options',              'list[string]');        --All options of
 INSERT INTO integration_values(i_id, pv_id)
 VALUES  (24, 271);
 
-/* sensor
+/* sensor_float
         states(main) / attributes extracted from:
         https://developers.home-assistant.io/docs/core/entity/sensor
         https://github.com/home-assistant/core/tree/dev/homeassistant/components/sensor
@@ -923,8 +924,7 @@ VALUES  (24, 271);
 INSERT INTO integration_values(i_id, pv_id)
 VALUES  (25, 12), -- unknown
         (25, 13), -- unavailable
-        (25, 25), -- value as string
-        (25, 44); -- values as float
+        (25, 44); -- value as float
 
 -- ATTRIBUTES --
 INSERT INTO possible_values(pv_id, property, p_value)
@@ -937,46 +937,44 @@ VALUES  (272,   'device_class',         'apparent_power'),                      
         (278,   'device_class',         'current'),                             --The device class of the sensor.
         (279,   'device_class',         'data_rate'),                           --The device class of the sensor.
         (280,   'device_class',         'data_size'),                           --The device class of the sensor.
-        (281,   'device_class',         'date'),                                --The device class of the sensor.
-        (282,   'device_class',         'distance'),                            --The device class of the sensor.
-        (283,   'device_class',         'duration'),                            --The device class of the sensor.
-        (284,   'device_class',         'energy'),                              --The device class of the sensor.
-        (285,   'device_class',         'energy_storage'),                      --The device class of the sensor.
-        (286,   'device_class',         'frequency'),                           --The device class of the sensor.
-        (287,   'device_class',         'humidity'),                            --The device class of the sensor.
-        (288,   'device_class',         'illuminance'),                         --The device class of the sensor.
-        (289,   'device_class',         'irradiance'),                           --The device class of the sensor.
-        (290,   'device_class',         'monetary'),                            --The device class of the sensor.
-        (291,   'device_class',         'nitrogen_dioxide'),                    --The device class of the sensor.
-        (292,   'device_class',         'nitrogen_monoxide'),                   --The device class of the sensor.
-        (293,   'device_class',         'nitrous_oxide'),                       --The device class of the sensor.
-        (294,   'device_class',         'ozone'),                               --The device class of the sensor.
-        (295,   'device_class',         'ph'),                                  --The device class of the sensor.
-        (296,   'device_class',         'pm1'),                                 --The device class of the sensor.
-        (297,   'device_class',         'pm10'),                                --The device class of the sensor.
-        (298,   'device_class',         'pm25'),                                --The device class of the sensor.
-        (299,   'device_class',         'power_factor'),                        --The device class of the sensor.
-        (300,   'device_class',         'precipitation'),                       --The device class of the sensor.
-        (301,   'device_class',         'precipitation_intensity'),             --The device class of the sensor.
-        (302,   'device_class',         'pressure'),                            --The device class of the sensor.
-        (303,   'device_class',         'reactive_power'),                      --The device class of the sensor.
-        (304,   'device_class',         'signal_strength'),                     --The device class of the sensor.
-        (305,   'device_class',         'sound_pressure'),                      --The device class of the sensor.
-        (306,   'device_class',         'speed'),                               --The device class of the sensor.
-        (307,   'device_class',         'sulphur_dioxide'),                     --The device class of the sensor.
-        (308,   'device_class',         'temperature'),                         --The device class of the sensor.
-        (309,   'device_class',         'timestamp'),                           --The device class of the sensor.
-        (310,   'device_class',         'volatile_organic_compounds'),          --The device class of the sensor.
-        (311,   'device_class',         'volatile_organic_compounds_parts'),    --The device class of the sensor.
-        (312,   'device_class',         'voltage'),                             --The device class of the sensor.
-        (313,   'device_class',         'volume'),                              --The device class of the sensor.
-        (314,   'device_class',         'volume_storage'),                      --The device class of the sensor.
-        (315,   'device_class',         'volume_flow_rate'),                    --The device class of the sensor.
-        (316,   'device_class',         'water'),                               --The device class of the sensor.
-        (317,   'device_class',         'weight'),                              --The device class of the sensor.
-        (318,   'device_class',         'wind_speed'),                          --The device class of the sensor.
-        (319,   'unit_of_measurement',  'string'),                              --The unit of the sensor value.
-        (320,   'battery_level',        'int');                                 --The battery level of the sensor.
+        (281,   'device_class',         'distance'),                            --The device class of the sensor.
+        (282,   'device_class',         'duration'),                            --The device class of the sensor.
+        (283,   'device_class',         'energy'),                              --The device class of the sensor.
+        (284,   'device_class',         'energy_storage'),                      --The device class of the sensor.
+        (285,   'device_class',         'frequency'),                           --The device class of the sensor.
+        (286,   'device_class',         'humidity'),                            --The device class of the sensor.
+        (287,   'device_class',         'illuminance'),                         --The device class of the sensor.
+        (288,   'device_class',         'irradiance'),                           --The device class of the sensor.
+        (289,   'device_class',         'monetary'),                            --The device class of the sensor.
+        (290,   'device_class',         'nitrogen_dioxide'),                    --The device class of the sensor.
+        (291,   'device_class',         'nitrogen_monoxide'),                   --The device class of the sensor.
+        (292,   'device_class',         'nitrous_oxide'),                       --The device class of the sensor.
+        (293,   'device_class',         'ozone'),                               --The device class of the sensor.
+        (294,   'device_class',         'ph'),                                  --The device class of the sensor.
+        (295,   'device_class',         'pm1'),                                 --The device class of the sensor.
+        (296,   'device_class',         'pm10'),                                --The device class of the sensor.
+        (297,   'device_class',         'pm25'),                                --The device class of the sensor.
+        (298,   'device_class',         'power_factor'),                        --The device class of the sensor.
+        (299,   'device_class',         'precipitation'),                       --The device class of the sensor.
+        (300,   'device_class',         'precipitation_intensity'),             --The device class of the sensor.
+        (301,   'device_class',         'pressure'),                            --The device class of the sensor.
+        (302,   'device_class',         'reactive_power'),                      --The device class of the sensor.
+        (303,   'device_class',         'signal_strength'),                     --The device class of the sensor.
+        (304,   'device_class',         'sound_pressure'),                      --The device class of the sensor.
+        (305,   'device_class',         'speed'),                               --The device class of the sensor.
+        (306,   'device_class',         'sulphur_dioxide'),                     --The device class of the sensor.
+        (307,   'device_class',         'temperature'),                         --The device class of the sensor.
+        (308,   'device_class',         'volatile_organic_compounds'),          --The device class of the sensor.
+        (309,   'device_class',         'volatile_organic_compounds_parts'),    --The device class of the sensor.
+        (310,   'device_class',         'voltage'),                             --The device class of the sensor.
+        (311,   'device_class',         'volume'),                              --The device class of the sensor.
+        (312,   'device_class',         'volume_storage'),                      --The device class of the sensor.
+        (313,   'device_class',         'volume_flow_rate'),                    --The device class of the sensor.
+        (314,   'device_class',         'water'),                               --The device class of the sensor.
+        (315,   'device_class',         'weight'),                              --The device class of the sensor.
+        (316,   'device_class',         'wind_speed'),                          --The device class of the sensor.
+        (317,   'unit_of_measurement',  'string'),                              --The unit of the sensor value.
+        (318,   'battery_level',        'int');                                 --The battery level of the sensor.
         
 INSERT INTO integration_values(i_id, pv_id)
 VALUES  (25, 272),
@@ -1026,14 +1024,12 @@ VALUES  (25, 272),
         (25, 316),
         (25, 317),
         (25, 318),
-        (25, 319),
-        (25, 320),
         (25, 75), -- device_class battery
         (25, 82), -- device_class gas
         (25, 86), -- device_class moisture
         (25, 92); -- device_class power
 
-/* sensor_enum
+/* sensor_string
         states(main) / attributes extracted from:
         https://developers.home-assistant.io/docs/core/entity/sensor
         https://github.com/home-assistant/core/tree/dev/homeassistant/components/sensor
@@ -1041,11 +1037,30 @@ VALUES  (25, 272),
 INSERT INTO integration_values(i_id, pv_id)
 VALUES  (26, 12), -- unknown
         (26, 13), -- unavailable
-        (26, 45); -- option
+        (26, 25); -- values as string
+
+-- ATTRIBUTES --
+INSERT INTO possible_values(pv_id, property, p_value)
+VALUES  (319,   'device_class',         'date'),                                --The device class of the sensor.
+        (320,   'device_class',         'timestamp');                           --The device class of the sensor.
+        
+INSERT INTO integration_values(i_id, pv_id)
+VALUES  (26, 319),
+        (26, 320);
+
+/* sensor_enum
+        states(main) / attributes extracted from:
+        https://developers.home-assistant.io/docs/core/entity/sensor
+        https://github.com/home-assistant/core/tree/dev/homeassistant/components/sensor
+*/
+INSERT INTO integration_values(i_id, pv_id)
+VALUES  (27, 12), -- unknown
+        (27, 13), -- unavailable
+        (27, 45); -- option
 
 -- ATTRIBUTES --
 INSERT INTO integration_values(i_id, pv_id)
-VALUES  (26, 271); --All options of the sensor.
+VALUES  (27, 271); --All options of the sensor.
 
 /* siren
         states(main) / attributes extracted from:
@@ -1053,18 +1068,18 @@ VALUES  (26, 271); --All options of the sensor.
         https://github.com/home-assistant/core/tree/dev/homeassistant/components/siren
 */
 INSERT INTO integration_values(i_id, pv_id)
-VALUES  (27, 12), -- unknown
-        (27, 13), -- unavailable
-        (27, 14), -- on
-        (27, 15); -- off
+VALUES  (28, 12), -- unknown
+        (28, 13), -- unavailable
+        (28, 14), -- on
+        (28, 15); -- off
 
 -- ATTRIBUTES --
 INSERT INTO possible_values(pv_id, property, p_value)
 VALUES  (321,   'available_tones',      'list[string]');        --The list of possible sounds for the siren.
 
 INSERT INTO integration_values(i_id, pv_id)
-VALUES  (27, 321),
-        (27, 74); --supp features
+VALUES  (28, 321),
+        (28, 74); --supp features
 
 /* stt
         states(main) / attributes extracted from:
@@ -1072,18 +1087,18 @@ VALUES  (27, 321),
         https://github.com/home-assistant/core/blob/dev/homeassistant/components/stt
 */
 INSERT INTO integration_values(i_id, pv_id)
-VALUES  (28, 12), -- unknown
-        (28, 13); -- unavailable
+VALUES  (29, 12), -- unknown
+        (29, 13); -- unavailable
 
 /* switch
         states(main) / attributes extracted from:
         https://developers.home-assistant.io/docs/core/entity/switch
 */
 INSERT INTO integration_values(i_id, pv_id)
-VALUES  (29, 12), -- unknown
-        (29, 13), -- unavailable
-        (29, 14), -- on
-        (29, 15); -- off
+VALUES  (30, 12), -- unknown
+        (30, 13), -- unavailable
+        (30, 14), -- on
+        (30, 15); -- off
 
 -- ATTRIBUTES --
 INSERT INTO possible_values(pv_id, property, p_value)
@@ -1091,17 +1106,17 @@ VALUES  (322,   'device_class',         'switch'),      --The device class of th
         (323,   'device_class',         'outlet');      --The device class of the switch.
 
 INSERT INTO integration_values(i_id, pv_id)
-VALUES  (29, 322),
-        (29, 323);
+VALUES  (30, 322),
+        (30, 323);
 
 /* text
         states(main) / attributes extracted from:
         https://developers.home-assistant.io/docs/core/entity/text
 */
 INSERT INTO integration_values(i_id, pv_id)
-VALUES  (30, 12), -- unknown
-        (30, 13), -- unavailable
-        (30, 25); -- text as string
+VALUES  (31, 12), -- unknown
+        (31, 13), -- unavailable
+        (31, 25); -- text as string
 
 -- ATTRIBUTES --
 INSERT INTO possible_values(pv_id, property, p_value)
@@ -1111,20 +1126,20 @@ VALUES  (324,   'mode',                 'text'),        --The text ui mode.
 
 
 INSERT INTO integration_values(i_id, pv_id)
-VALUES  (30, 324),
-        (30, 325),
-        (30, 326),
-        (30, 263), -- min
-        (30, 264); -- max
+VALUES  (31, 324),
+        (31, 325),
+        (31, 326),
+        (31, 263), -- min
+        (31, 264); -- max
 
 /* time
         states(main) / attributes extracted from:
         https://developers.home-assistant.io/docs/core/entity/time
 */
 INSERT INTO integration_values(i_id, pv_id)
-VALUES  (31, 12), -- unknown
-        (31, 13), -- unavailable
-        (31, 25); -- time as string
+VALUES  (32, 12), -- unknown
+        (32, 13), -- unavailable
+        (32, 25); -- time as string
 
 /* todo
         states(main) / attributes extracted from:
@@ -1134,21 +1149,21 @@ INSERT INTO possible_values(pv_id, property, p_value)
 VALUES  (46,    'main',         'int');           --A TodoListEntity state is the count of incomplete items in the To-do list.
 
 INSERT INTO integration_values(i_id, pv_id)
-VALUES  (32, 12), -- unknown
-        (32, 13), -- unavailable
-        (32, 46);
+VALUES  (33, 12), -- unknown
+        (33, 13), -- unavailable
+        (33, 46);
 
 -- ATTRIBUTES --
 INSERT INTO integration_values(i_id, pv_id)
-VALUES  (32, 74); -- supp features
+VALUES  (33, 74); -- supp features
 
 /* tts
         states(main) / attributes extracted from:
         https://developers.home-assistant.io/docs/core/entity/tts
 */
 INSERT INTO integration_values(i_id, pv_id)
-VALUES  (33, 12), -- unknown
-        (33, 13); -- unavailable
+VALUES  (34, 12), -- unknown
+        (34, 13); -- unavailable
 
 /* update
         states(main) / attributes extracted from:
@@ -1156,10 +1171,10 @@ VALUES  (33, 12), -- unknown
         https://github.com/home-assistant/core/tree/dev/homeassistant/components/update
 */
 INSERT INTO integration_values(i_id, pv_id)
-VALUES  (34, 12), -- unknown
-        (34, 13), -- unavailable
-        (34, 14), -- on
-        (34, 15); -- off
+VALUES  (35, 12), -- unknown
+        (35, 13), -- unavailable
+        (35, 14), -- on
+        (35, 15); -- off
 
 -- ATTRIBUTES --
 INSERT INTO possible_values(pv_id, property, p_value)
@@ -1175,17 +1190,17 @@ VALUES  (327,   'auto_update',          'bool'),        --The device or service 
         (336,   'device_class',         'firmware');    --The device class of the update.
 
 INSERT INTO integration_values(i_id, pv_id)
-VALUES  (34, 327),
-        (34, 328),
-        (34, 329),
-        (34, 330),
-        (34, 331),
-        (34, 332),
-        (34, 333),
-        (34, 334),
-        (34, 335),
-        (34, 336),
-        (34, 74);--supp features
+VALUES  (35, 327),
+        (35, 328),
+        (35, 329),
+        (35, 330),
+        (35, 331),
+        (35, 332),
+        (35, 333),
+        (35, 334),
+        (35, 335),
+        (35, 336),
+        (35, 74);--supp features
 
 /* vacuum
         states(main) / attributes extracted from:
@@ -1196,14 +1211,14 @@ VALUES  (47,    'main',     'cleaning'),                --The vacuum is cleaning
         (48,    'main',     'returning');               --The vacuum is returning to the dock.
 
 INSERT INTO integration_values(i_id, pv_id)
-VALUES  (35, 12), -- unknown
-        (35, 13), -- unavailable
-        (35, 16), -- idle
-        (35, 33), -- docked
-        (35, 34), -- paused
-        (35, 35), -- error
-        (35, 47),
-        (35, 48);
+VALUES  (36, 12), -- unknown
+        (36, 13), -- unavailable
+        (36, 16), -- idle
+        (36, 33), -- docked
+        (36, 34), -- paused
+        (36, 35), -- error
+        (36, 47),
+        (36, 48);
         
 
 -- ATTRIBUTES --
@@ -1216,14 +1231,14 @@ VALUES  (337,   'battery_icon',         'string'),      --The time the vacuum ha
         (342,   'fan_speed',            'max');         --The speed of the vacuum fan.
 
 INSERT INTO integration_values(i_id, pv_id)
-VALUES  (35,320), -- battery_level
-        (35,337),
-        (35,338),
-        (35,339),
-        (35,340),
-        (35,341),
-        (35,342),
-        (35, 74);--supp features
+VALUES  (36, 318), -- battery_level
+        (36, 337),
+        (36, 338),
+        (36, 339),
+        (36, 340),
+        (36, 341),
+        (36, 342),
+        (36, 74);--supp features
 
 /* valve
         states(main) / attributes extracted from:
@@ -1231,30 +1246,30 @@ VALUES  (35,320), -- battery_level
         https://www.home-assistant.io/integrations/valve/
 */
 INSERT INTO integration_values(i_id, pv_id)
-VALUES  (36, 12), -- unknown
-        (36, 13), -- unavailable
-        (36, 26), -- closed
-        (36, 27), -- closing
-        (36, 28), -- open
-        (36, 29); -- opening
+VALUES  (37, 12), -- unknown
+        (37, 13), -- unavailable
+        (37, 26), -- closed
+        (37, 27), -- closing
+        (37, 28), -- open
+        (37, 29); -- opening
 
 -- ATTRIBUTES --
 INSERT INTO possible_values(pv_id, property, p_value)
 VALUES  (343,   'current_position',     'int');         --The current position of the valve.
 
 INSERT INTO integration_values(i_id, pv_id)
-VALUES  (36, 82), -- device_class gas
-        (36, 316), -- device_class water
-        (36, 343);
+VALUES  (37, 82), -- device_class gas
+        (37, 314), -- device_class water
+        (37, 343);
 
 /* wake_word
         states(main) / attributes extracted from:
         https://developers.home-assistant.io/docs/core/entity/wake_word
 */
 INSERT INTO integration_values(i_id, pv_id)
-VALUES  (37, 12), -- unknown
-        (37, 13), -- unavailable
-        (37, 25); -- wake word as string
+VALUES  (38, 12), -- unknown
+        (38, 13), -- unavailable
+        (38, 25); -- wake word as string
 
 /* water_heater
         states(main) / attributes extracted from:
@@ -1270,16 +1285,16 @@ VALUES  (49,    'main',     'eco'),                     --The water heater is in
         (54,    'main',     'gas');                     --The water heater is in gas mode.
 
 INSERT INTO integration_values(i_id, pv_id)
-VALUES  (38, 12), -- unknown
-        (38, 13), -- unavailable
-        (38, 15), -- off
-        (38, 21), -- heat
-        (38, 49),
-        (38, 50),
-        (38, 51),
-        (38, 52),
-        (38, 53),
-        (38, 54);
+VALUES  (39, 12), -- unknown
+        (39, 13), -- unavailable
+        (39, 15), -- off
+        (39, 21), -- heat
+        (39, 49),
+        (39, 50),
+        (39, 51),
+        (39, 52),
+        (39, 53),
+        (39, 54);
 
 -- ATTRIBUTES --
 INSERT INTO possible_values(pv_id, property, p_value)
@@ -1294,22 +1309,22 @@ VALUES  (344,   'operation_mode',       'eco'),         --The operation mode of 
         (352,   'away_mode',            'off');         --The away mode of the water heater.
 
 INSERT INTO integration_values(i_id, pv_id)
-VALUES  (38, 116), --min_temp
-        (38, 114), --max_temp
-        (38, 112), --curr_temp
-        (38, 119), --temp
-        (38, 120), --target_temp_high
-        (38, 121), --target_temp_low
-        (38, 344),
-        (38, 345),
-        (38, 346),
-        (38, 347),
-        (38, 348),
-        (38, 349),
-        (38, 350),
-        (38, 351),
-        (38, 352),
-        (38, 74);--supp feat
+VALUES  (39, 116), --min_temp
+        (39, 114), --max_temp
+        (39, 112), --curr_temp
+        (39, 119), --temp
+        (39, 120), --target_temp_high
+        (39, 121), --target_temp_low
+        (39, 344),
+        (39, 345),
+        (39, 346),
+        (39, 347),
+        (39, 348),
+        (39, 349),
+        (39, 350),
+        (39, 351),
+        (39, 352),
+        (39, 74);--supp feat
 
 /* weather
         states(main) / attributes extracted from:
@@ -1334,25 +1349,25 @@ VALUES  (55,    'main',     'clear-night'),             --The weather is clear a
         (69,    'main',     'windy-variant');            --The weather is windy and variant.
 
 INSERT INTO integration_values(i_id, pv_id)
-VALUES  (39, 12), -- unknown
-        (39, 13), -- unavailable
-        (39, 15), -- off
-        (39, 21), -- heat
-        (39, 55),
-        (39, 56),
-        (39, 57),
-        (39, 58),
-        (39, 59),
-        (39, 60),
-        (39, 61),
-        (39, 62),
-        (39, 63),
-        (39, 64),
-        (39, 65),
-        (39, 66),
-        (39, 67),
-        (39, 68),
-        (39, 69);
+VALUES  (40, 12), -- unknown
+        (40, 13), -- unavailable
+        (40, 15), -- off
+        (40, 21), -- heat
+        (40, 55),
+        (40, 56),
+        (40, 57),
+        (40, 58),
+        (40, 59),
+        (40, 60),
+        (40, 61),
+        (40, 62),
+        (40, 63),
+        (40, 64),
+        (40, 65),
+        (40, 66),
+        (40, 67),
+        (40, 68),
+        (40, 69);
 
 -- ATTRIBUTES --
 INSERT INTO possible_values(pv_id, property, p_value)
@@ -1373,23 +1388,22 @@ VALUES  (353,   'attribution',          'string'),      --The attributor of the 
         (367,   'precipitation_unit',   'string');      -- The precipitation unit in mm or in.
 
 INSERT INTO integration_values(i_id, pv_id)
-VALUES  (39, 118),--humidity
-        (39, 119),--temperature
-        (39, 123),--temperature_unit
-        (39, 353),
-        (39, 354),
-        (39, 355),
-        (39, 356),
-        (39, 357),
-        (39, 358),
-        (39, 359),
-        (39, 360),
-        (39, 361),
-        (39, 362),
-        (39, 363),
-        (39, 364),
-        (39, 365),
-        (39, 366),
-        (39, 367),
-        (39, 74);--supp feat
-        
+VALUES  (40, 118),--humidity
+        (40, 119),--temperature
+        (40, 123),--temperature_unit
+        (40, 353),
+        (40, 354),
+        (40, 355),
+        (40, 356),
+        (40, 357),
+        (40, 358),
+        (40, 359),
+        (40, 360),
+        (40, 361),
+        (40, 362),
+        (40, 363),
+        (40, 364),
+        (40, 365),
+        (40, 366),
+        (40, 367),
+        (40, 74);--supp feat
