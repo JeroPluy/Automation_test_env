@@ -3,7 +3,7 @@ import os.path
 
 DATABASE = os.path.join("data", "automation_test_env.sqlite")
 INIT_FILE = os.path.join("schema", "database_creation.sql")
-INTEG_DATA = os.path.join("schema", "standard_integration.sql")
+INTEG_DATA = os.path.join("schema", "insert_standard_integration.sql")
 
 def init_db():
     """Initialize the database model in sqlite and load the base data
@@ -28,7 +28,7 @@ def init_db():
                 con.commit()
             
             # load base data for the data base
-            # load_data_foundation()
+            load_data_foundation()
 
 
 def load_data_foundation():
