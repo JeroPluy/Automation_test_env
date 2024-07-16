@@ -944,7 +944,7 @@ VALUES  (272,   'device_class',         'apparent_power'),                      
         (285,   'device_class',         'frequency'),                           --The device class of the sensor.
         (286,   'device_class',         'humidity'),                            --The device class of the sensor.
         (287,   'device_class',         'illuminance'),                         --The device class of the sensor.
-        (288,   'device_class',         'irradiance'),                           --The device class of the sensor.
+        (288,   'device_class',         'irradiance'),                          --The device class of the sensor.
         (289,   'device_class',         'monetary'),                            --The device class of the sensor.
         (290,   'device_class',         'nitrogen_dioxide'),                    --The device class of the sensor.
         (291,   'device_class',         'nitrogen_monoxide'),                   --The device class of the sensor.

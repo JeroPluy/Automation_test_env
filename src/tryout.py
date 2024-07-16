@@ -1,5 +1,6 @@
 import json
 from os import path
+import os
 from PIL import Image
 import tkinter
 from typing import Any, Tuple
@@ -19,6 +20,7 @@ from customWidgets.CTkXYFrame.ctk_xyframe import CTkXYFrame
 
 import customWidgets.customWidgets as cW
 import db
+import yaml_loader
 
 
 def load_settings():
@@ -269,5 +271,7 @@ class TestWindow(BlankWindow):
 
 if __name__ == "__main__":
     #app = AutoamtionAdditon(self.lang["PROJECT"] + "/" + self.lang["NEW_A"])
-    app = TestWindow()
-    app.mainloop()
+    # app = TestWindow()
+    # app.mainloop()
+    test = yaml_loader.load_yaml_dict(os.path.join('data','yaml_files','start_living_room_light_automation.yaml'))
+    print(test)
