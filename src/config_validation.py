@@ -6,12 +6,12 @@ from __future__ import annotations
 
 from collections.abc import Callable, Hashable
 import contextlib
-# from datetime import (
-#     date as date_sys,
-#     datetime as datetime_sys,
-#     time as time_sys,
-#     timedelta,
-# )
+from datetime import (
+    date as date_sys,
+    datetime as datetime_sys,
+    time as time_sys,
+    timedelta,
+)
 from enum import Enum, StrEnum
 import logging
 from numbers import Number
@@ -20,116 +20,31 @@ import re
 # from socket import (  # type: ignore[attr-defined]  # private, not in typeshed
 #     _GLOBAL_DEFAULT_TIMEOUT,
 # )
-from typing import Any, cast, overload
+from typing import Any, Final, cast, overload
 # from urllib.parse import urlparse
-# from uuid import UUID
+from uuid import UUID
+import slugify as unicode_slug
 
 import voluptuous as vol
-# import voluptuous_serialize
+import voluptuous_serialize
 
-# from homeassistant.const import (
-    ATTR_AREA_ID,
-    ATTR_DEVICE_ID,
-    ATTR_ENTITY_ID,
-    ATTR_FLOOR_ID,
-    ATTR_LABEL_ID,
-    CONF_ABOVE,
-    CONF_ALIAS,
-    CONF_ATTRIBUTE,
-    CONF_BELOW,
-    CONF_CHOOSE,
-    CONF_CONDITION,
-    CONF_CONDITIONS,
-    CONF_CONTINUE_ON_ERROR,
-    CONF_CONTINUE_ON_TIMEOUT,
-    CONF_COUNT,
-    CONF_DEFAULT,
-    CONF_DELAY,
-    CONF_DEVICE_ID,
-    CONF_DOMAIN,
-    CONF_ELSE,
-    CONF_ENABLED,
-    CONF_ENTITY_ID,
-    CONF_ENTITY_NAMESPACE,
-    CONF_ERROR,
-    CONF_EVENT,
-    CONF_EVENT_DATA,
-    CONF_EVENT_DATA_TEMPLATE,
-    CONF_FOR,
-    CONF_FOR_EACH,
-    CONF_ID,
-    CONF_IF,
-    CONF_MATCH,
-    CONF_PARALLEL,
-    CONF_PLATFORM,
-    CONF_REPEAT,
-    CONF_RESPONSE_VARIABLE,
-    CONF_SCAN_INTERVAL,
-    CONF_SCENE,
-    CONF_SEQUENCE,
-    CONF_SERVICE,
-    CONF_SERVICE_DATA,
-    CONF_SERVICE_DATA_TEMPLATE,
-    CONF_SERVICE_TEMPLATE,
-    CONF_SET_CONVERSATION_RESPONSE,
-    CONF_STATE,
-    CONF_STOP,
-    CONF_TARGET,
-    CONF_THEN,
-    CONF_TIMEOUT,
-    CONF_UNTIL,
-    CONF_VALUE_TEMPLATE,
-    CONF_VARIABLES,
-    CONF_WAIT_FOR_TRIGGER,
-    CONF_WAIT_TEMPLATE,
-    CONF_WHILE,
-    ENTITY_MATCH_ALL,
-    ENTITY_MATCH_ANY,
-    ENTITY_MATCH_NONE,
-    SUN_EVENT_SUNRISE,
-    SUN_EVENT_SUNSET,
-    WEEKDAYS,
-    UnitOfTemperature,
-)
-from homeassistant.core import (
-    DOMAIN as HOMEASSISTANT_DOMAIN,
-    async_get_hass,
-    async_get_hass_or_none,
-    split_entity_id,
-    valid_entity_id,
-)
-from homeassistant.exceptions import HomeAssistantError, TemplateError
-from homeassistant.generated import currencies
-from homeassistant.generated.countries import COUNTRIES
-from homeassistant.generated.languages import LANGUAGES
-from homeassistant.util import raise_if_invalid_path, slugify as util_slugify
-import homeassistant.util.dt as dt_util
-from homeassistant.util.yaml.objects import NodeStrClass
+from home_assistant_exception import HomeAssistantError, TemplateError
+from home_assistant_const import * 
+from home_assistant_helper_classes import * 
 
-from . import script_variables as script_variables_helper, template as template_helper
-from .frame import get_integration_logger
-from .typing import VolDictType, VolSchemaType
+def valid_entity_id(entity_id: str) -> bool:
+    """Test if an entity ID is a valid format.
 
-TIME_PERIOD_ERROR = "offset {} should be format 'HH:MM', 'HH:MM:SS' or 'HH:MM:SS.F'"
+    Format: <domain>.<entity> where both are slugs.
+    """
+    return VALID_ENTITY_ID.match(entity_id) is not None
 
-
-
-# Home Assistant types
-# byte = vol.All(vol.Coerce(int), vol.Range(min=0, max=255))
-# small_float = vol.All(vol.Coerce(float), vol.Range(min=0, max=1))
-# positive_int = vol.All(vol.Coerce(int), vol.Range(min=0))
-# positive_float = vol.All(vol.Coerce(float), vol.Range(min=0))
-# latitude = vol.All(
-#     vol.Coerce(float), vol.Range(min=-90, max=90), msg="invalid latitude"
-# )
-# longitude = vol.All(
-#     vol.Coerce(float), vol.Range(min=-180, max=180), msg="invalid longitude"
-# )
-# gps = vol.ExactSequence([latitude, longitude])
-# sun_event = vol.All(vol.Lower, vol.Any(SUN_EVENT_SUNSET, SUN_EVENT_SUNRISE))
-# port = vol.All(vol.Coerce(int), vol.Range(min=1, max=65535))
-
-
+def split_entity_id(entity_id: str) -> tuple[str, str]:
+    """Split a state entity ID into domain and object ID."""
+    domain, _, object_id = entity_id.partition(".")
+    if not domain or not object_id:
+        raise ValueError(f"Invalid entity ID {entity_id}")
+    return domain, object_id
 
 # Adapted from:
 # https://github.com/alecthomas/voluptuous/issues/115#issuecomment-144464666
@@ -390,9 +305,7 @@ def icon(value: Any) -> str:
 
     raise vol.Invalid('Icons should be specified in the form "prefix:name"')
 
-
 _COLOR_HEX = re.compile(r"^#[0-9A-F]{6}$", re.IGNORECASE)
-
 
 def color_hex(value: Any) -> str:
     """Validate a hex color code."""
@@ -403,6 +316,37 @@ def color_hex(value: Any) -> str:
 
     return str_value
 
+def parse_time(time_str: str) -> datetime.time | None:
+    """Parse a time string (00:20:00) into Time object.
+
+    Return None if invalid.
+    """
+    parts = str(time_str).split(":")
+    if len(parts) < 2:
+        return None
+    try:
+        hour = int(parts[0])
+        minute = int(parts[1])
+        second = int(parts[2]) if len(parts) > 2 else 0
+        return datetime.time(hour, minute, second)
+    except ValueError:
+        # ValueError if value cannot be converted to an int or not in range
+        return None
+
+def time(value: Any) -> time_sys:
+    """Validate and transform a time."""
+    if isinstance(value, time_sys):
+        return value
+
+    try:
+        time_val = parse_time(value)
+    except TypeError as err:
+        raise vol.Invalid("Not a parseable type") from err
+
+    if time_val is None:
+        raise vol.Invalid(f"Invalid time specified: {value}")
+
+    return time_val
 
 _TIME_PERIOD_DICT_KEYS = ("days", "hours", "minutes", "seconds", "milliseconds")
 
@@ -421,22 +365,13 @@ time_period_dict = vol.All(
     lambda value: timedelta(**value),
 )
 
-
-def time(value: Any) -> time_sys:
-    """Validate and transform a time."""
-    if isinstance(value, time_sys):
-        return value
-
+def parse_date(dt_str: str) -> datetime.date | None:
+    """Convert a date string to a date object."""
+    DATE_STR_FORMAT = "%Y-%m-%d"
     try:
-        time_val = dt_util.parse_time(value)
-    except TypeError as err:
-        raise vol.Invalid("Not a parseable type") from err
-
-    if time_val is None:
-        raise vol.Invalid(f"Invalid time specified: {value}")
-
-    return time_val
-
+        return datetime.datetime.strptime(dt_str, DATE_STR_FORMAT).date()
+    except ValueError:  # If dt_str did not match our format
+        return None
 
 def date(value: Any) -> date_sys:
     """Validate and transform a date."""
@@ -444,7 +379,7 @@ def date(value: Any) -> date_sys:
         return value
 
     try:
-        date_val = dt_util.parse_date(value)
+        date_val = parse_date(value)
     except TypeError as err:
         raise vol.Invalid("Not a parseable type") from err
 
@@ -531,6 +466,14 @@ def service(value: Any) -> str:
     raise vol.Invalid(f"Service {value} does not match format <domain>.<name>")
 
 
+def util_slugify(text: str | None, *, separator: str = "_") -> str:
+    """Slugify a given text."""
+    if text == "" or text is None:
+        return ""
+    slug = unicode_slug.slugify(text, separator=separator)
+    return "unknown" if slug == "" else slug
+
+
 def slug(value: Any) -> str:
     """Validate value is a valid slug."""
     if value is None:
@@ -574,7 +517,6 @@ def slugify(value: Any) -> str:
         return slg
     raise vol.Invalid(f"Unable to slugify {value}")
 
-
 def string(value: Any) -> str:
     """Coerce value to string, except for None."""
     if value is None:
@@ -588,7 +530,7 @@ def string(value: Any) -> str:
     ):
         return value
 
-    if isinstance(value, template_helper.ResultWrapper):
+    if isinstance(value, ResultWrapper):
         value = value.render_result
 
     elif isinstance(value, (list, dict)):
@@ -616,14 +558,20 @@ def temperature_unit(value: Any) -> UnitOfTemperature:
     raise vol.Invalid("invalid temperature unit (expected C or F)")
 
 
-def template(value: Any | None) -> template_helper.Template:
+def is_template_string(maybe_template: str) -> bool:
+    """Check if the input is a Jinja2 template."""
+    return "{" in maybe_template and (
+        "{%" in maybe_template or "{{" in maybe_template or "{#" in maybe_template
+    )
+
+def template(value: Any | None) -> Template:
     """Validate a jinja2 template."""
     if value is None:
         raise vol.Invalid("template value is None")
-    if isinstance(value, (list, dict, template_helper.Template)):
+    if isinstance(value, (list, dict, Template)):
         raise vol.Invalid("template value should be a string")
 
-    template_value = template_helper.Template(str(value), async_get_hass_or_none())
+    template_value = Template(str(value), None)
 
     try:
         template_value.ensure_valid()
@@ -632,16 +580,16 @@ def template(value: Any | None) -> template_helper.Template:
     return template_value
 
 
-def dynamic_template(value: Any | None) -> template_helper.Template:
+def dynamic_template(value: Any | None) -> Template:
     """Validate a dynamic (non static) jinja2 template."""
     if value is None:
         raise vol.Invalid("template value is None")
-    if isinstance(value, (list, dict, template_helper.Template)):
+    if isinstance(value, (list, dict, Template)):
         raise vol.Invalid("template value should be a string")
-    if not template_helper.is_template_string(str(value)):
+    if not is_template_string(str(value)):
         raise vol.Invalid("template value does not contain a dynamic template")
 
-    template_value = template_helper.Template(str(value), async_get_hass_or_none())
+    template_value = Template(str(value), None)
 
     try:
         template_value.ensure_valid()
@@ -662,7 +610,7 @@ def template_complex(value: Any) -> Any:
             template_complex(key): template_complex(element)
             for key, element in value.items()
         }
-    if isinstance(value, str) and template_helper.is_template_string(value):
+    if isinstance(value, str) and is_template_string(value):
         return template(value)
 
     return value
@@ -675,10 +623,10 @@ def _positive_time_period_template_complex(value: Any) -> Any:
     for key, element in value.items():
         if not isinstance(key, str):
             raise vol.Invalid("key should be a string")
-        if not template_helper.is_template_string(key):
+        if not is_template_string(key):
             vol.In(_TIME_PERIOD_DICT_KEYS)(key)
         if not isinstance(element, str) or (
-            isinstance(element, str) and not template_helper.is_template_string(element)
+            isinstance(element, str) and not is_template_string(element)
         ):
             vol.All(vol.Coerce(float), vol.Range(min=0))(element)
     return template_complex(value)
@@ -695,7 +643,7 @@ def datetime(value: Any) -> datetime_sys:
         return value
 
     try:
-        date_val = dt_util.parse_datetime(value)
+        date_val = datetime.datetime(value)
     except TypeError:
         date_val = None
 
@@ -705,61 +653,61 @@ def datetime(value: Any) -> datetime_sys:
     return date_val
 
 
-def time_zone(value: str) -> str:
-    """Validate timezone."""
-    if dt_util.get_time_zone(value) is not None:
-        return value
-    raise vol.Invalid(
-        "Invalid time zone passed in. Valid options can be found here: "
-        "http://en.wikipedia.org/wiki/List_of_tz_database_time_zones"
-    )
+# def time_zone(value: str) -> str:
+#     """Validate timezone."""
+#     if dt_util.get_time_zone(value) is not None:
+#         return value
+#     raise vol.Invalid(
+#         "Invalid time zone passed in. Valid options can be found here: "
+#         "http://en.wikipedia.org/wiki/List_of_tz_database_time_zones"
+#     )
 
 
 weekdays = vol.All(ensure_list, [vol.In(WEEKDAYS)])
 
 
-def socket_timeout(value: Any | None) -> object:
-    """Validate timeout float > 0.0.
+# def socket_timeout(value: Any | None) -> object:
+#     """Validate timeout float > 0.0.
 
-    None coerced to socket._GLOBAL_DEFAULT_TIMEOUT bare object.
-    """
-    if value is None:
-        return _GLOBAL_DEFAULT_TIMEOUT
-    try:
-        float_value = float(value)
-        if float_value > 0.0:
-            return float_value
-        raise vol.Invalid("Invalid socket timeout value. float > 0.0 required.")
-    except Exception as err:
-        raise vol.Invalid(f"Invalid socket timeout: {err}") from err
-
-
-def url(
-    value: Any,
-    _schema_list: frozenset[UrlProtocolSchema] = EXTERNAL_URL_PROTOCOL_SCHEMA_LIST,
-) -> str:
-    """Validate an URL."""
-    url_in = str(value)
-
-    if urlparse(url_in).scheme in _schema_list:
-        return cast(str, vol.Schema(vol.Url())(url_in))
-
-    raise vol.Invalid("invalid url")
+#     None coerced to socket._GLOBAL_DEFAULT_TIMEOUT bare object.
+#     """
+#     if value is None:
+#         return _GLOBAL_DEFAULT_TIMEOUT
+#     try:
+#         float_value = float(value)
+#         if float_value > 0.0:
+#             return float_value
+#         raise vol.Invalid("Invalid socket timeout value. float > 0.0 required.")
+#     except Exception as err:
+#         raise vol.Invalid(f"Invalid socket timeout: {err}") from err
 
 
-def configuration_url(value: Any) -> str:
-    """Validate an URL that allows the homeassistant schema."""
-    return url(value, CONFIGURATION_URL_PROTOCOL_SCHEMA_LIST)
+# def url(
+#     value: Any,
+#     _schema_list: frozenset[UrlProtocolSchema] = EXTERNAL_URL_PROTOCOL_SCHEMA_LIST,
+# ) -> str:
+#     """Validate an URL."""
+#     url_in = str(value)
+
+#     if urlparse(url_in).scheme in _schema_list:
+#         return cast(str, vol.Schema(vol.Url())(url_in))
+
+#     raise vol.Invalid("invalid url")
 
 
-def url_no_path(value: Any) -> str:
-    """Validate a url without a path."""
-    url_in = url(value)
+# def configuration_url(value: Any) -> str:
+#     """Validate an URL that allows the homeassistant schema."""
+#     return url(value, CONFIGURATION_URL_PROTOCOL_SCHEMA_LIST)
 
-    if urlparse(url_in).path not in ("", "/"):
-        raise vol.Invalid("url it not allowed to have a path component")
 
-    return url_in
+# def url_no_path(value: Any) -> str:
+#     """Validate a url without a path."""
+#     url_in = url(value)
+
+#     if urlparse(url_in).path not in ("", "/"):
+#         raise vol.Invalid("url it not allowed to have a path component")
+
+#     return url_in
 
 
 def x10_address(value: str) -> str:
@@ -873,7 +821,7 @@ def _deprecated_or_removed(
             if raise_if_present:
                 raise vol.Invalid(warning % arguments)
 
-            get_integration_logger(__name__).log(level, warning, *arguments)
+            # get_integration_logger(__name__).log(level, warning, *arguments)
             value = config[key]
             if replacement_key or option_removed:
                 config.pop(key)
@@ -1068,16 +1016,16 @@ def empty_config_schema(domain: str) -> Callable[[dict], dict]:
     """Return a config schema which logs if there are configuration parameters."""
 
     def validator(config: dict) -> dict:
-        if config_domain := config.get(domain):
-            get_integration_logger(__name__).error(
-                (
-                    "The %s integration does not support any configuration parameters, "
-                    "got %s. Please remove the configuration parameters from your "
-                    "configuration."
-                ),
-                domain,
-                config_domain,
-            )
+        # if config_domain := config.get(domain):
+        #     get_integration_logger(__name__).error(
+        #         (
+        #             "The %s integration does not support any configuration parameters, "
+        #             "got %s. Please remove the configuration parameters from your "
+        #             "configuration."
+        #         ),
+        #         domain,
+        #         config_domain,
+        #     )
         return config
 
     return validator
@@ -1091,34 +1039,34 @@ def _no_yaml_config_schema(
 ) -> Callable[[dict], dict]:
     """Return a config schema which logs if attempted to setup from YAML."""
 
-    def raise_issue() -> None:
-        # pylint: disable-next=import-outside-toplevel
-        from .issue_registry import IssueSeverity, async_create_issue
+    # def raise_issue() -> None:
+    #     # pylint: disable-next=import-outside-toplevel
+    #     from .issue_registry import IssueSeverity, async_create_issue
 
-        # HomeAssistantError is raised if called from the wrong thread
-        with contextlib.suppress(HomeAssistantError):
-            hass = async_get_hass()
-            async_create_issue(
-                hass,
-                HOMEASSISTANT_DOMAIN,
-                f"{issue_base}_{domain}",
-                is_fixable=False,
-                issue_domain=domain,
-                severity=IssueSeverity.ERROR,
-                translation_key=translation_key,
-                translation_placeholders={"domain": domain} | translation_placeholders,
-            )
+    #     # HomeAssistantError is raised if called from the wrong thread
+    #     with contextlib.suppress(HomeAssistantError):
+    #         hass = async_get_hass()
+    #         async_create_issue(
+    #             hass,
+    #             HOMEASSISTANT_DOMAIN,
+    #             f"{issue_base}_{domain}",
+    #             is_fixable=False,
+    #             issue_domain=domain,
+    #             severity=IssueSeverity.ERROR,
+    #             translation_key=translation_key,
+    #             translation_placeholders={"domain": domain} | translation_placeholders,
+    #         )
 
     def validator(config: dict) -> dict:
-        if domain in config:
-            get_integration_logger(__name__).error(
-                (
-                    "The %s integration does not support YAML setup, please remove it "
-                    "from your configuration file"
-                ),
-                domain,
-            )
-            raise_issue()
+        # if domain in config:
+        #     get_integration_logger(__name__).error(
+        #         (
+        #             "The %s integration does not support YAML setup, please remove it "
+        #             "from your configuration file"
+        #         ),
+        #         domain,
+        #     )
+        #     raise_issue()
         return config
 
     return validator
@@ -1251,9 +1199,8 @@ SCRIPT_CONVERSATION_RESPONSE_SCHEMA = vol.Any(template, None)
 SCRIPT_VARIABLES_SCHEMA = vol.All(
     vol.Schema({str: template_complex}),
     # pylint: disable-next=unnecessary-lambda
-    lambda val: script_variables_helper.ScriptVariables(val),
+    lambda val: ScriptVariables(val),
 )
-
 
 def script_action(value: Any) -> dict:
     """Validate a script action."""
@@ -1771,24 +1718,6 @@ _SCRIPT_PARALLEL_SCHEMA = vol.Schema(
 )
 
 
-SCRIPT_ACTION_ACTIVATE_SCENE = "scene"
-SCRIPT_ACTION_CALL_SERVICE = "call_service"
-SCRIPT_ACTION_CHECK_CONDITION = "condition"
-SCRIPT_ACTION_CHOOSE = "choose"
-SCRIPT_ACTION_DELAY = "delay"
-SCRIPT_ACTION_DEVICE_AUTOMATION = "device"
-SCRIPT_ACTION_FIRE_EVENT = "event"
-SCRIPT_ACTION_IF = "if"
-SCRIPT_ACTION_PARALLEL = "parallel"
-SCRIPT_ACTION_REPEAT = "repeat"
-SCRIPT_ACTION_SEQUENCE = "sequence"
-SCRIPT_ACTION_SET_CONVERSATION_RESPONSE = "set_conversation_response"
-SCRIPT_ACTION_STOP = "stop"
-SCRIPT_ACTION_VARIABLES = "variables"
-SCRIPT_ACTION_WAIT_FOR_TRIGGER = "wait_for_trigger"
-SCRIPT_ACTION_WAIT_TEMPLATE = "wait_template"
-
-
 ACTIONS_MAP = {
     CONF_DELAY: SCRIPT_ACTION_DELAY,
     CONF_WAIT_TEMPLATE: SCRIPT_ACTION_WAIT_TEMPLATE,
@@ -1849,12 +1778,12 @@ ACTION_TYPE_SCHEMAS: dict[str, Callable[[Any], dict]] = {
 
 
 currency = vol.In(
-    currencies.ACTIVE_CURRENCIES, msg="invalid ISO 4217 formatted currency"
+    ACTIVE_CURRENCIES, msg="invalid ISO 4217 formatted currency"
 )
 
-historic_currency = vol.In(
-    currencies.HISTORIC_CURRENCIES, msg="invalid ISO 4217 formatted historic currency"
-)
+# historic_currency = vol.In(
+#     HISTORIC_CURRENCIES, msg="invalid ISO 4217 formatted historic currency"
+# )
 
 country = vol.In(COUNTRIES, msg="invalid ISO 3166 formatted country")
 
