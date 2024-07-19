@@ -52,7 +52,7 @@ def load_data_foundation():
         print(str(e) + " - data already loaded")
 
 # just a test function
-# TODO: remove 
+# TODO: remove this function
 def get_db_path():
     print(os.path.isfile(INIT_FILE))
     print(os.path.isfile(INTEG_DATA))
