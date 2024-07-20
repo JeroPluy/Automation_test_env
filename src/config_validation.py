@@ -17,18 +17,15 @@ import logging
 from numbers import Number
 import os
 import re
-# from socket import (  # type: ignore[attr-defined]  # private, not in typeshed
-#     _GLOBAL_DEFAULT_TIMEOUT,
-# )
-from typing import Any, Final, cast, overload
-# from urllib.parse import urlparse
+
+from typing import Any, cast, overload
 from uuid import UUID
 import slugify as unicode_slug
 
 import voluptuous as vol
 import voluptuous_serialize
 
-from home_assistant_exception import HomeAssistantError, TemplateError
+from home_assistant_exception import TemplateError
 from home_assistant_const import * 
 from home_assistant_helper_classes import * 
 

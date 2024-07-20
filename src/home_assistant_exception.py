@@ -49,3 +49,12 @@ class HomeAssistantError(Exception):
         )
         return self._message
     
+class TemplateError(HomeAssistantError):
+    """Error during template rendering."""
+
+    def __init__(self, exception: Exception | str) -> None:
+        """Init the error."""
+        if isinstance(exception, str):
+            super().__init__(exception)
+        else:
+            super().__init__(f"{exception.__class__.__name__}: {exception}")

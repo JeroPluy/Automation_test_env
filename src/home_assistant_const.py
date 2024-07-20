@@ -853,9 +853,6 @@ def make_script_schema(
             vol.Optional(CONF_MAX, default=DEFAULT_MAX): vol.All(
                 vol.Coerce(int), vol.Range(min=2)
             ),
-            vol.Optional(CONF_MAX_EXCEEDED, default=DEFAULT_MAX_EXCEEDED): vol.All(
-                vol.Upper, vol.In(_MAX_EXCEEDED_CHOICES)
-            ),
         },
         extra=extra,
     )
