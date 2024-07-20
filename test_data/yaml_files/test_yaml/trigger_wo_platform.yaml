@@ -1,0 +1,36 @@
+alias: Wohnzimmerlampe einschalten
+description: ""
+trigger:
+  - alias: Wenn eine Bewegung erkannt wird
+    entity_id:
+      - binary_sensor.moving_living_room
+    from: "off"
+    to: "on"
+  - platform: state
+    entity_id:
+      - binary_sensor.person_living_room
+    from: "off"
+    to: "on"
+    alias: Wenn eine Person erkannt wird
+condition:
+  - alias: Ist die Sonne untergegangen
+    condition: sun
+    after: sunrise
+  - condition: state
+    entity_id: light.main_light_living_room
+    state: "on"
+    alias: Ist das Wohnzimmerlicht angeschaltet
+action:
+  - alias: Wohnzimmerlicht einschalten
+    service: input_boolean.turn_on
+    data: {}
+  - alias: Ist Person Krista im Wohnzimmer
+    condition: state
+    entity_id: sensor.whos_in_living_room
+    state: Krista
+  - alias: Musikanlage einschalten
+    service: media_player.media_play
+    target:
+      entity_id: media_player.living_room
+    data: {}
+mode: single

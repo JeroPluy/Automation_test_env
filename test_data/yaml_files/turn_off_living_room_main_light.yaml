@@ -1,0 +1,42 @@
+alias: Deckenlicht ausschalten
+description: >-
+  Das Deckenlicht wird nach dem Verlassen des Raumes automatisch ausgeschaltet
+  und die Musik pausiert.
+trigger:
+  - platform: state
+    entity_id:
+      - binary_sensor.moving_living_room
+    for:
+      hours: 0
+      minutes: 7
+      seconds: 0
+    to: "off"
+    from: "on"
+  - platform: state
+    entity_id:
+      - binary_sensor.person_living_room
+    from: "on"
+    to: "off"
+    for:
+      hours: 0
+      minutes: 7
+      seconds: 0
+condition:
+  - condition: state
+    entity_id: light.main_light_living_room
+    state: "on"
+action:
+  - service: light.turn_off
+    metadata: {}
+    data: {}
+    target:
+      entity_id: light.main_light_living_room
+  - condition: state
+    entity_id: media_player.living_room
+    state: playing
+  - service: media_player.media_pause
+    metadata: {}
+    data: {}
+    target:
+      entity_id: media_player.living_room
+mode: single

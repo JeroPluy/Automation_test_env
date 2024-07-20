@@ -1,0 +1,80 @@
+alias: Garten Bewässerung
+description: ""
+trigger:
+  - platform: time_pattern
+    seconds: "30"
+condition: []
+action:
+  - if:
+      - condition: numeric_state
+        entity_id: input_number.nachster_zu_wassernder_gartenteil
+        below: 0
+    then:
+      - variables:
+          active_part: 0
+    else:
+      - variables:
+          active_part: input_number.nachster_zu_wassernder_gartenteil
+  - choose:
+      - conditions:
+          - condition: template
+            value_template: "{{ active_part == 0 }}"
+        sequence:
+          - service: switch.turn_on
+            data: {}
+            enabled: false
+          - service: notify.persistent_notification
+            metadata: {}
+            data:
+              message: "{{ active_part }}"
+      - conditions:
+          - condition: template
+            value_template: "{{ active_part == 1 }}"
+        sequence:
+          - service: switch.turn_off
+            data: {}
+            enabled: false
+          - service: switch.turn_on
+            data: {}
+            enabled: false
+          - variables:
+              path_unavailable: true
+          - service: notify.persistent_notification
+            metadata: {}
+            data:
+              message: "{{ active_part }}"
+          - service: mqtt.publish
+            data:
+              qos: "0"
+              retain: true
+              topic: test_lm/set
+              payload: pause
+      - conditions:
+          - condition: template
+            value_template: "{{ active_part == 2 }}"
+        sequence:
+          - service: switch.turn_off
+            data: {}
+            enabled: false
+          - service: switch.turn_on
+            data: {}
+            enabled: false
+          - service: notify.persistent_notification
+            metadata: {}
+            data:
+              message: "{{ active_part }}"
+          - service: input_number.set_value
+            metadata: {}
+            data:
+              value: -1
+            target:
+              entity_id: input_number.nachster_zu_wassernder_gartenteil
+  - service: input_number.set_value
+    metadata: {}
+    data:
+      value: "{{ active_part + 1 }}"
+    target:
+      entity_id: input_number.nachster_zu_wassernder_gartenteil
+variables:
+  active_part: "{{ states('input_number.nachster_zu_wassernder_gartenteil') }}"
+mode: single
