@@ -1,26 +1,16 @@
 import asyncio
-import yaml_loader
-import os
 import copy
+import os
 
-import home_assistant_automation_config as config_validation
-from home_assistant_const import (
-    SCRIPT_MODE_CHOICES,
-    CONF_ALIAS, 
-    CONF_ID,
-    CONF_DESCRIPTION,
-    CONF_TRIGGER,
-    CONF_ACTION,
-    CONF_MODE,
-    CONF_MAX,
-    CONF_VARIABLES,
-    CONF_CONDITION,
-    CONF_TRACE,
-    CONF_INITIAL_STATE,
-    CONF_STORED_TRACES,
-    CONF_MAX_EXCEEDED,
-    LOGSEVERITY_STRING,
-)
+import home_assistant_automations.home_assistant_automation_config as config_validation
+from home_assistant_automations.home_assistant_const import (
+    CONF_ACTION, CONF_ALIAS, CONF_CONDITION, CONF_DESCRIPTION, CONF_ID,
+    CONF_INITIAL_STATE, CONF_MAX, CONF_MAX_EXCEEDED, CONF_MODE,
+    CONF_STORED_TRACES, CONF_TRACE, CONF_TRIGGER, CONF_VARIABLES,
+    LOGSEVERITY_STRING, SCRIPT_MODE_CHOICES)
+from home_assistant_automations.home_assistant_yaml_loader import \
+    load_yaml_dict
+
 
 def change_param(yaml_dict, param, value="invalid_value", nested = False, nested_param = None):
     """Change parameter in yaml dictionary to a value and validate the new yaml dictionary"""
@@ -79,7 +69,7 @@ def test_main_automation_params()-> None:
     basis_file = os.path.join('test_data','yaml_files', "test_yaml", 'basis_automation.yaml')
 
     # Load basis automation yaml file
-    yaml_dict = yaml_loader.load_yaml_dict(basis_file)
+    yaml_dict = load_yaml_dict(basis_file)
 
     # Make a copy of the original yaml dictionary and all of its nested dictionaries or lists
     reset_dict = copy.deepcopy(yaml_dict) 
@@ -145,7 +135,7 @@ def test_preconfigured_yaml_files()-> None:
     dir_path = os.path.join('test_data','yaml_files')
     for file in os.listdir(dir_path):
         if file.endswith(".yaml"):
-            yaml_dict = yaml_loader.load_yaml_dict(os.path.join(dir_path, file))
+            yaml_dict = load_yaml_dict(os.path.join(dir_path, file))
             print("Test " + file)
             validation_result = asyncio.run(config_validation.async_validate_config_item(yaml_dict))
             print(validation_result.automation_name + " : " + validation_result.validation_status + " : " + str(validation_result.validation_error))

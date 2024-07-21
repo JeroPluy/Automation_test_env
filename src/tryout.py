@@ -1,11 +1,13 @@
 import json
-from os import path
-import os
-from PIL import Image
 import tkinter
-from typing import Any, Tuple
+from os import path
+from typing import Tuple
 
 import customtkinter
+from PIL import Image
+
+import customWidgets.customWidgets as cW
+import db
 from customWidgets.CTkTable.ctktable import CTkTable
 from customWidgets.CTkXYFrame.ctk_xyframe import CTkXYFrame
 
@@ -18,8 +20,6 @@ from customWidgets.CTkXYFrame.ctk_xyframe import CTkXYFrame
 #ctkrangeslider
 
 
-import customWidgets.customWidgets as cW
-import db
 
 
 
