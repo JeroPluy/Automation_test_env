@@ -1,5 +1,12 @@
 alias: Wohnzimmerlampe einschalten
-description: ""
+id: "1600000000000"
+description: "Basis description"
+initial_state: true
+variables: {}
+trace:
+  stored_traces: 6
+trigger_variables:
+  testVar: "test"
 trigger:
   - alias: Wenn eine Bewegung erkannt wird
     platform: state
@@ -35,3 +42,5 @@ action:
       entity_id: media_player.living_room
     data: {}
 mode: single
+max: 1
+max_exceeded: warning
