@@ -1,51 +1,38 @@
 """
+    This code is partly extracted from:
+
 
 """
 
-from typing import Any, Mapping 
-import voluptuous as vol
-from voluptuous.humanize import humanize_error
 from contextlib import suppress
 from enum import StrEnum
+from typing import Any, Mapping
 
-from home_assistant_const import (
-    CONF_STORED_TRACES,
-    DEFAULT_STORED_TRACES,
-    CONF_ID, 
-    CONF_ALIAS, 
-    CONF_DESCRIPTION, 
-    CONF_TRACE, 
-    CONF_INITIAL_STATE, 
-    CONF_TRIGGER, 
-    CONF_CONDITION, 
-    CONF_VARIABLES, 
-    CONF_TRIGGER_VARIABLES, 
-    CONF_ACTION,
-    CONF_MODE, 
-    SCRIPT_MODE_SINGLE,
-    SCRIPT_MODE_CHOICES, 
-    make_script_schema, 
-    positive_int, 
-    ConfigType,
-)
+import voluptuous as vol
+from home_assistant_config_validation import (CONDITIONS_SCHEMA, SCRIPT_SCHEMA,
+                                              SCRIPT_VARIABLES_SCHEMA,
+                                              TRIGGER_SCHEMA, boolean, string)
+from home_assistant_const import (CONF_ACTION, CONF_ALIAS, CONF_CONDITION,
+                                  CONF_DESCRIPTION, CONF_ID,
+                                  CONF_INITIAL_STATE, CONF_MODE,
+                                  CONF_STORED_TRACES, CONF_TRACE, CONF_TRIGGER,
+                                  CONF_TRIGGER_VARIABLES, CONF_VARIABLES,
+                                  DEFAULT_STORED_TRACES, SCRIPT_MODE_CHOICES,
+                                  SCRIPT_MODE_SINGLE, ConfigType,
+                                  make_script_schema, positive_int)
+from voluptuous.humanize import humanize_error
 
-from config_validation import (
-    string,
-    boolean,
-    TRIGGER_SCHEMA,
-    CONDITIONS_SCHEMA,
-    SCRIPT_VARIABLES_SCHEMA, 
-    SCRIPT_SCHEMA, 
-) 
-
+# schema for the trace configuration
 TRACE_CONFIG_SCHEMA = {
     vol.Optional(CONF_STORED_TRACES, default=DEFAULT_STORED_TRACES): positive_int
 }
 
+# schema for the automation mode configuration
 MODE_CONFIG_SCHEMA = {
     vol.Optional(CONF_MODE, default=SCRIPT_MODE_SINGLE): SCRIPT_MODE_CHOICES
 }
 
+# schema for the basic description keys of an automation configuration
 _MINIMAL_PLATFORM_SCHEMA = vol.Schema(
     {
         CONF_ID: str,
@@ -55,8 +42,8 @@ _MINIMAL_PLATFORM_SCHEMA = vol.Schema(
     extra=vol.ALLOW_EXTRA,
 )
 
+# schema of the basic parameters of an automation configuration
 PLATFORM_SCHEMA = vol.All(
-
     make_script_schema(
         {
             # str on purpose
@@ -76,7 +63,11 @@ PLATFORM_SCHEMA = vol.All(
 )
 
 class ValidationStatus(StrEnum):
-    """What was changed in a config entry."""
+    """
+    What part produces an invalid configuration.
+
+
+    """
 
     FAILED_ACTIONS = "failed_actions"
     FAILED_BLUEPRINT = "failed_blueprint"
@@ -87,7 +78,11 @@ class ValidationStatus(StrEnum):
 
 
 class AutomationConfig(dict):
-    """Dummy class to allow adding attributes."""
+    """
+    Dummy class to allow adding attributes to the automation configuration.
+
+
+    """
 
     raw_config: dict[str, Any] | None = None
     raw_blueprint_inputs: dict[str, Any] | None = None
@@ -96,12 +91,11 @@ class AutomationConfig(dict):
     validation_error: str | None = None
 
 
-async def _async_validate_config_item(  # noqa: C901
-    config: ConfigType,
-    raise_on_errors: bool,
-    warn_on_errors: bool,
-) -> AutomationConfig:
-    """Validate config item."""
+async def _async_validate_config_item(config: ConfigType) -> AutomationConfig:
+    """
+    Validate the different parts of automation configurations.
+    
+    """
     raw_config = None
     raw_blueprint_inputs = None
     uses_blueprint = False
@@ -131,10 +125,14 @@ async def _async_validate_config_item(  # noqa: C901
         validation_error: Exception,
         config: ConfigType,
     ) -> AutomationConfig:
-        """Try validating id, alias and description."""
+        """
+        Try validating id, alias and description.
+
+        """
         try:
             minimal_config = _MINIMAL_PLATFORM_SCHEMA(config)
         except (vol.Invalid, vol.MultipleInvalid ) as err :
+
             # ID, alias or description produce an error
             automation_config = AutomationConfig()
             _set_validation_status(
@@ -163,6 +161,7 @@ async def _async_validate_config_item(  # noqa: C901
     automation_config.raw_blueprint_inputs = raw_blueprint_inputs
     automation_config.raw_config = raw_config
 
+    # if the config is valid  
     if isinstance(config, Mapping):
         if CONF_ALIAS in config:
             automation_config.automation_name = f"Automation with alias '{config[CONF_ALIAS]}'"
@@ -171,22 +170,25 @@ async def _async_validate_config_item(  # noqa: C901
 
     return automation_config
 
+async def async_validate_config_item(
+    config: dict[str, Any],
+) -> AutomationConfig:
+    """
+        Function to await the results of the validation function
+    """
+    return await _async_validate_config_item(config)
+
+
+# --------------------------------- TODO -----------------------------------------------
+
 # async def _try_async_validate_config_item(
 #     config: dict[str, Any],
 # ) -> AutomationConfig | None:
 #     """Validate config item."""
 #     try:
-#         return await _async_validate_config_item(config, False, True)
+#         return await _async_validate_config_item(config)
 #     except (vol.MultipleInvalid):
 #         return None
-
-
-async def async_validate_config_item(
-    config: dict[str, Any],
-) -> AutomationConfig:
-    """Validate config item, called by EditAutomationConfigView."""
-    return await _async_validate_config_item(config, True, False)
-
 
 # def extract_domain_configs(config: ConfigType, domain: str) -> Sequence[str]:
 #     """Extract keys from config for given domain name.

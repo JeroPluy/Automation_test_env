@@ -2,16 +2,15 @@
 This script provides functions for loading and parsing YAML files from Home Assistant. 
 It is a partical copy of the original script from Home Assistant.
 
-Original source: https://github.com/home-assistant/core/blob/dev/homeassistant/util/yaml/loader.py
+Original source: https://github.com/home-assistant/core/blob/dev/homeassistant/util/yaml/loader.py (VERSION: XX.XX.XXXX)
 """
 
-from io import StringIO, TextIOWrapper
 import logging
 import os
+from io import StringIO, TextIOWrapper
 from typing import Any, TextIO
 
 import yaml
-
 from home_assistant_exception import HomeAssistantError
 
 try:
@@ -20,9 +19,7 @@ try:
     HAS_C_LOADER = True
 except ImportError:
     HAS_C_LOADER = False
-    from yaml import (
-        SafeLoader as FastestAvailableSafeLoader,
-    )
+    from yaml import SafeLoader as FastestAvailableSafeLoader
 
 JSON_TYPE = list | dict | str
 

@@ -1,59 +1,107 @@
-"""Helpers for config validation using voluptuous."""
+"""
+Helpers for the config validation using voluptuous schemes.
 
-# PEP 563 seems to break typing.get_type_hints when used
-# with PEP 695 syntax. Fixed in Python 3.13.
+This code is partly extracted from:
+
+"""
+
 from __future__ import annotations
 
-from collections.abc import Callable, Hashable
 import contextlib
-from datetime import (
-    date as date_sys,
-    datetime as datetime_sys,
-    time as time_sys,
-    timedelta,
-)
-from enum import Enum, StrEnum
 import logging
-from numbers import Number
 import os
 import re
-
+from collections.abc import Callable, Hashable
+from datetime import date as date_sys
+from datetime import datetime as datetime_sys
+from datetime import time as time_sys
+from datetime import timedelta
+from enum import Enum
+from numbers import Number
 from typing import Any, cast, overload
 from uuid import UUID
-import slugify as unicode_slug
 
+import slugify as unicode_slug
 import voluptuous as vol
 import voluptuous_serialize
-
+from home_assistant_const import (ACTIVE_CURRENCIES, ATTR_AREA_ID,
+                                  ATTR_DEVICE_ID, ATTR_ENTITY_ID,
+                                  ATTR_FLOOR_ID, ATTR_LABEL_ID, CONF_ABOVE,
+                                  CONF_ALIAS, CONF_ATTRIBUTE, CONF_BELOW,
+                                  CONF_CHOOSE, CONF_CONDITION, CONF_CONDITIONS,
+                                  CONF_CONTINUE_ON_ERROR,
+                                  CONF_CONTINUE_ON_TIMEOUT, CONF_COUNT,
+                                  CONF_DEFAULT, CONF_DELAY, CONF_DEVICE_ID,
+                                  CONF_DOMAIN, CONF_ELSE, CONF_ENABLED,
+                                  CONF_ENTITY_ID, CONF_ENTITY_NAMESPACE,
+                                  CONF_ERROR, CONF_EVENT, CONF_EVENT_DATA,
+                                  CONF_EVENT_DATA_TEMPLATE, CONF_FOR,
+                                  CONF_FOR_EACH, CONF_ID, CONF_IF, CONF_MATCH,
+                                  CONF_PARALLEL, CONF_PLATFORM, CONF_REPEAT,
+                                  CONF_RESPONSE_VARIABLE, CONF_SCAN_INTERVAL,
+                                  CONF_SCENE, CONF_SEQUENCE, CONF_SERVICE,
+                                  CONF_SERVICE_DATA,
+                                  CONF_SERVICE_DATA_TEMPLATE,
+                                  CONF_SERVICE_TEMPLATE,
+                                  CONF_SET_CONVERSATION_RESPONSE, CONF_STATE,
+                                  CONF_STOP, CONF_TARGET, CONF_THEN,
+                                  CONF_TIMEOUT, CONF_UNTIL,
+                                  CONF_VALUE_TEMPLATE, CONF_VARIABLES,
+                                  CONF_WAIT_FOR_TRIGGER, CONF_WAIT_TEMPLATE,
+                                  CONF_WHILE, COUNTRIES, ENTITY_MATCH_ALL,
+                                  ENTITY_MATCH_ANY, ENTITY_MATCH_NONE,
+                                  LANGUAGES, SCRIPT_ACTION_ACTIVATE_SCENE,
+                                  SCRIPT_ACTION_CALL_SERVICE,
+                                  SCRIPT_ACTION_CHECK_CONDITION,
+                                  SCRIPT_ACTION_CHOOSE, SCRIPT_ACTION_DELAY,
+                                  SCRIPT_ACTION_DEVICE_AUTOMATION,
+                                  SCRIPT_ACTION_FIRE_EVENT, SCRIPT_ACTION_IF,
+                                  SCRIPT_ACTION_PARALLEL, SCRIPT_ACTION_REPEAT,
+                                  SCRIPT_ACTION_SEQUENCE,
+                                  SCRIPT_ACTION_SET_CONVERSATION_RESPONSE,
+                                  SCRIPT_ACTION_STOP, SCRIPT_ACTION_VARIABLES,
+                                  SCRIPT_ACTION_WAIT_FOR_TRIGGER,
+                                  SCRIPT_ACTION_WAIT_TEMPLATE,
+                                  SUN_EVENT_SUNRISE, SUN_EVENT_SUNSET,
+                                  TIME_PERIOD_ERROR, VALID_ENTITY_ID, WEEKDAYS,
+                                  NodeStrClass, ResultWrapper,
+                                  UnitOfTemperature, VolDictType,
+                                  VolSchemaType, sun_event)
 from home_assistant_exception import TemplateError
-from home_assistant_const import * 
-from home_assistant_helper_classes import * 
+from home_assistant_helper_classes import *
+
 
 def valid_entity_id(entity_id: str) -> bool:
-    """Test if an entity ID is a valid format.
+    """
+    Test if an entity ID is a valid format.
 
     Format: <domain>.<entity> where both are slugs.
     """
     return VALID_ENTITY_ID.match(entity_id) is not None
 
+
 def split_entity_id(entity_id: str) -> tuple[str, str]:
-    """Split a state entity ID into domain and object ID."""
+    """
+    Split a state entity ID into domain and object ID.
+    """
+
     domain, _, object_id = entity_id.partition(".")
     if not domain or not object_id:
         raise ValueError(f"Invalid entity ID {entity_id}")
     return domain, object_id
 
+
 # Adapted from:
 # https://github.com/alecthomas/voluptuous/issues/115#issuecomment-144464666
 def has_at_least_one_key(*keys: Any) -> Callable[[dict], dict]:
-    """Validate that at least one key exists."""
+    """
+    Validate that at least one key exists.
+    """
+
     key_set = set(keys)
 
     def validate(obj: dict) -> dict:
         """Test keys exist in dict."""
-        if not isinstance(obj, dict):
-            raise vol.Invalid("expected dictionary")
-
         if not key_set.isdisjoint(obj):
             return obj
         expected = ", ".join(str(k) for k in keys)
@@ -63,13 +111,12 @@ def has_at_least_one_key(*keys: Any) -> Callable[[dict], dict]:
 
 
 def has_at_most_one_key(*keys: Any) -> Callable[[dict], dict]:
-    """Validate that zero keys exist or one key exists."""
+    """
+    Validate that zero keys exist or one key exists.
+    """
 
     def validate(obj: dict) -> dict:
         """Test zero keys exist or one key exists in dict."""
-        if not isinstance(obj, dict):
-            raise vol.Invalid("expected dictionary")
-
         if len(set(keys) & set(obj)) > 1:
             expected = ", ".join(str(k) for k in keys)
             raise vol.Invalid(f"must contain at most one of {expected}.")
@@ -79,7 +126,10 @@ def has_at_most_one_key(*keys: Any) -> Callable[[dict], dict]:
 
 
 def boolean(value: Any) -> bool:
-    """Validate and coerce a boolean value."""
+    """
+    Validate and coerce a boolean value.
+    """
+
     if isinstance(value, bool):
         return value
     if isinstance(value, str):
@@ -95,7 +145,10 @@ def boolean(value: Any) -> bool:
 
 
 def whitespace(value: Any) -> str:
-    """Validate result contains only whitespace."""
+    """
+    Validate result contains only whitespace.
+    """
+
     if isinstance(value, str) and (value == "" or value.isspace()):
         return value
 
@@ -103,7 +156,10 @@ def whitespace(value: Any) -> str:
 
 
 def isdevice(value: Any) -> str:
-    """Validate that value is a real device."""
+    """
+    Validate that value is a real device.
+    """
+
     try:
         os.stat(value)
         return str(value)
@@ -112,7 +168,10 @@ def isdevice(value: Any) -> str:
 
 
 def matches_regex(regex: str) -> Callable[[Any], str]:
-    """Validate that the value is a string that matches a regex."""
+    """
+    Validate that the value is a string that matches a regex.
+    """
+
     compiled = re.compile(regex)
 
     def validator(value: Any) -> str:
@@ -131,7 +190,10 @@ def matches_regex(regex: str) -> Callable[[Any], str]:
 
 
 def is_regex(value: Any) -> re.Pattern[Any]:
-    """Validate that a string is a valid regular expression."""
+    """
+    Validate that a string is a valid regular expression.
+    """
+    
     try:
         r = re.compile(value)
     except TypeError as err:
@@ -144,7 +206,10 @@ def is_regex(value: Any) -> re.Pattern[Any]:
 
 
 def isfile(value: Any) -> str:
-    """Validate that the value is an existing file."""
+    """
+    Validate that the value is an existing file.
+    """
+
     if value is None:
         raise vol.Invalid("None is not file")
     file_in = os.path.expanduser(str(value))
@@ -943,8 +1008,8 @@ def key_dependency[_KT: Hashable, _VT](
 
 def custom_serializer(schema: Any) -> Any:
     """Serialize additional types for voluptuous_serialize."""
-    from .. import data_entry_flow  # pylint: disable=import-outside-toplevel
-    from . import selector  # pylint: disable=import-outside-toplevel
+    from ... import data_entry_flow  # pylint: disable=import-outside-toplevel
+    from .. import selector  # pylint: disable=import-outside-toplevel
 
     if schema is positive_time_period_dict:
         return {"type": "positive_time_period_dict"}

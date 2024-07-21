@@ -1,13 +1,15 @@
 """
 
+    This code is partly extracted from:
+
 """
 
-from typing import Any, Final, Mapping
-from enum import StrEnum
-import voluptuous as vol
-import re
 import logging
+import re
+from enum import StrEnum
+from typing import Any, Final, Mapping
 
+import voluptuous as vol
 
 TIME_PERIOD_ERROR = "offset {} should be format 'HH:MM', 'HH:MM:SS' or 'HH:MM:SS.F'"
 

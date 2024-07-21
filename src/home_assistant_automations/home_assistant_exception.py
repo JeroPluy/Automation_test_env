@@ -1,9 +1,17 @@
+"""
+
+This code is partly extracted from:
+
+"""
+
 from typing import TYPE_CHECKING, Callable
 
 _function_cache: dict[str, Callable[[str, str, dict[str, str] | None], str]] = {}
 
 class HomeAssistantError(Exception):
-    """General Home Assistant exception occurred."""
+    """
+    General Home Assistant exception occurred.
+    """
 
     _message: str | None = None
     generate_message: bool = False
@@ -50,7 +58,9 @@ class HomeAssistantError(Exception):
         return self._message
     
 class TemplateError(HomeAssistantError):
-    """Error during template rendering."""
+    """
+    Error during template rendering.
+    """
 
     def __init__(self, exception: Exception | str) -> None:
         """Init the error."""
