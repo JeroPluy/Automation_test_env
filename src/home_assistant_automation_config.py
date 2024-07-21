@@ -1,3 +1,7 @@
+"""
+
+"""
+
 from typing import Any, Mapping 
 import voluptuous as vol
 from voluptuous.humanize import humanize_error
@@ -12,13 +16,14 @@ from home_assistant_const import (
     CONF_DESCRIPTION, 
     CONF_TRACE, 
     CONF_INITIAL_STATE, 
-    CONF_HIDE_ENTITY, 
     CONF_TRIGGER, 
     CONF_CONDITION, 
     CONF_VARIABLES, 
     CONF_TRIGGER_VARIABLES, 
-    CONF_ACTION, 
-    SCRIPT_MODE_SINGLE, 
+    CONF_ACTION,
+    CONF_MODE, 
+    SCRIPT_MODE_SINGLE,
+    SCRIPT_MODE_CHOICES, 
     make_script_schema, 
     positive_int, 
     ConfigType,
@@ -35,6 +40,10 @@ from config_validation import (
 
 TRACE_CONFIG_SCHEMA = {
     vol.Optional(CONF_STORED_TRACES, default=DEFAULT_STORED_TRACES): positive_int
+}
+
+MODE_CONFIG_SCHEMA = {
+    vol.Optional(CONF_MODE, default=SCRIPT_MODE_SINGLE): SCRIPT_MODE_CHOICES
 }
 
 _MINIMAL_PLATFORM_SCHEMA = vol.Schema(
@@ -56,7 +65,6 @@ PLATFORM_SCHEMA = vol.All(
             vol.Optional(CONF_DESCRIPTION): string,
             vol.Optional(CONF_TRACE, default={}): TRACE_CONFIG_SCHEMA,
             vol.Optional(CONF_INITIAL_STATE): boolean,
-            vol.Optional(CONF_HIDE_ENTITY): boolean,
             vol.Required(CONF_TRIGGER): TRIGGER_SCHEMA,
             vol.Optional(CONF_CONDITION): CONDITIONS_SCHEMA,
             vol.Optional(CONF_VARIABLES): SCRIPT_VARIABLES_SCHEMA,
@@ -83,6 +91,7 @@ class AutomationConfig(dict):
 
     raw_config: dict[str, Any] | None = None
     raw_blueprint_inputs: dict[str, Any] | None = None
+    automation_name: str = "Unnamed automation" 
     validation_status: ValidationStatus = ValidationStatus.OK
     validation_error: str | None = None
 
@@ -123,7 +132,18 @@ async def _async_validate_config_item(  # noqa: C901
         config: ConfigType,
     ) -> AutomationConfig:
         """Try validating id, alias and description."""
-        minimal_config = _MINIMAL_PLATFORM_SCHEMA(config)
+        try:
+            minimal_config = _MINIMAL_PLATFORM_SCHEMA(config)
+        except (vol.Invalid, vol.MultipleInvalid ) as err :
+            # ID, alias or description produce an error
+            automation_config = AutomationConfig()
+            _set_validation_status(
+                automation_config, ValidationStatus.FAILED_SCHEMA, err, config
+                )
+            automation_config.automation_name = "Invalid automation"
+            return automation_config
+        
+        # ID, alias and description are valid
         automation_config = AutomationConfig(minimal_config)
         automation_config.raw_blueprint_inputs = raw_blueprint_inputs
         automation_config.raw_config = raw_config
@@ -132,23 +152,22 @@ async def _async_validate_config_item(  # noqa: C901
         )
         return automation_config
 
-    automation_name = "Unnamed automation"
-    if isinstance(config, Mapping):
-        if CONF_ALIAS in config:
-            automation_name = f"Automation with alias '{config[CONF_ALIAS]}'"
-        elif CONF_ID in config:
-            automation_name = f"Automation with ID '{config[CONF_ID]}'"
 
     try:
         validated_config = PLATFORM_SCHEMA(config)
     except (vol.Invalid, vol.MultipleInvalid ) as err :
-        # print(err, automation_name, "could not be validated", config)
+        # print(err, "could not be validated", config)
         return _minimal_config(ValidationStatus.FAILED_SCHEMA, err, config)
-
+    
     automation_config = AutomationConfig(validated_config)
     automation_config.raw_blueprint_inputs = raw_blueprint_inputs
     automation_config.raw_config = raw_config
 
+    if isinstance(config, Mapping):
+        if CONF_ALIAS in config:
+            automation_config.automation_name = f"Automation with alias '{config[CONF_ALIAS]}'"
+        elif CONF_ID in config:
+            automation_config.automation_name = f"Automation with ID '{config[CONF_ID]}'"
 
     return automation_config
 

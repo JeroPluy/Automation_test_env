@@ -1,7 +1,12 @@
+"""
+
+"""
+
 from typing import Any, Final, Mapping
 from enum import StrEnum
 import voluptuous as vol
 import re
+import logging
 
 
 TIME_PERIOD_ERROR = "offset {} should be format 'HH:MM', 'HH:MM:SS' or 'HH:MM:SS.F'"
@@ -232,10 +237,6 @@ CONF_WHILE: Final = "while"
 # CONF_XY: Final = "xy"
 # CONF_ZONE: Final = "zone"
 
-# CONF_ACTION = "action"
-# CONF_TRIGGER = "trigger"
-# CONF_TRIGGER_VARIABLES = "trigger_variables"
-# DOMAIN = "automation"
 CONF_HIDE_ENTITY = "hide_entity"
 # CONF_CONDITION_TYPE = "condition_type"
 # CONF_INITIAL_STATE = "initial_state"
@@ -257,12 +258,63 @@ SCRIPT_MODE_CHOICES = [
     SCRIPT_MODE_SINGLE,
 ]
 
+LOGSEVERITY_NOTSET = "NOTSET"
+LOGSEVERITY_DEBUG = "DEBUG"
+LOGSEVERITY_INFO = "INFO"
+LOGSEVERITY_WARNING = "WARNING"
+LOGSEVERITY_ERROR = "ERROR"
+LOGSEVERITY_CRITICAL = "CRITICAL"
+LOGSEVERITY_WARN = "WARN"
+LOGSEVERITY_FATAL = "FATAL"
+LOGSEVERITY_SILENT = "SILENT"
+LOGSEVERITY_STRING = [
+    LOGSEVERITY_NOTSET,
+    LOGSEVERITY_DEBUG,
+    LOGSEVERITY_INFO,
+    LOGSEVERITY_WARNING,
+    LOGSEVERITY_ERROR,
+    LOGSEVERITY_CRITICAL,
+    LOGSEVERITY_WARN,
+    LOGSEVERITY_FATAL,
+    LOGSEVERITY_SILENT,
+]
+LOGSEVERITY = {
+    LOGSEVERITY_CRITICAL: logging.CRITICAL,
+    LOGSEVERITY_FATAL: logging.FATAL,
+    LOGSEVERITY_ERROR: logging.ERROR,
+    LOGSEVERITY_WARNING: logging.WARNING,
+    LOGSEVERITY_WARN: logging.WARNING,
+    LOGSEVERITY_INFO: logging.INFO,
+    LOGSEVERITY_DEBUG: logging.DEBUG,
+    LOGSEVERITY_NOTSET: logging.NOTSET,
+}
+
 # INSTANCES
 CONF_MAX = "max"
 DEFAULT_MAX = 10
 CONF_MAX_EXCEEDED = "max_exceeded"
-_MAX_EXCEEDED_CHOICES = ["SILENT"]
-DEFAULT_MAX_EXCEEDED = "WARNING"
+MAX_EXCEEDED_CHOICES = [*LOGSEVERITY, "SILENT"]
+DEFAULT_MAX_EXCEEDED = "SILENT"
+
+def make_script_schema(
+    schema: Mapping[Any, Any], default_script_mode: str, extra: int = vol.PREVENT_EXTRA
+) -> vol.Schema:
+    """Make a schema for a component that uses the script helper."""
+    return vol.Schema(
+        {
+            **schema,
+            vol.Optional(CONF_MODE, default=default_script_mode): vol.In(
+                SCRIPT_MODE_CHOICES
+            ),
+            vol.Optional(CONF_MAX, default=DEFAULT_MAX): vol.All(
+                vol.Coerce(int), vol.Range(min=1)
+            ),
+            vol.Optional(CONF_MAX_EXCEEDED, default=DEFAULT_MAX_EXCEEDED): vol.All(
+                vol.Upper, vol.In(MAX_EXCEEDED_CHOICES)
+            ),
+        },
+        extra=extra,
+    )
 
 # SCRIPT_ACTION
 SCRIPT_ACTION_ACTIVATE_SCENE = "scene"
@@ -840,19 +892,4 @@ LANGUAGES = {
 }
 
 
-def make_script_schema(
-    schema: Mapping[Any, Any], default_script_mode: str, extra: int = vol.PREVENT_EXTRA
-) -> vol.Schema:
-    """Make a schema for a component that uses the script helper."""
-    return vol.Schema(
-        {
-            **schema,
-            vol.Optional(CONF_MODE, default=default_script_mode): vol.In(
-                SCRIPT_MODE_CHOICES
-            ),
-            vol.Optional(CONF_MAX, default=DEFAULT_MAX): vol.All(
-                vol.Coerce(int), vol.Range(min=2)
-            ),
-        },
-        extra=extra,
-    )
+
