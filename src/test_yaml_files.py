@@ -2,13 +2,13 @@ import asyncio
 import copy
 import os
 
-import home_assistant_automations.home_assistant_automation_config as config_validation
-from home_assistant_automations.home_assistant_const import (
+import ha_automation.home_assistant_automation_config as automation_config
+from ha_automation.home_assistant_const import (
     CONF_ACTION, CONF_ALIAS, CONF_CONDITION, CONF_DESCRIPTION, CONF_ID,
     CONF_INITIAL_STATE, CONF_MAX, CONF_MAX_EXCEEDED, CONF_MODE,
     CONF_STORED_TRACES, CONF_TRACE, CONF_TRIGGER, CONF_VARIABLES,
     LOGSEVERITY_STRING, SCRIPT_MODE_CHOICES)
-from home_assistant_automations.home_assistant_yaml_loader import \
+from ha_automation.home_assistant_yaml_loader import \
     load_yaml_dict
 
 
@@ -21,7 +21,7 @@ def change_param(yaml_dict, param, value="invalid_value", nested = False, nested
     else:
         print("--- " + str(param) + " changed to " + str(value) + " ---")
         yaml_dict[param] = value # Change to value
-    validation_result = asyncio.run(config_validation.async_validate_config_item(yaml_dict))
+    validation_result = asyncio.run(automation_config.async_validate_config_item(yaml_dict))
     print(param + " : " + validation_result.automation_name + " : " + validation_result.validation_status + " : " + str(validation_result.validation_error))
 
 def remove_param(yaml_dict, param, nested = False, nested_param = None):
@@ -33,7 +33,7 @@ def remove_param(yaml_dict, param, nested = False, nested_param = None):
     else:
         print("--- " + str(param) + " removed ---")
         yaml_dict.pop(param) # Remove parameter
-    validation_result = asyncio.run(config_validation.async_validate_config_item(yaml_dict))
+    validation_result = asyncio.run(automation_config.async_validate_config_item(yaml_dict))
     print(param + " : " + str(validation_result.automation_name) + " : " + validation_result.validation_status + " : " + str(validation_result.validation_error))
 
 
@@ -76,8 +76,8 @@ def test_main_automation_params()-> None:
 
     # Validate basis automation
     print("--- Test basis automation ---")
-    validation_result = asyncio.run(config_validation.async_validate_config_item(yaml_dict)) 
-    print(basis_file + " : " + validation_result.automation_name + " : " + validation_result.validation_status + " : " + str(validation_result.validation_error))
+    validation_result = asyncio.run(automation_config.async_validate_config_item(yaml_dict)) 
+    print(basis_file + " : \t" + validation_result.automation_name + " : \t" + validation_result.validation_status + " : \t" + str(validation_result.validation_error))
     print("\n--- Test handling of changes to single basis parameters ---")
 
     # Test changes to single basis parameters
@@ -137,8 +137,8 @@ def test_preconfigured_yaml_files()-> None:
         if file.endswith(".yaml"):
             yaml_dict = load_yaml_dict(os.path.join(dir_path, file))
             print("Test " + file)
-            validation_result = asyncio.run(config_validation.async_validate_config_item(yaml_dict))
-            print(validation_result.automation_name + " : " + validation_result.validation_status + " : " + str(validation_result.validation_error))
+            validation_result = asyncio.run(automation_config.async_validate_config_item(yaml_dict))
+            print(validation_result.automation_name + " : \t " + validation_result.validation_status + " : \t" + str(validation_result.validation_error))
 
 
 def test_yaml_files():

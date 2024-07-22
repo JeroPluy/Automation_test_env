@@ -1,27 +1,59 @@
-"""
+"""This module provides constants and types for the yaml import and the validation of the Home Assistant configuration files.
 
     This code is partly extracted from:
+        - core/homeassistant/const.py : https://github.com/home-assistant/core/blob/dev/homeassistant/const.py 
+            (VERSION: 26.06.2024 - parent f5c640e - commit 33b4f40)
 
+        - core/homeassistant/helpers/config_validation.py: https://github.com/home-assistant/core/blob/dev/homeassistant/helpers/config_validation.py 
+            (VERSION: 26.06.2024 - parent fcfb580 commit 6bceb8e)
+
+        - core/homeassistant/core.py : https://github.com/home-assistant/core/blob/dev/homeassistant/core.py
+            (VERSION: 04.07.2024 - parent  ad1ba1a commit d126465)
+
+        - core/homeassistant/components/logger/const.py : https://github.com/home-assistant/core/blob/dev/homeassistant/components/logger/const.py
+            (VERSION: 17.03.2024 - parent b8e1862 commit 929bcb9)
+
+        - core/homeassistant/automation/const.py : https://github.com/home-assistant/core/blob/dev/homeassistant/components/automation/const.py
+            (VERSION: 08.03.2024 - parent cb8c144 commit 2c06d4f)
+
+        - core/homeassistant/helpers/script.py : https://github.com/home-assistant/core/blob/dev/homeassistant/helpers/script.py
+            (VERSION: 17.07.2024 - parent a0f91d2 commit efb7bed)
+
+        - core/homeassistant/helpers/trace/const.py : https://github.com/home-assistant/core/blob/dev/homeassistant/components/trace/const.py
+            (VERSION: 19.10.2021 - parent 29c062f commit 961ee71)
+
+        - core/homeassistant/helpers/typing.py : https://github.com/home-assistant/core/blob/dev/homeassistant/helpers/typing.py
+            (VERSION: 25.06.2024 - parent 53f5dec commit b4eee16)
+
+        - core/homeassistant/generated/countries.py : https://github.com/home-assistant/core/blob/dev/homeassistant/generated/countries.py
+            (VERSION: 22.03.2024 - parent 1985a2a commit 2e68363)
+
+        - core/homeassistant/generated/languages.py : https://github.com/home-assistant/core/blob/dev/homeassistant/generated/languages.py
+            (VERSION: 27.06.2023 - parent fe28067 commit 071d3a4)
+
+        - homeassistant/generated/currencies.py : https://github.com/home-assistant/core/blob/dev/homeassistant/generated/currencies.py
+            (VERSION: 03.03.2023 - parent 4a3c0cd commit 699cc6c)
 """
 
 import logging
 import re
-from enum import StrEnum
 from typing import Any, Final, Mapping
 
 import voluptuous as vol
 
-TIME_PERIOD_ERROR = "offset {} should be format 'HH:MM', 'HH:MM:SS' or 'HH:MM:SS.F'"
 
-# Entity target all constant
-ENTITY_MATCH_NONE: Final = "none"
-ENTITY_MATCH_ALL: Final = "all"
-ENTITY_MATCH_ANY: Final = "any"
-
+# ----- core.py -----
 # Entity target domain constant
 _OBJECT_ID = r"(?!_)[\da-z_]+(?<!_)"
 _DOMAIN = r"(?!.+__)" + _OBJECT_ID
 VALID_ENTITY_ID = re.compile(r"^" + _DOMAIN + r"\." + _OBJECT_ID + r"$")
+# -------------------
+
+# ----- const.py -----
+# Entity target all constant
+ENTITY_MATCH_NONE: Final = "none"
+ENTITY_MATCH_ALL: Final = "all"
+ENTITY_MATCH_ANY: Final = "any"
 
 WEEKDAYS: Final[list[str]] = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
 
@@ -46,23 +78,8 @@ SUN_EVENT_SUNRISE: Final = "sunrise"
 
 # #### CONFIG ####
 CONF_ABOVE: Final = "above"
-# CONF_ACCESS_TOKEN: Final = "access_token"
-# CONF_ADDRESS: Final = "address"
-# CONF_AFTER: Final = "after"
 CONF_ALIAS: Final = "alias"
-# CONF_LLM_HASS_API = "llm_hass_api"
-# CONF_ALLOWLIST_EXTERNAL_URLS: Final = "allowlist_external_urls"
-# CONF_API_KEY: Final = "api_key"
-# CONF_API_TOKEN: Final = "api_token"
-# CONF_API_VERSION: Final = "api_version"
-# CONF_ARMING_TIME: Final = "arming_time"
-# CONF_AT: Final = "at"
 CONF_ATTRIBUTE: Final = "attribute"
-# CONF_AUTH_MFA_MODULES: Final = "auth_mfa_modules"
-# CONF_AUTH_PROVIDERS: Final = "auth_providers"
-# CONF_AUTHENTICATION: Final = "authentication"
-# CONF_BASE: Final = "base"
-# CONF_BEFORE: Final = "before"
 CONF_BELOW: Final = "below"
 # CONF_BINARY_SENSORS: Final = "binary_sensors"
 # CONF_BRIGHTNESS: Final = "brightness"
@@ -238,28 +255,9 @@ CONF_WHILE: Final = "while"
 # CONF_DEBUG: Final = "debug"
 # CONF_XY: Final = "xy"
 # CONF_ZONE: Final = "zone"
+# -------------------
 
-CONF_HIDE_ENTITY = "hide_entity"
-# CONF_CONDITION_TYPE = "condition_type"
-# CONF_INITIAL_STATE = "initial_state"
-# CONF_BLUEPRINT = "blueprint"
-# CONF_INPUT = "input"
-# CONF_TRACE = "trace"
-
-DEFAULT_INITIAL_STATE = True
-
-# SCRIPT_MODE
-SCRIPT_MODE_PARALLEL = "parallel"
-SCRIPT_MODE_QUEUED = "queued"
-SCRIPT_MODE_RESTART = "restart"
-SCRIPT_MODE_SINGLE = "single"
-SCRIPT_MODE_CHOICES = [
-    SCRIPT_MODE_PARALLEL,
-    SCRIPT_MODE_QUEUED,
-    SCRIPT_MODE_RESTART,
-    SCRIPT_MODE_SINGLE,
-]
-
+# ----- logger/const.py -----
 LOGSEVERITY_NOTSET = "NOTSET"
 LOGSEVERITY_DEBUG = "DEBUG"
 LOGSEVERITY_INFO = "INFO"
@@ -280,6 +278,7 @@ LOGSEVERITY_STRING = [
     LOGSEVERITY_FATAL,
     LOGSEVERITY_SILENT,
 ]
+
 LOGSEVERITY = {
     LOGSEVERITY_CRITICAL: logging.CRITICAL,
     LOGSEVERITY_FATAL: logging.FATAL,
@@ -290,6 +289,20 @@ LOGSEVERITY = {
     LOGSEVERITY_DEBUG: logging.DEBUG,
     LOGSEVERITY_NOTSET: logging.NOTSET,
 }
+# -------------------
+
+# ----- script.py -----
+# SCRIPT_MODE
+SCRIPT_MODE_PARALLEL = "parallel"
+SCRIPT_MODE_QUEUED = "queued"
+SCRIPT_MODE_RESTART = "restart"
+SCRIPT_MODE_SINGLE = "single"
+SCRIPT_MODE_CHOICES = [
+    SCRIPT_MODE_PARALLEL,
+    SCRIPT_MODE_QUEUED,
+    SCRIPT_MODE_RESTART,
+    SCRIPT_MODE_SINGLE,
+]
 
 # INSTANCES
 CONF_MAX = "max"
@@ -317,6 +330,37 @@ def make_script_schema(
         },
         extra=extra,
     )
+# -------------------
+
+# ----- automation/const.py -----
+# AUTOMATION
+CONF_ACTION = "action"
+CONF_TRIGGER = "trigger"
+CONF_TRIGGER_VARIABLES = "trigger_variables"
+DOMAIN = "automation"
+CONF_CONDITION_TYPE = "condition_type"
+CONF_INITIAL_STATE = "initial_state"
+CONF_BLUEPRINT = "blueprint"
+CONF_INPUT = "input"
+CONF_TRACE = "trace"
+DEFAULT_INITIAL_STATE = True
+# -------------------
+
+# ----- trace/const.py -----
+# TRACE CONFIG
+CONF_STORED_TRACES = "stored_traces"
+DEFAULT_STORED_TRACES = 5
+# -------------------
+
+# ----- typing.py -----
+# TYPES
+type VolDictType = dict[str | vol.Marker, Any]
+type VolSchemaType = vol.Schema | vol.All | vol.Any
+type ConfigType = dict[str, Any]
+# -------------------
+
+# ----- config_validation.py -----
+TIME_PERIOD_ERROR = "offset {} should be format 'HH:MM', 'HH:MM:SS' or 'HH:MM:SS.F'"
 
 # SCRIPT_ACTION
 SCRIPT_ACTION_ACTIVATE_SCENE = "scene"
@@ -336,70 +380,6 @@ SCRIPT_ACTION_VARIABLES = "variables"
 SCRIPT_ACTION_WAIT_FOR_TRIGGER = "wait_for_trigger"
 SCRIPT_ACTION_WAIT_TEMPLATE = "wait_template"
 
-# AUTOMATION
-CONF_ACTION = "action"
-CONF_TRIGGER = "trigger"
-CONF_TRIGGER_VARIABLES = "trigger_variables"
-DOMAIN = "automation"
-
-CONF_HIDE_ENTITY = "hide_entity"
-
-CONF_CONDITION_TYPE = "condition_type"
-CONF_INITIAL_STATE = "initial_state"
-CONF_BLUEPRINT = "blueprint"
-CONF_INPUT = "input"
-CONF_TRACE = "trace"
-CONF_STORED_TRACES = "stored_traces"
-DEFAULT_STORED_TRACES = 5
-
-# TYPES
-type VolDictType = dict[str | vol.Marker, Any]
-type VolSchemaType = vol.Schema | vol.All | vol.Any
-type ConfigType = dict[str, Any]
-
-class UnitOfTemperature(StrEnum):
-    """Temperature units."""
-
-    CELSIUS = "°C"
-    FAHRENHEIT = "°F"
-    KELVIN = "K"
-
-class NodeStrClass(str):
-    """Wrapper class to be able to add attributes on a string."""
-
-    __slots__ = ("__config_file__", "__line__")
-
-    __config_file__: str
-    __line__: int | str
-
-    def __voluptuous_compile__(self, schema: vol.Schema) -> Any:
-        """Needed because vol.Schema.compile does not handle str subclasses."""
-        return _compile_scalar(self)  # type: ignore[no-untyped-call]
-
-class ResultWrapper:
-    """Result wrapper class to store render result."""
-
-    render_result: str | None
-
-class Template:
-    """Class to hold a template and manage caching and rendering."""
-
-    __slots__ = (
-        "__weakref__",
-        "template",
-        "hass",
-        "is_static",
-        "_compiled_code",
-        "_compiled",
-        "_exc_info",
-        "_limited",
-        "_strict",
-        "_log_fn",
-        "_hash_cache",
-        "_renders",
-    )
-
-
 # Home Assistant types
 byte = vol.All(vol.Coerce(int), vol.Range(min=0, max=255))
 small_float = vol.All(vol.Coerce(float), vol.Range(min=0, max=1))
@@ -414,7 +394,9 @@ longitude = vol.All(
 gps = vol.ExactSequence([latitude, longitude])
 sun_event = vol.All(vol.Lower, vol.Any(SUN_EVENT_SUNSET, SUN_EVENT_SUNRISE))
 port = vol.All(vol.Coerce(int), vol.Range(min=1, max=65535))
+# -------------------
 
+# ----- countries.py -----
 COUNTRIES: Final[set[str]] = {
     "AD",
     "AE",
@@ -666,7 +648,75 @@ COUNTRIES: Final[set[str]] = {
     "ZM",
     "ZW",
 }
+# -------------------
 
+# ----- languages.py -----
+LANGUAGES = {
+    "af",
+    "ar",
+    "bg",
+    "bn",
+    "bs",
+    "ca",
+    "cs",
+    "cy",
+    "da",
+    "de",
+    "el",
+    "en",
+    "en-GB",
+    "eo",
+    "es",
+    "es-419",
+    "et",
+    "eu",
+    "fa",
+    "fi",
+    "fr",
+    "fy",
+    "gl",
+    "gsw",
+    "he",
+    "hi",
+    "hr",
+    "hu",
+    "hy",
+    "id",
+    "is",
+    "it",
+    "ja",
+    "ka",
+    "ko",
+    "lb",
+    "lt",
+    "lv",
+    "ml",
+    "nb",
+    "nl",
+    "nn",
+    "pl",
+    "pt",
+    "pt-BR",
+    "ro",
+    "ru",
+    "sk",
+    "sl",
+    "sr",
+    "sr-Latn",
+    "sv",
+    "ta",
+    "te",
+    "th",
+    "tr",
+    "uk",
+    "ur",
+    "vi",
+    "zh-Hans",
+    "zh-Hant",
+}
+# -------------------
+
+# ----- currencies.py -----
 ACTIVE_CURRENCIES = {
     "AED",
     "AFN",
@@ -828,70 +878,4 @@ ACTIVE_CURRENCIES = {
     "ZMW",
     "ZWL",
 }
-
-LANGUAGES = {
-    "af",
-    "ar",
-    "bg",
-    "bn",
-    "bs",
-    "ca",
-    "cs",
-    "cy",
-    "da",
-    "de",
-    "el",
-    "en",
-    "en-GB",
-    "eo",
-    "es",
-    "es-419",
-    "et",
-    "eu",
-    "fa",
-    "fi",
-    "fr",
-    "fy",
-    "gl",
-    "gsw",
-    "he",
-    "hi",
-    "hr",
-    "hu",
-    "hy",
-    "id",
-    "is",
-    "it",
-    "ja",
-    "ka",
-    "ko",
-    "lb",
-    "lt",
-    "lv",
-    "ml",
-    "nb",
-    "nl",
-    "nn",
-    "pl",
-    "pt",
-    "pt-BR",
-    "ro",
-    "ru",
-    "sk",
-    "sl",
-    "sr",
-    "sr-Latn",
-    "sv",
-    "ta",
-    "te",
-    "th",
-    "tr",
-    "uk",
-    "ur",
-    "vi",
-    "zh-Hans",
-    "zh-Hant",
-}
-
-
-
+# -------------------

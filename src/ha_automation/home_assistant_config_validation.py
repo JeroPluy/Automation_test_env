@@ -24,7 +24,8 @@ from uuid import UUID
 import slugify as unicode_slug
 import voluptuous as vol
 import voluptuous_serialize
-from home_assistant_const import (ACTIVE_CURRENCIES, ATTR_AREA_ID,
+
+from ha_automation.home_assistant_const import (ACTIVE_CURRENCIES, ATTR_AREA_ID,
                                   ATTR_DEVICE_ID, ATTR_ENTITY_ID,
                                   ATTR_FLOOR_ID, ATTR_LABEL_ID, CONF_ABOVE,
                                   CONF_ALIAS, CONF_ATTRIBUTE, CONF_BELOW,
@@ -64,11 +65,9 @@ from home_assistant_const import (ACTIVE_CURRENCIES, ATTR_AREA_ID,
                                   SCRIPT_ACTION_WAIT_TEMPLATE,
                                   SUN_EVENT_SUNRISE, SUN_EVENT_SUNSET,
                                   TIME_PERIOD_ERROR, VALID_ENTITY_ID, WEEKDAYS,
-                                  NodeStrClass, ResultWrapper,
-                                  UnitOfTemperature, VolDictType,
-                                  VolSchemaType, sun_event)
-from home_assistant_exception import TemplateError
-from home_assistant_helper_classes import *
+                                  VolDictType, VolSchemaType, sun_event)
+from ha_automation.home_assistant_exception import TemplateError
+from ha_automation.home_assistant_helper_classes import Template, ResultWrapper, NodeStrClass, UnitOfTemperature, ScriptVariables
 
 
 def valid_entity_id(entity_id: str) -> bool:
@@ -638,7 +637,9 @@ def template(value: Any | None) -> Template:
     try:
         template_value.ensure_valid()
     except TemplateError as ex:
-        raise vol.Invalid(f"invalid template ({ex})") from ex
+        raise vol.Invalid(f"template ({ex}) could not be validated ") from ex
+        # TODO - original code can be implemented again if the template validation is integrated
+        # raise vol.Invalid(f"invalid template ({ex})") from ex
     return template_value
 
 

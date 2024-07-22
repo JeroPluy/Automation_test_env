@@ -11,7 +11,7 @@ from io import StringIO, TextIOWrapper
 from typing import Any, TextIO
 
 import yaml
-from home_assistant_exception import HomeAssistantError
+from ha_automation.home_assistant_exception import HomeAssistantError
 
 try:
     from yaml import CSafeLoader as FastestAvailableSafeLoader

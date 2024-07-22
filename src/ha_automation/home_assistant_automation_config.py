@@ -1,6 +1,10 @@
-"""
-    This code is partly extracted from:
+"""The script applies different schema to the configuration directory to validate the configuration of automations in Home Assistant.
 
+    This code is partly extracted from:
+        - core/homeassistant/components/trace/__init__.py : https://github.com/home-assistant/core/blob/dev/homeassistant/components/trace/__init__.py
+            (VERSION: 02.07.2024 - parent
+        - core/homeassistant/components/automation/config.py : https://github.com/home-assistant/core/blob/dev/homeassistant/components/automation/config.py
+            (VERSION: 17.05.2024 - parent 4edee94 commit 87bb7ce)
 
 """
 
@@ -9,10 +13,12 @@ from enum import StrEnum
 from typing import Any, Mapping
 
 import voluptuous as vol
-from home_assistant_config_validation import (CONDITIONS_SCHEMA, SCRIPT_SCHEMA,
+from voluptuous.humanize import humanize_error
+
+from ha_automation.home_assistant_config_validation import (CONDITIONS_SCHEMA, SCRIPT_SCHEMA,
                                               SCRIPT_VARIABLES_SCHEMA,
                                               TRIGGER_SCHEMA, boolean, string)
-from home_assistant_const import (CONF_ACTION, CONF_ALIAS, CONF_CONDITION,
+from ha_automation.home_assistant_const import (CONF_ACTION, CONF_ALIAS, CONF_CONDITION,
                                   CONF_DESCRIPTION, CONF_ID,
                                   CONF_INITIAL_STATE, CONF_MODE,
                                   CONF_STORED_TRACES, CONF_TRACE, CONF_TRIGGER,
@@ -20,18 +26,21 @@ from home_assistant_const import (CONF_ACTION, CONF_ALIAS, CONF_CONDITION,
                                   DEFAULT_STORED_TRACES, SCRIPT_MODE_CHOICES,
                                   SCRIPT_MODE_SINGLE, ConfigType,
                                   make_script_schema, positive_int)
-from voluptuous.humanize import humanize_error
 
-# schema for the trace configuration
-TRACE_CONFIG_SCHEMA = {
-    vol.Optional(CONF_STORED_TRACES, default=DEFAULT_STORED_TRACES): positive_int
-}
 
 # schema for the automation mode configuration
 MODE_CONFIG_SCHEMA = {
     vol.Optional(CONF_MODE, default=SCRIPT_MODE_SINGLE): SCRIPT_MODE_CHOICES
 }
 
+# ----- trace/__init__.py -----
+# schema for the trace configuration
+TRACE_CONFIG_SCHEMA = {
+    vol.Optional(CONF_STORED_TRACES, default=DEFAULT_STORED_TRACES): positive_int
+}
+# -----------------------------
+
+# ----- automation/config.py -----
 # schema for the basic description keys of an automation configuration
 _MINIMAL_PLATFORM_SCHEMA = vol.Schema(
     {
@@ -179,7 +188,7 @@ async def async_validate_config_item(
     return await _async_validate_config_item(config)
 
 
-# --------------------------------- TODO -----------------------------------------------
+# TODO: check if the following methods are needed for the enviroment or delete them
 
 # async def _try_async_validate_config_item(
 #     config: dict[str, Any],
