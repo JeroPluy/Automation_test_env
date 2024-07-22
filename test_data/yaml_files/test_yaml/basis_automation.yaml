@@ -20,6 +20,7 @@ trigger:
     from: "off"
     to: "on"
     alias: Wenn eine Person erkannt wird
+    enabled: false
 condition:
   - alias: Ist die Sonne untergegangen
     condition: sun
