@@ -2,6 +2,7 @@
 This script provides functions for loading and parsing YAML files from Home Assistant. 
 It is a partical copy of the original script from Home Assistant.
 
+TODO: Add infos to the source code
 Original source: https://github.com/home-assistant/core/blob/dev/homeassistant/util/yaml/loader.py (VERSION: XX.XX.XXXX)
 """
 
