@@ -23,7 +23,7 @@ from types import TracebackType
 
 import jinja2
 
-from ha_automation.home_assistant_exception import TemplateError
+from home_assistant_exception import TemplateError
 
 # ----- const.py -----
 class UnitOfTemperature(StrEnum):

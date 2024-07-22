@@ -15,10 +15,10 @@ from typing import Any, Mapping
 import voluptuous as vol
 from voluptuous.humanize import humanize_error
 
-from ha_automation.home_assistant_config_validation import (CONDITIONS_SCHEMA, SCRIPT_SCHEMA,
+from home_assistant_config_validation import (CONDITIONS_SCHEMA, SCRIPT_SCHEMA,
                                               SCRIPT_VARIABLES_SCHEMA,
                                               TRIGGER_SCHEMA, boolean, string)
-from ha_automation.home_assistant_const import (CONF_ACTION, CONF_ALIAS, CONF_CONDITION,
+from home_assistant_const import (CONF_ACTION, CONF_ALIAS, CONF_CONDITION,
                                   CONF_DESCRIPTION, CONF_ID,
                                   CONF_INITIAL_STATE, CONF_MODE,
                                   CONF_STORED_TRACES, CONF_TRACE, CONF_TRIGGER,
