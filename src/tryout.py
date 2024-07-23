@@ -1,4 +1,6 @@
+import asyncio
 import json
+import os
 import tkinter
 from os import path
 from typing import Tuple
@@ -6,8 +8,9 @@ from typing import Tuple
 import customtkinter
 from PIL import Image
 
+
 import customWidgets.customWidgets as cW
-import db
+
 from customWidgets.CTkTable.ctktable import CTkTable
 from customWidgets.CTkXYFrame.ctk_xyframe import CTkXYFrame
 
@@ -271,7 +274,24 @@ class TestWindow(BlankWindow):
 
 
 
+# if __name__ == "__main__":
+#     # app = AutoamtionAdditon(self.lang["PROJECT"] + "/" + self.lang["NEW_A"])
+#     # app = TestWindow()
+#     # app.mainloop()
+
+import environment_package.automation_desection as automation_desection
+import environment_package.db as db
+from environment_package.ha_automation import home_assistant_yaml_loader as yaml_loader
+from environment_package.ha_automation import home_assistant_automation_config as ha_automation_config
+
+
 if __name__ == "__main__":
-    # app = AutoamtionAdditon(self.lang["PROJECT"] + "/" + self.lang["NEW_A"])
-    app = TestWindow()
-    app.mainloop()
+
+    # Automation to test basis parameters
+    # basis_file = os.path.join('test_data','yaml_files', 'turn_off_living_room_main_light_event.yaml')
+    basis_file = os.path.join('test_data','yaml_files', 'test_yaml', 'basis_automation.yaml')
+    automation_yaml = yaml_loader.load_yaml_dict(basis_file)
+    automation_config = asyncio.run(ha_automation_config.async_validate_config_item(automation_yaml))
+    print(automation_config.automation_name + " : \t" + automation_config.validation_status)
+    extract_information = automation_desection.desect_information(automation_config)
+
