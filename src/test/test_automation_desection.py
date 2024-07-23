@@ -4,7 +4,7 @@
 """
 
 from environment_package.automation_desection import _trigger_entities
-from environment_package.ha_automation.home_assistant_const import CONF_ABOVE, CONF_ALLOWED_METHODS, CONF_AT, CONF_ATTRIBUTE, CONF_BELOW, CONF_DEVICE, CONF_DEVICE_ID, CONF_DOMAIN, CONF_ENTITY_ID, CONF_EVENT, CONF_EVENT_CONTEXT, CONF_EVENT_DATA, CONF_EVENT_TYPE, CONF_FOR, CONF_FROM, CONF_LOCAL, CONF_NOFITY_ID, CONF_NOT_FROM, CONF_NOT_TO, CONF_NUMERICAL_STATE, CONF_OFFSET, CONF_PAYLOAD, CONF_PLATFORM, CONF_QOS, CONF_SOURCE, CONF_STATE, CONF_TO, CONF_TYPE, CONF_UPDATE_TYPE, CONF_VALUE_TEMPLATE, CONF_WEBHOOK_ID, CONF_ZONE, HOURS, MINUTES, SECONDS, TAG_ID
+from environment_package.ha_automation.home_assistant_const import CONF_ABOVE, CONF_ALLOWED_METHODS, CONF_AT, CONF_ATTRIBUTE, CONF_BELOW, CONF_DEVICE_ID, CONF_DOMAIN, CONF_ENTITY_ID, CONF_EVENT, CONF_EVENT_CONTEXT, CONF_EVENT_DATA, CONF_EVENT_TYPE, CONF_FOR, CONF_FROM, CONF_LOCAL, CONF_NOFITY_ID, CONF_NOT_FROM, CONF_NOT_TO, CONF_NUMERIC_STATE, CONF_OFFSET, CONF_PAYLOAD, CONF_PLATFORM, CONF_QOS, CONF_SOURCE, CONF_STATE, CONF_TO, CONF_TYPE, CONF_UPDATE_TYPE, CONF_VALUE_TEMPLATE, CONF_WEBHOOK_ID, CONF_ZONE, HOURS, MINUTES, SECONDS, TAG_ID
 import voluptuous as vol
 
 def test_trigger_entities():
@@ -93,7 +93,7 @@ def test_trigger_entities():
 
     # Test case 6: Numerical state trigger with below values
     trigger_part_num_state_1 = {
-        CONF_PLATFORM: CONF_NUMERICAL_STATE,
+        CONF_PLATFORM: CONF_NUMERIC_STATE,
         CONF_ENTITY_ID: "sensor.temperature",
         CONF_BELOW: 30
     }
@@ -105,7 +105,7 @@ def test_trigger_entities():
 
     # Test case 7: Numerical state trigger with above value
     trigger_part_num_state_2 = {
-        CONF_PLATFORM: CONF_NUMERICAL_STATE,
+        CONF_PLATFORM: CONF_NUMERIC_STATE,
         CONF_ENTITY_ID: "sensor.temperature",
         CONF_ABOVE: 20
     }
@@ -117,7 +117,7 @@ def test_trigger_entities():
 
     # Test case 8: Numerical state trigger with above and below values
     trigger_part_num_state_3 = {
-        CONF_PLATFORM: CONF_NUMERICAL_STATE,
+        CONF_PLATFORM: CONF_NUMERIC_STATE,
         CONF_ENTITY_ID: "sensor.temperature",
         CONF_ABOVE: 20,
         CONF_BELOW: 30
@@ -130,7 +130,7 @@ def test_trigger_entities():
     
     # Test case 9: Numerical state trigger with above, below, and for values
     trigger_part_num_state_4 = {
-        CONF_PLATFORM: CONF_NUMERICAL_STATE,
+        CONF_PLATFORM: CONF_NUMERIC_STATE,
         CONF_ENTITY_ID: "sensor.temperature",
         CONF_ABOVE: 20,
         CONF_BELOW: 30,

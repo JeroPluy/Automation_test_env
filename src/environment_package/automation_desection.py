@@ -4,7 +4,7 @@ This module is responsible for automating the desection of the data.
 
 
 from .ha_automation.home_assistant_automation_config import AutomationConfig
-from .ha_automation.home_assistant_const import CONF_ABOVE, CONF_ALLOWED_METHODS, CONF_AT, CONF_ATTRIBUTE, CONF_BELOW, CONF_CALENDAR, CONF_COMMAND, CONF_CONVERSATION, CONF_DEVICE, CONF_DEVICE_ID, CONF_DOMAIN, CONF_ENTITY_ID, CONF_EVENT, CONF_EVENT_CONTEXT, CONF_EVENT_DATA, CONF_EVENT_TYPE, CONF_FOR, CONF_FROM, CONF_GEO_LOCATION, CONF_LOCAL, CONF_NOFITY_ID, CONF_NOT_FROM, CONF_NOT_TO, CONF_NUMERICAL_STATE, CONF_OFFSET, CONF_PAYLOAD, CONF_PAYLOAD_JSON, CONF_PERS_NOTIFICATION, CONF_PLATFORM, CONF_QOS, CONF_SOURCE, CONF_STATE, CONF_TEMPLATE, CONF_TIME, CONF_TIME_PATTERN, CONF_TO, CONF_TRIGGER, CONF_TYPE, CONF_UPDATE_TYPE, CONF_VALUE_TEMPLATE, CONF_WEBHOOK, CONF_WEBHOOK_ID, CONF_ZONE, HOURS, MINUTES, SECONDS, TAG_ID, test_leading_zero
+from .ha_automation.home_assistant_const import CONF_ABOVE, CONF_ALLOWED_METHODS, CONF_AT, CONF_ATTRIBUTE, CONF_BELOW, CONF_CALENDAR, CONF_COMMAND, CONF_CONVERSATION, CONF_DEVICE, CONF_DEVICE_ID, CONF_DOMAIN, CONF_ENTITY_ID, CONF_EVENT, CONF_EVENT_CONTEXT, CONF_EVENT_DATA, CONF_EVENT_TYPE, CONF_FOR, CONF_FROM, CONF_GEO_LOCATION, CONF_LOCAL, CONF_NOFITY_ID, CONF_NOT_FROM, CONF_NOT_TO, CONF_NUMERIC_STATE, CONF_OFFSET, CONF_PAYLOAD, CONF_PERS_NOTIFICATION, CONF_PLATFORM, CONF_QOS, CONF_SOURCE, CONF_STATE, CONF_TEMPLATE, CONF_TIME, CONF_TIME_PATTERN, CONF_TO, CONF_TRIGGER, CONF_TYPE, CONF_UPDATE_TYPE, CONF_VALUE_TEMPLATE, CONF_WEBHOOK, CONF_WEBHOOK_ID, CONF_ZONE, HOURS, MINUTES, SECONDS, TAG_ID, test_leading_zero
 import re
 import voluptuous as vol
 
@@ -114,7 +114,7 @@ def _trigger_entities(trigger_part: dict) -> list:
         Entity_list.append(Entity(integration="mqtt", entity_name=trigger_part["topic"], possible_value=pos_value))
 
     # if the trigger is a numerical state change
-    elif platform == CONF_NUMERICAL_STATE:
+    elif platform == CONF_NUMERIC_STATE:
 
         # add the possible value range to the entity/ies
         pos_value_str = "__VALUE__"
@@ -338,7 +338,6 @@ def _extract_trigger(automation_config: AutomationConfig) -> list:
     trigger_entities = []
     triggers = automation_config[CONF_TRIGGER]
     for trigger in triggers:
-        print(trigger)
         trigger_entities += _trigger_entities(trigger)
     return trigger_entities
 

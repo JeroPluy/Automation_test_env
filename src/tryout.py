@@ -289,12 +289,15 @@ from environment_package.ha_automation import home_assistant_automation_config a
 if __name__ == "__main__":
 
     # Automation to test basis parameters
-    # basis_file = os.path.join('test_data','yaml_files', 'turn_off_living_room_main_light_event.yaml')
-    basis_file = os.path.join('test_data','yaml_files', 'test_yaml', 'basis_automation.yaml')
-    automation_yaml = yaml_loader.load_yaml_dict(basis_file)
-    automation_config = asyncio.run(ha_automation_config.async_validate_config_item(automation_yaml))
-    print(automation_config.automation_name + " : \t" + automation_config.validation_status)
-    extract_information = desect_information(automation_config)
-    for enitity in extract_information["entities"]:
-        print(Entity.get_name(enitity) + " : \t" + str(Entity.get_possible_value(enitity)))
-
+    basis_file = os.path.join('test_data','yaml_files', 'turn_off_living_room_main_light_event.yaml')
+    # basis_file = os.path.join('test_data','yaml_files', 'test_yaml', 'basis_automation.yaml')
+    yaml_dir = os.path.join('test_data','yaml_files')
+    for file in os.listdir(yaml_dir):
+        if file.endswith(".yaml"):
+            basis_file = os.path.join(yaml_dir, file)
+            automation_yaml = yaml_loader.load_yaml_dict(basis_file)
+            automation_config = asyncio.run(ha_automation_config.async_validate_config_item(automation_yaml))
+            print(" --- " + automation_config.automation_name + " --- ")
+            extract_information = desect_information(automation_config)
+            for enitity in extract_information["entities"]:
+                print(Entity.get_name(enitity) + " : \t" + str(Entity.get_possible_value(enitity)))
