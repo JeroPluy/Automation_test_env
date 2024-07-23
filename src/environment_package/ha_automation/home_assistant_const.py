@@ -1,4 +1,5 @@
-"""This module provides constants and types for the yaml import and the validation of the Home Assistant configuration files.
+""" This module provides constants and types for the yaml import and the validation of the Home Assistant configuration files.
+    It can be run with the following command: python -m ha_automation.home_assistant_const
 
     This code is partly extracted from:
         - core/homeassistant/const.py : https://github.com/home-assistant/core/blob/dev/homeassistant/const.py 
@@ -31,8 +32,17 @@
         - core/homeassistant/generated/languages.py : https://github.com/home-assistant/core/blob/dev/homeassistant/generated/languages.py
             (VERSION: 27.06.2023 - parent fe28067 commit 071d3a4)
 
-        - homeassistant/generated/currencies.py : https://github.com/home-assistant/core/blob/dev/homeassistant/generated/currencies.py
+        - core/homeassistant/generated/currencies.py : https://github.com/home-assistant/core/blob/dev/homeassistant/generated/currencies.py
             (VERSION: 03.03.2023 - parent 4a3c0cd commit 699cc6c)
+        
+        - core/homeassistant/components/homeassistant/triggers/event.py : https://github.com/home-assistant/core/blob/dev/homeassistant/components/homeassistant/triggers/event.py
+            (VERSION: 06.05.2024 - parent 460c05d commit b456d97)
+
+        - core/homeassistant/components/homeassistant/triggers/state.py : https://github.com/home-assistant/core/blob/dev/homeassistant/components/homeassistant/triggers/state.py
+            (VERSION: 04.04.2024 - parent 0f03079 commit 3c5089b)
+        
+        - core/homeassistant/components/tag/const.py : https://github.com/home-assistant/core/blob/dev/homeassistant/components/tag/const.py
+            (VERSION: 29.05.2024 - parent f37edc2 commit 9e3e7f5)
 """
 
 import logging
@@ -175,14 +185,14 @@ CONF_MODE: Final = "mode"
 # CONF_MONITORED_CONDITIONS: Final = "monitored_conditions"
 # CONF_MONITORED_VARIABLES: Final = "monitored_variables"
 # CONF_NAME: Final = "name"
-# CONF_OFFSET: Final = "offset"
+CONF_OFFSET: Final = "offset"
 # CONF_OPTIMISTIC: Final = "optimistic"
 # CONF_PACKAGES: Final = "packages"
 CONF_PARALLEL: Final = "parallel"
 # CONF_PARAMS: Final = "params"
 # CONF_PASSWORD: Final = "password"
 # CONF_PATH: Final = "path"
-# CONF_PAYLOAD: Final = "payload"
+CONF_PAYLOAD: Final = "payload"
 # CONF_PAYLOAD_OFF: Final = "payload_off"
 # CONF_PAYLOAD_ON: Final = "payload_on"
 # CONF_PENDING_TIME: Final = "pending_time"
@@ -222,12 +232,15 @@ CONF_SET_CONVERSATION_RESPONSE: Final = "set_conversation_response"
 # CONF_SSL: Final = "ssl"
 CONF_STATE: Final = "state"
 # CONF_STATE_TEMPLATE: Final = "state_template"
+CONF_NUMERICAL_STATE: Final = "numerical_state"
 CONF_STOP: Final = "stop"
 # CONF_STRUCTURE: Final = "structure"
 # CONF_SWITCHES: Final = "switches"
 CONF_TARGET: Final = "target"
 # CONF_TEMPERATURE_UNIT: Final = "temperature_unit"
 CONF_THEN: Final = "then"
+CONF_TIME: Final = "time"
+CONF_TIME_PATTERN: Final = "time_pattern"
 CONF_TIMEOUT: Final = "timeout"
 # CONF_TIME_ZONE: Final = "time_zone"
 # CONF_TOKEN: Final = "token"
@@ -241,12 +254,14 @@ CONF_UNTIL: Final = "until"
 # CONF_URL: Final = "url"
 # CONF_USERNAME: Final = "username"
 # CONF_UUID: Final = "uuid"
+CONF_TEMPLATE: Final = "template"
 CONF_VALUE_TEMPLATE: Final = "value_template"
 CONF_VARIABLES: Final = "variables"
 # CONF_VERIFY_SSL: Final = "verify_ssl"
 CONF_WAIT_FOR_TRIGGER: Final = "wait_for_trigger"
 CONF_WAIT_TEMPLATE: Final = "wait_template"
-# CONF_WEBHOOK_ID: Final = "webhook_id"
+CONF_WEBHOOK: Final = "webhook"
+CONF_WEBHOOK_ID: Final = "webhook_id"
 # CONF_WEEKDAY: Final = "weekday"
 CONF_WHILE: Final = "while"
 # CONF_WHITELIST: Final = "whitelist"
@@ -306,10 +321,10 @@ SCRIPT_MODE_CHOICES = [
 
 # INSTANCES
 CONF_MAX = "max"
-DEFAULT_MAX = 10
+DEFAULT_MAX = 1
 CONF_MAX_EXCEEDED = "max_exceeded"
 MAX_EXCEEDED_CHOICES = [*LOGSEVERITY, "SILENT"]
-DEFAULT_MAX_EXCEEDED = "SILENT"
+DEFAULT_MAX_EXCEEDED = "WARNING"
 
 def make_script_schema(
     schema: Mapping[Any, Any], default_script_mode: str, extra: int = vol.PREVENT_EXTRA
@@ -337,7 +352,7 @@ def make_script_schema(
 CONF_ACTION = "action"
 CONF_TRIGGER = "trigger"
 CONF_TRIGGER_VARIABLES = "trigger_variables"
-DOMAIN = "automation"
+# DOMAIN = "automation"
 CONF_CONDITION_TYPE = "condition_type"
 CONF_INITIAL_STATE = "initial_state"
 CONF_BLUEPRINT = "blueprint"
@@ -878,4 +893,22 @@ ACTIVE_CURRENCIES = {
     "ZMW",
     "ZWL",
 }
+# -------------------
+
+# ----- triggers/event.py -----
+CONF_EVENT_TYPE = "event_type"
+CONF_EVENT_CONTEXT = "context"
+# -------------------
+
+# ----- triggers/state.py -----
+CONF_FROM = "from"
+CONF_TO = "to"
+CONF_NOT_FROM = "not_from"
+CONF_NOT_TO = "not_to"
+# -------------------
+
+# ----- tag/const.py -----
+EVENT_TAG_SCANNED = "tag_scanned"
+TAG_ID = "tag_id"
+DEFAULT_NAME = "Tag"
 # -------------------

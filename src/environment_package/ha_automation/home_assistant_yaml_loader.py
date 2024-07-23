@@ -1,7 +1,7 @@
-"""
-This script provides functions for loading and parsing YAML files from Home Assistant. 
-It is a partical copy of the original script from Home Assistant.
+""" This script provides functions for loading and parsing YAML files from Home Assistant. 
+    It can be run with the following command: python -m ha_automation.home_assistant_yaml_loader
 
+It is a partical copy of the original script from Home Assistant.
 TODO: Add infos to the source code
 Original source: https://github.com/home-assistant/core/blob/dev/homeassistant/util/yaml/loader.py (VERSION: XX.XX.XXXX)
 """
@@ -12,7 +12,7 @@ from io import StringIO, TextIOWrapper
 from typing import Any, TextIO
 
 import yaml
-from home_assistant_exception import HomeAssistantError
+from .home_assistant_exception import HomeAssistantError
 
 try:
     from yaml import CSafeLoader as FastestAvailableSafeLoader

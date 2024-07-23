@@ -1,4 +1,5 @@
-"""The script applies different schema to the configuration directory to validate the configuration of automations in Home Assistant.
+""" The script applies different schema to the configuration directory to validate the configuration of automations in Home Assistant.
+    It can be run with the following command: python -m ha_automation.home_assistant_automation_config
 
     This code is partly extracted from:
         - core/homeassistant/components/trace/__init__.py : https://github.com/home-assistant/core/blob/dev/homeassistant/components/trace/__init__.py
@@ -15,10 +16,10 @@ from typing import Any, Mapping
 import voluptuous as vol
 from voluptuous.humanize import humanize_error
 
-from home_assistant_config_validation import (CONDITIONS_SCHEMA, SCRIPT_SCHEMA,
+from .home_assistant_config_validation import (CONDITIONS_SCHEMA, SCRIPT_SCHEMA,
                                               SCRIPT_VARIABLES_SCHEMA,
                                               TRIGGER_SCHEMA, boolean, string)
-from home_assistant_const import (CONF_ACTION, CONF_ALIAS, CONF_CONDITION,
+from .home_assistant_const import (CONF_ACTION, CONF_ALIAS, CONF_CONDITION,
                                   CONF_DESCRIPTION, CONF_ID,
                                   CONF_INITIAL_STATE, CONF_MODE,
                                   CONF_STORED_TRACES, CONF_TRACE, CONF_TRIGGER,
@@ -129,6 +130,15 @@ async def _async_validate_config_item(config: ConfigType) -> AutomationConfig:
         automation_config.validation_status = validation_status
         automation_config.validation_error = _humanize(validation_error, config)
 
+    def _name_or_id(config: ConfigType) -> str:
+        """Return the alias or ID of an automation as automation name."""
+        if CONF_ALIAS in config:
+            return f"ALIAS: '{config[CONF_ALIAS]}'"
+        elif CONF_ID in config:
+            return f"ID: '{config[CONF_ID]}'"
+        else:
+            return "Unnamed automation"
+
     def _minimal_config(
         validation_status: ValidationStatus,
         validation_error: Exception,
@@ -157,6 +167,7 @@ async def _async_validate_config_item(config: ConfigType) -> AutomationConfig:
         _set_validation_status(
             automation_config, validation_status, validation_error, config
         )
+        automation_config.automation_name = _name_or_id(config)
         return automation_config
 
 
@@ -169,13 +180,7 @@ async def _async_validate_config_item(config: ConfigType) -> AutomationConfig:
     automation_config = AutomationConfig(validated_config)
     automation_config.raw_blueprint_inputs = raw_blueprint_inputs
     automation_config.raw_config = raw_config
-
-    # if the config is valid  
-    if isinstance(config, Mapping):
-        if CONF_ALIAS in config:
-            automation_config.automation_name = f"Automation with alias '{config[CONF_ALIAS]}'"
-        elif CONF_ID in config:
-            automation_config.automation_name = f"Automation with ID '{config[CONF_ID]}'"
+    automation_config.automation_name = _name_or_id(config)
 
     return automation_config
 

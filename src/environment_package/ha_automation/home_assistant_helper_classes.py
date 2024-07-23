@@ -1,4 +1,5 @@
-"""This module contains helper classes for Home Assistant Automations.
+""" This module contains helper classes for Home Assistant Automations.
+    It can be run with the following command: python -m ha_automation.home_assistant_helper_classes
 
 This code is partly extracted from:
         - core/homeassistant/helpers/script_variables.py : https://github.com/home-assistant/core/blob/dev/homeassistant/helpers/script_variables.py
@@ -23,7 +24,7 @@ from types import TracebackType
 
 import jinja2
 
-from home_assistant_exception import TemplateError
+from .home_assistant_exception import TemplateError
 
 # ----- const.py -----
 class UnitOfTemperature(StrEnum):

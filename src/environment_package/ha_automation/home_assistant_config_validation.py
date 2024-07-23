@@ -1,5 +1,6 @@
-"""
-Helpers for the config validation using voluptuous schemes.
+""" This script implements helpers for the config validation using voluptuous schemes.
+    It can be run with the following command: python -m ha_automation.home_assistant_config_validation
+
 
 This code is partly extracted from:
 TODO: Add the original source
@@ -25,7 +26,7 @@ import slugify as unicode_slug
 import voluptuous as vol
 import voluptuous_serialize
 
-from home_assistant_const import (ACTIVE_CURRENCIES, ATTR_AREA_ID,
+from .home_assistant_const import (ACTIVE_CURRENCIES, ATTR_AREA_ID,
                                   ATTR_DEVICE_ID, ATTR_ENTITY_ID,
                                   ATTR_FLOOR_ID, ATTR_LABEL_ID, CONF_ABOVE,
                                   CONF_ALIAS, CONF_ATTRIBUTE, CONF_BELOW,
@@ -66,8 +67,8 @@ from home_assistant_const import (ACTIVE_CURRENCIES, ATTR_AREA_ID,
                                   SUN_EVENT_SUNRISE, SUN_EVENT_SUNSET,
                                   TIME_PERIOD_ERROR, VALID_ENTITY_ID, WEEKDAYS,
                                   VolDictType, VolSchemaType, sun_event)
-from home_assistant_exception import TemplateError
-from home_assistant_helper_classes import Template, ResultWrapper, NodeStrClass, UnitOfTemperature, ScriptVariables
+from .home_assistant_exception import TemplateError
+from .home_assistant_helper_classes import Template, ResultWrapper, NodeStrClass, UnitOfTemperature, ScriptVariables
 
 
 def valid_entity_id(entity_id: str) -> bool:
