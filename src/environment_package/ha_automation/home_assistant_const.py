@@ -925,7 +925,7 @@ HOURS: Final = "hours"
 MINUTES: Final = "minutes"
 SECONDS: Final = "seconds"
 
-CONF_PERS_NOTIFICATION: Final = "persistant_notification"
+CONF_PERS_NOTIFICATION: Final = "persistent_notification"
 CONF_UPDATE_TYPE: Final = "update_type"
 CONF_NOFITY_ID: Final = "notification_id"
 

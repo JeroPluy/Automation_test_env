@@ -77,8 +77,10 @@ def _trigger_entities(trigger_part: dict) -> list:
         if CONF_EVENT_DATA in trigger_part:
             pos_value[CONF_EVENT_DATA] = trigger_part[CONF_EVENT_DATA]
         if CONF_EVENT_CONTEXT in trigger_part:
+            context = {}
             for context_key in trigger_part[CONF_EVENT_CONTEXT]:
-                pos_value[context_key] = trigger_part[CONF_EVENT_CONTEXT][context_key]
+                context[context_key] = trigger_part[CONF_EVENT_CONTEXT][context_key]
+            pos_value[CONF_EVENT_CONTEXT] = context
         
         # if the event type has multiple event entities
         if isinstance(trigger_part[CONF_EVENT_TYPE], list):
@@ -160,8 +162,11 @@ def _trigger_entities(trigger_part: dict) -> list:
                     entity_name = entity_name + "." + str(trigger_part[CONF_ATTRIBUTE])
                 Entity_list.append(Entity(integration=entity_integration, entity_name=entity_name, possible_value=pos_value))
         else:
+            entity_name = trigger_part[CONF_ENTITY_ID].split(".")[1]
+            if CONF_ATTRIBUTE in trigger_part:
+                    entity_name = entity_name + "." + str(trigger_part[CONF_ATTRIBUTE])
             # create the single entity in the event_type part 
-            Entity_list.append(Entity(integration=trigger_part[CONF_ENTITY_ID].split(".")[0], entity_name=trigger_part[CONF_ENTITY_ID].split(".")[1], possible_value=pos_value))
+            Entity_list.append(Entity(integration=trigger_part[CONF_ENTITY_ID].split(".")[0], entity_name=entity_name, possible_value=pos_value))
 
     # if the trigger is the sunset or sunrise event
     elif platform == "sun":
@@ -190,12 +195,8 @@ def _trigger_entities(trigger_part: dict) -> list:
 
         # create all tag entities in the trigger part
         if isinstance(trigger_part[TAG_ID], list):
-            for entity in trigger_part[TAG_ID]:
-                entity_integration = entity.split(".")[0]
-                entity_name = entity.split(".")[1]
-                if CONF_ATTRIBUTE in trigger_part:
-                    entity_name = entity_name + "." + str(trigger_part[CONF_ATTRIBUTE])
-                Entity_list.append(Entity(integration=entity_integration, entity_name=entity_name, possible_value=pos_value))
+            for tag_id in trigger_part[TAG_ID]:
+                Entity_list.append(Entity(integration="tag", entity_name=tag_id, possible_value=pos_value))
         else:
             # create the single tag entity
             Entity_list.append(Entity(integration="tag", entity_name=trigger_part[TAG_ID], possible_value=pos_value))
@@ -211,18 +212,6 @@ def _trigger_entities(trigger_part: dict) -> list:
                 
                 # add the possible value of the template
                 pos_value = {CONF_VALUE_TEMPLATE : template_str}
-
-                # add the state values of the trigger
-                if CONF_TO in trigger_part:
-                    pos_value[CONF_TO] = str(trigger_part[CONF_TO])
-                elif CONF_NOT_TO in trigger_part:
-                    pos_value [CONF_NOT_TO] = str(trigger_part[CONF_NOT_TO])
-
-                # add the previous state value of the trigger
-                if CONF_FROM in trigger_part:
-                    pos_value[CONF_FROM] = trigger_part[CONF_FROM]
-                elif CONF_NOT_FROM in trigger_part:
-                    pos_value[CONF_NOT_FROM] = trigger_part[CONF_NOT_FROM]
                 
                 # add the time the value has to stay in the trigger range
                 if CONF_FOR in trigger_part:
@@ -310,10 +299,8 @@ def _trigger_entities(trigger_part: dict) -> list:
 
         # add the entity id and domain as the possible value
         pos_value = {CONF_ENTITY_ID : trigger_part[CONF_ENTITY_ID]}
-        if CONF_TYPE in trigger_part:
-            pos_value[CONF_TYPE] = trigger_part[CONF_TYPE]
-        if CONF_DOMAIN in trigger_part:
-            pos_value[CONF_DOMAIN] = trigger_part[CONF_DOMAIN]
+        pos_value[CONF_TYPE] = trigger_part[CONF_TYPE]
+        pos_value[CONF_DOMAIN] = trigger_part[CONF_DOMAIN]
 
         # create the device entity
         Entity_list.append(Entity(integration=CONF_DEVICE, entity_name=trigger_part[CONF_DEVICE_ID], possible_value=pos_value))
