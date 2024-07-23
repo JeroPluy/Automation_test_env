@@ -118,3 +118,4 @@ dmypy.json
 
 # vscode settings
 .vscode/
+test_data/basis_automation.info

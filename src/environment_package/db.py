@@ -51,11 +51,18 @@ def load_data_foundation():
     except sqlite.IntegrityError as e:
         print(str(e) + " - data already loaded")
 
+def add_automation(automation: dict):
+    """add an automation to the database
+
+    Args:
+        automation: dict - the automation to be added to the database
+    """
+    pass
+
+
+
 # just a test function
 # TODO: remove this function
 def get_db_path():
     print(os.path.isfile(INIT_FILE))
     print(os.path.isfile(INTEG_DATA))
-
-if __name__ == "__main__":
-    init_db()
