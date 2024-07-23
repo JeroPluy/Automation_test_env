@@ -2,7 +2,8 @@ alias: Garten Bewässerung
 description: ""
 trigger:
   - platform: time_pattern
-    seconds: "30"
+    hours: 6
+    seconds: 30
 condition: []
 action:
   - if:

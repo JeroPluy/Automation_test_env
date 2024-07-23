@@ -2,8 +2,11 @@
 This module is responsible for automating the desection of the data.
 """
 
+
 from .ha_automation.home_assistant_automation_config import AutomationConfig
-from .ha_automation.home_assistant_const import CONF_ABOVE, CONF_ATTRIBUTE, CONF_BELOW, CONF_DEVICE_ID, CONF_ENTITY_ID, CONF_EVENT, CONF_EVENT_CONTEXT, CONF_EVENT_DATA, CONF_EVENT_TYPE, CONF_FOR, CONF_FROM, CONF_NOT_FROM, CONF_NOT_TO, CONF_NUMERICAL_STATE, CONF_OFFSET, CONF_PAYLOAD, CONF_PLATFORM, CONF_STATE, CONF_TEMPLATE, CONF_TIME, CONF_TIME_PATTERN, CONF_TO, CONF_TRIGGER, CONF_WEBHOOK, TAG_ID
+from .ha_automation.home_assistant_const import CONF_ABOVE, CONF_ALLOWED_METHODS, CONF_AT, CONF_ATTRIBUTE, CONF_BELOW, CONF_CALENDAR, CONF_COMMAND, CONF_CONVERSATION, CONF_DEVICE, CONF_DEVICE_ID, CONF_DOMAIN, CONF_ENTITY_ID, CONF_EVENT, CONF_EVENT_CONTEXT, CONF_EVENT_DATA, CONF_EVENT_TYPE, CONF_FOR, CONF_FROM, CONF_GEO_LOCATION, CONF_LOCAL, CONF_NOFITY_ID, CONF_NOT_FROM, CONF_NOT_TO, CONF_NUMERICAL_STATE, CONF_OFFSET, CONF_PAYLOAD, CONF_PAYLOAD_JSON, CONF_PERS_NOTIFICATION, CONF_PLATFORM, CONF_QOS, CONF_SOURCE, CONF_STATE, CONF_TEMPLATE, CONF_TIME, CONF_TIME_PATTERN, CONF_TO, CONF_TRIGGER, CONF_TYPE, CONF_UPDATE_TYPE, CONF_VALUE_TEMPLATE, CONF_WEBHOOK, CONF_WEBHOOK_ID, CONF_ZONE, HOURS, MINUTES, SECONDS, TAG_ID, test_leading_zero
+import re
+import voluptuous as vol
 
 class Entity():
     """
@@ -33,9 +36,27 @@ class Entity():
             self.pos_value = None
         else:
             self.pos_value = possible_value
+    
+    def get_name(self) -> str:
+        """
+        Get the name of the entity.
+        """
+        return self.entity_name
+    
+    def get_integration(self) -> str:
+        """
+        Get the integration of the entity.
+        """
+        return self.integration
+
+    def get_possible_value(self) -> int | str | dict:
+        """
+        Get the possible value of the entity.
+        """
+        return self.pos_value
 
     
-def trigger_entities(trigger_part: dict) -> list:
+def _trigger_entities(trigger_part: dict) -> list:
     """The function creates a list of entities for one trigger list element.
     
     Args:
@@ -65,7 +86,6 @@ def trigger_entities(trigger_part: dict) -> list:
             for event in trigger_part[CONF_EVENT_TYPE]:
                 Entity_list.append(Entity(integration=CONF_EVENT, entity_name=event, possible_value=pos_value))
         else:
-            print(trigger_part[CONF_EVENT_TYPE])
             # create the single entity in the event_type part 
             entity = Entity(integration=CONF_EVENT, entity_name=trigger_part[CONF_EVENT_TYPE], possible_value=pos_value)
             Entity_list.append(entity)
@@ -77,10 +97,16 @@ def trigger_entities(trigger_part: dict) -> list:
     
     # if the trigger is a mqtt message
     elif platform == "mqtt":
+
+        pos_value = {}
+
+        # add the payload value to the entity
         if CONF_PAYLOAD in trigger_part:
-            pos_value = trigger_part[CONF_PAYLOAD]
-        else:
-            pos_value = None
+            pos_value[CONF_PAYLOAD] = trigger_part[CONF_PAYLOAD]
+
+        # add the qos of payload to the entity
+        if CONF_QOS in trigger_part:
+            pos_value[CONF_QOS] = trigger_part[CONF_QOS]
 
         # create the mqtt entity
         Entity_list.append(Entity(integration="mqtt", entity_name=trigger_part["topic"], possible_value=pos_value))
@@ -89,11 +115,16 @@ def trigger_entities(trigger_part: dict) -> list:
     elif platform == CONF_NUMERICAL_STATE:
 
         # add the possible value range to the entity/ies
-        pos_value = "__VALUE__"
+        pos_value_str = "__VALUE__"
         if CONF_ABOVE in trigger_part:
-            pos_value = str(trigger_part[CONF_ABOVE]) + " < " + pos_value
+            pos_value_str = str(trigger_part[CONF_ABOVE]) + " < " + pos_value_str
         if CONF_BELOW in trigger_part:
-            pos_value = pos_value + " < " + str(trigger_part[CONF_BELOW])
+            pos_value_str = pos_value_str + " < " + str(trigger_part[CONF_BELOW])
+        pos_value = {"value": pos_value_str}
+        
+        # add the time the value has to stay in the trigger range
+        if CONF_FOR in trigger_part:
+            pos_value[CONF_FOR] = trigger_part[CONF_FOR]
 
         # create all entities in the trigger part 
         if isinstance(trigger_part[CONF_ENTITY_ID], list):
@@ -169,63 +200,199 @@ def trigger_entities(trigger_part: dict) -> list:
             # create the single tag entity
             Entity_list.append(Entity(integration="tag", entity_name=trigger_part[TAG_ID], possible_value=pos_value))
 
-    # # TODO
-    # elif platform == CONF_TEMPLATE:
-    #     pass
+    # if the trigger is a template
+    elif platform == CONF_TEMPLATE:
+        # if trigger has a template string
+        if CONF_VALUE_TEMPLATE in trigger_part:
+            template_str = trigger_part[CONF_VALUE_TEMPLATE]
 
-    # # TODO
-    # elif platform == CONF_TIME:
-    #     pass
+            # check if the string is a Jinja2 template
+            if "{" in template_str and ("{%" in template_str or "{{" in template_str or "{#" in template_str):
+                
+                # add the possible value of the template
+                pos_value = {CONF_VALUE_TEMPLATE : template_str}
 
-    # # TODO
-    # elif platform == CONF_TIME_PATTERN:
-    #     pass
+                # add the state values of the trigger
+                if CONF_TO in trigger_part:
+                    pos_value[CONF_TO] = str(trigger_part[CONF_TO])
+                elif CONF_NOT_TO in trigger_part:
+                    pos_value [CONF_NOT_TO] = str(trigger_part[CONF_NOT_TO])
 
-    # # TODO
-    # elif platform == CONF_PERS_NOTIFICATION:
-    #     pass
+                # add the previous state value of the trigger
+                if CONF_FROM in trigger_part:
+                    pos_value[CONF_FROM] = trigger_part[CONF_FROM]
+                elif CONF_NOT_FROM in trigger_part:
+                    pos_value[CONF_NOT_FROM] = trigger_part[CONF_NOT_FROM]
+                
+                # add the time the value has to stay in the trigger range
+                if CONF_FOR in trigger_part:
+                    pos_value[CONF_FOR] = trigger_part[CONF_FOR]
 
-    # # TODO
-    # elif platform == CONF_WEBHOOK:
-    #     pass
+                # search for entities in the template string
+                entities = re.findall(r"\w+\.\w+", template_str)
+                for entity in entities:
+                    entity_integration = entity.split(".")[0]
+                    entity_name = entity.split(".")[1]
+                    Entity_list.append(Entity(integration=entity_integration, entity_name=entity_name, possible_value=pos_value))
+                    
+    # if the trigger is a time event
+    elif platform == CONF_TIME:
+        # create the time entity
+        Entity_list.append(Entity(integration=CONF_TIME, entity_name=CONF_TIME, possible_value={CONF_AT : trigger_part[CONF_AT]}))
 
-    # # TODO
-    # elif platform == CONF_ZONE:
-    #     pass
+    # if the trigger is a time pattern event
+    elif platform == CONF_TIME_PATTERN:
+        pos_value = {}
 
-    # # TODO
-    # elif platform == CONF_GEO_LOCATION:
-    #     pass
+        if HOURS in trigger_part: 
+            if test_leading_zero(trigger_part[HOURS]):
+                raise vol.Invalid("Leading zero in hours is not allowed")
+            pos_value[HOURS] = trigger_part[HOURS]
+        if MINUTES in trigger_part:
+            if test_leading_zero(trigger_part[MINUTES]):
+                raise vol.Invalid("Leading zero in minutes is not allowed")
+            pos_value[MINUTES] = trigger_part[MINUTES]
+        if SECONDS in trigger_part:
+            if test_leading_zero(trigger_part[SECONDS]):
+                raise vol.Invalid("Leading zero in seconds is not allowed")
+            pos_value[SECONDS] = trigger_part[SECONDS]
+        # create the time pattern entity
+        Entity_list.append(Entity(integration=CONF_TIME_PATTERN, entity_name="_", possible_value=pos_value))
 
-    # # TODO
-    # elif platform == CONF_DEVICE:
-    #     pass
+    # if the trigger is a persistant notification
+    elif platform == CONF_PERS_NOTIFICATION:
 
-    # # TODO
-    # elif platform == CALENDAR:
-    #     pass
+        # add the notification id as the entity name
+        if CONF_NOFITY_ID in trigger_part:
+            entity_name = trigger_part[CONF_NOFITY_ID]
+        else:
+            entity_name = "_"
 
-    # # TODO
-    # elif platform == SENTENCE:
-    #     pass
+        # add the update type as the possible value
+        pos_value = {CONF_UPDATE_TYPE : trigger_part[CONF_UPDATE_TYPE]}
+
+        # create the persistant notification entity
+        Entity_list.append(Entity(integration=CONF_PERS_NOTIFICATION, entity_name=entity_name, possible_value=pos_value))
+
+    # if the trigger is a webhook
+    elif platform == CONF_WEBHOOK:
+
+        if CONF_ALLOWED_METHODS in trigger_part:
+            pos_value = {CONF_ALLOWED_METHODS : trigger_part[CONF_ALLOWED_METHODS]}
+            if CONF_LOCAL in trigger_part:
+                pos_value[CONF_LOCAL] = trigger_part[CONF_LOCAL]
+
+        # create the webhook entity
+        Entity_list.append(Entity(integration=CONF_WEBHOOK, entity_name=trigger_part[CONF_WEBHOOK_ID], possible_value=pos_value))
+
+    # if the trigger is a zone event (enter or leave)
+    elif platform == CONF_ZONE:
+            
+        # add the entity id of the person and the event type as the possible value
+        pos_value = {CONF_EVENT : trigger_part[CONF_EVENT]}
+        pos_value[CONF_ENTITY_ID] = trigger_part[CONF_ENTITY_ID]
+
+        # create the zone entity
+        Entity_list.append(Entity(integration=CONF_ZONE, entity_name=trigger_part[CONF_ZONE].split(".")[1], possible_value=pos_value))
+
+    # if the trigger is a geo location event
+    elif platform == CONF_GEO_LOCATION:
+        
+        # add the entity id of the person and the event type as the possible value
+        pos_value = {CONF_EVENT : trigger_part[CONF_EVENT]}
+        pos_value[CONF_SOURCE] = trigger_part[CONF_SOURCE]
+
+        # create the zone entity
+        Entity_list.append(Entity(integration=CONF_ZONE, entity_name=trigger_part[CONF_ZONE].split(".")[1], possible_value=pos_value))
+
+    # if the trigger is a device event
+    elif platform == CONF_DEVICE:
+
+        # add the entity id and domain as the possible value
+        pos_value = {CONF_ENTITY_ID : trigger_part[CONF_ENTITY_ID]}
+        if CONF_TYPE in trigger_part:
+            pos_value[CONF_TYPE] = trigger_part[CONF_TYPE]
+        if CONF_DOMAIN in trigger_part:
+            pos_value[CONF_DOMAIN] = trigger_part[CONF_DOMAIN]
+
+        # create the device entity
+        Entity_list.append(Entity(integration=CONF_DEVICE, entity_name=trigger_part[CONF_DEVICE_ID], possible_value=pos_value))
+
+    # if the trigger is a calendar event
+    elif platform == CONF_CALENDAR:
+
+        # add the calendar event as the possible value
+        pos_value = {CONF_EVENT : trigger_part[CONF_EVENT]}
+        if CONF_OFFSET in trigger_part:
+            pos_value[CONF_OFFSET] = trigger_part[CONF_OFFSET]
+        
+        # create the calendar entity
+        Entity_list.append(Entity(integration=CONF_CALENDAR, entity_name=trigger_part[CONF_ENTITY_ID].split(".")[1], possible_value=pos_value))
+        
+    # if trigger is a sentence
+    elif platform == CONF_CONVERSATION:
+            
+        # create the conversation entity
+        Entity_list.append(Entity(integration=CONF_CONVERSATION, entity_name="_", possible_value={CONF_COMMAND : trigger_part[CONF_COMMAND]}))
 
     return Entity_list
 
 
-def _extract_trigger(automation_config: AutomationConfig) -> dict:
+def _extract_trigger(automation_config: AutomationConfig) -> list:
     """
-    Extract the trigger from the data.
+    Extracts the trigger from the data.
+
+    Args:
+        automation_config (AutomationConfig): The automation configuration data.
+
+    Returns:
+        list: A list of trigger entities extracted from the data.
     """
-    triggers : list = automation_config[CONF_TRIGGER]
+    trigger_entities = []
+    triggers = automation_config[CONF_TRIGGER]
     for trigger in triggers:
         print(trigger)
+        trigger_entities += _trigger_entities(trigger)
+    return trigger_entities
 
 
-    
+
+def _extract_condition(automation_config: AutomationConfig) -> list:
+    """
+    Extract the condition from the data.
+    """
+    pass
 
 
-def desect_information(automation_config: AutomationConfig) -> None:
+def _extract_action(automation_config: AutomationConfig) -> list:
+    """
+    Extract the action from the data.
+    """
+    pass
+
+
+def create_entity_list(automation_config: AutomationConfig) -> list:
+    """
+    Create a list of entities from the automation configuration.
+    """
+    Entity_list = []
+    Entity_list += _extract_trigger(automation_config)
+    # Entity_list += _extract_condition(automation_config)
+    # Entity_list += _extract_action(automation_config)
+    return Entity_list
+
+def create_automation_script(automation_config: AutomationConfig) -> str:
+    """
+    Create the automation script.
+    """
+    pass
+
+
+def desect_information(automation_config: AutomationConfig) -> dict:
     """
     Extract the information from the data.
     """
-    _extract_trigger(automation_config)
+    automation_data = {}
+    automation_data["entities"] = create_entity_list(automation_config)
+    automation_data["script"] = create_automation_script(automation_config)
+    return automation_data

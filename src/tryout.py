@@ -279,10 +279,11 @@ class TestWindow(BlankWindow):
 #     # app = TestWindow()
 #     # app.mainloop()
 
-import environment_package.automation_desection as automation_desection
+from environment_package.automation_desection import desect_information, Entity
 import environment_package.db as db
 from environment_package.ha_automation import home_assistant_yaml_loader as yaml_loader
 from environment_package.ha_automation import home_assistant_automation_config as ha_automation_config
+
 
 
 if __name__ == "__main__":
@@ -293,5 +294,7 @@ if __name__ == "__main__":
     automation_yaml = yaml_loader.load_yaml_dict(basis_file)
     automation_config = asyncio.run(ha_automation_config.async_validate_config_item(automation_yaml))
     print(automation_config.automation_name + " : \t" + automation_config.validation_status)
-    extract_information = automation_desection.desect_information(automation_config)
+    extract_information = desect_information(automation_config)
+    for enitity in extract_information["entities"]:
+        print(Entity.get_name(enitity) + " : \t" + str(Entity.get_possible_value(enitity)))
 

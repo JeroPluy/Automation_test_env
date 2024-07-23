@@ -100,7 +100,7 @@ CONF_CHOOSE: Final = "choose"
 # CONF_CLIENT_SECRET: Final = "client_secret"
 # CONF_CODE: Final = "code"
 # CONF_COLOR_TEMP: Final = "color_temp"
-# CONF_COMMAND: Final = "command"
+CONF_COMMAND: Final = "command"
 # CONF_COMMAND_CLOSE: Final = "command_close"
 # CONF_COMMAND_OFF: Final = "command_off"
 # CONF_COMMAND_ON: Final = "command_on"
@@ -123,7 +123,7 @@ CONF_DEFAULT: Final = "default"
 CONF_DELAY: Final = "delay"
 # CONF_DELAY_TIME: Final = "delay_time"
 CONF_DESCRIPTION: Final = "description"
-# CONF_DEVICE: Final = "device"
+CONF_DEVICE: Final = "device"
 # CONF_DEVICES: Final = "devices"
 # CONF_DEVICE_CLASS: Final = "device_class"
 CONF_DEVICE_ID: Final = "device_id"
@@ -195,6 +195,7 @@ CONF_PARALLEL: Final = "parallel"
 CONF_PAYLOAD: Final = "payload"
 # CONF_PAYLOAD_OFF: Final = "payload_off"
 # CONF_PAYLOAD_ON: Final = "payload_on"
+CONF_PAYLOAD_JSON: Final = "payload_json"
 # CONF_PENDING_TIME: Final = "pending_time"
 # CONF_PIN: Final = "pin"
 CONF_PLATFORM: Final = "platform"
@@ -228,7 +229,7 @@ CONF_SERVICE_TEMPLATE: Final = "service_template"
 CONF_SET_CONVERSATION_RESPONSE: Final = "set_conversation_response"
 # CONF_SHOW_ON_MAP: Final = "show_on_map"
 # CONF_SLAVE: Final = "slave"
-# CONF_SOURCE: Final = "source"
+CONF_SOURCE: Final = "source"
 # CONF_SSL: Final = "ssl"
 CONF_STATE: Final = "state"
 # CONF_STATE_TEMPLATE: Final = "state_template"
@@ -246,7 +247,7 @@ CONF_TIMEOUT: Final = "timeout"
 # CONF_TOKEN: Final = "token"
 # CONF_TRIGGER_TIME: Final = "trigger_time"
 # CONF_TTL: Final = "ttl"
-# CONF_TYPE: Final = "type"
+CONF_TYPE: Final = "type"
 # CONF_UNIQUE_ID: Final = "unique_id"
 # CONF_UNIT_OF_MEASUREMENT: Final = "unit_of_measurement"
 # CONF_UNIT_SYSTEM: Final = "unit_system"
@@ -269,7 +270,7 @@ CONF_WHILE: Final = "while"
 # LEGACY_CONF_WHITELIST_EXTERNAL_DIRS: Final = "whitelist_external_dirs"
 # CONF_DEBUG: Final = "debug"
 # CONF_XY: Final = "xy"
-# CONF_ZONE: Final = "zone"
+CONF_ZONE: Final = "zone"
 # -------------------
 
 # ----- logger/const.py -----
@@ -345,6 +346,12 @@ def make_script_schema(
         },
         extra=extra,
     )
+
+def test_leading_zero(value: str | int) -> bool:
+    """Test if value has leading zero."""
+    if isinstance(value, int):
+        return False
+    return value[0] == "0" and value != "0"
 # -------------------
 
 # ----- automation/const.py -----
@@ -352,7 +359,6 @@ def make_script_schema(
 CONF_ACTION = "action"
 CONF_TRIGGER = "trigger"
 CONF_TRIGGER_VARIABLES = "trigger_variables"
-# DOMAIN = "automation"
 CONF_CONDITION_TYPE = "condition_type"
 CONF_INITIAL_STATE = "initial_state"
 CONF_BLUEPRINT = "blueprint"
@@ -912,3 +918,23 @@ EVENT_TAG_SCANNED = "tag_scanned"
 TAG_ID = "tag_id"
 DEFAULT_NAME = "Tag"
 # -------------------
+
+# ----- additional constants -----
+# Time parameter
+HOURS: Final = "hours"
+MINUTES: Final = "minutes"
+SECONDS: Final = "seconds"
+
+CONF_PERS_NOTIFICATION: Final = "persistant_notification"
+CONF_UPDATE_TYPE: Final = "update_type"
+CONF_NOFITY_ID: Final = "notification_id"
+
+CONF_AT: Final = "at"
+CONF_QOS: Final = "qos"
+
+CONF_ALLOWED_METHODS: Final = "allowed_methods"
+CONF_LOCAL: Final = "local_only"
+
+CONF_GEO_LOCATION: Final = "geo_location"
+CONF_CALENDAR: Final = "calendar"
+CONF_CONVERSATION: Final = "conversation"

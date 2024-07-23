@@ -1,3 +1,8 @@
+""" This module is used to test the YAML files for preconfigured automations and parameter behavior.
+
+    The python_path needs to be set to the src directory: (for venv) $env:PYTHONPATH = "D:\Workspace\Python\custom_Tkinker_tryout\src"
+"""
+
 import asyncio
 import copy
 import os
@@ -88,7 +93,7 @@ def test_main_automation_params()-> None:
     ]
 
     # Automation to test basis parameters
-    basis_file = os.path.join('..','test_data','yaml_files', "test_yaml", 'basis_automation.yaml')
+    basis_file = os.path.join('test_data','yaml_files', "test_yaml", 'basis_automation.yaml')
     automation_name = "ALIAS: 'Wohnzimmerlampe einschalten'"
 
     # Load basis automation yaml file
@@ -182,7 +187,7 @@ def test_preconfigured_yaml_files()-> None:
     """
 
     
-    dir_path = os.path.join('..','test_data','yaml_files')
+    dir_path = os.path.join('test_data','yaml_files')
     for file in os.listdir(dir_path):
         if file.endswith(".yaml"):
             yaml_dict = load_yaml_dict(os.path.join(dir_path, file))
@@ -191,7 +196,7 @@ def test_preconfigured_yaml_files()-> None:
             print(validation_result.automation_name + " : \t " + validation_result.validation_status + " : \t" + str(validation_result.validation_error))
 
 
-def test_yaml_files():
+def test_yaml_configs():
     """
     This function is used to test the YAML files for preconfigured automations and parameter behavior.
     It prints the start and completion messages for each test.
@@ -204,7 +209,5 @@ def test_yaml_files():
     print("--- Parameter behavior test completed ---")
 
 
-# run the tests with the following command:
-# python -m src.environment_package.test.test_yaml_files
 if __name__ == "__main__":
-    test_yaml_files()
+    test_yaml_configs()

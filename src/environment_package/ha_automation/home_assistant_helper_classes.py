@@ -48,12 +48,6 @@ class ScriptVariables:
         """Return dict version of this class."""
         return self.variables
 
-
-def is_template_string(maybe_template: str) -> bool:
-    """Check if the input is a Jinja2 template."""
-    return "{" in maybe_template and (
-        "{%" in maybe_template or "{{" in maybe_template or "{#" in maybe_template
-    )
 # -------------------
 
 # ----- yaml/objects.py -----
@@ -79,6 +73,12 @@ class ResultWrapper:
 template_cv: ContextVar[tuple[str, str] | None] = ContextVar(
     "template_cv", default=None
 )
+
+def is_template_string(maybe_template: str) -> bool:
+    """Check if the input is a Jinja2 template."""
+    return "{" in maybe_template and (
+        "{%" in maybe_template or "{{" in maybe_template or "{#" in maybe_template
+    )
 
 class Template:
     """Class to hold a template and manage caching and rendering."""
@@ -114,6 +114,7 @@ class Template:
         self._hash_cache: int = hash(self.template)
         self._renders: int = 0
 
+    
 
 # TODO: Implement the following methods for the template validation 
 
