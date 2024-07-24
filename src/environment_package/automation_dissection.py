@@ -7,6 +7,7 @@ from .ha_automation.home_assistant_automation_config import AutomationConfig
 from .ha_automation.home_assistant_const import CONF_ABOVE, CONF_ALLOWED_METHODS, CONF_AT, CONF_ATTRIBUTE, CONF_BELOW, CONF_CALENDAR, CONF_COMMAND, CONF_CONVERSATION, CONF_DEVICE, CONF_DEVICE_ID, CONF_DOMAIN, CONF_ENTITY_ID, CONF_EVENT, CONF_EVENT_CONTEXT, CONF_EVENT_DATA, CONF_EVENT_TYPE, CONF_FOR, CONF_FROM, CONF_GEO_LOCATION, CONF_LOCAL, CONF_NOFITY_ID, CONF_NOT_FROM, CONF_NOT_TO, CONF_NUMERIC_STATE, CONF_OFFSET, CONF_PAYLOAD, CONF_PERS_NOTIFICATION, CONF_PLATFORM, CONF_QOS, CONF_SOURCE, CONF_STATE, CONF_TEMPLATE, CONF_TIME, CONF_TIME_PATTERN, CONF_TO, CONF_TRIGGER, CONF_TYPE, CONF_UPDATE_TYPE, CONF_VALUE_TEMPLATE, CONF_WEBHOOK, CONF_WEBHOOK_ID, CONF_ZONE, HOURS, MINUTES, SECONDS, TAG_ID, test_leading_zero
 import re
 import voluptuous as vol
+import uuid
 
 class Entity():
     """
@@ -15,7 +16,7 @@ class Entity():
 
     integration: str = None
     entity_name : str | list = None
-    pos_value: int | str | dict = None
+    pos_value: dict = None
 
     def __init__(self, integration, entity_name, possible_value=None):
         """
@@ -49,14 +50,14 @@ class Entity():
         """
         return self.integration
 
-    def get_possible_value(self) -> int | str | dict:
+    def get_possible_value(self) -> dict:
         """
         Get the possible value of the entity.
         """
         return self.pos_value
 
     
-def _trigger_entities(trigger_part: dict) -> list:
+def _trigger_entities(trigger_part: dict, position: int) -> list:
     """The function creates a list of entities for one trigger list element.
     
     Args:
@@ -95,7 +96,8 @@ def _trigger_entities(trigger_part: dict) -> list:
     # if is a home_assistant start or shutdown event
     elif platform == "homeassistant":
         # create the home assistant entity
-        Entity_list.append(Entity(integration="homeassistant", entity_name=trigger_part[CONF_EVENT]))
+        pos_value = {CONF_EVENT : trigger_part[CONF_EVENT]}
+        Entity_list.append(Entity(integration="homeassistant", entity_name="_", possible_value=pos_value))
     
     # if the trigger is a mqtt message
     elif platform == "mqtt":
@@ -246,7 +248,7 @@ def _trigger_entities(trigger_part: dict) -> list:
                 raise vol.Invalid("Leading zero in seconds is not allowed")
             pos_value[SECONDS] = trigger_part[SECONDS]
         # create the time pattern entity
-        Entity_list.append(Entity(integration=CONF_TIME_PATTERN, entity_name="_", possible_value=pos_value))
+        Entity_list.append(Entity(integration=CONF_TIME_PATTERN, entity_name=str(uuid.uuid4()), possible_value=pos_value))
 
     # if the trigger is a persistant notification
     elif platform == CONF_PERS_NOTIFICATION:
@@ -255,7 +257,7 @@ def _trigger_entities(trigger_part: dict) -> list:
         if CONF_NOFITY_ID in trigger_part:
             entity_name = trigger_part[CONF_NOFITY_ID]
         else:
-            entity_name = "_"
+            entity_name = str(uuid.uuid4())
 
         # add the update type as the possible value
         pos_value = {CONF_UPDATE_TYPE : trigger_part[CONF_UPDATE_TYPE]}
@@ -320,7 +322,7 @@ def _trigger_entities(trigger_part: dict) -> list:
     elif platform == CONF_CONVERSATION:
             
         # create the conversation entity
-        Entity_list.append(Entity(integration=CONF_CONVERSATION, entity_name="_", possible_value={CONF_COMMAND : trigger_part[CONF_COMMAND]}))
+        Entity_list.append(Entity(integration=CONF_CONVERSATION, entity_name=str(uuid.uuid4()), possible_value={CONF_COMMAND : trigger_part[CONF_COMMAND]}))
 
     return Entity_list
 

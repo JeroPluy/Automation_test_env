@@ -187,181 +187,188 @@
 (187,   'event_type',           'category_registry_updated'),           --The event of a category registry update.
 (188,   'event_type',           'device_registry_updated'),             --The event of a device registry update.
 (189,   'event_type',           'entity_registry_updated'),             --The event of a entity registry update.
-(190,   'percentage',           'integer'),                             --The current speed percentage. Must be a value between 0 (off) and 100.
-(191,   'percentage_step',      'integer'),                             --The steps for the speed percentage. Must be a value between 1 and 100.
-(192,   'oscillating',          'bool'),                                --True if the fan is oscillating.
-(193,   'direction',            'forward'),                             --The fan spinns forward.
-(194,   'direction',            'reverse'),                             --The fan spinns reverse.
-(195,   'action',               'off'),                                 --The humidifier is off.
-(196,   'action',               'idle'),                                --The humidifier does nothing.
-(197,   'action',               'humidifying'),                         --The humidifier humidifying the air.
-(198,   'action',               'drying'),                              --The humidifier drying the air.
-(199,   'device_class',         'humidifier'),                          --The humidifier is a humidifier.
-(200,   'device_class',         'dehumidifier'),                        --The humidifier is a dehumidifier.
-(201,   'effect',               'rainbow'),                             --The light makes a rainbow effect.
-(202,   'effect',               'none'),                                --The light makes no effect.
-(203,   'min_color_temp_kelvin','int'),                                 --The minimal color value.
-(204,   'max_color_temp_kelvin','int'),                                 --The maximal color value.
-(205,   'color_mode',           'color_temp'),                          --The ui color setting.
-(206,   'color_mode',           'hs'),                                  --The ui color setting.
-(207,   'brightness',           'integer'),                             --The brightness of the light.
-(208,   'color_temp_kelvin',    'integer'),                             --The color of the light as kelvin number.
-(209,   'hs_color',             'tuple[float, float]'),                 --The color of the light in hs-format.
-(210,   'rgb_color',            'tuple[int, int, int]'),                --The color of the light in rgb-format.
-(211,   'xy_color',             'tuple[float, float]'),                 --The color of the light in xy-format.
-(212,   'rgbw_color',           'tuple[int, int, int, int]'),           --The color of the light in rgbw-format.
-(213,   'rgbww_color',          'tuple[int, int, int, int, int]'),      --The color of the light in rgbww-format.
-(214,   'volume_level',         'float'),                               --The volume level of the media player in the range (0..1).
-(215,   'is_volume_muted',      'bool'),                                --Its true if volume is currently muted.
-(216,   'volume_step',          'float'),                               --The volume step to use for the volume_up and volume_down services.
-(217,   'media_content_id',     'string'),                              --The content ID of current playing media.
-(218,   'media_content_type',   'album'),                               --The content type of current playing media.
-(219,   'media_content_type',   'app'),                                 --The content type of current playing media.
-(220,   'media_content_type',   'artist'),                              --The content type of current playing media.
-(221,   'media_content_type',   'channel'),                             --The content type of current playing media.
-(222,   'media_content_type',   'channels'),                            --The content type of current playing media.
-(223,   'media_content_type',   'composer'),                            --The content type of current playing media.
-(224,   'media_content_type',   'contibuting_artist'),                  --The content type of current playing media.
-(225,   'media_content_type',   'episode'),                             --The content type of current playing media.
-(226,   'media_content_type',   'game'),                                --The content type of current playing media.
-(227,   'media_content_type',   'genre'),                               --The content type of current playing media.
-(228,   'media_content_type',   'image'),                               --The content type of current playing media.
-(229,   'media_content_type',   'movie'),                               --The content type of current playing media.
-(230,   'media_content_type',   'music'),                               --The content type of current playing media.
-(231,   'media_content_type',   'playlist'),                            --The content type of current playing media.
-(232,   'media_content_type',   'podcast'),                             --The content type of current playing media.
-(233,   'media_content_type',   'season'),                              --The content type of current playing media.
-(234,   'media_content_type',   'track'),                               --The content type of current playing media.
-(235,   'media_content_type',   'tvshow'),                              --The content type of current playing media.
-(236,   'media_content_type',   'url'),                                 --The content type of current playing media.
-(237,   'media_content_type',   'video'),                               --The content type of current playing media.
-(238,   'app_name',             'string'),                              --The name of the current running app.
-(239,   'group_members',        'list[str]'),                           --A dynamic list of player entities which are currently grouped together for synchronous playback.
-(240,   'media_album_artist',   'string'),                              --The album artist of current playing media, music track only.
-(241,   'media_album_name',     'string'),                              --The album name of current playing media, music track only.
-(242,   'media_artist',         'string'),                              --The artist of current playing media, music track only.
-(243,   'media_channel',        'string'),                              --The channel currently playing.
-(244,   'media_duration',       'integer'),                             --The duration of current playing media in seconds.
-(245,   'media_episode',        'string'),                              --The episode of current playing media, TV show only.
-(246,   'media_playlist',       'string'),                              --The duration of current playing media in seconds.
-(247,   'media_position',       'integer'),                             --The episode of current playing media, TV show only
-(248,   'media_season',         'string'),                              --The duration of current playing media in seconds.
-(249,   'media_series_title',   'string'),                              --The episode of current playing media, TV show only
-(250,   'media_title',          'string'),                              --The duration of current playing media in seconds.
-(251,   'media_track',          'integer'),                             --The track number of current playing media, music track only.
-(252,   'repeat',               'off'),                                 --The current repeat mode.
-(253,   'repeat',               'one'),                                 --The current repeat mode.
-(254,   'repeat',               'all'),                                 --The current repeat mode.
-(255,   'shuffle',              'bool'),                                --True if shuffle is enabled.
-(256,   'source',               'dvd'),                                 --The currently selected input source for the media player.
-(257,   'source',               'youtube'),                             --The currently selected input source for the media player.
-(258,   'sound_mode',           'music'),                               --The current sound mode of the media player.
-(259,   'sound_mode',           'movie'),                               --The current sound mode of the media player.
-(260,   'device_class',         'tv'),                                  --The media player is a tv.
-(261,   'device_class',         'speaker'),                             --The media player is a speaker.
-(262,   'device_class',         'receiver'),                            --The media player is a receiver.
-(263,   'min',                  'float'),                               --The minimum accepted value in the number's (inclusive).
-(264,   'max',                  'float'),                               --The maximum accepted value in the number's (inclusive).
-(265,   'step',                 'float'),                               --Defines the resolution of the values, i.e. the smallest increment or decrement in the number's.
-(266,   'mode',                 'string'),                              --Defines how the number should be displayed in the UI. Can be box, slider or auto.
-(267,   'activity',             'string'),                              --The minimum accepted value in the number's (inclusive).
-(268,   'current_activity',     'string'),                              --The maximum accepted value in the number's (inclusive).
-(269,   'id',                   'string'),                              --The id of the scene.
-(270,   'entity_id',            'string'),                              --The id of the entity in the scene.
-(271,   'options', 	            'list[string]'),                        --All options of the select.
-(272,   'device_class',         'apparent_power'),                      --The device class of the sensor.
-(273,   'device_class',         'aqi'),                                 --The device class of the sensor.
-(274,   'device_class',         'atmospheric_pressure'),                --The device class of the sensor.
-(275,   'device_class',         'conductivity'),                        --The device class of the sensor.
-(276,   'device_class',         'carbon_dioxide'),                      --The device class of the sensor.
-(277,   'device_class',         'carbon_monoxide'),                     --The device class of the sensor.
-(278,   'device_class',         'current'),                             --The device class of the sensor.
-(279,   'device_class',         'data_rate'),                           --The device class of the sensor.
-(280,   'device_class',         'data_size'),                           --The device class of the sensor.
-(281,   'device_class',         'distance'),                            --The device class of the sensor.
-(282,   'device_class',         'duration'),                            --The device class of the sensor.
-(283,   'device_class',         'energy'),                              --The device class of the sensor.
-(284,   'device_class',         'energy_storage'),                      --The device class of the sensor.
-(285,   'device_class',         'frequency'),                           --The device class of the sensor.
-(286,   'device_class',         'humidity'),                            --The device class of the sensor.
-(287,   'device_class',         'illuminance'),                         --The device class of the sensor.
-(288,   'device_class',         'irradiance'),                           --The device class of the sensor.
-(289,   'device_class',         'monetary'),                            --The device class of the sensor.
-(290,   'device_class',         'nitrogen_dioxide'),                    --The device class of the sensor.
-(291,   'device_class',         'nitrogen_monoxide'),                   --The device class of the sensor.
-(292,   'device_class',         'nitrous_oxide'),                       --The device class of the sensor.
-(293,   'device_class',         'ozone'),                               --The device class of the sensor.
-(294,   'device_class',         'ph'),                                  --The device class of the sensor.
-(295,   'device_class',         'pm1'),                                 --The device class of the sensor.
-(296,   'device_class',         'pm10'),                                --The device class of the sensor.
-(297,   'device_class',         'pm25'),                                --The device class of the sensor.
-(298,   'device_class',         'power_factor'),                        --The device class of the sensor.
-(299,   'device_class',         'precipitation'),                       --The device class of the sensor.
-(300,   'device_class',         'precipitation_intensity'),             --The device class of the sensor.
-(301,   'device_class',         'pressure'),                            --The device class of the sensor.
-(302,   'device_class',         'reactive_power'),                      --The device class of the sensor.
-(303,   'device_class',         'signal_strength'),                     --The device class of the sensor.
-(304,   'device_class',         'sound_pressure'),                      --The device class of the sensor.
-(305,   'device_class',         'speed'),                               --The device class of the sensor.
-(306,   'device_class',         'sulphur_dioxide'),                     --The device class of the sensor.
-(307,   'device_class',         'temperature'),                         --The device class of the sensor.
-(308,   'device_class',         'volatile_organic_compounds'),          --The device class of the sensor.
-(309,   'device_class',         'volatile_organic_compounds_parts'),    --The device class of the sensor.
-(310,   'device_class',         'voltage'),                             --The device class of the sensor.
-(311,   'device_class',         'volume'),                              --The device class of the sensor.
-(312,   'device_class',         'volume_storage'),                      --The device class of the sensor.
-(313,   'device_class',         'volume_flow_rate'),                    --The device class of the sensor.
-(314,   'device_class',         'water'),                               --The device class of the sensor.
-(315,   'device_class',         'weight'),                              --The device class of the sensor.
-(316,   'device_class',         'wind_speed'),                          --The device class of the sensor.
-(317,   'unit_of_measurement',  'string'),                              --The unit of the sensor value.
-(318,   'battery_level',        'int'),                                 --The battery level of the sensor.
-(319,   'device_class',         'date'),                                --The device class of the sensor.
-(320,   'device_class',         'timestamp'),                           --The device class of the sensor.
-(321,   'available_tones',      'list[string]'),                        --The list of possible sounds for the siren.
-(322,   'device_class',         'switch'),                              --The device class of the switch.
-(323,   'device_class',         'outlet'),                              --The device class of the switch.
-(324,   'mode',                 'text'),                                --The text ui mode.
-(325,   'mode',                 'password'),                            --The text ui mode.
-(326,   'pattern',              'string'),                              --A regex pattern that the text value must match to be valid.
-(327,   'auto_update',          'bool'),                                --The device or service that the entity represents has auto update logic. When this is set to True you can not skip updates.
-(328,   'installed_version',    'string'),                              --The currently installed and used version of the software.
-(329,   'in_progress',          'int'),                                 --Update installation progress. Can either return a boolean (1 if in progress, 0 if not) or an int to indicate the progress from 0 to 100%.
-(330,   'release_summary',      'string'),                              --Summary of the release notes or changelog.
-(331,   'release_url',          'string'),                              --URL to the full release notes of the latest version available.
-(332,   'current_version',      'string'),                              --The current version of the update.
-(333,   'skipped_version',      'string'),                              --The version that was skipped.
-(334,   'title',                'string'),                              --Title of the software.
-(335,   'latest_version',       'string'),                              --The latest version of the software available.
-(336,   'device_class',         'firmware'),                            --The device class of the update.
-(337,   'battery_icon',         'string'),                              --The time the vacuum has been cleaning.
-(338,   'cleaned_area',         'float'),                               --The percentage of the area that has been cleaned.
-(339,   'fan_speed',            'min'),                                 --The speed of the vacuum fan.
-(340,   'fan_speed',            'medium'),                              --The speed of the vacuum fan.
-(341,   'fan_speed',            'high'),                                --The speed of the vacuum fan.
-(342,   'fan_speed',            'max'),                                 --The speed of the vacuum fan.
-(343,   'current_position',     'int'),                                 --The current position of the valve.
-(344,   'operation_mode',       'eco'),                                 --The operation mode of the water heater.
-(345,   'operation_mode',       'electric'),                            --The operation mode of the water heater.
-(346,   'operation_mode',       'performance'),                         --The operation mode of the water heater.
-(347,   'operation_mode',       'high_demand'),                         --The operation mode of the water heater.
-(348,   'operation_mode',       'heat_pump'),                           --The operation mode of the water heater.
-(349,   'operation_mode',       'gas'),                                 --The operation mode of the water heater.
-(350,   'operation_mode',       'off'),                                 --The operation mode of the water heater.
-(351,   'away_mode',            'on'),                                  --The away mode of the water heater.
-(352,   'away_mode',            'off'),                                 --The away mode of the water heater.
-(353,   'attribution',          'string'),                              --The attributor of the weather.
-(354,   'apparent_temperature', 'float'),                               --The current apparent (feels-like) temperature in °C or °F.
-(355,   'pressure',             'flaot'),                               --The pressure of the weather.
-(356,   'pressure_unit',        'string'),                              --The pressure unit of the weather.
-(357,   'wind_speed',           'float'),                               --The wind bearing of the weather.
-(358,   'wind_speed_unit',      'string'),                              --The wind speed unit of the weather.
-(359,   'wind_bearing',         'string'),                              --The current wind bearing in azimuth angle (degrees) or 1-3 letter cardinal direction.
-(360,   'wind_gust_speed',      'float'),                               --he current wind gust speed.
-(361,   'visibility',           'float'),                               --The visibility of the weather.
-(362,   'visibility_unit',      'string'),                              --The visibility unit of the weather.
-(363,   'cloud_coverage',       'int'),                                 --The cloud coverage of the weather.
-(364,   'dew_point',            'float'),                               --The dew point temperature in °C or °F.
-(365,   'ozone',                'float'),                               --The current ozone level of the weather.
-(366,   'uv_index',             'float'),                               --The uv index of the weather.
-(367,   'precipitation_unit',   'string'),                              -- The precipitation unit in mm or in.
+(190,   'event_type',           'string');                              --A custom event.
+(191,   'percentage',           'integer'),                             --The current speed percentage. Must be a value between 0 (off) and 100.
+(192,   'percentage_step',      'integer'),                             --The steps for the speed percentage. Must be a value between 1 and 100.
+(193,   'oscillating',          'bool'),                                --True if the fan is oscillating.
+(194,   'direction',            'forward'),                             --The fan spinns forward.
+(195,   'direction',            'reverse'),                             --The fan spinns reverse.
+(196,   'action',               'off'),                                 --The humidifier is off.
+(197,   'action',               'idle'),                                --The humidifier does nothing.
+(198,   'action',               'humidifying'),                         --The humidifier humidifying the air.
+(199,   'action',               'drying'),                              --The humidifier drying the air.
+(200,   'device_class',         'humidifier'),                          --The humidifier is a humidifier.
+(201,   'device_class',         'dehumidifier'),                        --The humidifier is a dehumidifier.
+(202,   'effect',               'rainbow'),                             --The light makes a rainbow effect.
+(203,   'effect',               'none'),                                --The light makes no effect.
+(204,   'min_color_temp_kelvin','int'),                                 --The minimal color value.
+(205,   'max_color_temp_kelvin','int'),                                 --The maximal color value.
+(206,   'color_mode',           'color_temp'),                          --The ui color setting.
+(207,   'color_mode',           'hs'),                                  --The ui color setting.
+(208,   'brightness',           'integer'),                             --The brightness of the light.
+(209,   'color_temp_kelvin',    'integer'),                             --The color of the light as kelvin number.
+(210,   'hs_color',             'tuple[float, float]'),                 --The color of the light in hs-format.
+(211,   'rgb_color',            'tuple[int, int, int]'),                --The color of the light in rgb-format.
+(212,   'xy_color',             'tuple[float, float]'),                 --The color of the light in xy-format.
+(213,   'rgbw_color',           'tuple[int, int, int, int]'),           --The color of the light in rgbw-format.
+(214,   'rgbww_color',          'tuple[int, int, int, int, int]'),      --The color of the light in rgbww-format.
+(215,   'volume_level',         'float'),                               --The volume level of the media player in the range (0..1).
+(216,   'is_volume_muted',      'bool'),                                --Its true if volume is currently muted.
+(217,   'volume_step',          'float'),                               --The volume step to use for the volume_up and volume_down services.
+(218,   'media_content_id',     'string'),                              --The content ID of current playing media.
+(219,   'media_content_type',   'album'),                               --The content type of current playing media.
+(220,   'media_content_type',   'app'),                                 --The content type of current playing media.
+(221,   'media_content_type',   'artist'),                              --The content type of current playing media.
+(222,   'media_content_type',   'channel'),                             --The content type of current playing media.
+(223,   'media_content_type',   'channels'),                            --The content type of current playing media.
+(224,   'media_content_type',   'composer'),                            --The content type of current playing media.
+(225,   'media_content_type',   'contibuting_artist'),                  --The content type of current playing media.
+(226,   'media_content_type',   'episode'),                             --The content type of current playing media.
+(227,   'media_content_type',   'game'),                                --The content type of current playing media.
+(228,   'media_content_type',   'genre'),                               --The content type of current playing media.
+(229,   'media_content_type',   'image'),                               --The content type of current playing media.
+(230,   'media_content_type',   'movie'),                               --The content type of current playing media.
+(231,   'media_content_type',   'music'),                               --The content type of current playing media.
+(232,   'media_content_type',   'playlist'),                            --The content type of current playing media.
+(233,   'media_content_type',   'podcast'),                             --The content type of current playing media.
+(234,   'media_content_type',   'season'),                              --The content type of current playing media.
+(235,   'media_content_type',   'track'),                               --The content type of current playing media.
+(236,   'media_content_type',   'tvshow'),                              --The content type of current playing media.
+(237,   'media_content_type',   'url'),                                 --The content type of current playing media.
+(238,   'media_content_type',   'video'),                               --The content type of current playing media.
+(239,   'app_name',             'string'),                              --The name of the current running app.
+(240,   'group_members',        'list[str]'),                           --A dynamic list of player entities which are currently grouped together for synchronous playback.
+(241,   'media_album_artist',   'string'),                              --The album artist of current playing media, music track only.
+(242,   'media_album_name',     'string'),                              --The album name of current playing media, music track only.
+(243,   'media_artist',         'string'),                              --The artist of current playing media, music track only.
+(244,   'media_channel',        'string'),                              --The channel currently playing.
+(245,   'media_duration',       'integer'),                             --The duration of current playing media in seconds.
+(246,   'media_episode',        'string'),                              --The episode of current playing media, TV show only.
+(247,   'media_playlist',       'string'),                              --The duration of current playing media in seconds.
+(248,   'media_position',       'integer'),                             --The episode of current playing media, TV show only
+(249,   'media_season',         'string'),                              --The duration of current playing media in seconds.
+(250,   'media_series_title',   'string'),                              --The episode of current playing media, TV show only
+(251,   'media_title',          'string'),                              --The duration of current playing media in seconds.
+(252,   'media_track',          'integer'),                             --The track number of current playing media, music track only.
+(253,   'repeat',               'off'),                                 --The current repeat mode.
+(254,   'repeat',               'one'),                                 --The current repeat mode.
+(255,   'repeat',               'all'),                                 --The current repeat mode.
+(256,   'shuffle',              'bool'),                                --True if shuffle is enabled.
+(257,   'source',               'dvd'),                                 --The currently selected input source for the media player.
+(258,   'source',               'youtube'),                             --The currently selected input source for the media player.
+(259,   'sound_mode',           'music'),                               --The current sound mode of the media player.
+(260,   'sound_mode',           'movie'),                               --The current sound mode of the media player.
+(261,   'device_class',         'tv'),                                  --The media player is a tv.
+(262,   'device_class',         'speaker'),                             --The media player is a speaker.
+(263,   'device_class',         'receiver'),                            --The media player is a receiver.
+(264,   'min',                  'float'),                               --The minimum accepted value in the number's (inclusive).
+(265,   'max',                  'float'),                               --The maximum accepted value in the number's (inclusive).
+(266,   'step',                 'float'),                               --Defines the resolution of the values, i.e. the smallest increment or decrement in the number's.
+(267,   'mode',                 'string'),                              --Defines how the number should be displayed in the UI. Can be box, slider or auto.
+(268,   'activity',             'string'),                              --The minimum accepted value in the number's (inclusive).
+(269,   'current_activity',     'string'),                              --The maximum accepted value in the number's (inclusive).
+(270,   'id',                   'string'),                              --The id of the scene.
+(271,   'entity_id',            'string'),                              --The id of the entity in the scene.
+(272,   'options', 	            'list[string]'),                        --All options of the select.
+(273,   'device_class',         'apparent_power'),                      --The device class of the sensor.
+(274,   'device_class',         'aqi'),                                 --The device class of the sensor.
+(275,   'device_class',         'atmospheric_pressure'),                --The device class of the sensor.
+(276,   'device_class',         'conductivity'),                        --The device class of the sensor.
+(277,   'device_class',         'carbon_dioxide'),                      --The device class of the sensor.
+(278,   'device_class',         'carbon_monoxide'),                     --The device class of the sensor.
+(279,   'device_class',         'current'),                             --The device class of the sensor.
+(280,   'device_class',         'data_rate'),                           --The device class of the sensor.
+(281,   'device_class',         'data_size'),                           --The device class of the sensor.
+(282,   'device_class',         'distance'),                            --The device class of the sensor.
+(283,   'device_class',         'duration'),                            --The device class of the sensor.
+(284,   'device_class',         'energy'),                              --The device class of the sensor.
+(285,   'device_class',         'energy_storage'),                      --The device class of the sensor.
+(286,   'device_class',         'frequency'),                           --The device class of the sensor.
+(287,   'device_class',         'humidity'),                            --The device class of the sensor.
+(288,   'device_class',         'illuminance'),                         --The device class of the sensor.
+(289,   'device_class',         'irradiance'),                           --The device class of the sensor.
+(290,   'device_class',         'monetary'),                            --The device class of the sensor.
+(291,   'device_class',         'nitrogen_dioxide'),                    --The device class of the sensor.
+(292,   'device_class',         'nitrogen_monoxide'),                   --The device class of the sensor.
+(293,   'device_class',         'nitrous_oxide'),                       --The device class of the sensor.
+(294,   'device_class',         'ozone'),                               --The device class of the sensor.
+(295,   'device_class',         'ph'),                                  --The device class of the sensor.
+(296,   'device_class',         'pm1'),                                 --The device class of the sensor.
+(297,   'device_class',         'pm10'),                                --The device class of the sensor.
+(298,   'device_class',         'pm25'),                                --The device class of the sensor.
+(299,   'device_class',         'power_factor'),                        --The device class of the sensor.
+(300,   'device_class',         'precipitation'),                       --The device class of the sensor.
+(301,   'device_class',         'precipitation_intensity'),             --The device class of the sensor.
+(302,   'device_class',         'pressure'),                            --The device class of the sensor.
+(303,   'device_class',         'reactive_power'),                      --The device class of the sensor.
+(304,   'device_class',         'signal_strength'),                     --The device class of the sensor.
+(305,   'device_class',         'sound_pressure'),                      --The device class of the sensor.
+(306,   'device_class',         'speed'),                               --The device class of the sensor.
+(307,   'device_class',         'sulphur_dioxide'),                     --The device class of the sensor.
+(308,   'device_class',         'temperature'),                         --The device class of the sensor.
+(309,   'device_class',         'volatile_organic_compounds'),          --The device class of the sensor.
+(310,   'device_class',         'volatile_organic_compounds_parts'),    --The device class of the sensor.
+(311,   'device_class',         'voltage'),                             --The device class of the sensor.
+(312,   'device_class',         'volume'),                              --The device class of the sensor.
+(313,   'device_class',         'volume_storage'),                      --The device class of the sensor.
+(314,   'device_class',         'volume_flow_rate'),                    --The device class of the sensor.
+(315,   'device_class',         'water'),                               --The device class of the sensor.
+(316,   'device_class',         'weight'),                              --The device class of the sensor.
+(317,   'device_class',         'wind_speed'),                          --The device class of the sensor.
+(318,   'unit_of_measurement',  'string'),                              --The unit of the sensor value.
+(319,   'battery_level',        'int'),                                 --The battery level of the sensor.
+(320,   'device_class',         'date'),                                --The device class of the sensor.
+(321,   'device_class',         'timestamp'),                           --The device class of the sensor.
+(322,   'available_tones',      'list[string]'),                        --The list of possible sounds for the siren.
+(323,   'device_class',         'switch'),                              --The device class of the switch.
+(324,   'device_class',         'outlet'),                              --The device class of the switch.
+(325,   'mode',                 'text'),                                --The text ui mode.
+(326,   'mode',                 'password'),                            --The text ui mode.
+(327,   'pattern',              'string'),                              --A regex pattern that the text value must match to be valid.
+(328,   'auto_update',          'bool'),                                --The device or service that the entity represents has auto update logic. When this is set to True you can not skip updates.
+(329,   'installed_version',    'string'),                              --The currently installed and used version of the software.
+(330,   'in_progress',          'int'),                                 --Update installation progress. Can either return a boolean (1 if in progress, 0 if not) or an int to indicate the progress from 0 to 100%.
+(331,   'release_summary',      'string'),                              --Summary of the release notes or changelog.
+(332,   'release_url',          'string'),                              --URL to the full release notes of the latest version available.
+(333,   'current_version',      'string'),                              --The current version of the update.
+(334,   'skipped_version',      'string'),                              --The version that was skipped.
+(335,   'title',                'string'),                              --Title of the software.
+(336,   'latest_version',       'string'),                              --The latest version of the software available.
+(337,   'device_class',         'firmware'),                            --The device class of the update.
+(338,   'battery_icon',         'string'),                              --The time the vacuum has been cleaning.
+(339,   'cleaned_area',         'float'),                               --The percentage of the area that has been cleaned.
+(340,   'fan_speed',            'min'),                                 --The speed of the vacuum fan.
+(341,   'fan_speed',            'medium'),                              --The speed of the vacuum fan.
+(342,   'fan_speed',            'high'),                                --The speed of the vacuum fan.
+(343,   'fan_speed',            'max'),                                 --The speed of the vacuum fan.
+(344,   'current_position',     'int'),                                 --The current position of the valve.
+(345,   'operation_mode',       'eco'),                                 --The operation mode of the water heater.
+(346,   'operation_mode',       'electric'),                            --The operation mode of the water heater.
+(347,   'operation_mode',       'performance'),                         --The operation mode of the water heater.
+(348,   'operation_mode',       'high_demand'),                         --The operation mode of the water heater.
+(349,   'operation_mode',       'heat_pump'),                           --The operation mode of the water heater.
+(350,   'operation_mode',       'gas'),                                 --The operation mode of the water heater.
+(351,   'operation_mode',       'off'),                                 --The operation mode of the water heater.
+(352,   'away_mode',            'on'),                                  --The away mode of the water heater.
+(353,   'away_mode',            'off'),                                 --The away mode of the water heater.
+(354,   'attribution',          'string'),                              --The attributor of the weather.
+(355,   'apparent_temperature', 'float'),                               --The current apparent (feels-like) temperature in °C or °F.
+(356,   'pressure',             'flaot'),                               --The pressure of the weather.
+(357,   'pressure_unit',        'string'),                              --The pressure unit of the weather.
+(358,   'wind_speed',           'float'),                               --The wind bearing of the weather.
+(359,   'wind_speed_unit',      'string'),                              --The wind speed unit of the weather.
+(360,   'wind_bearing',         'string'),                              --The current wind bearing in azimuth angle (degrees) or 1-3 letter cardinal direction.
+(361,   'wind_gust_speed',      'float'),                               --he current wind gust speed.
+(362,   'visibility',           'float'),                               --The visibility of the weather.
+(363,   'visibility_unit',      'string'),                              --The visibility unit of the weather.
+(364,   'cloud_coverage',       'int'),                                 --The cloud coverage of the weather.
+(365,   'dew_point',            'float'),                               --The dew point temperature in °C or °F.
+(366,   'ozone',                'float'),                               --The current ozone level of the weather.
+(367,   'uv_index',             'float'),                               --The uv index of the weather.
+(368,   'precipitation_unit',   'string'),                              --The precipitation unit in mm or in.
+
+(   ,   'template',             'string'),                              --A template string for automations
+(   ,   'at',                   'string'),                              --Trigger the time 
+(   ,   'event'                 'string'),                              --Triggered with this event
+(   ,   'offset'                'string'),                              --Offset of the trigger
+(   ,   'scentence'             'string'),                              --The scentence to trigger the event
