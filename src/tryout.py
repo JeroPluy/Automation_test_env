@@ -13,6 +13,7 @@ import customWidgets.customWidgets as cW
 
 from customWidgets.CTkTable.ctktable import CTkTable
 from customWidgets.CTkXYFrame.ctk_xyframe import CTkXYFrame
+from environment_package.env_const import AUTOMATION_SCRIPT
 
 #ctkmessagebox
 
@@ -279,11 +280,30 @@ class TestWindow(BlankWindow):
 #     # app = TestWindow()
 #     # app.mainloop()
 
-from environment_package.automation_dissection import desect_information, Entity
+from environment_package.automation_dissection import Automation, Entity, dissect_information
 import environment_package.db as db
 from environment_package.ha_automation import home_assistant_yaml_loader as yaml_loader
 from environment_package.ha_automation import home_assistant_automation_config as ha_automation_config
 
+import sqlite3 as sqlite
+import subprocess
+
+DATABASE = os.path.join("data", "automation_test_env.sqlite")
+
+
+def run_automation(automation: Automation, entities: list[Entity]):
+    """run the automation script and return the result
+
+    Args:
+        automation (Automation): the automation to run
+
+    Returns:
+        str: the result of the automation
+    """
+    serialized_entities = json.dumps([entity.serialize() for entity in entities])
+    
+    result = subprocess.run(["python", automation.script, serialized_entities], capture_output=True)
+    return result.stdout.decode("utf-8")
 
 
 if __name__ == "__main__":
@@ -298,6 +318,10 @@ if __name__ == "__main__":
             automation_yaml = yaml_loader.load_yaml_dict(basis_file)
             automation_config = asyncio.run(ha_automation_config.async_validate_config_item(automation_yaml))
             print(" --- " + automation_config.automation_name + " --- ")
-            extract_information = desect_information(automation_config)
-            for enitity in extract_information["entities"]:
-                print(Entity.get_name(enitity) + " : \t" + str(Entity.get_possible_value(enitity)))
+            extract_information = dissect_information(automation_config)
+            # entity: Entity = None
+            # for entity in extract_information["entities"]:
+                # print(entity.entity_name + " : \t" + str(entity.expected_value))
+                
+        automation: Automation = extract_information["infos"]
+        print( "result of the automation: " + run_automation(automation, extract_information["entities"]))

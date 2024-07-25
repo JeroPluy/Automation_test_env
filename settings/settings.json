@@ -1,5 +1,6 @@
 {
     "mode": "light",
     "LANG" : 1,
-    "HA_VERSIONS" : ["HA 2024.5.4"]
+    "HA_VERSIONS" : ["HA 2024.5.4"],
+    "automation_script_path" : ["data","automation_scripts"]
 }

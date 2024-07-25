@@ -97,7 +97,7 @@ class AutomationConfig(dict):
 
     raw_config: dict[str, Any] | None = None
     raw_blueprint_inputs: dict[str, Any] | None = None
-    automation_name: str = "Unnamed automation" 
+    automation_name: str = None 
     validation_status: ValidationStatus = ValidationStatus.OK
     validation_error: str | None = None
 
@@ -133,12 +133,12 @@ async def _async_validate_config_item(config: ConfigType) -> AutomationConfig:
 
     def _name_or_id(config: ConfigType) -> str:
         """Return the alias or ID of an automation as automation name."""
-        if CONF_ALIAS in config:
-            return f"ALIAS: '{config[CONF_ALIAS]}'"
-        elif CONF_ID in config:
-            return f"ID: '{config[CONF_ID]}'"
+        if CONF_ID in config:
+            return f"id_{config[CONF_ID]}".replace(' ', '_')
+        elif CONF_ALIAS in config:
+            return f'{config[CONF_ALIAS]}'.replace(' ', '_')
         else:
-            return "Unnamed automation"
+            return "unnamed_automation"
 
     def _minimal_config(
         validation_status: ValidationStatus,
@@ -158,7 +158,7 @@ async def _async_validate_config_item(config: ConfigType) -> AutomationConfig:
             _set_validation_status(
                 automation_config, ValidationStatus.FAILED_SCHEMA, err, config
                 )
-            automation_config.automation_name = "Invalid automation"
+            automation_config.automation_name = "!invalid_automation"
             return automation_config
         
         # ID, alias and description are valid

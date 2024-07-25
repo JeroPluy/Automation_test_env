@@ -6383,6 +6383,6 @@ action:
                 service: input_boolean.turn_off
                 data:
                   entity_id: []
-id: "1717581197103"
+id: "1717581197103 huge automation"
 alias: Hintergrundlicht im Wohnzimmer
 description: ""
