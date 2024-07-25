@@ -11,23 +11,24 @@
 
 from contextlib import suppress
 from enum import StrEnum
-from typing import Any, Mapping
+from typing import Any
 
 import voluptuous as vol
 from voluptuous.humanize import humanize_error
 
-from .home_assistant_config_validation import (CONDITIONS_SCHEMA, SCRIPT_SCHEMA,
-                                              SCRIPT_VARIABLES_SCHEMA,
-                                              TRIGGER_SCHEMA, boolean, string)
+from .home_assistant_config_validation import (CONDITIONS_SCHEMA,
+                                               SCRIPT_SCHEMA,
+                                               SCRIPT_VARIABLES_SCHEMA,
+                                               TRIGGER_SCHEMA, boolean, string)
 from .home_assistant_const import (CONF_ACTION, CONF_ALIAS, CONF_CONDITION,
-                                  CONF_DESCRIPTION, CONF_ID,
-                                  CONF_INITIAL_STATE, CONF_MODE,
-                                  CONF_STORED_TRACES, CONF_TRACE, CONF_TRIGGER,
-                                  CONF_TRIGGER_VARIABLES, CONF_VARIABLES,
-                                  DEFAULT_STORED_TRACES, SCRIPT_MODE_CHOICES,
-                                  SCRIPT_MODE_SINGLE, ConfigType,
-                                  make_script_schema, positive_int)
-
+                                   CONF_DESCRIPTION, CONF_ID,
+                                   CONF_INITIAL_STATE, CONF_MODE,
+                                   CONF_STORED_TRACES, CONF_TRACE,
+                                   CONF_TRIGGER, CONF_TRIGGER_VARIABLES,
+                                   CONF_VARIABLES, DEFAULT_STORED_TRACES,
+                                   SCRIPT_MODE_CHOICES, SCRIPT_MODE_SINGLE,
+                                   ConfigType, make_script_schema,
+                                   positive_int)
 
 # schema for the automation mode configuration
 MODE_CONFIG_SCHEMA = {

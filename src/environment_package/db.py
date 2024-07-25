@@ -1,11 +1,11 @@
-import sqlite3 as sqlite
 import os.path
+import sqlite3 as sqlite
 
 DATABASE = os.path.join("data", "automation_test_env.sqlite")
 INIT_FILE = os.path.join("schema", "database_creation.sql")
 INTEG_DATA = os.path.join("schema", "insert_standard_integration.sql")
 
-def init_db():
+def init_db(): 
     """Initialize the database model in sqlite and load the base data
     
     needed sql-Files: 

@@ -7,13 +7,15 @@ import asyncio
 import copy
 import os
 
-from environment_package.ha_automation import home_assistant_automation_config as ha_automation_config
+from environment_package.ha_automation import \
+    home_assistant_automation_config as ha_automation_config
 from environment_package.ha_automation.home_assistant_const import (
     CONF_ACTION, CONF_ALIAS, CONF_CONDITION, CONF_DESCRIPTION, CONF_ID,
     CONF_INITIAL_STATE, CONF_MAX, CONF_MAX_EXCEEDED, CONF_MODE,
     CONF_STORED_TRACES, CONF_TRACE, CONF_TRIGGER, CONF_VARIABLES,
     LOGSEVERITY_STRING, SCRIPT_MODE_CHOICES)
-from environment_package.ha_automation.home_assistant_yaml_loader import load_yaml_dict
+from environment_package.ha_automation.home_assistant_yaml_loader import \
+    load_yaml_dict
 
 
 def change_param(yaml_dict, param, value="invalid_value", nested = False, nested_param = None) -> dict:

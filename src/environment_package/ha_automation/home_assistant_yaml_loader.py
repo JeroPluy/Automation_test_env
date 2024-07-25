@@ -12,6 +12,7 @@ from io import StringIO, TextIOWrapper
 from typing import Any, TextIO
 
 import yaml
+
 from .home_assistant_exception import HomeAssistantError
 
 try:

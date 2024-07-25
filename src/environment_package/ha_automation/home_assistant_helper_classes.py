@@ -12,19 +12,19 @@ This code is partly extracted from:
             (VERSION: 21.07.2024 - parent 0ab1ccc commit a8cbfe5)
 """
 
-from enum import StrEnum
 import sys
 from collections.abc import Callable
-from types import CodeType
-from typing import Any
-from voluptuous import Schema
 from contextlib import AbstractContextManager
 from contextvars import ContextVar
-from types import TracebackType
+from enum import StrEnum
+from types import CodeType, TracebackType
+from typing import Any
 
 import jinja2
+from voluptuous import Schema
 
 from .home_assistant_exception import TemplateError
+
 
 # ----- const.py -----
 class UnitOfTemperature(StrEnum):

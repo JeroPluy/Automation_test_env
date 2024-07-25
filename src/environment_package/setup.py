@@ -1,4 +1,4 @@
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 setup(
     name='enviroment_package',
@@ -16,4 +16,4 @@ setup(
         'voluptuous==0.15.2',
         'voluptuous-serialize==2.6.0',
     ],
-)
+) 

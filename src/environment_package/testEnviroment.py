@@ -18,7 +18,7 @@ def load_language(lang):
         selected_lang = {}
         for key in langs:
             selected_lang[key] = langs.get(key)[lang]
-        return selected_lang
+        return selected_lang 
     
 class BlankWindow(customtkinter.CTk):
     """

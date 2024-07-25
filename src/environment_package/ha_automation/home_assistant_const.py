@@ -51,7 +51,6 @@ from typing import Any, Final, Mapping
 
 import voluptuous as vol
 
-
 # ----- core.py -----
 # Entity target domain constant
 _OBJECT_ID = r"(?!_)[\da-z_]+(?<!_)"
