@@ -40,6 +40,7 @@
 (38,    'wake_word'),
 (39,    'water_heater'),
 (40,    'weather')
+
 -- TRIGGER INTEGRATION
 /* import the integrations for triggers */
 (41,    'homeassistant'),
