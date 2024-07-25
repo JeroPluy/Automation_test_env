@@ -1,0 +1,105 @@
+alias: enitity test auto
+description: ""
+trigger:
+  - platform: state
+    entity_id:
+      - media_player.bedroom
+    enabled: true
+  - platform: event
+    event_type: ""
+  - platform: numeric_state
+    entity_id:
+      - sensor.carbon_monoxide
+    above: 10
+    below: 50000
+  - platform: persistent_notification
+    update_type:
+      - added
+      - removed
+    notification_id: test_id
+  - platform: numeric_state
+    entity_id:
+      - sensor.light_living_room
+    for:
+      hours: 0
+      minutes: 10
+      seconds: 0
+    above: 2
+    below: 4000
+  - platform: mqtt
+    topic: topic/topic
+    payload: test_payload
+    qos: 1
+  - platform: zone
+    entity_id: person.admin
+    zone: zone.home
+    event: enter
+  - platform: calendar
+    event: start
+    entity_id: calendar.calendar_1
+  - platform: template
+    value_template: ""
+    for: "03:00:00"
+condition:
+  - condition: state
+    entity_id: media_player.lounge_room
+    attribute: device_class
+    state: tv
+  - condition: state
+    entity_id: media_player.walkman
+    state: playing
+  - condition: device
+    type: is_off
+    device_id: 7a0da52b720a09ec110abc1176236897
+    entity_id: 39673709b7df2572bb84431e672ebef5
+    domain: light
+  - condition: numeric_state
+    entity_id: sensor.carbon_monoxide
+    above: 5
+  - condition: sun
+    before: sunrise
+    after_offset: "55"
+  - condition: time
+    weekday:
+      - fri
+    after: "10:00:00"
+  - condition: zone
+    entity_id: device_tracker.demo_paulus
+    zone: zone.home
+  - condition: not
+    conditions:
+      - condition: and
+        conditions:
+          - condition: or
+            conditions:
+              - condition: device
+                type: is_off
+                device_id: 7f6e169dcdf4b5ef7904aeff83333410
+                entity_id: c6ff22d2817f164c951419c23a07a12b
+                domain: switch
+              - type: is_moist
+                condition: device
+                device_id: 95d8bd3158c6e1b06af0b8442196743d
+                entity_id: aeb94a72d8da8a617a540ae7d72a2f24
+                domain: binary_sensor
+          - condition: state
+            entity_id: vacuum.0_ground_floor
+            state: unavailable
+      - condition: numeric_state
+        entity_id: sensor.carbon_dioxide
+        above: 10
+  - condition: trigger
+    id: ""
+  - condition: template
+    value_template: "{{ TRUE }}"
+  - condition: template
+    value_template: "{{ False }}"
+  - condition: or
+    conditions: []
+action:
+  - service: cover.set_cover_tilt_position
+    metadata: {}
+    data: {}
+mode: single
+trace:
+  stored_traces: 6

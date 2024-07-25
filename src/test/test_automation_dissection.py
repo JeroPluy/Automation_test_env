@@ -204,8 +204,35 @@ def test_trigger_entities():
         "value": "20 < __VALUE__ < 30",
         CONF_FOR: "00:01:00",
     }
+    
+    # Test case 13: Numerical state trigger with above value for an attribute
+    trigger_part_num_state_5 = {
+        CONF_PLATFORM: CONF_NUMERIC_STATE,
+        CONF_ENTITY_ID: "sensor.temperature",
+        CONF_ATTRIBUTE: "attribute_1",
+        CONF_ABOVE: 20,
+    }
+    entities_num_state_5 = _trigger_entities(trigger_part_num_state_5, position=1)
+    assert len(entities_num_state_5) == 1
+    assert entities_num_state_5[0].parameter_role == START
+    assert entities_num_state_5[0].integration == "sensor"
+    assert entities_num_state_5[0].entity_name == "sensor.temperature.attribute_1"
+    assert entities_num_state_5[0].expected_value == {"value": "20 < __VALUE__"}
+           
+    
+     # Test case 14: State trigger with on values
+    trigger_part_state_0 = {
+        CONF_PLATFORM: CONF_STATE,
+        CONF_ENTITY_ID: "binary_sensor.motion",
+    }
+    entities_state_1 = _trigger_entities(trigger_part_state_0, position=1)
+    assert len(entities_state_1) == 1
+    assert entities_state_1[0].parameter_role == START
+    assert entities_state_1[0].integration == "binary_sensor"
+    assert entities_state_1[0].entity_name == "binary_sensor.motion"
+    assert entities_state_1[0].expected_value is None
 
-    # Test case 13: State trigger with on values
+    # Test case 15: State trigger with on values
     trigger_part_state_1 = {
         CONF_PLATFORM: CONF_STATE,
         CONF_ENTITY_ID: "binary_sensor.motion",
@@ -218,7 +245,7 @@ def test_trigger_entities():
     assert entities_state_1[0].entity_name == "binary_sensor.motion"
     assert entities_state_1[0].expected_value == {CONF_TO: "on"}
 
-    # Test case 14: State trigger with from and to values
+    # Test case 16: State trigger with from and to values
     trigger_part_state_2 = {
         CONF_PLATFORM: CONF_STATE,
         CONF_ENTITY_ID: "binary_sensor.motion",
@@ -232,7 +259,7 @@ def test_trigger_entities():
     assert entities_state_2[0].entity_name == "binary_sensor.motion"
     assert entities_state_2[0].expected_value == {CONF_TO: "on", CONF_FROM: "off"}
 
-    # Test case 15: State trigger with from, to, and for values
+    # Test case 17: State trigger with from, to, and for values
     trigger_part_state_3 = {
         CONF_PLATFORM: CONF_STATE,
         CONF_ENTITY_ID: "binary_sensor.motion",
@@ -251,7 +278,7 @@ def test_trigger_entities():
         CONF_FOR: "00:01:00",
     }
 
-    # Test case 16: State trigger with not from and not to values
+    # Test case 18: State trigger with not from and not to values
     trigger_part_state_4 = {
         CONF_PLATFORM: CONF_STATE,
         CONF_ENTITY_ID: "binary_sensor.motion",
@@ -268,7 +295,7 @@ def test_trigger_entities():
         CONF_NOT_FROM: "off",
     }
 
-    # Test case 17: State trigger with attribute value
+    # Test case 19: State trigger with attribute value
     trigger_part_state_5 = {
         CONF_PLATFORM: CONF_STATE,
         CONF_ENTITY_ID: "binary_sensor.motion",
@@ -283,7 +310,7 @@ def test_trigger_entities():
     assert entities_state_5[0].entity_name == "binary_sensor.motion.attribute_1"
     assert entities_state_5[0].expected_value == {CONF_TO: "temp2", CONF_FROM: "temp1"}
 
-    # Test case 18: Sun trigger
+    # Test case 20: Sun trigger
     trigger_part_sun_1 = {CONF_PLATFORM: "sun", CONF_EVENT: "sunset"}
     entities_sun_1 = _trigger_entities(trigger_part_sun_1, position=1)
     assert len(entities_sun_1) == 1
@@ -292,7 +319,7 @@ def test_trigger_entities():
     assert entities_sun_1[0].entity_name == "sun.sun"
     assert entities_sun_1[0].expected_value == {CONF_EVENT: "sunset"}
 
-    # Test case 19: Sun trigger with offset
+    # Test case 21: Sun trigger with offset
     trigger_part_sun_2 = {
         CONF_PLATFORM: "sun",
         CONF_EVENT: "sunset",
@@ -308,7 +335,7 @@ def test_trigger_entities():
         CONF_OFFSET: "-01:00:00",
     }
 
-    # Test case 20: Tag trigger with single device
+    # Test case 22: Tag trigger with single device
     trigger_part_tag_1 = {
         CONF_PLATFORM: "tag",
         TAG_ID: "tag_id_1",
@@ -321,7 +348,7 @@ def test_trigger_entities():
     assert entities_tag_1[0].entity_name == "tag.tag_id_1"
     assert entities_tag_1[0].expected_value == {CONF_DEVICE_ID: "device_id_1"}
 
-    # Test case 21: Tag trigger with multiple devices
+    # Test case 23: Tag trigger with multiple devices
     trigger_part_tag_2 = {
         CONF_PLATFORM: "tag",
         TAG_ID: "tag_id_2",
@@ -336,7 +363,7 @@ def test_trigger_entities():
         CONF_DEVICE_ID: ["device_id_2", "device_id_3"]
     }
 
-    # Test case 22: Tag trigger with multiple tags and devices
+    # Test case 24: Tag trigger with multiple tags and devices
     trigger_part_tag_3 = {
         CONF_PLATFORM: "tag",
         TAG_ID: ["tag_id_2", "tag_id_3"],
@@ -357,7 +384,7 @@ def test_trigger_entities():
         CONF_DEVICE_ID: ["device_id_2", "device_id_3"]
     }
 
-    # Test case 23: Template trigger with a value
+    # Test case 25: Template trigger with a value
     trigger_part_template_1 = {
         CONF_PLATFORM: "template",
         CONF_VALUE_TEMPLATE: "{% if is_state('device_tracker.paulus', 'home') %}true{% endif %}",
@@ -371,7 +398,7 @@ def test_trigger_entities():
         CONF_VALUE_TEMPLATE: "{% if is_state('device_tracker.paulus', 'home') %}true{% endif %}"
     }
 
-    # Test case 24: Template trigger with two values
+    # Test case 26: Template trigger with two values
     trigger_part_template_2 = {
         CONF_PLATFORM: "template",
         CONF_VALUE_TEMPLATE: "{{ is_state('device_tracker.paulus', 'home') and is_state('device_tracker.anne_therese', 'home') }}",
@@ -391,7 +418,7 @@ def test_trigger_entities():
         CONF_VALUE_TEMPLATE: "{{ is_state('device_tracker.paulus', 'home') and is_state('device_tracker.anne_therese', 'home') }}"
     }
 
-    # Test case 25: Template trigger with value and for
+    # Test case 27: Template trigger with value and for
     trigger_part_template_3 = {
         CONF_PLATFORM: "template",
         CONF_VALUE_TEMPLATE: "{{ is_state('device_tracker.paulus', 'home') }}",
@@ -407,7 +434,7 @@ def test_trigger_entities():
         CONF_FOR: "00:01:00",
     }
 
-    # Test case 26: Time trigger at 06:05:02
+    # Test case 28: Time trigger at 06:05:02
     trigger_part_time_1 = {CONF_PLATFORM: "time", CONF_AT: "06:05:02"}
     entities_time_1 = _trigger_entities(trigger_part_time_1, position=1)
     assert len(entities_time_1) == 1
@@ -415,8 +442,21 @@ def test_trigger_entities():
     assert entities_time_1[0].integration == "time"
     assert entities_time_1[0].entity_name == "time.time"
     assert entities_time_1[0].expected_value == {CONF_AT: "06:05:02"}
+    
+    # Test case 29: Time trigger at 06:05 and 06:10
+    trigger_part_time_2 = {CONF_PLATFORM: "time", CONF_AT: ["06:05", "06:10"]}
+    entities_time_2 = _trigger_entities(trigger_part_time_2, position=1)
+    assert len(entities_time_2) == 2
+    assert entities_time_2[0].parameter_role == START
+    assert entities_time_2[0].integration == "time"
+    assert entities_time_2[0].entity_name == "time.time"
+    assert entities_time_2[0].expected_value == {CONF_AT: "06:05"}
+    assert entities_time_2[1].parameter_role == START
+    assert entities_time_2[1].integration == "time"
+    assert entities_time_2[1].entity_name == "time.time"
+    assert entities_time_2[1].expected_value == {CONF_AT: "06:10"}
 
-    # Test case 27: Time pattern trigger at **:**:02 seconds
+    # Test case 30: Time pattern trigger at **:**:02 seconds
     trigger_part_time_pattern_1 = {CONF_PLATFORM: "time_pattern", SECONDS: 2}
     entities_time_pattern_1 = _trigger_entities(trigger_part_time_pattern_1, position=1)
     assert len(entities_time_1) == 1
@@ -425,7 +465,7 @@ def test_trigger_entities():
     assert entities_time_pattern_1[0].entity_name is not None
     assert entities_time_pattern_1[0].expected_value == {SECONDS: 2}
 
-    # Test case 28: Time pattern trigger at **:02:00
+    # Test case 31: Time pattern trigger at **:02:00
     trigger_part_time_pattern_2 = {CONF_PLATFORM: "time_pattern", MINUTES: 2}
     entities_time_pattern_2 = _trigger_entities(trigger_part_time_pattern_2, position=1)
     assert len(entities_time_pattern_2) == 1
@@ -434,7 +474,7 @@ def test_trigger_entities():
     assert entities_time_pattern_2[0].entity_name is not None
     assert entities_time_pattern_2[0].expected_value == {MINUTES: 2}
 
-    # Test case 259: Time pattern trigger at 02:00:00
+    # Test case 32: Time pattern trigger at 02:00:00
     trigger_part_time_pattern_3 = {CONF_PLATFORM: "time_pattern", HOURS: 2}
     entities_time_pattern_3 = _trigger_entities(trigger_part_time_pattern_3, position=1)
     assert len(entities_time_pattern_3) == 1
@@ -443,7 +483,7 @@ def test_trigger_entities():
     assert entities_time_pattern_3[0].entity_name is not None
     assert entities_time_pattern_3[0].expected_value == {HOURS: 2}
 
-    # Test case 30: Time pattern trigger at 06:05:02 AM with leading zero in hours
+    # Test case 33: Time pattern trigger at 06:05:02 AM with leading zero in hours
     trigger_part_time_pattern_4 = {
         CONF_PLATFORM: "time_pattern",
         HOURS: "06",
@@ -456,7 +496,7 @@ def test_trigger_entities():
     except vol.Invalid as e:
         assert str(e) == "Leading zero in hours is not allowed"
 
-    # Test case 31: Time pattern trigger at 6:05:02 AM with leading zero in minutes
+    # Test case 34: Time pattern trigger at 6:05:02 AM with leading zero in minutes
     trigger_part_time_pattern_5 = {
         CONF_PLATFORM: "time_pattern",
         HOURS: 6,
@@ -469,7 +509,7 @@ def test_trigger_entities():
     except vol.Invalid as e:
         assert str(e) == "Leading zero in minutes is not allowed"
 
-    # Test case 32: Time pattern trigger at 6:05:02 AM with leading zero in seconds
+    # Test case 35: Time pattern trigger at 6:05:02 AM with leading zero in seconds
     trigger_part_time_pattern_6 = {
         CONF_PLATFORM: "time_pattern",
         HOURS: 6,
@@ -482,7 +522,7 @@ def test_trigger_entities():
     except vol.Invalid as e:
         assert str(e) == "Leading zero in seconds is not allowed"
 
-    # Test case 33: Time pattern trigger at every 5 minutes
+    # Test case 36: Time pattern trigger at every 5 minutes
     trigger_part_time_pattern_7 = {CONF_PLATFORM: "time_pattern", MINUTES: "/5"}
     entities_time_pattern_7 = _trigger_entities(trigger_part_time_pattern_7, position=1)
     assert len(entities_time_pattern_7) == 1
@@ -491,7 +531,7 @@ def test_trigger_entities():
     assert entities_time_pattern_7[0].entity_name is not None
     assert entities_time_pattern_7[0].expected_value == {MINUTES: "/5"}
 
-    # Test case 34: Trigger at the creation of a persistent notification
+    # Test case 37: Trigger at the creation of a persistent notification
     trigger_part_pers_notify_1 = {
         CONF_PLATFORM: "persistent_notification",
         CONF_UPDATE_TYPE: "create",
@@ -503,7 +543,7 @@ def test_trigger_entities():
     assert entities_pers_notify_1[0].entity_name is not None
     assert entities_pers_notify_1[0].expected_value == {CONF_UPDATE_TYPE: "create"}
 
-    # Test case 35: Trigger at the creation of a persistent notification with the id "notify_id_1"
+    # Test case 38: Trigger at the creation of a persistent notification with the id "notify_id_1"
     trigger_part_pers_notify_2 = {
         CONF_PLATFORM: "persistent_notification",
         CONF_UPDATE_TYPE: "create",
@@ -518,7 +558,7 @@ def test_trigger_entities():
     )
     assert entities_pers_notify_2[0].expected_value == {CONF_UPDATE_TYPE: "create"}
 
-    # Test case 36: Trigger at the post or get of a webhook with id "webhook_id_1"
+    # Test case 39: Trigger at the post or get of a webhook with id "webhook_id_1"
     trigger_part_webhook_1 = {
         CONF_PLATFORM: "webhook",
         CONF_WEBHOOK_ID: "webhook_id_1",
@@ -533,7 +573,7 @@ def test_trigger_entities():
         CONF_ALLOWED_METHODS: ["POST", "GET"]
     }
 
-    # Test case 37: Trigger at the post of a webhook with id "webhook_id_2" only locally
+    # Test case 40: Trigger at the post of a webhook with id "webhook_id_2" only locally
     trigger_part_webhook_2 = {
         CONF_PLATFORM: "webhook",
         CONF_WEBHOOK_ID: "webhook_id_2",
@@ -550,7 +590,7 @@ def test_trigger_entities():
         CONF_LOCAL: True,
     }
 
-    # Test case 38: Trigger when paulus enters the home zone
+    # Test case 41: Trigger when paulus enters the home zone
     trigger_part_zone_1 = {
         CONF_PLATFORM: "zone",
         CONF_ZONE: "zone.home",
@@ -567,7 +607,7 @@ def test_trigger_entities():
         CONF_ENTITY_ID: "device_tracker.paulus",
     }
 
-    # Test case 39: Trigger when paulus enters the home zone with a local device
+    # Test case 42: Trigger when paulus enters the home zone with a local device
     trigger_part_geo_local_1 = {
         CONF_PLATFORM: "geo_location",
         CONF_ZONE: "zone.home",
@@ -584,7 +624,7 @@ def test_trigger_entities():
         CONF_SOURCE: "geo_location-source",
     }
 
-    # Test case 40: Trigger when device_id_1 does something
+    # Test case 43: Trigger when device_id_1 does something
     trigger_part_device_1 = {
         CONF_PLATFORM: "device",
         CONF_DEVICE_ID: "device_id_1",
@@ -603,7 +643,7 @@ def test_trigger_entities():
         CONF_DOMAIN: "domain",
     }
 
-    # Test case 41: Trigger when calender_name has an event event_name
+    # Test case 44: Trigger when calender_name has an event event_name
     trigger_part_calendar_1 = {
         CONF_PLATFORM: "calendar",
         CONF_ENTITY_ID: "calendar.calendar_name",
@@ -616,7 +656,7 @@ def test_trigger_entities():
     assert entities_calendar_1[0].entity_name == "calendar.calendar_name"
     assert entities_calendar_1[0].expected_value == {CONF_EVENT: "event_name"}
 
-    # Test case 42: Trigger when calender_name has an event event_name with an offset of -01:00:00
+    # Test case 45: Trigger when calender_name has an event event_name with an offset of -01:00:00
     trigger_part_calendar_2 = {
         CONF_PLATFORM: "calendar",
         CONF_ENTITY_ID: "calendar.calendar_name",
@@ -633,18 +673,35 @@ def test_trigger_entities():
         CONF_OFFSET: "-01:00:00",
     }
 
+    # Test case 46: Trigger when conversation has an intentional_name command
     trigger_part_conversation_1 = {
         CONF_PLATFORM: "conversation",
-        CONF_COMMAND: "intent_name",
+        CONF_COMMAND: "intentional_name",
     }
     entities_conversation_1 = _trigger_entities(trigger_part_conversation_1, position=1)
     assert len(entities_conversation_1) == 1
     assert entities_conversation_1[0].parameter_role == START
     assert entities_conversation_1[0].integration == "conversation"
     assert entities_conversation_1[0].entity_name is not None
-    assert entities_conversation_1[0].expected_value == {CONF_COMMAND: "intent_name"}
+    assert entities_conversation_1[0].expected_value == {CONF_COMMAND: "intentional_name"}
 
-    # Test case 43: Unsupported platform
+    # Test case 47: Trigger when conversation has a be my guest command or a intentional_name command
+    trigger_part_conversation_2 = {
+        CONF_PLATFORM: "conversation",
+        CONF_COMMAND: ["intentional_name", "be my guest"],
+    }
+    entities_conversation_2 = _trigger_entities(trigger_part_conversation_2, position=1)
+    assert len(entities_conversation_2) == 2
+    assert entities_conversation_2[0].parameter_role == START
+    assert entities_conversation_2[0].integration == "conversation"
+    assert entities_conversation_2[0].entity_name is not None
+    assert entities_conversation_2[0].expected_value == {CONF_COMMAND: "intentional_name"}
+    assert entities_conversation_2[1].parameter_role == START
+    assert entities_conversation_2[1].integration == "conversation"
+    assert entities_conversation_2[1].entity_name is not None
+    assert entities_conversation_2[1].expected_value == {CONF_COMMAND: "be my guest"}
+    
+    # Test case 48: Unsupported platform
     trigger_part_x = {CONF_PLATFORM: "unsupported"}
     entities_x = _trigger_entities(trigger_part_x, position=1)
     assert len(entities_x) == 0
@@ -652,5 +709,24 @@ def test_trigger_entities():
     print("All test cases passed!")
 
 
+from environment_package.ha_automation import home_assistant_yaml_loader as yaml_loader
+import os
+import asyncio
+from environment_package.ha_automation import home_assistant_automation_config as ha_automation_config
+from environment_package.automation_dissection import Automation, Entity, _extract_all_conditions
+
+def test_condition_entities():
+    basis_file = os.path.join('test_data','yaml_files','all_conditions.yaml')
+    automation_yaml = yaml_loader.load_yaml_dict(basis_file)
+    automation_config = asyncio.run(ha_automation_config.async_validate_config_item(automation_yaml))
+    print(" --- " + automation_config.automation_name + " --- ")
+    extracted_entities = _extract_all_conditions(automation_config)
+    entity: Entity = None
+    for entity in extracted_entities:
+        print(entity.entity_name + " : \t" + str(entity.expected_value))
+    
+    
+
 if __name__ == "__main__":
-    test_trigger_entities()
+    # test_trigger_entities()
+    test_condition_entities()

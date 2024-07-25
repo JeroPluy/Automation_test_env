@@ -18,16 +18,19 @@ from .ha_automation.home_assistant_const import (
     CONF_ABOVE,
     CONF_ACTION,
     CONF_ALLOWED_METHODS,
+    CONF_AND,
     CONF_AT,
     CONF_ATTRIBUTE,
     CONF_BELOW,
     CONF_CALENDAR,
     CONF_COMMAND,
     CONF_CONDITION,
+    CONF_CONDITIONS,
     CONF_CONVERSATION,
     CONF_DEVICE,
     CONF_DEVICE_ID,
     CONF_DOMAIN,
+    CONF_ENABLED,
     CONF_ENTITY_ID,
     CONF_EVENT,
     CONF_EVENT_CONTEXT,
@@ -40,10 +43,12 @@ from .ha_automation.home_assistant_const import (
     CONF_MAX,
     CONF_MODE,
     CONF_NOFITY_ID,
+    CONF_NOT,
     CONF_NOT_FROM,
     CONF_NOT_TO,
     CONF_NUMERIC_STATE,
     CONF_OFFSET,
+    CONF_OR,
     CONF_PAYLOAD,
     CONF_PERS_NOTIFICATION,
     CONF_PLATFORM,
@@ -174,6 +179,11 @@ def _trigger_entities(trigger_part: dict, position: int) -> list:
     # entity parameter role is start
     param_role = START
 
+    # check if the trigger is enabled
+    if CONF_ENABLED in trigger_part:
+        if CONF_ENABLED is False:
+            return Entity_list
+
     # if the trigger is an event
     if platform == CONF_EVENT:
         exp_value = {}
@@ -263,6 +273,7 @@ def _trigger_entities(trigger_part: dict, position: int) -> list:
         if CONF_BELOW in trigger_part:
             exp_value_str = exp_value_str + " < " + str(trigger_part[CONF_BELOW])
         exp_value = {"value": exp_value_str}
+        # TODO value_template is missing
 
         # add the time the value has to stay in the trigger range
         if CONF_FOR in trigger_part:
@@ -273,6 +284,8 @@ def _trigger_entities(trigger_part: dict, position: int) -> list:
             for entity in trigger_part[CONF_ENTITY_ID]:
                 entity_integration = entity.split(".")[0]
                 entity_name = entity.split(".")[1]
+                if CONF_ATTRIBUTE in trigger_part:
+                    entity_name = entity_name + "." + str(trigger_part[CONF_ATTRIBUTE])
                 Entity_list.append(
                     Entity(
                         position=position,
@@ -283,28 +296,32 @@ def _trigger_entities(trigger_part: dict, position: int) -> list:
                     )
                 )
         else:
+            entity_name = trigger_part[CONF_ENTITY_ID].split(".")[1]
+            if CONF_ATTRIBUTE in trigger_part:
+                    entity_name = entity_name + "." + str(trigger_part[CONF_ATTRIBUTE])
             # create the single entity in the event_type part
             Entity_list.append(
                 Entity(
                     position=position,
                     param_role=param_role,
                     integration=trigger_part[CONF_ENTITY_ID].split(".")[0],
-                    entity_name=trigger_part[CONF_ENTITY_ID].split(".")[1],
+                    entity_name=entity_name,
                     expected_value=exp_value,
                 )
             )
 
     # if the trigger is a state change
     elif platform == CONF_STATE:
+        exp_value = {}
         # add the state values of the trigger
         if CONF_TO in trigger_part:
-            exp_value = {CONF_TO: str(trigger_part[CONF_TO])}
-        else:
-            exp_value = {CONF_NOT_TO: str(trigger_part[CONF_NOT_TO])}
+            exp_value[CONF_TO] = str(trigger_part[CONF_TO])
+        elif CONF_NOT_TO in trigger_part:
+            exp_value[CONF_NOT_TO] = str(trigger_part[CONF_NOT_TO])
         if CONF_FROM in trigger_part:
-            exp_value[CONF_FROM] = trigger_part[CONF_FROM]
+            exp_value[CONF_FROM] = str(trigger_part[CONF_FROM])
         elif CONF_NOT_FROM in trigger_part:
-            exp_value[CONF_NOT_FROM] = trigger_part[CONF_NOT_FROM]
+            exp_value[CONF_NOT_FROM] = str(trigger_part[CONF_NOT_FROM])
         if CONF_FOR in trigger_part:
             exp_value[CONF_FOR] = trigger_part[CONF_FOR]
 
@@ -406,6 +423,7 @@ def _trigger_entities(trigger_part: dict, position: int) -> list:
             ):
                 # add the possible value of the template
                 exp_value = {CONF_VALUE_TEMPLATE: template_str}
+                # TODO could be a bit more accurate than just the whole string
 
                 # add the time the value has to stay in the trigger range
                 if CONF_FOR in trigger_part:
@@ -428,16 +446,29 @@ def _trigger_entities(trigger_part: dict, position: int) -> list:
 
     # if the trigger is a time event
     elif platform == CONF_TIME:
-        # create the time entity
-        Entity_list.append(
-            Entity(
-                position=position,
-                param_role=param_role,
-                integration=CONF_TIME,
-                entity_name=CONF_TIME,
-                expected_value={CONF_AT: trigger_part[CONF_AT]},
+        if isinstance(trigger_part[CONF_AT], list):
+            for time in trigger_part[CONF_AT]:
+                # create the time entity
+                Entity_list.append(
+                    Entity(
+                        position=position,
+                        param_role=param_role,
+                        integration=CONF_TIME,
+                        entity_name=CONF_TIME,
+                        expected_value={CONF_AT: time},
+                    )
+                )
+        else:
+            # create the single time entity
+            Entity_list.append(
+                Entity(
+                    position=position,
+                    param_role=param_role,
+                    integration=CONF_TIME,
+                    entity_name=CONF_TIME,
+                    expected_value={CONF_AT: trigger_part[CONF_AT]},
+                )
             )
-        )
 
     # if the trigger is a time pattern event
     elif platform == CONF_TIME_PATTERN:
@@ -578,16 +609,29 @@ def _trigger_entities(trigger_part: dict, position: int) -> list:
 
     # if trigger is a sentence
     elif platform == CONF_CONVERSATION:
-        # create the conversation entity
-        Entity_list.append(
-            Entity(
-                position=position,
-                param_role=param_role,
-                integration=CONF_CONVERSATION,
-                entity_name=str(uuid.uuid4()),
-                expected_value={CONF_COMMAND: trigger_part[CONF_COMMAND]},
+        if isinstance(trigger_part[CONF_COMMAND], list):
+            for command in trigger_part[CONF_COMMAND]:
+                # create the conversation entity
+                Entity_list.append(
+                    Entity(
+                        position=position,
+                        param_role=param_role,
+                        integration=CONF_CONVERSATION,
+                        entity_name=str(uuid.uuid4()),
+                        expected_value={CONF_COMMAND: command},
+                    )
+                )
+        else:
+            # create the conversation entity
+            Entity_list.append(
+                Entity(
+                    position=position,
+                    param_role=param_role,
+                    integration=CONF_CONVERSATION,
+                    entity_name=str(uuid.uuid4()),
+                    expected_value={CONF_COMMAND: trigger_part[CONF_COMMAND]},
+                )
             )
-        )
 
     return Entity_list
 
@@ -602,13 +646,167 @@ def _condition_entities(condition_part: dict, position: int) -> list:
         list: A list of entities as Entity objects
     """
 
-    platform = condition_part[CONF_PLATFORM]
+    # check if the condition is a pure template
+    if CONF_CONDITION in condition_part:
+        condition = condition_part[CONF_CONDITION]
+    else:
+        condition = CONF_TEMPLATE
+
     # list of entities in the trigger part
     Entity_list = []
     # entity parameter role is start
     param_role = INPUT
 
+    # check if the condition is enabled
+    if CONF_ENABLED in condition_part:
+        if CONF_ENABLED is False:
+            return Entity_list
+
+    if condition == CONF_OR or condition == CONF_AND or condition == CONF_NOT:
+        if CONF_CONDITIONS in condition_part:
+            for sub_condition in condition_part[CONF_CONDITIONS]:
+                Entity_list += _condition_entities(sub_condition, position)
+                if condition == CONF_OR:
+                    position += 1
+                    # TODO test the position increment / decrements - the or condition should have a smaller position than the and / not conditions its nested in 
+
+    elif condition == CONF_NUMERIC_STATE:
+        # add the value range to the entity
+        exp_value_str = "__VALUE__"
+        if CONF_ABOVE in condition_part:
+            exp_value_str = str(condition_part[CONF_ABOVE]) + " < " + exp_value_str
+        if CONF_BELOW in condition_part:
+            exp_value_str = exp_value_str + " < " + str(condition_part[CONF_BELOW])
+        exp_value = {"value": exp_value_str}
+        # TODO value_template is missing
+
+        # check if multiple entities has to reach the condition
+        if isinstance(condition_part[CONF_ENTITY_ID], list):
+            for entity in condition_part[CONF_ENTITY_ID]:
+                entity_integration = entity.split(".")[0]
+                entity_name = entity.split(".")[1]
+                if CONF_ATTRIBUTE in condition_part:
+                    entity_name = entity_name + "." + str(condition_part[CONF_ATTRIBUTE])
+                Entity_list.append(
+                    Entity(
+                        position=position,
+                        param_role=param_role,
+                        integration=entity_integration,
+                        entity_name=entity_name,
+                        expected_value=exp_value,
+                    )
+                )
+        else:
+            entity_name = condition_part[CONF_ENTITY_ID].split(".")[1]
+            if CONF_ATTRIBUTE in condition_part:
+                    entity_name = entity_name + "." + str(condition_part[CONF_ATTRIBUTE])
+            # create a single entity in the condion part
+            Entity_list.append(
+                Entity(
+                    position=position,
+                    param_role=param_role,
+                    integration=condition_part[CONF_ENTITY_ID].split(".")[0],
+                    entity_name=entity_name,
+                    expected_value=exp_value,
+                )
+            )
+
+    elif condition == CONF_STATE:
+        # add the state value of the condition
+        exp_value = {CONF_STATE: str(condition_part[CONF_STATE])}
+        if CONF_FOR in condition_part:
+            exp_value[CONF_FOR] = condition_part[CONF_FOR]
+        
+        # TODO CONF_MANY
+        # TODO isinstance(condition_part[CONF_STATE], list)
+        
+        if isinstance(condition_part[CONF_ENTITY_ID], list):
+            for entity in condition_part[CONF_ENTITY_ID]:
+                entity_integration = entity.split(".")[0]
+                entity_name = entity.split(".")[1]
+                if CONF_ATTRIBUTE in condition_part:
+                    entity_name = entity_name + "." + str(condition_part[CONF_ATTRIBUTE])
+                Entity_list.append(
+                    Entity(
+                        position=position,
+                        param_role=param_role,
+                        integration=entity_integration,
+                        entity_name=entity_name,
+                        expected_value=exp_value,
+                    )
+                )
+        else:
+            entity_name = condition_part[CONF_ENTITY_ID].split(".")[1]
+            if CONF_ATTRIBUTE in condition_part:
+                entity_name = entity_name + "." + str(condition_part[CONF_ATTRIBUTE])
+
+            # create the entity in the condition part
+            Entity_list.append(
+                Entity(
+                    position=position,
+                    param_role=param_role,
+                    integration=condition_part[CONF_ENTITY_ID].split(".")[0],
+                    entity_name=entity_name,
+                    expected_value=exp_value,
+                )
+            )
+
+    elif condition == CONF_TEMPLATE:
+        if CONF_VALUE_TEMPLATE in condition:
+            template_str = condition_part[CONF_VALUE_TEMPLATE]
+        else:
+            template_str = condition_part
+
+        # check if the string is a Jinja2 template
+        if "{" in template_str and (
+            "{%" in template_str or "{{" in template_str or "{#" in template_str
+        ):
+            # add the possible value of the template
+            exp_value = {CONF_VALUE_TEMPLATE: template_str}
+
+            # search for entities in the template string
+            entities = re.findall(r"\w+\.\w+", template_str)
+            for entity in entities:
+                entity_integration = entity.split(".")[0]
+                entity_name = entity.split(".")[1]
+                Entity_list.append(
+                    Entity(
+                        position=position,
+                        param_role=param_role,
+                        integration=entity_integration,
+                        entity_name=entity_name,
+                        expected_value=exp_value,
+                    )
+                )
+        elif condition == CONF_TIME:
+            # create the time entity
+            Entity_list.append(
+                Entity(
+                    position=position,
+                    param_role=param_role,
+                    integration=CONF_TIME,
+                    entity_name=CONF_TIME,
+                    expected_value={CONF_AT: condition_part[CONF_AT]},
+                )
+            )
+
+    #TODO time
+    elif condition == CONF_TIME:
+        pass
     
+    #TODO trigger
+    elif condition == CONF_TRIGGER:
+        pass
+    
+    #TODO zone
+    elif condition == CONF_ZONE:
+        pass
+    
+    #TODO device
+    elif condition == CONF_DEVICE:
+        pass
+    
+    return Entity_list
 
 
 def _action_entities(action_part: dict, position: int) -> list:
@@ -626,6 +824,11 @@ def _action_entities(action_part: dict, position: int) -> list:
     Entity_list = []
     # entity parameter role is start
     param_role = OUTPUT
+    
+    # check if the action is enabled
+    if CONF_ENABLED in action_part:
+        if CONF_ENABLED is False:
+            return Entity_list
 
     pass
 
@@ -681,7 +884,7 @@ def create_entity_list(automation_config: AutomationConfig) -> list:
     """
     Entity_list = []
     Entity_list += _extract_all_trigger(automation_config)
-    # Entity_list += _extract_all_conditions(automation_config)
+    Entity_list += _extract_all_conditions(automation_config)
     # Entity_list += _extract_all_actions(automation_config)
     return Entity_list
 

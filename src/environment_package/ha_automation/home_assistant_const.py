@@ -937,3 +937,7 @@ CONF_LOCAL: Final = "local_only"
 CONF_GEO_LOCATION: Final = "geo_location"
 CONF_CALENDAR: Final = "calendar"
 CONF_CONVERSATION: Final = "conversation"
+
+CONF_NOT: Final = "not"
+CONF_OR: Final = "or"
+CONF_AND: Final = "and"
