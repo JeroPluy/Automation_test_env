@@ -1,102 +1,102 @@
-(1,     'main',     'None'),	                                        --Unknown state.
-(2,     'main',     'disarmed'),	                                    --The alarm is disarmed (off).
-(3,     'main',     'armed_home'),	                                    --The alarm is armed in home mode.
-(4,     'main',     'armed_away'),	                                    --The alarm is armed in away mode.
-(5,     'main',     'armed_night'),	                                    --The alarm is armed in night mode.
-(6,     'main',     'armed_vacation'),	                                --The alarm is armed in vacation mode.
-(7,     'main',     'armed_custom_bypass'),                             --The alarm is armed in bypass mode.
-(8,     'main',     'pending'),	                                        --The alarm is pending (towards triggered).
-(9,     'main',     'arming'),	                                        --The alarm is arming.
-(10,    'main',     'disarming'),	                                    --The alarm is disarming.
-(11,    'main',     'triggered'),                                       --The alarm is triggered.
-(12,    'main',     'unknown'),	                                        --Unknown state.
-(13,    'main',     'unavailable'),                                     --The entity is not reachable.
-(14,    'main',     'on'),	                                            --The sensor detects something.
-(15,    'main',     'off'),	                                            --The sensor detects nothing.
-(16,    'main',     'idle'),                                            --The camera observes.
-(17,    'main',     'recording'),                                       --The camera records the recording.
-(18,    'main',     'streaming'),                                       --The camera streams the recording.
-(19,    'main',     'auto'),                                            --The device is set to a schedule, learned behavior, AI.
-(20,    'main',     'cool'),                                            --The device is set to cool to a target temperature.
-(21,    'main',     'heat'),                                            --The device is set to heat to a target temperature.
-(22,    'main',     'heat_cool'),                                       --The device is set to heat/cool to a target temperature range.
-(23,    'main',     'dry'),                                             --The device is set to dry/humidity mode.
-(24,    'main',     'fan_only'),                                        --The device only has the fan on. No heating or cooling taking place.
-(25,    'main',     'string'),                                          --The scentence in the converstation.
-(26,    'main',     'closed'),                                          --The cover has reach the closed position.
-(27,    'main',     'closing'),                                         --The cover is in the process of closing to reach a set position.
-(28,    'main',     'open'),                                            --The cover has reached the open position.
-(29,    'main',     'opening'),                                         --The cover is in the process of opening to reach a set position
-(30,    'main',     'home'),                                            --The device is home.
-(31,    'main',     'not_home'),                                        --The cover is not home.
-(32,    'main',     'mowing'), 	                                        --The lawn mower is currently mowing.
-(33,    'main',     'docked'),	                                        --The lawn mower is done mowing and is currently docked.
-(34,    'main',     'paused'),	                                        --The lawn mower was active and is now paused.
-(35,    'main',     'error'),       	                                --The lawn mower encountered an error while active and needs assistance.
-(36,    'main',     'jammed'),                                          --The lock is unabled to toggle.
-(37,    'main',     'locked'),                                          --The lock is locked.
-(38,    'main',     'locking'),                                         --The lock is looking.
-(39,    'main',     'unlocked'),                                        --The lock is unlocked.
-(40,    'main',     'unlocking'),                                       --The lock is unlooking.
-(41,    'main',     'playing'),                                         --The media player playimg something.
-(42,    'main',     'standby'),                                         --The media player is in standby mode.
-(43,    'main',     'buffering'),                                       --The media player buffering something.
-(44,    'main',     'float'),                                           --The number of the entity.
-(45,    'main', 	'option'),                                          --The id of the scene.
-(46,    'main',     'integer'),                                         --A TodoListEntity state is the count of incomplete items in the To-do list.
-(47,    'main',     'cleaning'),                                        --The vacuum is cleaning.
-(48,    'main',     'returning'),                                       --The vacuum is returning to the dock.
-(49,    'main',     'eco'),                                             --The water heater is in eco mode.
-(50,    'main',     'electric'),                                        --The water heater is in electric mode.
-(51,    'main',     'performance'),                                     --The water heater is in high performance mode.
-(52,    'main',     'high_demand'),                                     --The water heater is in high performance mode.
-(53,    'main',     'heat_pump'),                                       --The water heater is in heat pump mode.
-(54,    'main',     'gas'),                                             --The water heater is in gas mode.
-(55,    'main',     'clear-night'),                                     --The weather is clear at night.
-(56,    'main',     'cloudy'),                                          --The weather is cloudy.
-(57,    'main',     'exceptional'),                                     --The weather is exceptional.
-(58,    'main',     'fog'),                                             --The weather is foggy.
-(59,    'main',     'hail'),                                            --The weather is hailing.
-(60,    'main',     'lightning'),                                       --The weather is lightning.
-(61,    'main',     'lightning-rainy'),                                 --The weather is lightning and rainy.
-(62,    'main',     'partlycloudy'),                                    --The weather is partly cloudy.
-(63,    'main',     'pouring'),                                         --The weather is pouring.
-(64,    'main',     'rainy'),                                           --The weather is rainy.
-(65,    'main',     'snowy'),                                           --The weather is snowy.
-(66,    'main',     'snowy-rainy'),                                     --The weather is snowy and rainy.
-(67,    'main',     'sunny'),                                           --The weather is sunny.
-(68,    'main',     'windy'),                                           --The weather is windy.
-(69,    'main',     'windy-variant'),                                   --The weather is windy and variant.
-(70,    'code_format',          'number'),                              --The code format of the alarm control panel.
-(71,    'code_format',          'text'),                                --The code format of the alarm control panel.
-(72,    'changed_by',           'string'),                              --The alarm control panel got changed by a user.
-(73,    'code_arm_required',    'string'),                              --The code required to arm the alarm control panel.
-(74,    'supported_features',   'int'),                                 --The count of supported features of the alarm control panel.
-(75,    'device_class',         'battery'),                             --The device class of the binary sensor.
-(76,    'device_class',         'battery_charging'),                    --The device class of the binary sensor.
-(77,    'device_class',         'co'),                                  --The device class of the binary sensor.
-(78,    'device_class',         'cold'),                                --The device class of the binary sensor.
-(79,    'device_class',         'connectivity'),                        --The device class of the binary sensor.
-(80,    'device_class',         'door'),                                --The device class of the binary sensor.
-(81,    'device_class',         'garage_door'),                         --The device class of the binary sensor.
-(82,    'device_class',         'gas'),                                 --The device class of the binary sensor.
-(83,    'device_class',         'heat'),                                --The device class of the binary sensor.
-(84,    'device_class',         'light'),                               --The device class of the binary sensor.
-(85,    'device_class',         'lock'),                                --The device class of the binary sensor.
-(86,    'device_class',         'moisture'),                            --The device class of the binary sensor.
-(87,    'device_class',         'motion'),                              --The device class of the binary sensor.
-(88,    'device_class',         'moving'),                              --The device class of the binary sensor.
-(89,    'device_class',         'occupancy'),                           --The device class of the binary sensor.
-(90,    'device_class',         'opening'),                             --The device class of the binary sensor.
-(91,    'device_class',         'plug'),                                --The device class of the binary sensor.
-(92,    'device_class',         'power'),                               --The device class of the binary sensor.
-(93,    'device_class',         'presence'),                            --The device class of the binary sensor.
-(94,    'device_class',         'problem'),                             --The device class of the binary sensor.
-(95,    'device_class',         'running'),                             --The device class of the binary sensor.
-(96,    'device_class',         'safety'),                              --The device class of the binary sensor.
-(97,    'device_class',         'smoke'),                               --The device class of the binary sensor.
-(98,    'device_class',         'sound'),                               --The device class of the binary sensor.
-(99,    'device_class',         'tamper'),                              --The device class of the binary sensor.
+(1  ,     'main',     'None'),	                                        --Unknown state.
+(2  ,     'main',     'disarmed'),	                                    --The alarm is disarmed (off).
+(3  ,     'main',     'armed_home'),	                                    --The alarm is armed in home mode.
+(4  ,     'main',     'armed_away'),	                                    --The alarm is armed in away mode.
+(5  ,     'main',     'armed_night'),	                                    --The alarm is armed in night mode.
+(6  ,     'main',     'armed_vacation'),	                                --The alarm is armed in vacation mode.
+(7  ,     'main',     'armed_custom_bypass'),                             --The alarm is armed in bypass mode.
+(8  ,     'main',     'pending'),	                                        --The alarm is pending (towards triggered).
+(9  ,     'main',     'arming'),	                                        --The alarm is arming.
+(10 ,    'main',     'disarming'),	                                    --The alarm is disarming.
+(11 ,    'main',     'triggered'),                                       --The alarm is triggered.
+(12 ,    'main',     'unknown'),	                                        --Unknown state.
+(13 ,    'main',     'unavailable'),                                     --The entity is not reachable.
+(14 ,    'main',     'on'),	                                            --The sensor detects something.
+(15 ,    'main',     'off'),	                                            --The sensor detects nothing.
+(16 ,    'main',     'idle'),                                            --The camera observes.
+(17 ,    'main',     'recording'),                                       --The camera records the recording.
+(18 ,    'main',     'streaming'),                                       --The camera streams the recording.
+(19 ,    'main',     'auto'),                                            --The device is set to a schedule, learned behavior, AI.
+(20 ,    'main',     'cool'),                                            --The device is set to cool to a target temperature.
+(21 ,    'main',     'heat'),                                            --The device is set to heat to a target temperature.
+(22 ,    'main',     'heat_cool'),                                       --The device is set to heat/cool to a target temperature range.
+(23 ,    'main',     'dry'),                                             --The device is set to dry/humidity mode.
+(24 ,    'main',     'fan_only'),                                        --The device only has the fan on. No heating or cooling taking place.
+(25 ,    'main',     'string'),                                          --The scentence in the converstation.
+(26 ,    'main',     'closed'),                                          --The cover has reach the closed position.
+(27 ,    'main',     'closing'),                                         --The cover is in the process of closing to reach a set position.
+(28 ,    'main',     'open'),                                            --The cover has reached the open position.
+(29 ,    'main',     'opening'),                                         --The cover is in the process of opening to reach a set position
+(30 ,    'main',     'home'),                                            --The device is home.
+(31 ,    'main',     'not_home'),                                        --The cover is not home.
+(32 ,    'main',     'mowing'), 	                                        --The lawn mower is currently mowing.
+(33 ,    'main',     'docked'),	                                        --The lawn mower is done mowing and is currently docked.
+(34 ,    'main',     'paused'),	                                        --The lawn mower was active and is now paused.
+(35 ,    'main',     'error'),       	                                --The lawn mower encountered an error while active and needs assistance.
+(36 ,    'main',     'jammed'),                                          --The lock is unabled to toggle.
+(37 ,    'main',     'locked'),                                          --The lock is locked.
+(38 ,    'main',     'locking'),                                         --The lock is looking.
+(39 ,    'main',     'unlocked'),                                        --The lock is unlocked.
+(40 ,    'main',     'unlocking'),                                       --The lock is unlooking.
+(41 ,    'main',     'playing'),                                         --The media player playimg something.
+(42 ,    'main',     'standby'),                                         --The media player is in standby mode.
+(43 ,    'main',     'buffering'),                                       --The media player buffering something.
+(44 ,    'main',     'float'),                                           --The number of the entity.
+(45 ,    'main', 	'option'),                                          --The id of the scene.
+(46 ,    'main',     'integer'),                                         --A TodoListEntity state is the count of incomplete items in the To-do list.
+(47 ,    'main',     'cleaning'),                                        --The vacuum is cleaning.
+(48 ,    'main',     'returning'),                                       --The vacuum is returning to the dock.
+(49 ,    'main',     'eco'),                                             --The water heater is in eco mode.
+(50 ,    'main',     'electric'),                                        --The water heater is in electric mode.
+(51 ,    'main',     'performance'),                                     --The water heater is in high performance mode.
+(52 ,    'main',     'high_demand'),                                     --The water heater is in high performance mode.
+(53 ,    'main',     'heat_pump'),                                       --The water heater is in heat pump mode.
+(54 ,    'main',     'gas'),                                             --The water heater is in gas mode.
+(55 ,    'main',     'clear-night'),                                     --The weather is clear at night.
+(56 ,    'main',     'cloudy'),                                          --The weather is cloudy.
+(57 ,    'main',     'exceptional'),                                     --The weather is exceptional.
+(58 ,    'main',     'fog'),                                             --The weather is foggy.
+(59 ,    'main',     'hail'),                                            --The weather is hailing.
+(60 ,    'main',     'lightning'),                                       --The weather is lightning.
+(61 ,    'main',     'lightning-rainy'),                                 --The weather is lightning and rainy.
+(62 ,    'main',     'partlycloudy'),                                    --The weather is partly cloudy.
+(63 ,    'main',     'pouring'),                                         --The weather is pouring.
+(64 ,    'main',     'rainy'),                                           --The weather is rainy.
+(65 ,    'main',     'snowy'),                                           --The weather is snowy.
+(66 ,    'main',     'snowy-rainy'),                                     --The weather is snowy and rainy.
+(67 ,    'main',     'sunny'),                                           --The weather is sunny.
+(68 ,    'main',     'windy'),                                           --The weather is windy.
+(69 ,    'main',     'windy-variant'),                                   --The weather is windy and variant.
+(70 ,    'code_format',          'number'),                              --The code format of the alarm control panel.
+(71 ,    'code_format',          'text'),                                --The code format of the alarm control panel.
+(72 ,    'changed_by',           'string'),                              --The alarm control panel got changed by a user.
+(73 ,    'code_arm_required',    'string'),                              --The code required to arm the alarm control panel.
+(74 ,    'supported_features',   'int'),                                 --The count of supported features of the alarm control panel.
+(75 ,    'device_class',         'battery'),                             --The device class of the binary sensor.
+(76 ,    'device_class',         'battery_charging'),                    --The device class of the binary sensor.
+(77 ,    'device_class',         'co'),                                  --The device class of the binary sensor.
+(78 ,    'device_class',         'cold'),                                --The device class of the binary sensor.
+(79 ,    'device_class',         'connectivity'),                        --The device class of the binary sensor.
+(80 ,    'device_class',         'door'),                                --The device class of the binary sensor.
+(81 ,    'device_class',         'garage_door'),                         --The device class of the binary sensor.
+(82 ,    'device_class',         'gas'),                                 --The device class of the binary sensor.
+(83 ,    'device_class',         'heat'),                                --The device class of the binary sensor.
+(84 ,    'device_class',         'light'),                               --The device class of the binary sensor.
+(85 ,    'device_class',         'lock'),                                --The device class of the binary sensor.
+(86 ,    'device_class',         'moisture'),                            --The device class of the binary sensor.
+(87 ,    'device_class',         'motion'),                              --The device class of the binary sensor.
+(88 ,    'device_class',         'moving'),                              --The device class of the binary sensor.
+(89 ,    'device_class',         'occupancy'),                           --The device class of the binary sensor.
+(90 ,    'device_class',         'opening'),                             --The device class of the binary sensor.
+(91 ,    'device_class',         'plug'),                                --The device class of the binary sensor.
+(92 ,    'device_class',         'power'),                               --The device class of the binary sensor.
+(93 ,    'device_class',         'presence'),                            --The device class of the binary sensor.
+(94 ,    'device_class',         'problem'),                             --The device class of the binary sensor.
+(95 ,    'device_class',         'running'),                             --The device class of the binary sensor.
+(96 ,    'device_class',         'safety'),                              --The device class of the binary sensor.
+(97 ,    'device_class',         'smoke'),                               --The device class of the binary sensor.
+(98 ,    'device_class',         'sound'),                               --The device class of the binary sensor.
+(99 ,    'device_class',         'tamper'),                              --The device class of the binary sensor.
 (100,   'device_class',         'update'),                              --The device class of the binary sensor.
 (101,   'device_class',         'vibration'),                           --The device class of the binary sensor.
 (102,   'device_class',         'window'),                              --The device class of the binary sensor.
@@ -367,8 +367,3 @@
 (367,   'uv_index',             'float'),                               --The uv index of the weather.
 (368,   'precipitation_unit',   'string'),                              --The precipitation unit in mm or in.
 
-(   ,   'template',             'string'),                              --A template string for automations
-(   ,   'at',                   'string'),                              --Trigger the time 
-(   ,   'event'                 'string'),                              --Triggered with this event
-(   ,   'offset'                'string'),                              --Offset of the trigger
-(   ,   'scentence'             'string'),                              --The scentence to trigger the event

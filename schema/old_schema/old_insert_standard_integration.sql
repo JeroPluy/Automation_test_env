@@ -47,17 +47,6 @@ VALUES  (1,     'alarm_control_panel'),
         (38,    'wake_word'),
         (39,    'water_heater'),
         (40,    'weather'),
-        -- TRIGGER INTEGRATION
-/* import the integrations for triggers */
-        (41,    'homeassistant'),
-        (42,    'mqtt'),
-        (43,    'sun'),
-        (44,    'tag'),
-        (45,    'time_pattern'),
-        (46,    'persistent_notification'),
-        (47,    'webhook'),
-        (48,    'zone'),
-        (49,    'device');
 
 -- POSSIBLE VALUES --
 /* import the values from standard integrations */
@@ -1473,15 +1462,15 @@ VALUES  (371,   'azimuth',              'float'),       --The azimuth of the sun
         (379,   'rising',               'bool');        --The sun is rising.
 
 INSERT INTO integration_values(i_id, pv_id)
-VALUES  (42, 371),
-        (42, 372),
-        (42, 373),
-        (42, 374),
-        (42, 375),
-        (42, 376),
-        (42, 377),
-        (42, 378),
-        (42, 379);
+VALUES  (43, 371),
+        (43, 372),
+        (43, 373),
+        (43, 374),
+        (43, 375),
+        (43, 376),
+        (43, 377),
+        (43, 378),
+        (43, 379);
         
 /* tag
         states(main) / attributes extracted from:
