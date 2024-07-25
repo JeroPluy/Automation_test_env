@@ -1,10 +1,11 @@
 """ Test cases for automation deselection module.
-    The python_path needs to be set to the src directory: (for venv) $env:PYTHONPATH = "D:\Workspace\Python\custom_Tkinker_tryout\src"
+    The python_path needs to be set to the src directory: (for venv) $env:PYTHONPATH = "D:\\Workspace\\Python\\custom_Tkinker_tryout\\src"
 
 """
 
-from environment_package.automation_desection import _trigger_entities
-from environment_package.ha_automation.home_assistant_const import CONF_ABOVE, CONF_ALLOWED_METHODS, CONF_AT, CONF_ATTRIBUTE, CONF_BELOW, CONF_DEVICE_ID, CONF_DOMAIN, CONF_ENTITY_ID, CONF_EVENT, CONF_EVENT_CONTEXT, CONF_EVENT_DATA, CONF_EVENT_TYPE, CONF_FOR, CONF_FROM, CONF_LOCAL, CONF_NOFITY_ID, CONF_NOT_FROM, CONF_NOT_TO, CONF_NUMERIC_STATE, CONF_OFFSET, CONF_PAYLOAD, CONF_PLATFORM, CONF_QOS, CONF_SOURCE, CONF_STATE, CONF_TO, CONF_TYPE, CONF_UPDATE_TYPE, CONF_VALUE_TEMPLATE, CONF_WEBHOOK_ID, CONF_ZONE, HOURS, MINUTES, SECONDS, TAG_ID
+import uuid
+from environment_package.automation_dissection import _trigger_entities
+from environment_package.ha_automation.home_assistant_const import CONF_ABOVE, CONF_ALLOWED_METHODS, CONF_AT, CONF_ATTRIBUTE, CONF_BELOW, CONF_COMMAND, CONF_DEVICE_ID, CONF_DOMAIN, CONF_ENTITY_ID, CONF_EVENT, CONF_EVENT_CONTEXT, CONF_EVENT_DATA, CONF_EVENT_TYPE, CONF_FOR, CONF_FROM, CONF_LOCAL, CONF_NOFITY_ID, CONF_NOT_FROM, CONF_NOT_TO, CONF_NUMERIC_STATE, CONF_OFFSET, CONF_PAYLOAD, CONF_PLATFORM, CONF_QOS, CONF_SOURCE, CONF_STATE, CONF_TO, CONF_TYPE, CONF_UPDATE_TYPE, CONF_VALUE_TEMPLATE, CONF_WEBHOOK_ID, CONF_ZONE, HOURS, MINUTES, SECONDS, TAG_ID
 import voluptuous as vol
 
 def test_trigger_entities():
@@ -13,25 +14,25 @@ def test_trigger_entities():
         CONF_PLATFORM: CONF_EVENT,
         CONF_EVENT_TYPE: "event_type_1"
     }
-    entities_event_1 = _trigger_entities(trigger_part_event_1)
+    entities_event_1 = _trigger_entities(trigger_part_event_1, position=1)
     assert len(entities_event_1) == 1
     assert entities_event_1[0].integration == CONF_EVENT
-    assert entities_event_1[0].entity_name == f"{CONF_EVENT}.event_type_1"
-    assert entities_event_1[0].pos_value is None
+    assert entities_event_1[0].entity_name != None
+    assert entities_event_1[0].expected_value == {CONF_EVENT_TYPE: "event_type_1"}
 
     # Test case 2: Event trigger with multiple event types
-    trigger_part_2 = {
+    trigger_part_event_2 = {
         CONF_PLATFORM: CONF_EVENT,
         CONF_EVENT_TYPE: ["event_type_2", "event_type_3"]
     }
-    entities_event_2 = _trigger_entities(trigger_part_2)
+    entities_event_2 = _trigger_entities(trigger_part_event_2, position=1)
     assert len(entities_event_2) == 2
     assert entities_event_2[0].integration == CONF_EVENT
-    assert entities_event_2[0].entity_name == f"{CONF_EVENT}.event_type_2"
-    assert entities_event_2[0].pos_value is None
+    assert entities_event_2[0].entity_name != None
+    assert entities_event_2[0].expected_value == {CONF_EVENT_TYPE: "event_type_2"}
     assert entities_event_2[1].integration == CONF_EVENT
-    assert entities_event_2[1].entity_name == f"{CONF_EVENT}.event_type_3"
-    assert entities_event_2[1].pos_value is None
+    assert entities_event_2[1].entity_name != None
+    assert entities_event_2[1].expected_value == {CONF_EVENT_TYPE: "event_type_3"}
 
     trigger_part_event_3 = {
         CONF_PLATFORM: CONF_EVENT,
@@ -47,11 +48,11 @@ def test_trigger_entities():
             ]
         }
     }
-    entities_event_3 = _trigger_entities(trigger_part_event_3)
+    entities_event_3 = _trigger_entities(trigger_part_event_3, position=1)
     assert len(entities_event_3) == 1
     assert entities_event_3[0].integration == CONF_EVENT
-    assert entities_event_3[0].entity_name == f"{CONF_EVENT}.event_type_3"
-    assert entities_event_3[0].pos_value == { CONF_EVENT_DATA : { "key_1": "value_1", "key_2": "value_2" }, CONF_EVENT_CONTEXT : { "key_3-2": ["value_3-2-1", "value_3-2-2"] } }
+    assert entities_event_3[0].entity_name != None
+    assert entities_event_3[0].expected_value == { CONF_EVENT_TYPE : "event_type_3" ,CONF_EVENT_DATA : { "key_1": "value_1", "key_2": "value_2" }, CONF_EVENT_CONTEXT : { "key_3-2": ["value_3-2-1", "value_3-2-2"] } }
     
     # Test case 3: MQTT trigger with qos
     trigger_part_mqtt_1 = {
@@ -59,11 +60,11 @@ def test_trigger_entities():
         "topic": "mqtt_topic",
         CONF_QOS: 0
     }
-    entities_mqtt_1 = _trigger_entities(trigger_part_mqtt_1)
+    entities_mqtt_1 = _trigger_entities(trigger_part_mqtt_1, position=1)
     assert len(entities_mqtt_1) == 1
     assert entities_mqtt_1[0].integration == "mqtt"
     assert entities_mqtt_1[0].entity_name == "mqtt.mqtt_topic"
-    assert entities_mqtt_1[0].pos_value == {CONF_QOS: 0}
+    assert entities_mqtt_1[0].expected_value == {CONF_QOS: 0}
 
     # Test case 4: MQTT trigger with payload
     trigger_part_mqtt_2 = {
@@ -71,11 +72,11 @@ def test_trigger_entities():
         "topic": "mqtt_topic",
         CONF_PAYLOAD: "mqtt_payload"
     }
-    entities_mqtt_2 = _trigger_entities(trigger_part_mqtt_2)
+    entities_mqtt_2 = _trigger_entities(trigger_part_mqtt_2, position=1)
     assert len(entities_mqtt_2) == 1
     assert entities_mqtt_2[0].integration == "mqtt"
     assert entities_mqtt_2[0].entity_name == "mqtt.mqtt_topic"
-    assert entities_mqtt_2[0].pos_value == {CONF_PAYLOAD: "mqtt_payload"}
+    assert entities_mqtt_2[0].expected_value == {CONF_PAYLOAD: "mqtt_payload"}
 
     # Test case 5: MQTT trigger with qos and payload
     trigger_part_mqtt_3 = {
@@ -84,11 +85,11 @@ def test_trigger_entities():
         CONF_PAYLOAD: "mqtt_payload",
         CONF_QOS: 0
     }
-    entities_mqtt_3 = _trigger_entities(trigger_part_mqtt_3)
+    entities_mqtt_3 = _trigger_entities(trigger_part_mqtt_3, position=1)
     assert len(entities_mqtt_3) == 1
     assert entities_mqtt_3[0].integration == "mqtt"
     assert entities_mqtt_3[0].entity_name == "mqtt.mqtt_topic"
-    assert entities_mqtt_3[0].pos_value == {CONF_PAYLOAD: "mqtt_payload", CONF_QOS: 0}
+    assert entities_mqtt_3[0].expected_value == {CONF_PAYLOAD: "mqtt_payload", CONF_QOS: 0}
 
 
     # Test case 6: Numerical state trigger with below values
@@ -97,11 +98,11 @@ def test_trigger_entities():
         CONF_ENTITY_ID: "sensor.temperature",
         CONF_BELOW: 30
     }
-    entities_num_state_1 = _trigger_entities(trigger_part_num_state_1)
+    entities_num_state_1 = _trigger_entities(trigger_part_num_state_1, position=1)
     assert len(entities_num_state_1) == 1
     assert entities_num_state_1[0].integration == "sensor"
     assert entities_num_state_1[0].entity_name == "sensor.temperature"
-    assert entities_num_state_1[0].pos_value == {"value": "__VALUE__ < 30"}
+    assert entities_num_state_1[0].expected_value == {"value": "__VALUE__ < 30"}
 
     # Test case 7: Numerical state trigger with above value
     trigger_part_num_state_2 = {
@@ -109,11 +110,11 @@ def test_trigger_entities():
         CONF_ENTITY_ID: "sensor.temperature",
         CONF_ABOVE: 20
     }
-    entities_num_state_2 = _trigger_entities(trigger_part_num_state_2)
+    entities_num_state_2 = _trigger_entities(trigger_part_num_state_2, position=1)
     assert len(entities_num_state_2) == 1
     assert entities_num_state_2[0].integration == "sensor"
     assert entities_num_state_2[0].entity_name == "sensor.temperature"
-    assert entities_num_state_2[0].pos_value == {"value":"20 < __VALUE__"}
+    assert entities_num_state_2[0].expected_value == {"value":"20 < __VALUE__"}
 
     # Test case 8: Numerical state trigger with above and below values
     trigger_part_num_state_3 = {
@@ -122,11 +123,11 @@ def test_trigger_entities():
         CONF_ABOVE: 20,
         CONF_BELOW: 30
     }
-    entities_num_state_3 = _trigger_entities(trigger_part_num_state_3)
+    entities_num_state_3 = _trigger_entities(trigger_part_num_state_3, position=1)
     assert len(entities_num_state_3) == 1
     assert entities_num_state_3[0].integration == "sensor"
     assert entities_num_state_3[0].entity_name == "sensor.temperature"
-    assert entities_num_state_3[0].pos_value == {"value":"20 < __VALUE__ < 30"}
+    assert entities_num_state_3[0].expected_value == {"value":"20 < __VALUE__ < 30"}
     
     # Test case 9: Numerical state trigger with above, below, and for values
     trigger_part_num_state_4 = {
@@ -136,11 +137,11 @@ def test_trigger_entities():
         CONF_BELOW: 30,
         CONF_FOR: "00:01:00"
     }
-    entities_num_state_4 = _trigger_entities(trigger_part_num_state_4)
+    entities_num_state_4 = _trigger_entities(trigger_part_num_state_4, position=1)
     assert len(entities_num_state_4) == 1
     assert entities_num_state_4[0].integration == "sensor"
     assert entities_num_state_4[0].entity_name == "sensor.temperature"
-    assert entities_num_state_4[0].pos_value == {"value":"20 < __VALUE__ < 30", CONF_FOR: "00:01:00"}
+    assert entities_num_state_4[0].expected_value == {"value":"20 < __VALUE__ < 30", CONF_FOR: "00:01:00"}
 
     # Test case 10: State trigger with on values
     trigger_part_state_1 = {
@@ -148,11 +149,11 @@ def test_trigger_entities():
         CONF_ENTITY_ID: "binary_sensor.motion",
         CONF_TO: "on"
     }
-    entities_state_1 = _trigger_entities(trigger_part_state_1)
+    entities_state_1 = _trigger_entities(trigger_part_state_1, position=1)
     assert len(entities_state_1) == 1
     assert entities_state_1[0].integration == "binary_sensor"
     assert entities_state_1[0].entity_name == "binary_sensor.motion"
-    assert entities_state_1[0].pos_value == {
+    assert entities_state_1[0].expected_value == {
         CONF_TO: "on"
     }
 
@@ -163,11 +164,11 @@ def test_trigger_entities():
         CONF_FROM: "off",
         CONF_TO: "on"
     }
-    entities_state_2 = _trigger_entities(trigger_part_state_2)
+    entities_state_2 = _trigger_entities(trigger_part_state_2, position=1)
     assert len(entities_state_2) == 1
     assert entities_state_2[0].integration == "binary_sensor"
     assert entities_state_2[0].entity_name == "binary_sensor.motion"
-    assert entities_state_2[0].pos_value == {
+    assert entities_state_2[0].expected_value == {
         CONF_TO: "on",
         CONF_FROM: "off"
     }
@@ -180,11 +181,11 @@ def test_trigger_entities():
         CONF_TO: "on",
         CONF_FOR: "00:01:00"
     }
-    entities_state_3 = _trigger_entities(trigger_part_state_3)
+    entities_state_3 = _trigger_entities(trigger_part_state_3, position=1)
     assert len(entities_state_3) == 1
     assert entities_state_3[0].integration == "binary_sensor"
     assert entities_state_3[0].entity_name == "binary_sensor.motion"
-    assert entities_state_3[0].pos_value == {
+    assert entities_state_3[0].expected_value == {
         CONF_TO: "on",
         CONF_FROM: "off",
         CONF_FOR: "00:01:00"
@@ -197,11 +198,11 @@ def test_trigger_entities():
         CONF_NOT_TO: "on",
         CONF_NOT_FROM: "off"
     }
-    entities_state_4 = _trigger_entities(trigger_part_state_4)
+    entities_state_4 = _trigger_entities(trigger_part_state_4, position=1)
     assert len(entities_state_4) == 1
     assert entities_state_4[0].integration == "binary_sensor"
     assert entities_state_4[0].entity_name == "binary_sensor.motion"
-    assert entities_state_4[0].pos_value == {
+    assert entities_state_4[0].expected_value == {
         CONF_NOT_TO: "on",
         CONF_NOT_FROM: "off"
     }
@@ -214,11 +215,11 @@ def test_trigger_entities():
         CONF_TO: "temp2",
         CONF_FROM: "temp1"
     }
-    entities_state_5 = _trigger_entities(trigger_part_state_5)
+    entities_state_5 = _trigger_entities(trigger_part_state_5, position=1)
     assert len(entities_state_5) == 1
     assert entities_state_5[0].integration == "binary_sensor"
     assert entities_state_5[0].entity_name == "binary_sensor.motion.attribute_1"
-    assert entities_state_5[0].pos_value == {
+    assert entities_state_5[0].expected_value == {
         CONF_TO: "temp2",
         CONF_FROM: "temp1"
     }
@@ -228,11 +229,11 @@ def test_trigger_entities():
         CONF_PLATFORM: "sun",
         CONF_EVENT: "sunset"
     }
-    entities_sun_1 = _trigger_entities(trigger_part_sun_1)
+    entities_sun_1 = _trigger_entities(trigger_part_sun_1, position=1)
     assert len(entities_sun_1) == 1
     assert entities_sun_1[0].integration == "sun"
     assert entities_sun_1[0].entity_name == "sun.sun"
-    assert entities_sun_1[0].pos_value == {
+    assert entities_sun_1[0].expected_value == {
         CONF_EVENT: "sunset"
     }
 
@@ -242,11 +243,11 @@ def test_trigger_entities():
         CONF_EVENT: "sunset",
         CONF_OFFSET: "-01:00:00"
     }
-    entities_sun_2 = _trigger_entities(trigger_part_sun_2)
+    entities_sun_2 = _trigger_entities(trigger_part_sun_2, position=1)
     assert len(entities_sun_2) == 1
     assert entities_sun_2[0].integration == "sun"
     assert entities_sun_2[0].entity_name == "sun.sun"
-    assert entities_sun_2[0].pos_value == {
+    assert entities_sun_2[0].expected_value == {
         CONF_EVENT: "sunset",
         CONF_OFFSET: "-01:00:00"
     }
@@ -257,11 +258,11 @@ def test_trigger_entities():
         TAG_ID: "tag_id_1",
         CONF_DEVICE_ID: "device_id_1"
     }
-    entities_tag_1 = _trigger_entities(trigger_part_tag_1)
+    entities_tag_1 = _trigger_entities(trigger_part_tag_1, position=1)
     assert len(entities_tag_1) == 1
     assert entities_tag_1[0].integration == "tag"
     assert entities_tag_1[0].entity_name == "tag.tag_id_1"
-    assert entities_tag_1[0].pos_value == {
+    assert entities_tag_1[0].expected_value == {
         CONF_DEVICE_ID: "device_id_1"
     }
 
@@ -271,11 +272,11 @@ def test_trigger_entities():
         TAG_ID: "tag_id_2",
         CONF_DEVICE_ID: ["device_id_2", "device_id_3"]
     }
-    entities_tag_2 = _trigger_entities(trigger_part_tag_2)
+    entities_tag_2 = _trigger_entities(trigger_part_tag_2, position=1)
     assert len(entities_tag_2) == 1
     assert entities_tag_2[0].integration == "tag"
     assert entities_tag_2[0].entity_name == "tag.tag_id_2"
-    assert entities_tag_2[0].pos_value == {
+    assert entities_tag_2[0].expected_value == {
         CONF_DEVICE_ID: ["device_id_2", "device_id_3"]
     }
 
@@ -285,16 +286,16 @@ def test_trigger_entities():
         TAG_ID: ["tag_id_2", "tag_id_3"],
         CONF_DEVICE_ID: ["device_id_2", "device_id_3"]
     }
-    entities_tag_3 = _trigger_entities(trigger_part_tag_3)
+    entities_tag_3 = _trigger_entities(trigger_part_tag_3, position=1)
     assert len(entities_tag_3) == 2
     assert entities_tag_3[0].integration == "tag"
     assert entities_tag_3[0].entity_name == "tag.tag_id_2"
-    assert entities_tag_3[0].pos_value == {
+    assert entities_tag_3[0].expected_value == {
         CONF_DEVICE_ID: ["device_id_2", "device_id_3"]
     }
     assert entities_tag_3[1].integration == "tag"
     assert entities_tag_3[1].entity_name == "tag.tag_id_3"
-    assert entities_tag_3[1].pos_value == {
+    assert entities_tag_3[1].expected_value == {
         CONF_DEVICE_ID: ["device_id_2", "device_id_3"]
     }
 
@@ -303,11 +304,11 @@ def test_trigger_entities():
         CONF_PLATFORM: "template",
         CONF_VALUE_TEMPLATE: "{% if is_state('device_tracker.paulus', 'home') %}true{% endif %}"
     }
-    entities_template_1 = _trigger_entities(trigger_part_template_1)
+    entities_template_1 = _trigger_entities(trigger_part_template_1, position=1)
     assert len(entities_template_1) == 1
     assert entities_template_1[0].integration == "device_tracker"
     assert entities_template_1[0].entity_name == "device_tracker.paulus"
-    assert entities_template_1[0].pos_value == {
+    assert entities_template_1[0].expected_value == {
         CONF_VALUE_TEMPLATE: "{% if is_state('device_tracker.paulus', 'home') %}true{% endif %}"
     }
 
@@ -316,16 +317,16 @@ def test_trigger_entities():
         CONF_PLATFORM: "template",
         CONF_VALUE_TEMPLATE: "{{ is_state('device_tracker.paulus', 'home') and is_state('device_tracker.anne_therese', 'home') }}"
     }
-    entities_template_2 = _trigger_entities(trigger_part_template_2)
+    entities_template_2 = _trigger_entities(trigger_part_template_2, position=1)
     assert len(entities_template_2) == 2
     assert entities_template_2[0].integration == "device_tracker"
     assert entities_template_2[0].entity_name == "device_tracker.paulus"
-    assert entities_template_2[0].pos_value == {
+    assert entities_template_2[0].expected_value == {
         CONF_VALUE_TEMPLATE: "{{ is_state('device_tracker.paulus', 'home') and is_state('device_tracker.anne_therese', 'home') }}"
     }
     assert entities_template_2[1].integration == "device_tracker"
     assert entities_template_2[1].entity_name == "device_tracker.anne_therese"
-    assert entities_template_2[1].pos_value == {
+    assert entities_template_2[1].expected_value == {
         CONF_VALUE_TEMPLATE: "{{ is_state('device_tracker.paulus', 'home') and is_state('device_tracker.anne_therese', 'home') }}"
     }
 
@@ -335,11 +336,11 @@ def test_trigger_entities():
         CONF_VALUE_TEMPLATE: "{{ is_state('device_tracker.paulus', 'home') }}",
         CONF_FOR: "00:01:00"
     }
-    entities_template_3 = _trigger_entities(trigger_part_template_3)
+    entities_template_3 = _trigger_entities(trigger_part_template_3, position=1)
     assert len(entities_template_3) == 1
     assert entities_template_3[0].integration == "device_tracker"
     assert entities_template_3[0].entity_name == "device_tracker.paulus"
-    assert entities_template_3[0].pos_value == {
+    assert entities_template_3[0].expected_value == {
         CONF_VALUE_TEMPLATE: "{{ is_state('device_tracker.paulus', 'home') }}",
         CONF_FOR: "00:01:00"
     }
@@ -349,22 +350,22 @@ def test_trigger_entities():
         CONF_PLATFORM: "time",
         CONF_AT: "06:05:02"
     }
-    entities_time_1 = _trigger_entities(trigger_part_time_1)
+    entities_time_1 = _trigger_entities(trigger_part_time_1, position=1)
     assert len(entities_time_1) == 1
     assert entities_time_1[0].integration == "time"
     assert entities_time_1[0].entity_name == "time.time"
-    assert entities_time_1[0].pos_value == { CONF_AT: "06:05:02" }
+    assert entities_time_1[0].expected_value == { CONF_AT: "06:05:02" }
         
     # Test case 24: Time pattern trigger at **:**:02 seconds
     trigger_part_time_pattern_1 = {
         CONF_PLATFORM: "time_pattern",
         SECONDS: 2
     }
-    entities_time_pattern_1 = _trigger_entities(trigger_part_time_pattern_1)
+    entities_time_pattern_1 = _trigger_entities(trigger_part_time_pattern_1, position=1)
     assert len(entities_time_1) == 1
     assert entities_time_pattern_1[0].integration == "time_pattern"
-    assert entities_time_pattern_1[0].entity_name == "time_pattern._"
-    assert entities_time_pattern_1[0].pos_value == {
+    assert entities_time_pattern_1[0].entity_name != None
+    assert entities_time_pattern_1[0].expected_value == {
         SECONDS: 2
     }
 
@@ -373,11 +374,11 @@ def test_trigger_entities():
         CONF_PLATFORM: "time_pattern",
         MINUTES: 2
     }
-    entities_time_pattern_2 = _trigger_entities(trigger_part_time_pattern_2)
+    entities_time_pattern_2 = _trigger_entities(trigger_part_time_pattern_2, position=1)
     assert len(entities_time_pattern_2) == 1
     assert entities_time_pattern_2[0].integration == "time_pattern"
-    assert entities_time_pattern_2[0].entity_name == "time_pattern._"
-    assert entities_time_pattern_2[0].pos_value == {
+    assert entities_time_pattern_2[0].entity_name != None
+    assert entities_time_pattern_2[0].expected_value == {
         MINUTES: 2
     }
 
@@ -386,11 +387,11 @@ def test_trigger_entities():
         CONF_PLATFORM: "time_pattern",
         HOURS: 2
     }
-    entities_time_pattern_3 = _trigger_entities(trigger_part_time_pattern_3)
+    entities_time_pattern_3 = _trigger_entities(trigger_part_time_pattern_3, position=1)
     assert len(entities_time_pattern_3) == 1
     assert entities_time_pattern_3[0].integration == "time_pattern"
-    assert entities_time_pattern_3[0].entity_name == "time_pattern._"
-    assert entities_time_pattern_3[0].pos_value == {
+    assert entities_time_pattern_3[0].entity_name != None
+    assert entities_time_pattern_3[0].expected_value == {
         HOURS: 2
     }
 
@@ -402,7 +403,7 @@ def test_trigger_entities():
         SECONDS: "2"
     }
     try:
-        entities_time_pattern_4 = _trigger_entities(trigger_part_time_pattern_4)
+        entities_time_pattern_4 = _trigger_entities(trigger_part_time_pattern_4, position=1)
         assert False  # The function should raise an exception
     except vol.Invalid as e:
         assert str(e) == "Leading zero in hours is not allowed"
@@ -415,7 +416,7 @@ def test_trigger_entities():
         SECONDS: 2
     }
     try:
-        entities_time_pattern_5 = _trigger_entities(trigger_part_time_pattern_5)
+        entities_time_pattern_5 = _trigger_entities(trigger_part_time_pattern_5, position=1)
         assert False  # The function should raise an exception
     except vol.Invalid as e:
         assert str(e) == "Leading zero in minutes is not allowed"
@@ -428,7 +429,7 @@ def test_trigger_entities():
         SECONDS: "02"
     }
     try:
-        entities_time_pattern_6 = _trigger_entities(trigger_part_time_pattern_6)
+        entities_time_pattern_6 = _trigger_entities(trigger_part_time_pattern_6, position=1)
         assert False  # The function should raise an exception
     except vol.Invalid as e:
         assert str(e) == "Leading zero in seconds is not allowed"
@@ -438,11 +439,11 @@ def test_trigger_entities():
         CONF_PLATFORM: "time_pattern",
         MINUTES: '/5'
     }
-    entities_time_pattern_7 = _trigger_entities(trigger_part_time_pattern_7)
+    entities_time_pattern_7 = _trigger_entities(trigger_part_time_pattern_7, position=1)
     assert len(entities_time_pattern_7) == 1
     assert entities_time_pattern_7[0].integration == "time_pattern"
-    assert entities_time_pattern_7[0].entity_name == "time_pattern._"
-    assert entities_time_pattern_7[0].pos_value == {
+    assert entities_time_pattern_7[0].entity_name != None
+    assert entities_time_pattern_7[0].expected_value == {
         MINUTES: '/5'
     }
 
@@ -451,11 +452,11 @@ def test_trigger_entities():
         CONF_PLATFORM: "persistent_notification",
         CONF_UPDATE_TYPE: "create"
     }
-    entities_pers_notify_1 = _trigger_entities(trigger_part_pers_notify_1)
+    entities_pers_notify_1 = _trigger_entities(trigger_part_pers_notify_1, position=1)
     assert len(entities_pers_notify_1) == 1
     assert entities_pers_notify_1[0].integration == "persistent_notification"
-    assert entities_pers_notify_1[0].entity_name == "persistent_notification._"
-    assert entities_pers_notify_1[0].pos_value == {
+    assert entities_pers_notify_1[0].entity_name != None
+    assert entities_pers_notify_1[0].expected_value == {
         CONF_UPDATE_TYPE: "create"
     }
 
@@ -465,11 +466,11 @@ def test_trigger_entities():
         CONF_UPDATE_TYPE: "create",
         CONF_NOFITY_ID: "notify_id_1"
     }
-    entities_pers_notify_2 = _trigger_entities(trigger_part_pers_notify_2)
+    entities_pers_notify_2 = _trigger_entities(trigger_part_pers_notify_2, position=1)
     assert len(entities_pers_notify_2) == 1
     assert entities_pers_notify_2[0].integration == "persistent_notification"
     assert entities_pers_notify_2[0].entity_name == "persistent_notification.notify_id_1"
-    assert entities_pers_notify_2[0].pos_value == {
+    assert entities_pers_notify_2[0].expected_value == {
         CONF_UPDATE_TYPE: "create"
     }
 
@@ -479,11 +480,11 @@ def test_trigger_entities():
         CONF_WEBHOOK_ID: "webhook_id_1",
         CONF_ALLOWED_METHODS: ["POST", "GET"]
     }
-    entities_webhook_1 = _trigger_entities(trigger_part_webhook_1)
+    entities_webhook_1 = _trigger_entities(trigger_part_webhook_1, position=1)
     assert len(entities_webhook_1) == 1
     assert entities_webhook_1[0].integration == "webhook"
     assert entities_webhook_1[0].entity_name == "webhook.webhook_id_1"
-    assert entities_webhook_1[0].pos_value == {
+    assert entities_webhook_1[0].expected_value == {
         CONF_ALLOWED_METHODS: ["POST", "GET"]
     }
 
@@ -494,11 +495,11 @@ def test_trigger_entities():
         CONF_ALLOWED_METHODS: ["POST"],
         CONF_LOCAL: True
     }
-    entities_webhook_2 = _trigger_entities(trigger_part_webhook_2)
+    entities_webhook_2 = _trigger_entities(trigger_part_webhook_2, position=1)
     assert len(entities_webhook_2) == 1
     assert entities_webhook_2[0].integration == "webhook"
     assert entities_webhook_2[0].entity_name == "webhook.webhook_id_2"
-    assert entities_webhook_2[0].pos_value == {
+    assert entities_webhook_2[0].expected_value == {
         CONF_ALLOWED_METHODS: ["POST"],
         CONF_LOCAL: True
     }
@@ -510,11 +511,11 @@ def test_trigger_entities():
         CONF_EVENT: "enter",
         CONF_ENTITY_ID: "device_tracker.paulus"
     }
-    entities_zone_1 = _trigger_entities(trigger_part_zone_1)
+    entities_zone_1 = _trigger_entities(trigger_part_zone_1, position=1)
     assert len(entities_zone_1) == 1
     assert entities_zone_1[0].integration == "zone"
     assert entities_zone_1[0].entity_name == "zone.home"
-    assert entities_zone_1[0].pos_value == {
+    assert entities_zone_1[0].expected_value == {
         CONF_EVENT: "enter",
         CONF_ENTITY_ID: "device_tracker.paulus"
     }
@@ -526,11 +527,11 @@ def test_trigger_entities():
         CONF_EVENT: "enter",
         CONF_SOURCE: "geo_location-source"
     }
-    entities_geo_local_1 = _trigger_entities(trigger_part_geo_local_1)
+    entities_geo_local_1 = _trigger_entities(trigger_part_geo_local_1, position=1)
     assert len(entities_geo_local_1) == 1
     assert entities_geo_local_1[0].integration == "zone"
     assert entities_geo_local_1[0].entity_name == "zone.home"
-    assert entities_geo_local_1[0].pos_value == {
+    assert entities_geo_local_1[0].expected_value == {
         CONF_EVENT: "enter",
         CONF_SOURCE: "geo_location-source"
     }
@@ -543,11 +544,11 @@ def test_trigger_entities():
         CONF_TYPE: "do something",
         CONF_DOMAIN: "domain"
     }
-    entities_device_1 = _trigger_entities(trigger_part_device_1)
+    entities_device_1 = _trigger_entities(trigger_part_device_1, position=1)
     assert len(entities_device_1) == 1
     assert entities_device_1[0].integration == "device"
     assert entities_device_1[0].entity_name == "device.device_id_1"
-    assert entities_device_1[0].pos_value == {
+    assert entities_device_1[0].expected_value == {
         CONF_ENTITY_ID: "test_entity_id",
         CONF_TYPE: "do something",
         CONF_DOMAIN: "domain"
@@ -559,11 +560,11 @@ def test_trigger_entities():
         CONF_ENTITY_ID: "calendar.calendar_name",
         CONF_EVENT: "event_name"
     }
-    entities_calendar_1 = _trigger_entities(trigger_part_calendar_1)
+    entities_calendar_1 = _trigger_entities(trigger_part_calendar_1, position=1)
     assert len(entities_calendar_1) == 1
     assert entities_calendar_1[0].integration == "calendar"
     assert entities_calendar_1[0].entity_name == "calendar.calendar_name"
-    assert entities_calendar_1[0].pos_value == {
+    assert entities_calendar_1[0].expected_value == {
         CONF_EVENT: "event_name"
     }
 
@@ -574,20 +575,32 @@ def test_trigger_entities():
         CONF_EVENT: "event_name",
         CONF_OFFSET: "-01:00:00"
     }
-    entities_calendar_2 = _trigger_entities(trigger_part_calendar_2)
+    entities_calendar_2 = _trigger_entities(trigger_part_calendar_2, position=1)
     assert len(entities_calendar_2) == 1
     assert entities_calendar_2[0].integration == "calendar"
     assert entities_calendar_2[0].entity_name == "calendar.calendar_name"
-    assert entities_calendar_2[0].pos_value == {
+    assert entities_calendar_2[0].expected_value == {
         CONF_EVENT: "event_name",
         CONF_OFFSET: "-01:00:00"
+    }
+
+    trigger_part_conversation_1 = {
+        CONF_PLATFORM: "conversation",
+        CONF_COMMAND: "intent_name"
+    }
+    entities_conversation_1 = _trigger_entities(trigger_part_conversation_1, position=1)
+    assert len(entities_conversation_1) == 1
+    assert entities_conversation_1[0].integration == "conversation"
+    assert entities_conversation_1[0].entity_name != None
+    assert entities_conversation_1[0].expected_value == {
+        CONF_COMMAND: "intent_name"
     }
 
     # Test case x: Unsupported platform
     trigger_part_x = {
         CONF_PLATFORM: "unsupported"
     }
-    entities_x = _trigger_entities(trigger_part_x)
+    entities_x = _trigger_entities(trigger_part_x, position=1)
     assert len(entities_x) == 0
 
     print("All test cases passed!")

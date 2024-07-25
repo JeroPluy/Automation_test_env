@@ -279,7 +279,7 @@ class TestWindow(BlankWindow):
 #     # app = TestWindow()
 #     # app.mainloop()
 
-from environment_package.automation_desection import desect_information, Entity
+from environment_package.automation_dissection import desect_information, Entity
 import environment_package.db as db
 from environment_package.ha_automation import home_assistant_yaml_loader as yaml_loader
 from environment_package.ha_automation import home_assistant_automation_config as ha_automation_config
