@@ -1,4 +1,4 @@
-""" Home Assistant exception modules for handling errors in a Home Assistant context.
+"""Home Assistant exception modules for handling errors in a Home Assistant context.
     It can be run with the following command: python -m ha_automation.home_assistant_exception
 
 This code is partly extracted from:
@@ -8,6 +8,7 @@ TODO: Add link to the source code
 from typing import TYPE_CHECKING, Callable
 
 _function_cache: dict[str, Callable[[str, str, dict[str, str] | None], str]] = {}
+
 
 class HomeAssistantError(Exception):
     """
@@ -57,7 +58,8 @@ class HomeAssistantError(Exception):
             self.translation_domain, self.translation_key, self.translation_placeholders
         )
         return self._message
-    
+
+
 class TemplateError(HomeAssistantError):
     """
     Error during template rendering.

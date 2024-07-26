@@ -1,11 +1,11 @@
-""" The script applies different schema to the configuration directory to validate the configuration of automations in Home Assistant.
-    It can be run with the following command: python -m ha_automation.home_assistant_automation_config
+"""The script applies different schema to the configuration directory to validate the configuration of automations in Home Assistant.
+It can be run with the following command: python -m ha_automation.home_assistant_automation_config
 
-    This code is partly extracted from:
-        - core/homeassistant/components/trace/__init__.py : https://github.com/home-assistant/core/blob/dev/homeassistant/components/trace/__init__.py
-            (VERSION: 02.07.2024 - parent
-        - core/homeassistant/components/automation/config.py : https://github.com/home-assistant/core/blob/dev/homeassistant/components/automation/config.py
-            (VERSION: 17.05.2024 - parent 4edee94 commit 87bb7ce)
+This code is partly extracted from:
+    - core/homeassistant/components/trace/__init__.py : https://github.com/home-assistant/core/blob/dev/homeassistant/components/trace/__init__.py
+        (VERSION: 02.07.2024 - parent
+    - core/homeassistant/components/automation/config.py : https://github.com/home-assistant/core/blob/dev/homeassistant/components/automation/config.py
+        (VERSION: 17.05.2024 - parent 4edee94 commit 87bb7ce)
 
 """
 
@@ -16,19 +16,34 @@ from typing import Any
 import voluptuous as vol
 from voluptuous.humanize import humanize_error
 
-from .home_assistant_config_validation import (CONDITIONS_SCHEMA,
-                                               SCRIPT_SCHEMA,
-                                               SCRIPT_VARIABLES_SCHEMA,
-                                               TRIGGER_SCHEMA, boolean, string)
-from .home_assistant_const import (CONF_ACTION, CONF_ALIAS, CONF_CONDITION,
-                                   CONF_DESCRIPTION, CONF_ID,
-                                   CONF_INITIAL_STATE, CONF_MODE,
-                                   CONF_STORED_TRACES, CONF_TRACE,
-                                   CONF_TRIGGER, CONF_TRIGGER_VARIABLES,
-                                   CONF_VARIABLES, DEFAULT_STORED_TRACES,
-                                   SCRIPT_MODE_CHOICES, SCRIPT_MODE_SINGLE,
-                                   ConfigType, make_script_schema,
-                                   positive_int)
+from .home_assistant_config_validation import (
+    CONDITIONS_SCHEMA,
+    SCRIPT_SCHEMA,
+    SCRIPT_VARIABLES_SCHEMA,
+    TRIGGER_SCHEMA,
+    boolean,
+    string,
+)
+from .home_assistant_const import (
+    CONF_ACTION,
+    CONF_ALIAS,
+    CONF_CONDITION,
+    CONF_DESCRIPTION,
+    CONF_ID,
+    CONF_INITIAL_STATE,
+    CONF_MODE,
+    CONF_STORED_TRACES,
+    CONF_TRACE,
+    CONF_TRIGGER,
+    CONF_TRIGGER_VARIABLES,
+    CONF_VARIABLES,
+    DEFAULT_STORED_TRACES,
+    SCRIPT_MODE_CHOICES,
+    SCRIPT_MODE_SINGLE,
+    ConfigType,
+    make_script_schema,
+    positive_int,
+)
 
 # schema for the automation mode configuration
 MODE_CONFIG_SCHEMA = {
@@ -73,6 +88,7 @@ PLATFORM_SCHEMA = vol.All(
     ),
 )
 
+
 class ValidationStatus(StrEnum):
     """
     What part produces an invalid configuration.
@@ -97,7 +113,7 @@ class AutomationConfig(dict):
 
     raw_config: dict[str, Any] | None = None
     raw_blueprint_inputs: dict[str, Any] | None = None
-    automation_name: str = None 
+    automation_name: str = None
     validation_status: ValidationStatus = ValidationStatus.OK
     validation_error: str | None = None
 
@@ -105,7 +121,7 @@ class AutomationConfig(dict):
 async def _async_validate_config_item(config: ConfigType) -> AutomationConfig:
     """
     Validate the different parts of automation configurations.
-    
+
     """
     raw_config = None
     raw_blueprint_inputs = None
@@ -134,9 +150,9 @@ async def _async_validate_config_item(config: ConfigType) -> AutomationConfig:
     def _name_or_id(config: ConfigType) -> str:
         """Return the alias or ID of an automation as automation name."""
         if CONF_ID in config:
-            return f"id_{config[CONF_ID]}".replace(' ', '_')
+            return f"id_{config[CONF_ID]}".replace(" ", "_")
         elif CONF_ALIAS in config:
-            return f'{config[CONF_ALIAS]}'.replace(' ', '_')
+            return f"{config[CONF_ALIAS]}".replace(" ", "_")
         else:
             return "unnamed_automation"
 
@@ -151,16 +167,15 @@ async def _async_validate_config_item(config: ConfigType) -> AutomationConfig:
         """
         try:
             minimal_config = _MINIMAL_PLATFORM_SCHEMA(config)
-        except (vol.Invalid, vol.MultipleInvalid ) as err :
-
+        except (vol.Invalid, vol.MultipleInvalid) as err:
             # ID, alias or description produce an error
             automation_config = AutomationConfig()
             _set_validation_status(
                 automation_config, ValidationStatus.FAILED_SCHEMA, err, config
-                )
+            )
             automation_config.automation_name = "!invalid_automation"
             return automation_config
-        
+
         # ID, alias and description are valid
         automation_config = AutomationConfig(minimal_config)
         automation_config.raw_blueprint_inputs = raw_blueprint_inputs
@@ -171,13 +186,12 @@ async def _async_validate_config_item(config: ConfigType) -> AutomationConfig:
         automation_config.automation_name = _name_or_id(config)
         return automation_config
 
-
     try:
         validated_config = PLATFORM_SCHEMA(config)
-    except (vol.Invalid, vol.MultipleInvalid ) as err :
+    except (vol.Invalid, vol.MultipleInvalid) as err:
         # print(err, "could not be validated", config)
         return _minimal_config(ValidationStatus.FAILED_SCHEMA, err, config)
-    
+
     automation_config = AutomationConfig(validated_config)
     automation_config.raw_blueprint_inputs = raw_blueprint_inputs
     automation_config.raw_config = raw_config
@@ -185,11 +199,12 @@ async def _async_validate_config_item(config: ConfigType) -> AutomationConfig:
 
     return automation_config
 
+
 async def async_validate_config_item(
     config: dict[str, Any],
 ) -> AutomationConfig:
     """
-        Function to await the results of the validation function
+    Function to await the results of the validation function
     """
     return await _async_validate_config_item(config)
 

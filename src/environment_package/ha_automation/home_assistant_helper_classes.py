@@ -1,10 +1,10 @@
-""" This module contains helper classes for Home Assistant Automations.
+"""This module contains helper classes for Home Assistant Automations.
     It can be run with the following command: python -m ha_automation.home_assistant_helper_classes
 
 This code is partly extracted from:
         - core/homeassistant/helpers/script_variables.py : https://github.com/home-assistant/core/blob/dev/homeassistant/helpers/script_variables.py
             (VERSION: 08.03.2024 - parent c773d57 commit 19ab3d6)
-        - core/homeassistant/const.py : https://github.com/home-assistant/core/blob/dev/homeassistant/const.py 
+        - core/homeassistant/const.py : https://github.com/home-assistant/core/blob/dev/homeassistant/const.py
             (VERSION: 26.06.2024 - parent f5c640e - commit 33b4f40)
         - core/homeassistant/util/yaml/objects.py : https://github.com/home-assistant/core/blob/dev/homeassistant/util/yaml/objects.py
             (VERSION: 02.07.2024 - parent 0d0ca22 commit 0e52d14)
@@ -33,7 +33,10 @@ class UnitOfTemperature(StrEnum):
     CELSIUS = "°C"
     FAHRENHEIT = "°F"
     KELVIN = "K"
+
+
 # -------------------
+
 
 # ----- script_variables.py -----
 class ScriptVariables:
@@ -48,7 +51,9 @@ class ScriptVariables:
         """Return dict version of this class."""
         return self.variables
 
+
 # -------------------
+
 
 # ----- yaml/objects.py -----
 class NodeStrClass(str):
@@ -61,8 +66,11 @@ class NodeStrClass(str):
 
     def __voluptuous_compile__(self, schema: Schema) -> Any:
         """Needed because vol.Schema.compile does not handle str subclasses."""
-        return _compile_scalar(self)  # type: ignore[no-untyped-call]
+        return _compile_scalar(self)  # type: ignore[no-untyped-call]  # noqa: F821
+
+
 # -------------------
+
 
 # ----- template.py -----
 class ResultWrapper:
@@ -70,15 +78,18 @@ class ResultWrapper:
 
     render_result: str | None
 
+
 template_cv: ContextVar[tuple[str, str] | None] = ContextVar(
     "template_cv", default=None
 )
+
 
 def is_template_string(maybe_template: str) -> bool:
     """Check if the input is a Jinja2 template."""
     return "{" in maybe_template and (
         "{%" in maybe_template or "{{" in maybe_template or "{#" in maybe_template
     )
+
 
 class Template:
     """Class to hold a template and manage caching and rendering."""
@@ -114,10 +125,7 @@ class Template:
         self._hash_cache: int = hash(self.template)
         self._renders: int = 0
 
-    
-
-# TODO: Implement the following methods for the template validation 
-
+    # TODO: Implement the following methods for the template validation
 
     def ensure_valid(self) -> None:
         """Return if template is valid."""
@@ -138,7 +146,6 @@ class Template:
         #     except jinja2.TemplateError as err:
         #         raise TemplateError(err) from err
 
- 
     # @property
     # def _env(self) -> TemplateEnvironment:
 
@@ -462,6 +469,7 @@ class Template:
         """Representation of Template."""
         return f"Template<template=({self.template}) renders={self._renders}>"
 
+
 class TemplateContextManager(AbstractContextManager):
     """Context manager to store template being parsed or rendered in a ContextVar."""
 
@@ -477,6 +485,7 @@ class TemplateContextManager(AbstractContextManager):
     ) -> None:
         """Raise any exception triggered within the runtime context."""
         template_cv.set(None)
+
 
 _template_context_manager = TemplateContextManager()
 # -------------------

@@ -1,4 +1,4 @@
-""" This script provides functions for loading and parsing YAML files from Home Assistant. 
+"""This script provides functions for loading and parsing YAML files from Home Assistant.
     It can be run with the following command: python -m ha_automation.home_assistant_yaml_loader
 
 It is a partical copy of the original script from Home Assistant.
@@ -27,8 +27,10 @@ JSON_TYPE = list | dict | str
 
 _LOGGER = logging.getLogger(__name__)
 
+
 class YamlTypeError(HomeAssistantError):
     """Raised by load_yaml_dict if top level data is not a dict."""
+
 
 class FastSafeLoader(FastestAvailableSafeLoader):
     """The fastest available safe loader, either C or Python."""
@@ -47,6 +49,7 @@ class FastSafeLoader(FastestAvailableSafeLoader):
 
         super().__init__(stream)
 
+
 class PythonSafeLoader(yaml.SafeLoader):
     """Python safe loader."""
 
@@ -54,10 +57,11 @@ class PythonSafeLoader(yaml.SafeLoader):
         """Initialize a safe line loader."""
         super().__init__(stream)
 
+
 type LoaderType = FastSafeLoader | PythonSafeLoader
 
-def load_yaml_dict(
-    fname: str | os.PathLike[str]) -> dict:
+
+def load_yaml_dict(fname: str | os.PathLike[str]) -> dict:
     """Load a YAML file and ensure the top level is a dict.
 
     Raise if the top level is not a dict.
@@ -70,8 +74,8 @@ def load_yaml_dict(
         raise YamlTypeError(f"YAML file {fname} does not contain a dict")
     return loaded_yaml
 
-def load_yaml(
-    fname: str | os.PathLike[str]) -> JSON_TYPE | None:
+
+def load_yaml(fname: str | os.PathLike[str]) -> JSON_TYPE | None:
     """Load a YAML file."""
     try:
         with open(fname, encoding="utf-8") as conf_file:
@@ -80,8 +84,8 @@ def load_yaml(
         _LOGGER.error("Unable to read file %s: %s", fname, exc)
         raise HomeAssistantError(exc) from exc
 
-def parse_yaml(
-    content: str | TextIO | StringIO) -> JSON_TYPE:
+
+def parse_yaml(content: str | TextIO | StringIO) -> JSON_TYPE:
     """Parse YAML with the fastest available loader."""
     if not HAS_C_LOADER:
         return _parse_yaml_python(content)
@@ -94,15 +98,16 @@ def parse_yaml(
             # Rewind the stream so we can try again
             content.seek(0, 0)
         return _parse_yaml_python(content)
-    
-def _parse_yaml_python(
-    content: str | TextIO | StringIO) -> JSON_TYPE:
+
+
+def _parse_yaml_python(content: str | TextIO | StringIO) -> JSON_TYPE:
     """Parse YAML with the python loader (this is very slow)."""
     try:
         return _parse_yaml(PythonSafeLoader, content)
     except yaml.YAMLError as exc:
         _LOGGER.error(str(exc))
         raise HomeAssistantError(exc) from exc
+
 
 def _parse_yaml(
     loader: type[FastSafeLoader | PythonSafeLoader],
