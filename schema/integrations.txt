@@ -39,7 +39,7 @@
 (37,    'valve'),
 (38,    'wake_word'),
 (39,    'water_heater'),
-(40,    'weather')
+(40,    'weather'),
 
 -- TRIGGER INTEGRATION
 /* import the integrations for triggers */
@@ -52,3 +52,7 @@
 (47,    'webhook'),
 (48,    'zone'),
 (49,    'device'),
+
+-- CONDITION INTEGRATION
+/* import the integrations for conditions */
+(50,    'trigger'),

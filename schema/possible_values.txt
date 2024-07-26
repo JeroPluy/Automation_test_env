@@ -524,7 +524,7 @@
 (371,       'dew_point',                        'float'),                               --The dew point temperature in °C or °F.
 (372,       'ozone',                            'float'),                               --The current ozone level of the weather.
 (373,       'uv_index',                         'float'),                               --The uv index of the weather.
-(374,       'precipitation_unit',               'string');                              --The precipitation unit in mm or in.
+(374,       'precipitation_unit',               'string'),                              --The precipitation unit in mm or in.
 /* homeassistant
         attributes extracted from trigger: automation_dissection.py
 */
@@ -600,5 +600,14 @@
 (417,       'type',                             'turn_on'),                             --type of action.
 (418,       'type',                             'turn_off'),                            --type of action.
 (419,       'type',                             'toggle'),                              --type of action.
-
-
+/* datetime additions
+        attributes extracted from: 
+        https://www.home-assistant.io/docs/scripts/conditions/#time-condition
+*/
+(420,       'weekday',                          'mon'),                                 -- If the day is monday
+(421,       'weekday',                          'tue'),                                 -- If the day is tuesday
+(422,       'weekday',                          'wed'),                                 -- If the day is wednesday
+(423,       'weekday',                          'thu'),                                 -- If the day is thursday
+(424,       'weekday',                          'fri'),                                 -- If the day is friday
+(425,       'weekday',                          'sat'),                                 -- If the day is saturday
+(426,       'weekday',                          'sun');                                 -- If the day is sunday
