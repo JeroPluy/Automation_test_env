@@ -1311,8 +1311,8 @@ VALUES
         (47,     407),      -- The webhook is local only.
         -- zone
         (48,     310),      -- The number of registered people in the zone
-        (48,     128),      --  The coordinates of the zone.
-        (48,     129),      --  The coordinates of the zone.
+        (48,     128),      -- The coordinates of the zone.
+        (48,     129),      -- The coordinates of the zone.
         (48,     408),      -- The radius of the zone.
         (48,     409),      -- The zone is passive.
         (48,     410),      -- The persons in the zone.   

@@ -278,7 +278,7 @@ class TestWindow(BlankWindow):
 #     # app = TestWindow()
 #     # app.mainloop()
 
-from environment_package.automation_dissection import Automation, Entity, dissect_information, _extract_all_conditions
+from environment_package.automation_dissection import Automation, Entity, dissect_information, _extract_all_conditions, _extract_all_trigger
 import environment_package.db as db
 from environment_package.ha_automation import home_assistant_yaml_loader as yaml_loader
 from environment_package.ha_automation import home_assistant_automation_validation as ha_automation_config
@@ -320,15 +320,25 @@ def run_automation(automation: Automation, entities: list[Entity]):
     return result.stdout.decode("utf-8")
 
 
+def test_trigger_entities():
+    basis_file = path.join('test_data','yaml_files','all_triggers.yaml')
+    automation_yaml = yaml_loader.load_yaml_dict(basis_file)
+    automation_config = asyncio.run(ha_automation_config.async_validate_config_item(automation_yaml))
+    print(" --- " + automation_config.automation_name + " --- ")
+    extracted_entities = _extract_all_trigger(automation_config)
+    entity: Entity = None
+    for entity in extracted_entities:
+        print(str(entity.parent) + ": \t" +str(entity.position) + ": \t" + entity.entity_name + " : \t" + str(entity.expected_value))
+
 def test_condition_entities():
-    basis_file = path.join('test_data','yaml_files','all_conditions.yaml')
+    basis_file = path.join('test_data','yaml_files','deep_condition.yaml')
     automation_yaml = yaml_loader.load_yaml_dict(basis_file)
     automation_config = asyncio.run(ha_automation_config.async_validate_config_item(automation_yaml))
     print(" --- " + automation_config.automation_name + " --- ")
     extracted_entities = _extract_all_conditions(automation_config)
     entity: Entity = None
     for entity in extracted_entities:
-        print(entity.entity_name + " : \t" + str(entity.expected_value))
+        print(str(entity.parent) + ": \t" +str(entity.position) + ": \t" + entity.entity_name + " : \t" + str(entity.expected_value))
 
 if __name__ == "__main__":
 
@@ -337,6 +347,7 @@ if __name__ == "__main__":
     # basis_file = os.path.join('test_data','yaml_files', 'test_yaml', 'basis_automation.yaml')
     
     test_condition_entities()
+    # test_trigger_entities()
 
                 
     # automation: Automation = extract_information["infos"]
