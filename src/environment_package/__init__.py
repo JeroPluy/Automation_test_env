@@ -8,4 +8,4 @@
 # from .module2 import *
 
 # You can also define a __all__ variable to specify which modules should be imported when using `from package import *`.
-# __all__ = ['module1', 'module2'] 
+# __all__ = ['module1', 'module2']

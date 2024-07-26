@@ -278,15 +278,31 @@ class TestWindow(BlankWindow):
 #     # app = TestWindow()
 #     # app.mainloop()
 
-from environment_package.automation_dissection import Automation, Entity, dissect_information
+from environment_package.automation_dissection import Automation, Entity, dissect_information, _extract_all_conditions
 import environment_package.db as db
 from environment_package.ha_automation import home_assistant_yaml_loader as yaml_loader
-from environment_package.ha_automation import home_assistant_automation_config as ha_automation_config
+from environment_package.ha_automation import home_assistant_automation_validation as ha_automation_config
 
 import sqlite3 as sqlite
 import subprocess
 
 DATABASE = path.join("data", "automation_test_env.sqlite")
+
+def test_all_yaml_files():
+    automations = []
+    yaml_dir = path.join('test_data','yaml_files')
+    for file in listdir(yaml_dir):
+        if file.endswith(".yaml"):
+            basis_file = path.join(yaml_dir, file)
+            automation_yaml = yaml_loader.load_yaml_dict(basis_file)
+            automation_config = asyncio.run(ha_automation_config.async_validate_config_item(automation_yaml))
+            print(" --- " + automation_config.automation_name + " --- ")
+            extract_information = dissect_information(automation_config)
+            entity: Entity = None
+            for entity in extract_information["entities"]:
+                print(entity.entity_name + " : \t" + str(entity.expected_value))
+            automations.append(extract_information)
+    return automations
 
 
 def run_automation(automation: Automation, entities: list[Entity]):
@@ -304,22 +320,24 @@ def run_automation(automation: Automation, entities: list[Entity]):
     return result.stdout.decode("utf-8")
 
 
+def test_condition_entities():
+    basis_file = path.join('test_data','yaml_files','all_conditions.yaml')
+    automation_yaml = yaml_loader.load_yaml_dict(basis_file)
+    automation_config = asyncio.run(ha_automation_config.async_validate_config_item(automation_yaml))
+    print(" --- " + automation_config.automation_name + " --- ")
+    extracted_entities = _extract_all_conditions(automation_config)
+    entity: Entity = None
+    for entity in extracted_entities:
+        print(entity.entity_name + " : \t" + str(entity.expected_value))
+
 if __name__ == "__main__":
 
     # Automation to test basis parameters
     basis_file = path.join('test_data','yaml_files', 'turn_off_living_room_main_light_event.yaml')
     # basis_file = os.path.join('test_data','yaml_files', 'test_yaml', 'basis_automation.yaml')
-    yaml_dir = path.join('test_data','yaml_files')
-    for file in listdir(yaml_dir):
-        if file.endswith(".yaml"):
-            basis_file = path.join(yaml_dir, file)
-            automation_yaml = yaml_loader.load_yaml_dict(basis_file)
-            automation_config = asyncio.run(ha_automation_config.async_validate_config_item(automation_yaml))
-            print(" --- " + automation_config.automation_name + " --- ")
-            extract_information = dissect_information(automation_config)
-            entity: Entity = None
-            for entity in extract_information["entities"]:
-                print(entity.entity_name + " : \t" + str(entity.expected_value))
+    
+    test_condition_entities()
+
                 
-        # automation: Automation = extract_information["infos"]
-        # print( "result of the automation: " + run_automation(automation, extract_information["entities"]))
+    # automation: Automation = extract_information["infos"]
+    # print( "result of the automation: " + run_automation(automation, extract_information["entities"]))
