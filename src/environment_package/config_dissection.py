@@ -100,7 +100,7 @@ from .ha_automation.home_assistant_const import (
     TAG_ID,
     test_leading_zero,
 )
-from environment_package.automation_script_gen import create_automation_script
+from environment_package.automation_script_gen import create_trigger_script, init_automation_script
 import re
 import voluptuous as vol
 import uuid
@@ -224,7 +224,7 @@ def _trigger_entities(trigger_part: dict, position: int) -> list:
     param_role = START
 
     # check if the trigger is enabled
-    if f'{CONF_ENABLED}:' in trigger_part:
+    if f"{CONF_ENABLED}:" in trigger_part:
         if trigger_part[CONF_ENABLED] is False:
             return [Entity_list, position]
 
@@ -748,8 +748,7 @@ def _condition_entities(
     param_role = INPUT
 
     # check if the condition is enabled
-
-    if f'{CONF_ENABLED}:' in condition_part:
+    if f"{CONF_ENABLED}:" in condition_part:
         if condition_part[CONF_ENABLED] is False:
             return [Entity_list, position]
 
@@ -760,6 +759,7 @@ def _condition_entities(
     else:
         condition = CONF_TEMPLATE
 
+    # processes a combination of multiple conditions
     if condition == CONF_OR or condition == CONF_AND or condition == CONF_NOT:
         if CONF_CONDITIONS in condition_part:
             new_parent = position
@@ -771,6 +771,7 @@ def _condition_entities(
                 Entity_list += result_list[0]
                 position = result_list[1]
 
+    # processes a numeric state condition
     elif condition == CONF_NUMERIC_STATE:
         # add the value range to the entity
         exp_value_str = "__VALUE__"
@@ -832,6 +833,7 @@ def _condition_entities(
                 )
             )
 
+    # processes a state condition
     elif condition == CONF_STATE:
         # add the state value/s of the condition
         exp_value = {CONF_STATE: condition_part[CONF_STATE]}
@@ -888,6 +890,7 @@ def _condition_entities(
                 )
             )
 
+    # processes a device condition
     elif condition == CONF_DEVICE:
         # add the entity id and domain as the possible value
         exp_value = {CONF_ENTITY_ID: condition_part[CONF_ENTITY_ID]}
@@ -906,6 +909,7 @@ def _condition_entities(
             )
         )
 
+    # processes a sun condition
     elif condition == "sun":
         exp_value = {}
         if CONF_AFTER in condition_part:
@@ -929,6 +933,7 @@ def _condition_entities(
             )
         )
 
+    # processes a template condition
     elif condition == CONF_TEMPLATE:
         if CONF_VALUE_TEMPLATE in condition_part:
             template_str = condition_part[CONF_VALUE_TEMPLATE]
@@ -980,6 +985,7 @@ def _condition_entities(
                     )
                 )
 
+    # processes a time condition
     elif condition == CONF_TIME:
         exp_value = {}
         if CONF_AFTER in condition_part:
@@ -1003,6 +1009,7 @@ def _condition_entities(
             )
         )
 
+    # processes a trigger based condition
     elif condition == CONF_TRIGGER:
         # create all trigger entities that are needed for the condition
         if (
@@ -1043,6 +1050,7 @@ def _condition_entities(
                 )
             )
 
+    # processes a zone condition
     elif condition == CONF_ZONE:
         exp_value = {}
         if CONF_ZONE in condition_part:
@@ -1119,10 +1127,11 @@ def _action_entities(action_part: dict, position: int, parent: int = None) -> li
     param_role = OUTPUT
 
     # check if the action is enabled
-    if f'{CONF_ENABLED}:' in action_part:
+    if f"{CONF_ENABLED}:" in action_part:
         if action_part[CONF_ENABLED] is False:
             return [Entity_list, position]
 
+    # processes a conditional action 
     if SCRIPT_ACTION_IF in action_part:
         conditions = action_part[SCRIPT_ACTION_IF]
         if len(conditions) > 1:
@@ -1164,6 +1173,7 @@ def _action_entities(action_part: dict, position: int, parent: int = None) -> li
             # set the position back to the last entity
             position -= 1
 
+    # processes a conditional action with multiple options
     elif CONF_CHOOSE in action_part:
         choose = action_part[CONF_CHOOSE]
         has_cons = False
@@ -1195,9 +1205,10 @@ def _action_entities(action_part: dict, position: int, parent: int = None) -> li
                         # set the position for the next action
                         position = results[1] + 1
                     has_cons = False
-        # set the position back to the last entity                    
+        # set the position back to the last entity
         position -= 1
 
+    # processes the default action/s of the choose action with multiple options
     elif CONF_DEFAULT in action_part:
         default_actions = action_part[CONF_DEFAULT]
         for action in default_actions:
@@ -1208,6 +1219,7 @@ def _action_entities(action_part: dict, position: int, parent: int = None) -> li
         # set the position back to the last entity
         position -= 1
 
+    # processes a parallel grouping action
     elif CONF_PARALLEL in action_part:
         if isinstance(action_part[CONF_PARALLEL], list):
             for action in action_part[CONF_PARALLEL]:
@@ -1218,16 +1230,17 @@ def _action_entities(action_part: dict, position: int, parent: int = None) -> li
             # set the position back to the last entity
             position -= 1
 
+    # processes a repeat grouping action
     elif CONF_REPEAT in action_part:
         repeat_part = action_part[CONF_REPEAT]
         has_cons = False
         conditions = []
-        
+
         if CONF_WHILE in repeat_part:
             conditions = repeat_part[CONF_WHILE]
         elif CONF_UNTIL in repeat_part:
             conditions = repeat_part[CONF_UNTIL]
-        
+
         if isinstance(conditions, list):
             if len(conditions) > 1:
                 has_cons = True
@@ -1235,7 +1248,7 @@ def _action_entities(action_part: dict, position: int, parent: int = None) -> li
                 # create all condition entities which are needed for the repeated action/s
                 for condition in conditions:
                     position += 1
-                    results = _condition_entities(condition, position, new_parent) 
+                    results = _condition_entities(condition, position, new_parent)
                     Entity_list += results[0]
                     position = results[1]
             elif len(conditions) == 1:
@@ -1243,7 +1256,6 @@ def _action_entities(action_part: dict, position: int, parent: int = None) -> li
                 results = _condition_entities(conditions[0], position)
                 Entity_list += results[0]
                 position = results[1]
-        
 
         if CONF_SEQUENCE in repeat_part:
             if has_cons:
@@ -1257,6 +1269,7 @@ def _action_entities(action_part: dict, position: int, parent: int = None) -> li
                 # set the position back to the last entity
                 position -= 1
 
+    # processes a sequencal grouping action
     elif CONF_SEQUENCE in action_part:
         if isinstance(action_part[CONF_SEQUENCE], list):
             for action in action_part[CONF_SEQUENCE]:
@@ -1267,11 +1280,13 @@ def _action_entities(action_part: dict, position: int, parent: int = None) -> li
             # set the position back to the last entity
             position -= 1
 
+    # processes a condition in the action part
     elif CONF_CONDITION in action_part:
         results = _condition_entities(action_part, position, parent)
         Entity_list += results[0]
         position = results[1]
 
+    # processes a event action
     elif CONF_EVENT in action_part:
         # if the event has a data part
         if CONF_EVENT_DATA in action_part:
@@ -1281,7 +1296,7 @@ def _action_entities(action_part: dict, position: int, parent: int = None) -> li
                 event_data[data_key] = action_part[CONF_EVENT_DATA][data_key]
             exp_value[CONF_EVENT_DATA] = event_data
         # prohibit the use of 'context' in action events
-        
+
         # create the entity
         Entity_list.append(
             Entity(
@@ -1294,6 +1309,7 @@ def _action_entities(action_part: dict, position: int, parent: int = None) -> li
             )
         )
 
+    # processes a service action
     elif CONF_SERVICE in action_part:
         service = action_part[CONF_SERVICE]
         # TODO templates use could be more accurate
@@ -1346,6 +1362,7 @@ def _action_entities(action_part: dict, position: int, parent: int = None) -> li
             )
         )
 
+    # processes a wait for a trigger action
     elif SCRIPT_ACTION_WAIT_FOR_TRIGGER in action_part:
         # just one of the triggers has to be true to continue (or-block)
         if isinstance(action_part[SCRIPT_ACTION_WAIT_FOR_TRIGGER], list):
@@ -1367,6 +1384,7 @@ def _action_entities(action_part: dict, position: int, parent: int = None) -> li
             Entity_list += results[0]
             position = results[1]
 
+    # processes a device action
     elif CONF_DEVICE_ID in action_part:
         integration = action_part[CONF_DOMAIN]
         entity_name = action_part[CONF_DEVICE_ID]
@@ -1388,10 +1406,12 @@ def _action_entities(action_part: dict, position: int, parent: int = None) -> li
         )
 
     # TODO add variables for more detailed template actionss
+    # processes variables in the action part
     elif CONF_VARIABLES in action_part:
         pass
 
     # TODO add variables for more detailed template actionss
+    # processes a wait for a template action
     elif SCRIPT_ACTION_WAIT_TEMPLATE in action_part:
         pass
 
@@ -1415,16 +1435,17 @@ def _extract_all_trigger(automation_config: AutomationConfig) -> list:
         return_list = _trigger_entities(trigger, position)
         trigger_entities += return_list[0]
         position = return_list[1] + 1
+        create_trigger_script(return_list[0], return_list[2])
     return trigger_entities
 
 
 def _extract_all_conditions(automation_config: AutomationConfig) -> list:
     """
     Extract the condition from the data.
-    
+
     Args:
         automation_config (AutomationConfig): The automation configuration data.
-    
+
     Returns:
         list: A list of condition entities extracted from the data.
     """
@@ -1441,10 +1462,10 @@ def _extract_all_conditions(automation_config: AutomationConfig) -> list:
 def _extract_all_actions(automation_config: AutomationConfig) -> list:
     """
     Extract the action from the data.
-    
+
     Args:
         automation_config (AutomationConfig): The automation configuration data.
-    
+
     Returns:
         list: A list of action entities extracted from the data
     """
@@ -1469,12 +1490,14 @@ def create_entity_list(automation_config: AutomationConfig) -> list:
     return Entity_list
 
 
-def create_automation(automation_config: AutomationConfig) -> Automation:
+def create_automation(automation_config: AutomationConfig) -> dict:
     """
     Create an automation from the automation configuration.
     """
+    automation_data = {}
+    
     automation_name = automation_config.automation_name
-    automation_script = create_automation_script(automation_config)
+    automation_script = init_automation_script(automation_name)
 
     if CONF_MODE in automation_config:
         mode = automation_config[CONF_MODE]
@@ -1492,14 +1515,10 @@ def create_automation(automation_config: AutomationConfig) -> Automation:
         automation_mode=mode,
         max_instances=max_instances,
     )
-    return automation
-
-
-def dissect_information(automation_config: AutomationConfig) -> dict:
-    """
-    Extract the information from the data.
-    """
-    automation_data = {}
+    
     automation_data["entities"] = create_entity_list(automation_config)
-    automation_data["infos"] = create_automation(automation_config)
+    automation_data["infos"] = automation
+    
     return automation_data
+    
+

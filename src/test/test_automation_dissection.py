@@ -5,7 +5,7 @@ The python_path needs to be set to the src directory: (for venv) $env:PYTHONPATH
 
 import voluptuous as vol
 
-from environment_package.automation_dissection import (
+from environment_package.config_dissection import (
     _action_entities,
     _condition_entities,
     _trigger_entities,
