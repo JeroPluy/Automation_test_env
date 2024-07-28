@@ -3,11 +3,15 @@ This module is responsible for automating the desection of the data.
 
 The information about the trigger functions are from:
 https://www.home-assistant.io/docs/automation/trigger/
+
+The information about the condition functions are from:
+https://www.home-assistant.io/docs/scripts/conditions
+
+The information about the action functions are from:
+https://www.home-assistant.io/docs/scripts
 """
 
-import os
 from environment_package.env_const import (
-    AUTOMATION_SCRIPT,
     INPUT,
     OUTPUT,
     SINGLE,
@@ -96,6 +100,7 @@ from .ha_automation.home_assistant_const import (
     TAG_ID,
     test_leading_zero,
 )
+from environment_package.automation_script_gen import create_automation_script
 import re
 import voluptuous as vol
 import uuid
@@ -219,7 +224,7 @@ def _trigger_entities(trigger_part: dict, position: int) -> list:
     param_role = START
 
     # check if the trigger is enabled
-    if CONF_ENABLED in trigger_part:
+    if f'{CONF_ENABLED}:' in trigger_part:
         if trigger_part[CONF_ENABLED] is False:
             return [Entity_list, position]
 
@@ -743,7 +748,8 @@ def _condition_entities(
     param_role = INPUT
 
     # check if the condition is enabled
-    if CONF_ENABLED in condition_part:
+
+    if f'{CONF_ENABLED}:' in condition_part:
         if condition_part[CONF_ENABLED] is False:
             return [Entity_list, position]
 
@@ -1100,6 +1106,8 @@ def _action_entities(action_part: dict, position: int, parent: int = None) -> li
 
     Args:
         action_part (dict): The action list element
+        position (int): The position of the entity in the list
+        parent (int): The parent entity of condition entities
 
     Returns:
         list: A list of entities as Entity objects
@@ -1111,7 +1119,7 @@ def _action_entities(action_part: dict, position: int, parent: int = None) -> li
     param_role = OUTPUT
 
     # check if the action is enabled
-    if CONF_ENABLED in action_part:
+    if f'{CONF_ENABLED}:' in action_part:
         if action_part[CONF_ENABLED] is False:
             return [Entity_list, position]
 
@@ -1413,6 +1421,12 @@ def _extract_all_trigger(automation_config: AutomationConfig) -> list:
 def _extract_all_conditions(automation_config: AutomationConfig) -> list:
     """
     Extract the condition from the data.
+    
+    Args:
+        automation_config (AutomationConfig): The automation configuration data.
+    
+    Returns:
+        list: A list of condition entities extracted from the data.
     """
     condition_entities = []
     conditions = automation_config[CONF_CONDITION]
@@ -1427,6 +1441,12 @@ def _extract_all_conditions(automation_config: AutomationConfig) -> list:
 def _extract_all_actions(automation_config: AutomationConfig) -> list:
     """
     Extract the action from the data.
+    
+    Args:
+        automation_config (AutomationConfig): The automation configuration data.
+    
+    Returns:
+        list: A list of action entities extracted from the data
     """
     action_entities = []
     actions = automation_config[CONF_ACTION]
@@ -1449,40 +1469,12 @@ def create_entity_list(automation_config: AutomationConfig) -> list:
     return Entity_list
 
 
-def _create_automation_script(automation_config: AutomationConfig) -> str:
-    """
-    Create the automation script which simulates the automation.
-
-    Args:
-        automation_config (AutomationConfig): The automation configuration data.
-    """
-    file_name = automation_config.automation_name + ".py"
-    filepath = os.path.join(AUTOMATION_SCRIPT, file_name)
-
-    script_content = """
-import sys
-import json
-
-# Argumente auslesen
-serialized_entities = sys.argv[1]
-    
-entities_list = json.loads(serialized_entities)
-    
-for item in entities_list:
-    # print(item)   
-"""
-
-    with open(filepath, "w") as script:
-        script.write(script_content)
-    return filepath
-
-
 def create_automation(automation_config: AutomationConfig) -> Automation:
     """
     Create an automation from the automation configuration.
     """
     automation_name = automation_config.automation_name
-    automation_script = _create_automation_script(automation_config)
+    automation_script = create_automation_script(automation_config)
 
     if CONF_MODE in automation_config:
         mode = automation_config[CONF_MODE]

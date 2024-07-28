@@ -300,14 +300,10 @@ def test_all_yaml_files():
             automation_config = asyncio.run(ha_automation_config.async_validate_config_item(automation_yaml))
             print(" --- " + automation_config.automation_name + " --- ")
             extract_information = dissect_information(automation_config)
-            entity: Entity = None
-            entity_role = START
-            print(" --- " + str(entity_role) + " --- ")
+            entity: Entity = None   
             for entity in extract_information["entities"]:
-                if entity.parameter_role != entity_role:
-                    entity_role = entity.parameter_role
-                    print(" --- " + str(entity_role) + " --- ")
-                print(entity.entity_name + " : \t" + str(entity.expected_value))
+                role = "in" if entity.parameter_role == 1 else "out" if entity.parameter_role == 2 else "start"
+                print(role + ": \t \t" + str(entity.parent) + ": \t" +str(entity.position) + ": \t" + entity.entity_name + " : \t" + str(entity.expected_value))
             automations.append(extract_information)
     return automations
 
@@ -335,7 +331,8 @@ def test_trigger_entities():
     extracted_entities = _extract_all_trigger(automation_config)
     entity: Entity = None
     for entity in extracted_entities:
-        print(str(entity.parent) + ": \t" +str(entity.position) + ": \t" + entity.entity_name + " : \t" + str(entity.expected_value))
+        role = "in" if entity.parameter_role == 1 else "out" if entity.parameter_role == 2 else "start"
+        print(role + ": \t \t" + str(entity.parent) + ": \t" +str(entity.position) + ": \t" + entity.entity_name + " : \t" + str(entity.expected_value))
 
 def test_condition_entities():
     basis_file = path.join('test_data','yaml_files','all_conditions.yaml')
@@ -345,7 +342,8 @@ def test_condition_entities():
     extracted_entities = _extract_all_conditions(automation_config)
     entity: Entity = None
     for entity in extracted_entities:
-        print(str(entity.parent) + ": \t" +str(entity.position) + ": \t" + entity.entity_name + " : \t" + str(entity.expected_value))
+        role = "in" if entity.parameter_role == 1 else "out" if entity.parameter_role == 2 else "start"
+        print(role + ": \t \t" + str(entity.parent) + ": \t" +str(entity.position) + ": \t" + entity.entity_name + " : \t" + str(entity.expected_value))
 
 def test_action_entities():
     basis_file = path.join('test_data','yaml_files','watering_the_garden.yaml')
@@ -355,7 +353,8 @@ def test_action_entities():
     extracted_entities = create_entity_list(automation_config)
     entity: Entity = None
     for entity in extracted_entities:
-        print(str(entity.parameter_role) + ": \t" + str(entity.parent) + ": \t" +str(entity.position) + ": \t" + entity.entity_name + " : \t" + str(entity.expected_value))
+        role = "in" if entity.parameter_role == 1 else "out" if entity.parameter_role == 2 else "start"
+        print(role + ": \t \t" + str(entity.parent) + ": \t" +str(entity.position) + ": \t" + entity.entity_name + " : \t" + str(entity.expected_value))
 
 if __name__ == "__main__":
 
@@ -366,9 +365,9 @@ if __name__ == "__main__":
     
     # test_trigger_entities()
     # test_condition_entities()
-    test_action_entities()
+    # test_action_entities()
 
-    # test_all_yaml_files()
+    test_all_yaml_files()
                 
     # automation: Automation = extract_information["infos"]
     # print( "result of the automation: " + run_automation(automation, extract_information["entities"]))

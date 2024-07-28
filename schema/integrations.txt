@@ -56,3 +56,5 @@
 -- CONDITION INTEGRATION
 /* import the integrations for conditions */
 (50,    'trigger'),
+(51,    'automation'),
+(52,    'script'),

@@ -2,24 +2,24 @@
         states(main) / attributes extracted from:
         https://developers.home-assistant.io/docs/core/entity/alarm-control-panel
 */
-(1  ,       'main',                             'None'),	                                --Unknown state.
-(2  ,       'main',                             'disarmed'),	                            --The alarm is disarmed (off).
+(1  ,       'main',                             'None'),	                        --Unknown state.
+(2  ,       'main',                             'disarmed'),	                        --The alarm is disarmed (off).
 (3  ,       'main',                             'armed_home'),	                        --The alarm is armed in home mode.
 (4  ,       'main',                             'armed_away'),	                        --The alarm is armed in away mode.
 (5  ,       'main',                             'armed_night'),	                        --The alarm is armed in night mode.
-(6  ,       'main',                             'armed_vacation'),	                    --The alarm is armed in vacation mode.
-(7  ,       'main',                             'armed_custom_bypass'),                   --The alarm is armed in bypass mode.
-(8  ,       'main',                             'pending'),	                            --The alarm is pending (towards triggered).
-(9  ,       'main',                             'arming'),	                            --The alarm is arming.
+(6  ,       'main',                             'armed_vacation'),	                --The alarm is armed in vacation mode.
+(7  ,       'main',                             'armed_custom_bypass'),                 --The alarm is armed in bypass mode.
+(8  ,       'main',                             'pending'),	                        --The alarm is pending (towards triggered).
+(9  ,       'main',                             'arming'),	                        --The alarm is arming.
 (10 ,       'main',                             'disarming'),	                        --The alarm is disarming.
-(11 ,       'main',                             'triggered'),                            --The alarm is triggered.
-(12 ,       'main',                             'unknown'),	                            --Unknown state.
-(13 ,       'main',                             'unavailable'),                          --The entity is not reachable.
-(14 ,       'code_format',                      'number'),                               --The code format of the alarm control panel.
-(15 ,       'code_format',                      'text'),                                 --The code format of the alarm control panel.
-(16 ,       'changed_by',                       'string'),                               --The alarm control panel got changed by a user.
-(17 ,       'code_arm_required',                'string'),                               --The code required to arm the alarm control panel.
-(18 ,       'supported_features',               'int'),                                  --The count of supported features of the alarm control panel.
+(11 ,       'main',                             'triggered'),                           --The alarm is triggered.
+(12 ,       'main',                             'unknown'),	                        --Unknown state.
+(13 ,       'main',                             'unavailable'),                         --The entity is not reachable.
+(14 ,       'code_format',                      'number'),                              --The code format of the alarm control panel.
+(15 ,       'code_format',                      'text'),                                --The code format of the alarm control panel.
+(16 ,       'changed_by',                       'string'),                              --The alarm control panel got changed by a user.
+(17 ,       'code_arm_required',                'string'),                              --The code required to arm the alarm control panel.
+(18 ,       'supported_features',               'int'),                                 --The count of supported features of the alarm control panel.
 /* time
         attribute extracted from: 
         environment_package/automation_dissection.py
@@ -30,8 +30,8 @@
         https://developers.home-assistant.io/docs/core/entity/binary-sensor
         https://github.com/home-assistant/core/blob/dev/homeassistant/components/binary_sensor
 */
-(20 ,       'main',                             'on'),                                   --The sensor detects something.
-(21 ,       'main',                             'off'),                                  --The sensor detects nothing.
+(20 ,       'main',                             'on'),                                  --The sensor detects something.
+(21 ,       'main',                             'off'),                                 --The sensor detects nothing.
 (22 ,       'device_class',                     'battery'),                             --The device class of the binary sensor.
 (23 ,       'device_class',                     'battery_charging'),                    --The device class of the binary sensor.
 (24 ,       'device_class',                     'co'),                                  --The device class of the binary sensor.
@@ -469,7 +469,7 @@
         https://developers.home-assistant.io/docs/core/entity/valve
         https://www.home-assistant.io/integrations/valve/
 */
-(329,       'current_position',                 'int')                                 --The current position of the valve.
+(329,       'current_position',                 'int'),                                 --The current position of the valve.
 /* water_heater
         states(main) / attributes extracted from:
         https://developers.home-assistant.io/docs/core/entity/water-heater
@@ -564,50 +564,57 @@
         states(main) / attributes extracted from:
         https://www.home-assistant.io/integrations/persistent_notification/
 */
-(396,       'update_type',                      'added'),                               --The message of the notification.
-(397,       'update_type',                      'updated'),                             --The message of the notification.
-(398,       'update_type',                      'removed'),                             --The message of the notification.
-(399,       'update_type',                      'current'),                             --The message of the notification.
-(400,       'title',                            'string'),                              --The title of the notification.
-(401,       'message',                          'string'),                              --The message of the notification.
-(402,       'notification_id',                  'string'),                              --The id of the notification.
+(396,       'update_type',                      'added'),                               -- The message of the notification.
+(397,       'update_type',                      'updated'),                             -- The message of the notification.
+(398,       'update_type',                      'removed'),                             -- The message of the notification.
+(399,       'update_type',                      'current'),                             -- The message of the notification.
+(400,       'notification_id',                  'string'),                              -- The id of the notification.
 /* webhook
         states(main) / attributes extracted from:
         https://www.home-assistant.io/docs/automation/trigger/#webhook-trigger
 */
-(403,       'allowed_method',                   'POST'),                                --The allowed method for the web.
-(404,       'allowed_method',                   'PUT'),                                 --The allowed method for the web.
-(405,       'allowed_method',                   'HEAD'),                                --The allowed method for the web.
-(406,       'allowed_method',                   'GET'),                                 --The allowed method for the web.
-(407,       'local_only',                       'bool'),                                --The webhook is local only.
+(401,       'allowed_method',                   'POST'),                                -- The allowed method for the web.
+(402,       'allowed_method',                   'PUT'),                                 -- The allowed method for the web.
+(403,       'allowed_method',                   'HEAD'),                                -- The allowed method for the web.
+(404,       'allowed_method',                   'GET'),                                 -- The allowed method for the web.
+(405,       'local_only',                       'bool'),                                -- The webhook is local only.
 /* zone
         states(main) / attributes extracted from:
         https://www.home-assistant.io/integrations/zone/
 */
-(408,       'radius',                           'int'),                                 --The radius of the zone.
-(409,       'passive',                          'bool'),                                --The zone is passive.
-(410,       'persons',                          'list[string]'),                        --The persons in the zone.
+(406,       'radius',                           'int'),                                 -- The radius of the zone.
+(407,       'passive',                          'bool'),                                -- The zone is passive.
+(408,       'persons',                          'list[string]'),                        -- The persons in the zone.
 /* device_automation
         states(main) / attributes extracted from:
         https://github.com/home-assistant/core/tree/dev/homeassistant/components/device_automation
 */                                
-(411,       'domain',                           'string'),                              --enitity domain.
-(412,       'device_id',                        'string'),                              --device id.
-(413,       'type',                             'turned_on'),                           --type of trigger.
-(414,       'type',                             'turned_off'),                          --type of trigger .
-(415,       'type',                             'is_on'),                               --type of condition.
-(416,       'type',                             'is_off'),                              --type of condition.
-(417,       'type',                             'turn_on'),                             --type of action.
-(418,       'type',                             'turn_off'),                            --type of action.
-(419,       'type',                             'toggle'),                              --type of action.
+(409,       'domain',                           'string'),                              -- enitity domain.
+(410,       'type',                             'turned_on'),                           -- type of trigger.
+(411,       'type',                             'turned_off'),                          -- type of trigger .
+(412,       'type',                             'is_on'),                               -- type of condition.
+(413,       'type',                             'is_off'),                              -- type of condition.
+(414,       'type',                             'turn_on'),                             -- type of action.
+(415,       'type',                             'turn_off'),                            -- type of action.
+(416,       'type',                             'toggle'),                              -- type of action.
 /* datetime additions
         attributes extracted from: 
         https://www.home-assistant.io/docs/scripts/conditions/#time-condition
 */
-(420,       'weekday',                          'mon'),                                 -- If the day is monday
-(421,       'weekday',                          'tue'),                                 -- If the day is tuesday
-(422,       'weekday',                          'wed'),                                 -- If the day is wednesday
-(423,       'weekday',                          'thu'),                                 -- If the day is thursday
-(424,       'weekday',                          'fri'),                                 -- If the day is friday
-(425,       'weekday',                          'sat'),                                 -- If the day is saturday
-(426,       'weekday',                          'sun');                                 -- If the day is sunday
+(417,       'weekday',                          'mon'),                                 -- If the day is monday
+(418,       'weekday',                          'tue'),                                 -- If the day is tuesday
+(419,       'weekday',                          'wed'),                                 -- If the day is wednesday
+(420,       'weekday',                          'thu'),                                 -- If the day is thursday
+(421,       'weekday',                          'fri'),                                 -- If the day is friday
+(422,       'weekday',                          'sat'),                                 -- If the day is saturday
+(423,       'weekday',                          'sun'),                                 -- If the day is sunday
+/* automation
+        states(main) extracted from:
+        https://www.home-assistant.io/docs/automation/services/
+*/
+(424,       'last_triggered',                   'datetime'),                            -- The last time the automation was triggered.
+(425,       'mode',                             'single'),                              -- The automation won't start if repeated.
+(426,       'mode',                             'restart'),                             -- The automation will restart up if repeated.
+(427,       'mode',                             'queued'),                              -- The automation is queued up if repeated.
+(428,       'mode',                             'parallel'),                            -- The automation is called parallel if repeated.
+(429,       'current',                          'int'),                                 -- The current state (not running 0 / running 1) of the automation

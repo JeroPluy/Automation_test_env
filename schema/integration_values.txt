@@ -602,7 +602,7 @@
 -- tag
 (44,     12),       --  unknown
 (44,     13),       --  unavailable
-(44,     108),      --  date of the last use as string
+(44,     108),      --  Date of the last use as string
 (44,     394),      --  The id of the device that last scanned the tag.
 (44,     395),      --  The id of the tag.
 -- time_pattern
@@ -613,46 +613,67 @@
 (46,     397),      -- The message of the notification.
 (46,     398),      -- The message of the notification.
 (46,     399),      -- The message of the notification.
-(46,     400),      -- The title of the notification.
-(46,     401),      -- The message of the notification.
-(46,     402),      -- The id of the notification.
+(46,     318),      -- The title of the notification.
+(46,     51),       -- The message of the notification.
+(46,     400),      -- The id of the notification.
 -- webhook
+(47,     401),      -- The allowed method for the webhook.
+(47,     402),      -- The allowed method for the webhook.
 (47,     403),      -- The allowed method for the webhook.
 (47,     404),      -- The allowed method for the webhook.
-(47,     405),      -- The allowed method for the webhook.
-(47,     406),      -- The allowed method for the webhook.
-(47,     407),      -- The webhook is local only.
+(47,     405),      -- The webhook is local only.
 -- zone
 (48,     310),      -- The number of registered people in the zone
-(48,     128),      --  The coordinates of the zone.
-(48,     129),      --  The coordinates of the zone.
-(48,     408),      -- The radius of the zone.
-(48,     409),      -- The zone is passive.
-(48,     410),      -- The persons in the zone.   
+(48,     128),      -- The coordinates of the zone.
+(48,     129),      -- The coordinates of the zone.
+(48,     406),      -- The radius of the zone.
+(48,     407),      -- The zone is passive.
+(48,     408),      -- The persons in the zone.   
 -- device_automation
-(49,     20),       -- device is on 
-(49,     21),       -- device is off
-(49,     252),      -- The id of the entity needed for the trigger.
-(49,     411),      -- enitity domain.
-(49,     412),      -- device id.
-(49,     413),      -- type of trigger.
-(49,     414),      -- type of trigger .
-(49,     415),      -- type of condition.
-(49,     416),      -- type of condition.
-(49,     417),      -- type of action.
-(49,     418),      -- type of action.
-(49,     419),      -- type of action.
+(49,    20),        -- device is on 
+(49,    21),        -- device is off
+(49,    252),       -- The id of the entity needed for the trigger.
+(49,    409),       -- enitity domain.
+(49,    394),       -- device id.
+(49,    410),       -- type of trigger.
+(49,    411),       -- type of trigger .
+(49,    412),       -- type of condition.
+(49,    413),       -- type of condition.
+(49,    414),       -- type of action.
+(49,    415),       -- type of action.
+(49,    416);       -- type of action.
 -- datetime additions
-(10,     422),      -- If the day is monday
-(10,     423),      -- If the day is tuesday
-(10,     424),      -- If the day is wednesday
-(10,     425),      -- If the day is thursday
-(10,     426),      -- If the day is friday
-(10,     427),      -- If the day is saturday
-(10,     428),      -- If the day is sunday
+(10,     417),      -- If the day is monday
+(10,     418),      -- If the day is tuesday
+(10,     419),      -- If the day is wednesday
+(10,     420),      -- If the day is thursday
+(10,     421),      -- If the day is friday
+(10,     422),      -- If the day is saturday
+(10,     423),      -- If the day is sunday
 -- trigger
 (50,     20),       -- The trigger is used.
-(50,     21),       -- The trigger is not used.
-(50,     251),      -- The id of the trigger.  
-
-
+(50,     21),       -- The trigger is not used..
+(50,     251),      -- The id of the trigger.     
+-- automation
+(51,     12),       --Unknown state.
+(51,     13),       --The entity is not reachable.
+(51,     20),       --The automation is activated
+(51,     21),       --The automation is deactivated
+(51,     251),      --The id of the automation.
+(51,     424),      --The last time the automation was triggered.
+(51,     425),      --The automation won't start if repeated.
+(51,     426),      --The automation will restart up if repeated.
+(51,     427),      --The automation is queued up if repeated.
+(51,     428),      --The automation is called parallel if repeated.
+(51,     429),      --The current state (not running 0 / running 1) of the automation
+-- script
+(52,     12),       --Unknown state.
+(52,     13),       --The entity is not reachable.
+(52,     20),       --The script is activated
+(52,     21),       --The script is deactivated
+(52,     424),      --The last time the script was triggered.
+(52,     425),      --The script won't start if repeated.
+(52,     426),      --The script will restart up if repeated.
+(52,     427),      --The script is queued up if repeated.
+(52,     428),      --The script is called parallel if repeated.
+(52,     429);      --The current state (not running 0 / running 1) of the script

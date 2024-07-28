@@ -1229,38 +1229,35 @@ VALUES
         (397,       'update_type',                      'updated'),                             -- The message of the notification.
         (398,       'update_type',                      'removed'),                             -- The message of the notification.
         (399,       'update_type',                      'current'),                             -- The message of the notification.
-        (400,       'title',                            'string'),                              -- The title of the notification.
-        (401,       'message',                          'string'),                              -- The message of the notification.
-        (402,       'notification_id',                  'string'),                              -- The id of the notification.
+        (400,       'notification_id',                  'string'),                              -- The id of the notification.
 /* webhook
         states(main) / attributes extracted from:
         https://www.home-assistant.io/docs/automation/trigger/#webhook-trigger
 */
-        (403,       'allowed_method',                   'POST'),                                -- The allowed method for the web.
-        (404,       'allowed_method',                   'PUT'),                                 -- The allowed method for the web.
-        (405,       'allowed_method',                   'HEAD'),                                -- The allowed method for the web.
-        (406,       'allowed_method',                   'GET'),                                 -- The allowed method for the web.
-        (407,       'local_only',                       'bool'),                                -- The webhook is local only.
+        (401,       'allowed_method',                   'POST'),                                -- The allowed method for the web.
+        (402,       'allowed_method',                   'PUT'),                                 -- The allowed method for the web.
+        (403,       'allowed_method',                   'HEAD'),                                -- The allowed method for the web.
+        (404,       'allowed_method',                   'GET'),                                 -- The allowed method for the web.
+        (405,       'local_only',                       'bool'),                                -- The webhook is local only.
 /* zone
         states(main) / attributes extracted from:
         https://www.home-assistant.io/integrations/zone/
 */
-        (408,       'radius',                           'int'),                                 -- The radius of the zone.
-        (409,       'passive',                          'bool'),                                -- The zone is passive.
-        (410,       'persons',                          'list[string]'),                        -- The persons in the zone.
+        (406,       'radius',                           'int'),                                 -- The radius of the zone.
+        (407,       'passive',                          'bool'),                                -- The zone is passive.
+        (408,       'persons',                          'list[string]'),                        -- The persons in the zone.
 /* device_automation
         states(main) / attributes extracted from:
         https://github.com/home-assistant/core/tree/dev/homeassistant/components/device_automation
 */                                
-        (411,       'domain',                           'string'),                              -- enitity domain.
-        (412,       'device_id',                        'string'),                              -- device id.
-        (413,       'type',                             'turned_on'),                           -- type of trigger.
-        (414,       'type',                             'turned_off'),                          -- type of trigger .
-        (415,       'type',                             'is_on'),                               -- type of condition.
-        (416,       'type',                             'is_off'),                              -- type of condition.
-        (417,       'type',                             'turn_on'),                             -- type of action.
-        (418,       'type',                             'turn_off'),                            -- type of action.
-        (419,       'type',                             'toggle');                              -- type of action.
+        (409,       'domain',                           'string'),                              -- enitity domain.
+        (410,       'type',                             'turned_on'),                           -- type of trigger.
+        (411,       'type',                             'turned_off'),                          -- type of trigger .
+        (412,       'type',                             'is_on'),                               -- type of condition.
+        (413,       'type',                             'is_off'),                              -- type of condition.
+        (414,       'type',                             'turn_on'),                             -- type of action.
+        (415,       'type',                             'turn_off'),                            -- type of action.
+        (416,       'type',                             'toggle');                              -- type of action.
 
 INSERT INTO integration_values(i_id, pv_id)
 VALUES  
@@ -1300,41 +1297,43 @@ VALUES
         (46,     397),      -- The message of the notification.
         (46,     398),      -- The message of the notification.
         (46,     399),      -- The message of the notification.
-        (46,     400),      -- The title of the notification.
-        (46,     401),      -- The message of the notification.
-        (46,     402),      -- The id of the notification.
+        (46,     318),      -- The title of the notification.
+        (46,     51),       -- The message of the notification.
+        (46,     400),      -- The id of the notification.
         -- webhook
+        (47,     401),      -- The allowed method for the webhook.
+        (47,     402),      -- The allowed method for the webhook.
         (47,     403),      -- The allowed method for the webhook.
         (47,     404),      -- The allowed method for the webhook.
-        (47,     405),      -- The allowed method for the webhook.
-        (47,     406),      -- The allowed method for the webhook.
-        (47,     407),      -- The webhook is local only.
+        (47,     405),      -- The webhook is local only.
         -- zone
         (48,     310),      -- The number of registered people in the zone
         (48,     128),      -- The coordinates of the zone.
         (48,     129),      -- The coordinates of the zone.
-        (48,     408),      -- The radius of the zone.
-        (48,     409),      -- The zone is passive.
-        (48,     410),      -- The persons in the zone.   
+        (48,     406),      -- The radius of the zone.
+        (48,     407),      -- The zone is passive.
+        (48,     408),      -- The persons in the zone.   
         -- device_automation
         (49,    20),        -- device is on 
         (49,    21),        -- device is off
         (49,    252),       -- The id of the entity needed for the trigger.
-        (49,    411),       -- enitity domain.
-        (49,    412),       -- device id.
-        (49,    413),       -- type of trigger.
-        (49,    414),       -- type of trigger .
-        (49,    415),       -- type of condition.
-        (49,    416),       -- type of condition.
-        (49,    417),       -- type of action.
-        (49,    418),       -- type of action.
-        (49,    419);       -- type of action.
+        (49,    409),       -- enitity domain.
+        (49,    394),       -- device id.
+        (49,    410),       -- type of trigger.
+        (49,    411),       -- type of trigger .
+        (49,    412),       -- type of condition.
+        (49,    413),       -- type of condition.
+        (49,    414),       -- type of action.
+        (49,    415),       -- type of action.
+        (49,    416);       -- type of action.
         
 -- CONDITION INTEGRATION
 /* import the integrations for conditions */
 
 INSERT INTO integration(i_id, i_name)
-VALUES  (50,    'trigger');
+VALUES  (50,    'trigger'),
+        (51,    'automation'),
+        (52,    'script');
 
 -- POSSIBLE VALUES --
 /* import the values from condition integrations */
@@ -1345,25 +1344,59 @@ VALUES
         attributes extracted from: 
         https://www.home-assistant.io/docs/scripts/conditions/#time-condition
 */
-        (420,       'weekday',                          'mon'),                                 -- If the day is monday
-        (421,       'weekday',                          'tue'),                                 -- If the day is tuesday
-        (422,       'weekday',                          'wed'),                                 -- If the day is wednesday
-        (423,       'weekday',                          'thu'),                                 -- If the day is thursday
-        (424,       'weekday',                          'fri'),                                 -- If the day is friday
-        (425,       'weekday',                          'sat'),                                 -- If the day is saturday
-        (426,       'weekday',                          'sun');                                 -- If the day is sunday
+        (417,       'weekday',                          'mon'),                                 -- If the day is monday
+        (418,       'weekday',                          'tue'),                                 -- If the day is tuesday
+        (419,       'weekday',                          'wed'),                                 -- If the day is wednesday
+        (420,       'weekday',                          'thu'),                                 -- If the day is thursday
+        (421,       'weekday',                          'fri'),                                 -- If the day is friday
+        (422,       'weekday',                          'sat'),                                 -- If the day is saturday
+        (423,       'weekday',                          'sun'),                                 -- If the day is sunday
+/* automation
+        states(main) extracted from:
+        https://www.home-assistant.io/docs/automation/services/
+*/
+        (424,       'last_triggered',                   'datetime'),                            -- The last time the automation was triggered.
+        (425,       'mode',                             'single'),                              -- The automation won't start if repeated.
+        (426,       'mode',                             'restart'),                             -- The automation will restart up if repeated.
+        (427,       'mode',                             'queued'),                              -- The automation is queued up if repeated.
+        (428,       'mode',                             'parallel'),                            -- The automation is called parallel if repeated.
+        (429,       'current',                          'int');                                 -- The current state (not running 0 / running 1) of the automation
+
 
 INSERT INTO integration_values(i_id, pv_id)
 VALUES 
         -- datetime additions
-        (10,     422),      -- If the day is monday
-        (10,     423),      -- If the day is tuesday
-        (10,     424),      -- If the day is wednesday
-        (10,     425),      -- If the day is thursday
-        (10,     426),      -- If the day is friday
-        (10,     427),      -- If the day is saturday
-        (10,     428),      -- If the day is sunday
+        (10,     417),      -- If the day is monday
+        (10,     418),      -- If the day is tuesday
+        (10,     419),      -- If the day is wednesday
+        (10,     420),      -- If the day is thursday
+        (10,     421),      -- If the day is friday
+        (10,     422),      -- If the day is saturday
+        (10,     423),      -- If the day is sunday
         -- trigger
         (50,     20),       -- The trigger is used.
         (50,     21),       -- The trigger is not used..
-        (50,     251);      -- The id of the trigger.     
+        (50,     251),      -- The id of the trigger.     
+        -- automation
+        (51,     12),       --Unknown state.
+        (51,     13),       --The entity is not reachable.
+        (51,     20),       --The automation is activated
+        (51,     21),       --The automation is deactivated
+        (51,     251),      --The id of the automation.
+        (51,     424),      --The last time the automation was triggered.
+        (51,     425),      --The automation won't start if repeated.
+        (51,     426),      --The automation will restart up if repeated.
+        (51,     427),      --The automation is queued up if repeated.
+        (51,     428),      --The automation is called parallel if repeated.
+        (51,     429),      --The current state (not running 0 / running 1) of the automation
+        -- script
+        (52,     12),       --Unknown state.
+        (52,     13),       --The entity is not reachable.
+        (52,     20),       --The script is activated
+        (52,     21),       --The script is deactivated
+        (52,     424),      --The last time the script was triggered.
+        (52,     425),      --The script won't start if repeated.
+        (52,     426),      --The script will restart up if repeated.
+        (52,     427),      --The script is queued up if repeated.
+        (52,     428),      --The script is called parallel if repeated.
+        (52,     429);      --The current state (not running 0 / running 1) of the script
