@@ -6,11 +6,13 @@ The python_path needs to be set to the src directory: (for venv) $env:PYTHONPATH
 import voluptuous as vol
 
 from environment_package.automation_dissection import (
+    _action_entities,
     _condition_entities,
     _trigger_entities,
 )
-from environment_package.env_const import INPUT, START
+from environment_package.env_const import INPUT, OUTPUT, START
 from environment_package.ha_automation.home_assistant_const import (
+    ATTR_AREA_ID,
     CONF_ABOVE,
     CONF_AFTER,
     CONF_AFTER_OFFSET,
@@ -24,6 +26,8 @@ from environment_package.ha_automation.home_assistant_const import (
     CONF_CONDITION,
     CONF_DEVICE_ID,
     CONF_DOMAIN,
+    CONF_ELSE,
+    CONF_ENABLED,
     CONF_ENTITY_ID,
     CONF_EVENT,
     CONF_EVENT_CONTEXT,
@@ -31,6 +35,7 @@ from environment_package.ha_automation.home_assistant_const import (
     CONF_EVENT_TYPE,
     CONF_FOR,
     CONF_FROM,
+    CONF_ID,
     CONF_LOCAL,
     CONF_NOFITY_ID,
     CONF_NOT_FROM,
@@ -40,9 +45,13 @@ from environment_package.ha_automation.home_assistant_const import (
     CONF_PAYLOAD,
     CONF_PLATFORM,
     CONF_QOS,
+    CONF_SERVICE,
+    CONF_SERVICE_DATA,
     CONF_SOURCE,
     CONF_STATE,
+    CONF_TARGET,
     CONF_TEMPLATE,
+    CONF_THEN,
     CONF_TO,
     CONF_TYPE,
     CONF_UPDATE_TYPE,
@@ -52,6 +61,7 @@ from environment_package.ha_automation.home_assistant_const import (
     CONF_ZONE,
     HOURS,
     MINUTES,
+    SCRIPT_ACTION_IF,
     SECONDS,
     TAG_ID,
 )
@@ -901,6 +911,16 @@ def test_trigger_entities():
     entities_x, end_position = results
     assert len(entities_x) == 0
 
+    # Test case 49: State trigger with disabled set to false
+    trigger_part_x2 = {
+        CONF_PLATFORM: "state",
+        CONF_ENABLED: False,
+        CONF_ENTITY_ID: "sensor.temperature",
+    }
+    results = _trigger_entities(trigger_part_x2, position=1)
+    entities_x2, end_position = results
+    assert len(entities_x2) == 0
+
     print("All trigger test cases passed!")
 
 
@@ -1293,7 +1313,7 @@ def test_condition_entities():
     assert entities_sun_1[0].entity_name == "sun.sun"
     assert entities_sun_1[0].expected_value == {"after": "sunset"}
     assert end_position == 1
-    
+
     # Test case 21: Sun condition before the sunset
     condition_part_sun_2 = {
         CONF_CONDITION: "sun",
@@ -1309,7 +1329,7 @@ def test_condition_entities():
     assert entities_sun_2[0].entity_name == "sun.sun"
     assert entities_sun_2[0].expected_value == {"before": "sunset"}
     assert end_position == 1
-    
+
     # Test case 22: Sun condition 1 hour after the sunset and 1 hour after the sunrise
     condition_part_sun_3 = {
         CONF_CONDITION: "sun",
@@ -1326,9 +1346,14 @@ def test_condition_entities():
     assert entities_sun_3[0].parameter_role == INPUT
     assert entities_sun_3[0].integration == "sun"
     assert entities_sun_3[0].entity_name == "sun.sun"
-    assert entities_sun_3[0].expected_value == {"after": "sunset", "before": "sunrise", "before_offset": "-01:00:00", "after_offset": "01:00:00"}
+    assert entities_sun_3[0].expected_value == {
+        "after": "sunset",
+        "before": "sunrise",
+        "before_offset": "-01:00:00",
+        "after_offset": "01:00:00",
+    }
     assert end_position == 1
-    
+
     # Test case 23: Sun condition after the sunset and before the sunrise at a specific position
     condition_part_sun_4 = {
         CONF_CONDITION: "sun",
@@ -1345,7 +1370,7 @@ def test_condition_entities():
     assert entities_sun_4[0].entity_name == "sun.sun"
     assert entities_sun_4[0].expected_value == {"after": "sunset", "before": "sunrise"}
     assert end_position == 3
-    
+
     # Test case 24: Device condition with a device that does something
     condition_part_device_1 = {
         CONF_CONDITION: "device",
@@ -1368,7 +1393,7 @@ def test_condition_entities():
         CONF_DOMAIN: "domain",
     }
     assert end_position == 1
-    
+
     # Test case 25: Device condition with a device that does something at a specific position
     condition_part_device_2 = {
         CONF_CONDITION: "device",
@@ -1376,7 +1401,7 @@ def test_condition_entities():
         CONF_DOMAIN: "domain",
         CONF_ENTITY_ID: "test_entity_id",
         CONF_TYPE: "do something",
-    } 
+    }
     results = _condition_entities(condition_part_device_2, position=5, parent=2)
     entities_device_2, end_position = results
     assert len(entities_device_2) == 1
@@ -1391,7 +1416,7 @@ def test_condition_entities():
         CONF_DOMAIN: "domain",
     }
     assert end_position == 5
-    
+
     # Test case 26: Time condition before a specific time
     condition_part_time_1 = {
         CONF_CONDITION: "time",
@@ -1407,7 +1432,7 @@ def test_condition_entities():
     assert entities_time_1[0].entity_name is not None
     assert entities_time_1[0].expected_value == {"before": "12:00:00"}
     assert end_position == 1
-    
+
     # Test case 27: Time condition after a specific time
     condition_part_time_2 = {
         CONF_CONDITION: "time",
@@ -1423,7 +1448,7 @@ def test_condition_entities():
     assert entities_time_2[0].entity_name is not None
     assert entities_time_2[0].expected_value == {"after": "12:00:00"}
     assert end_position == 1
-    
+
     # Test case 28: Time condition between two specific times on monday
     condition_part_time_3 = {
         CONF_CONDITION: "time",
@@ -1439,9 +1464,13 @@ def test_condition_entities():
     assert entities_time_3[0].parameter_role == INPUT
     assert entities_time_3[0].integration == "datetime"
     assert entities_time_3[0].entity_name is not None
-    assert entities_time_3[0].expected_value == {"after": "12:00:00", "before": "14:00:00", "weekday": "mon"}
+    assert entities_time_3[0].expected_value == {
+        "after": "12:00:00",
+        "before": "14:00:00",
+        "weekday": "mon",
+    }
     assert end_position == 1
-    
+
     # Test case 29: Time condition between two specific times on friday at a specific position
     condition_part_time_4 = {
         CONF_CONDITION: "time",
@@ -1457,20 +1486,417 @@ def test_condition_entities():
     assert entities_time_4[0].parameter_role == INPUT
     assert entities_time_4[0].integration == "datetime"
     assert entities_time_4[0].entity_name is not None
-    assert entities_time_4[0].expected_value == {"after": "12:00:00", "before": "14:00:00", "weekday": "fri"}
+    assert entities_time_4[0].expected_value == {
+        "after": "12:00:00",
+        "before": "14:00:00",
+        "weekday": "fri",
+    }
     assert end_position == 12
+
+    # Test case 30: Trigger condition with a trigger that has an string id
+    condition_part_trigger_1 = {CONF_CONDITION: "trigger", CONF_ID: "trigger_1"}
+    results = _condition_entities(condition_part_trigger_1, position=1)
+    entities_trigger_1, end_position = results
+    assert len(entities_trigger_1) == 1
+    assert entities_trigger_1[0].parent is None
+    assert entities_trigger_1[0].position == 1
+    assert entities_trigger_1[0].parameter_role == INPUT
+    assert entities_trigger_1[0].integration == "trigger"
+    assert entities_trigger_1[0].entity_name is not None
+    assert entities_trigger_1[0].expected_value == {CONF_ID: "trigger_1"}
+    assert end_position == 1
+
+    # Test case 31: Trigger condition with a trigger that has an integer id
+    condition_part_trigger_2 = {CONF_CONDITION: "trigger", CONF_ID: 1}
+    results = _condition_entities(condition_part_trigger_2, position=1)
+    entities_trigger_2, end_position = results
+    assert len(entities_trigger_2) == 1
+    assert entities_trigger_2[0].parent is None
+    assert entities_trigger_2[0].position == 1
+    assert entities_trigger_2[0].parameter_role == INPUT
+    assert entities_trigger_2[0].integration == "trigger"
+    assert entities_trigger_2[0].entity_name is not None
+    assert entities_trigger_2[0].expected_value == {CONF_ID: 1}
+    assert end_position == 1
+
+    # Test case 32: Trigger condition with a trigger that has an string id at a specific position
+    condition_part_trigger_3 = {CONF_CONDITION: "trigger", CONF_ID: "trigger_1"}
+    results = _condition_entities(condition_part_trigger_3, position=4, parent=2)
+    entities_trigger_3, end_position = results
+    assert len(entities_trigger_3) == 1
+    assert entities_trigger_3[0].parent == 2
+    assert entities_trigger_3[0].position == 4
+    assert entities_trigger_3[0].parameter_role == INPUT
+    assert entities_trigger_3[0].integration == "trigger"
+    assert entities_trigger_3[0].entity_name is not None
+    assert entities_trigger_3[0].expected_value == {CONF_ID: "trigger_1"}
+    assert end_position == 4
+
+    # Test case 33: Zone condition with one entity
+    condition_part_zone_1 = {
+        CONF_CONDITION: "zone",
+        CONF_ENTITY_ID: "device_tracker.paulus",
+        CONF_ZONE: "zone.home",
+    }
+    results = _condition_entities(condition_part_zone_1, position=1)
+    entities_zone_1, end_position = results
+    assert len(entities_zone_1) == 1
+    assert entities_zone_1[0].parent is None
+    assert entities_zone_1[0].position == 1
+    assert entities_zone_1[0].parameter_role == INPUT
+    assert entities_zone_1[0].integration == "zone"
+    assert entities_zone_1[0].entity_name == "zone.home"
+    assert entities_zone_1[0].expected_value == {"entity_id": "device_tracker.paulus"}
+    assert end_position == 1
+
+    # Test case 34: Zone condition with one entity in a list
+    condition_part_zone_2 = {
+        CONF_CONDITION: "zone",
+        CONF_ENTITY_ID: ["device_tracker.paulus"],
+        CONF_ZONE: "zone.home",
+    }
+    results = _condition_entities(condition_part_zone_2, position=1)
+    entities_zone_2, end_position = results
+    assert len(entities_zone_2) == 1
+    assert entities_zone_2[0].parent is None
+    assert entities_zone_2[0].position == 1
+    assert entities_zone_2[0].parameter_role == INPUT
+    assert entities_zone_2[0].integration == "zone"
+    assert entities_zone_2[0].entity_name == "zone.home"
+    assert entities_zone_2[0].expected_value == {"entity_id": ["device_tracker.paulus"]}
+    assert end_position == 1
+
+    # Test case 35: Zone condition with two entities
+    condition_part_zone_3 = {
+        CONF_CONDITION: "zone",
+        CONF_ENTITY_ID: ["device_tracker.paulus", "device_tracker.anne_therese"],
+        CONF_ZONE: "zone.home",
+    }
+    results = _condition_entities(condition_part_zone_3, position=1)
+    entities_zone_3, end_position = results
+    assert len(entities_zone_3) == 1
+    assert entities_zone_3[0].parent is None
+    assert entities_zone_3[0].position == 1
+    assert entities_zone_3[0].parameter_role == INPUT
+    assert entities_zone_3[0].integration == "zone"
+    assert entities_zone_3[0].entity_name == "zone.home"
+    assert entities_zone_3[0].expected_value == {
+        "entity_id": ["device_tracker.paulus", "device_tracker.anne_therese"]
+    }
+    assert end_position == 1
+
+    # Test case 36: Zone condition with two entities and at a specific position
+    condition_part_zone_4 = {
+        CONF_CONDITION: "zone",
+        CONF_ENTITY_ID: ["device_tracker.paulus", "device_tracker.anne_therese"],
+        CONF_ZONE: "zone.home",
+    }
+    results = _condition_entities(condition_part_zone_4, position=4, parent=2)
+    entities_zone_4, end_position = results
+    assert len(entities_zone_4) == 1
+    assert entities_zone_4[0].parent == 2
+    assert entities_zone_4[0].position == 4
+    assert entities_zone_4[0].parameter_role == INPUT
+    assert entities_zone_4[0].integration == "zone"
+    assert entities_zone_4[0].entity_name == "zone.home"
+    assert entities_zone_4[0].expected_value == {
+        "entity_id": ["device_tracker.paulus", "device_tracker.anne_therese"]
+    }
+    assert end_position == 4
     
+    # Test case 37: unknown condition
+    condition_part_x = {
+        CONF_CONDITION: "x",
+        CONF_SERVICE_DATA: {"entity_id": "light.kitchen"},
+    }
+    results = _condition_entities(condition_part_x, position=1)
+    entities_x, end_position = results
+    assert len(entities_x) == 0
     
-    
-    
-    
-    
+    # Test case 38: disabled condition
+    condition_part_x2 = {
+        CONF_CONDITION: "state",
+        CONF_ENTITY_ID: "sensor.temperature",
+        CONF_STATE: "on",
+        CONF_ENABLED: False,
+    }
+    results = _condition_entities(condition_part_x2, position=1)
+    entities_x2, end_position = results
+    assert len(entities_x2) == 0
     
     
 
     print("All condition test cases passed!")
 
 
+def test_action_entities():
+    # Test case 1: Call service action for one entity
+    action_part_call_service_1 = {
+        CONF_SERVICE: "light.doSomething",
+        CONF_TARGET: {CONF_ENTITY_ID: "light.kitchen"},
+    }
+    results = _action_entities(action_part_call_service_1, position=1)
+    entities_call_service_1, end_position = results
+    assert len(entities_call_service_1) == 1
+    assert entities_call_service_1[0].parent is None
+    assert entities_call_service_1[0].position == 1
+    assert entities_call_service_1[0].parameter_role == OUTPUT
+    assert entities_call_service_1[0].integration == "light"
+    assert entities_call_service_1[0].entity_name == "light.kitchen"
+    assert entities_call_service_1[0].expected_value == {CONF_SERVICE: "doSomething"}
+    assert end_position == 1
+
+    # Test case 2: Call service action for two entity
+    action_part_call_service_2 = {
+        CONF_SERVICE: "light.doSomething",
+        CONF_TARGET: {CONF_ENTITY_ID: ["light.kitchen", "light.living_room"]},
+    }
+    results = _action_entities(action_part_call_service_2, position=1)
+    entities_call_service_2, end_position = results
+    assert len(entities_call_service_2) == 1
+    assert entities_call_service_2[0].parent is None
+    assert entities_call_service_2[0].position == 1
+    assert entities_call_service_2[0].parameter_role == OUTPUT
+    assert entities_call_service_2[0].integration == "light"
+    assert entities_call_service_2[0].entity_name == "light.target_group"
+    assert entities_call_service_2[0].expected_value == {
+        CONF_SERVICE: "doSomething",
+        CONF_ENTITY_ID: ["light.kitchen", "light.living_room"],
+    }
+    assert end_position == 1
+
+    # Test case 3: Call service action for two entities, entities in a specific area and a device
+    action_part_call_service_3 = {
+        CONF_SERVICE: "light.doSomething",
+        CONF_TARGET: {
+            CONF_ENTITY_ID: ["light.kitchen", "light.living_room"],
+            ATTR_AREA_ID: "area.living_room",
+            CONF_DEVICE_ID: "device_id_1",
+        },
+    }
+    results = _action_entities(action_part_call_service_3, position=1)
+    entities_call_service_3, end_position = results
+    assert len(entities_call_service_3) == 1
+    assert entities_call_service_3[0].parent is None
+    assert entities_call_service_3[0].position == 1
+    assert entities_call_service_3[0].parameter_role == OUTPUT
+    assert entities_call_service_3[0].integration == "light"
+    assert entities_call_service_3[0].entity_name == "light.target_group"
+    assert entities_call_service_3[0].expected_value == {
+        CONF_SERVICE: "doSomething",
+        CONF_ENTITY_ID: ["light.kitchen", "light.living_room"],
+        ATTR_AREA_ID: "area.living_room",
+        CONF_DEVICE_ID: "device_id_1",
+    }
+    assert end_position == 1
+    
+    # Test case 4: Call service action for one entity with data instead of target
+    action_part_call_service_4 = {
+        CONF_SERVICE: "light.doSomething",
+        CONF_SERVICE_DATA: {"entity_id": "light.kitchen"},
+    }
+    results = _action_entities(action_part_call_service_4, position=1)
+    entities_call_service_4, end_position = results
+    assert len(entities_call_service_4) == 1
+    assert entities_call_service_4[0].parent is None
+    assert entities_call_service_4[0].position == 1
+    assert entities_call_service_4[0].parameter_role == OUTPUT
+    assert entities_call_service_4[0].integration == "light"
+    assert entities_call_service_4[0].entity_name is not None
+    assert entities_call_service_4[0].expected_value == {CONF_SERVICE: "doSomething", "entity_id": "light.kitchen"}
+    assert end_position == 1
+    
+    # Test case 5: Call service action for one entity with entity_id and at a specific position
+    action_part_call_service_5 = {
+        CONF_SERVICE: "light.doSomething",
+        CONF_ENTITY_ID: "light.kitchen",
+    }
+    results = _action_entities(action_part_call_service_5, position=20, parent=10)
+    entities_call_service_5, end_position = results
+    assert len(entities_call_service_5) == 1
+    assert entities_call_service_5[0].parent == 10
+    assert entities_call_service_5[0].position == 20
+    assert entities_call_service_5[0].parameter_role == OUTPUT
+    assert entities_call_service_5[0].integration == "light"
+    assert entities_call_service_5[0].entity_name == "light.kitchen"
+    assert end_position == 20
+    
+    # Test case 6: Call service action for no entity
+    action_part_call_service_6 = {
+        CONF_SERVICE: "light.doSomething",
+        CONF_ENTITY_ID: [],
+    }
+    results = _action_entities(action_part_call_service_6, position=1)
+    entities_call_service_6, end_position = results
+    assert len(entities_call_service_6) == 1
+    assert entities_call_service_6[0].parent is None
+    assert entities_call_service_6[0].position == 1
+    assert entities_call_service_6[0].parameter_role == OUTPUT
+    assert entities_call_service_6[0].integration == "light"
+    assert entities_call_service_6[0].entity_name is not None
+    assert entities_call_service_6[0].expected_value == {CONF_SERVICE: "doSomething"}
+    assert end_position == 1
+    
+    # Test case 7: Test branching action based on one condition
+    action_part_if_1 = {
+        SCRIPT_ACTION_IF: [
+            {
+                CONF_CONDITION: "state",
+                CONF_ENTITY_ID: "sensor.temperature",
+                CONF_STATE: "on",
+            }],
+        CONF_THEN: [
+            {
+                CONF_SERVICE: "light.turn_on",
+                CONF_TARGET: {CONF_ENTITY_ID: "light.kitchen"},
+            }
+        ],
+    }
+    results = _action_entities(action_part_if_1, position=1)
+    entities_if_1, end_position = results
+    assert len(entities_if_1) == 2
+    assert entities_if_1[0].parent is None
+    assert entities_if_1[0].position == 1
+    assert entities_if_1[0].parameter_role == INPUT
+    assert entities_if_1[0].integration == "sensor"
+    assert entities_if_1[0].entity_name == "sensor.temperature"
+    assert entities_if_1[0].expected_value == {"state": "on"}
+    assert entities_if_1[1].parent is None
+    assert entities_if_1[1].position == 2
+    assert entities_if_1[1].parameter_role == OUTPUT
+    assert entities_if_1[1].integration == "light"
+    assert entities_if_1[1].entity_name == "light.kitchen"
+    assert entities_if_1[1].expected_value == {CONF_SERVICE: "turn_on"}
+    assert end_position == 2
+    
+    # Test case 8: Test branching action based on one condition but with an else
+    action_part_if_2 = {
+        SCRIPT_ACTION_IF: [
+            {
+                CONF_CONDITION: "state",
+                CONF_ENTITY_ID: "sensor.temperature",
+                CONF_STATE: "on",
+            }],
+        CONF_THEN: [
+            {
+                CONF_SERVICE: "light.turn_on",
+                CONF_TARGET: {CONF_ENTITY_ID: "light.kitchen"},
+            }
+        ],
+        CONF_ELSE: [
+            {
+                CONF_SERVICE: "light.turn_off",
+                CONF_TARGET: {CONF_ENTITY_ID: "light.kitchen"},
+            }
+        ],
+    }
+    results = _action_entities(action_part_if_2, position=1)
+    entities_if_2, end_position = results
+    assert len(entities_if_2) == 3
+    assert entities_if_2[0].parent is None
+    assert entities_if_2[0].position == 1
+    assert entities_if_2[0].parameter_role == INPUT
+    assert entities_if_2[0].integration == "sensor"
+    assert entities_if_2[0].entity_name == "sensor.temperature"
+    assert entities_if_2[0].expected_value == {"state": "on"}
+    assert entities_if_2[1].parent is None
+    assert entities_if_2[1].position == 2
+    assert entities_if_2[1].parameter_role == OUTPUT
+    assert entities_if_2[1].integration == "light"
+    assert entities_if_2[1].entity_name == "light.kitchen"
+    assert entities_if_2[1].expected_value == {CONF_SERVICE: "turn_on"}
+    assert entities_if_2[2].parent is None
+    assert entities_if_2[2].position == 3
+    assert entities_if_2[2].parameter_role == OUTPUT
+    assert entities_if_2[2].integration == "light"
+    assert entities_if_2[2].entity_name == "light.kitchen"
+    assert entities_if_2[2].expected_value == {CONF_SERVICE: "turn_off"}
+    assert end_position == 3
+    
+    # Test case 9: Test branching action based on one condition but without a then 
+    action_part_if_3 = {
+        SCRIPT_ACTION_IF: [
+            {
+                CONF_CONDITION: "state",
+                CONF_ENTITY_ID: "sensor.temperature",
+                CONF_STATE: "on",
+            }],
+        CONF_ELSE: [
+            {
+                CONF_SERVICE: "light.turn_off",
+                CONF_TARGET: {CONF_ENTITY_ID: "light.kitchen"},
+            }
+        ],
+    }
+    results = _action_entities(action_part_if_3, position=1)
+    entities_if_3, end_position = results
+    assert len(entities_if_3) == 2
+    assert entities_if_3[0].parent is None
+    assert entities_if_3[0].position == 1
+    assert entities_if_3[0].parameter_role == INPUT
+    assert entities_if_3[0].integration == "sensor"
+    assert entities_if_3[0].entity_name == "sensor.temperature"
+    assert entities_if_3[0].expected_value == {"state": "on"}
+    assert entities_if_3[1].parent is None
+    assert entities_if_3[1].position == 2
+    assert entities_if_3[1].parameter_role == OUTPUT
+    assert entities_if_3[1].integration == "light"
+    assert entities_if_3[1].entity_name == "light.kitchen"
+    assert entities_if_3[1].expected_value == {CONF_SERVICE: "turn_off"}
+    assert end_position == 2
+    
+    # Test case 10: Test branching action with two conditions
+    action_part_if_4 = {
+        SCRIPT_ACTION_IF: [
+            {
+                CONF_CONDITION: "state",
+                CONF_ENTITY_ID: "sensor.temperature",
+                CONF_STATE: "on",
+            },
+            {
+                CONF_CONDITION: "state",
+                CONF_ENTITY_ID: "sensor.humidity",
+                CONF_STATE: "off",
+            }],
+        CONF_THEN: [
+            {
+                CONF_SERVICE: "light.turn_on",
+                CONF_TARGET: {CONF_ENTITY_ID: "light.kitchen"},
+            }
+        ],
+    }
+    results = _action_entities(action_part_if_4, position=1)
+    entities_if_4, end_position = results
+    assert len(entities_if_4) == 3
+    assert entities_if_4[0].parent == 1
+    assert entities_if_4[0].position == 2
+    assert entities_if_4[0].parameter_role == INPUT
+    assert entities_if_4[0].integration == "sensor"
+    assert entities_if_4[0].entity_name == "sensor.temperature"
+    assert entities_if_4[0].expected_value == {"state": "on"}
+    assert entities_if_4[1].parent == 1
+    assert entities_if_4[1].position == 3
+    assert entities_if_4[1].parameter_role == INPUT
+    assert entities_if_4[1].integration == "sensor"
+    assert entities_if_4[1].entity_name == "sensor.humidity"
+    assert entities_if_4[1].expected_value == {"state": "off"}
+    assert entities_if_4[2].parent is None
+    assert entities_if_4[2].position == 4
+    assert entities_if_4[2].parameter_role == OUTPUT
+    assert entities_if_4[2].integration == "light"
+    assert entities_if_4[2].entity_name == "light.kitchen"
+    assert entities_if_4[2].expected_value == {CONF_SERVICE: "turn_on"}
+    assert end_position == 4
+    
+    
+    
+    
+    
+
+    print("All action test cases passed!")
+
+
 if __name__ == "__main__":
     test_trigger_entities()
     test_condition_entities()
+    test_action_entities()

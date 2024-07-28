@@ -20,18 +20,28 @@ condition:
   - condition: state
     entity_id: light.main_light_living_room
     state: "on"
-    alias: Ist das Wohnzimmerlicht angeschaltet
+    alias: Ist das Deckenlicht angeschaltet
 action:
-  - alias: Wohnzimmerlicht einschalten
-    service: input_boolean.turn_on
+  - alias: Deckenlicht einschalten
+    service: light.turn_on
     data: {}
-  - alias: Ist Person Krista im Wohnzimmer
-    condition: state
-    entity_id: sensor.whos_in_living_room
-    state: Krista
-  - alias: Musikanlage einschalten
-    service: media_player.media_play
     target:
-      entity_id: media_player.living_room
-    data: {}
+      entity_id: light.ceiling_lights
+  - choose:
+      - conditions:
+          - alias: Ist Person Krista im Wohnzimmer
+            condition: state
+            entity_id: sensor.whos_in_living_room
+            state: Krista
+          - condition: not
+            conditions:
+              - condition: state
+                entity_id: media_player.living_room
+                state: playing
+        sequence:
+          - alias: Musikanlage einschalten
+            service: media_player.media_play
+            target:
+              entity_id: media_player.living_room
+            data: {}
 mode: single
