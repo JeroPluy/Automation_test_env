@@ -1158,9 +1158,10 @@ def _action_entities(action_part: dict, position: int, parent: int = None) -> li
 
     elif CONF_CHOOSE in action_part:
         choose = action_part[CONF_CHOOSE]
-        original_position = position
+        has_cons = False
         for option in choose:
             if CONF_CONDITIONS in option:
+                has_cons = True
                 new_parent = position
                 # create all condition entities which are needed for the following action
                 for condition in option[CONF_CONDITIONS]:
@@ -1170,22 +1171,24 @@ def _action_entities(action_part: dict, position: int, parent: int = None) -> li
                     position = results[1]
 
             elif CONF_CONDITION in option:
-                results = _condition_entities(option[CONF_CONDITION], position)
+                has_cons = True
+                results = _condition_entities(option, position)
                 Entity_list += results[0]
                 position = results[1]
 
             if CONF_SEQUENCE in option:
                 if isinstance(option[CONF_SEQUENCE], list):
                     # increase because the sequence has condition/s
-                    if original_position != position:
+                    if has_cons:
                         position += 1
                     for action in option[CONF_SEQUENCE]:
                         results = _action_entities(action, position)
                         Entity_list += results[0]
                         # set the position for the next action
                         position = results[1] + 1
-                    # set the position back to the last entity
-                    position -= 1
+                    has_cons = False
+        # set the position back to the last entity                    
+        position -= 1
 
     elif CONF_DEFAULT in action_part:
         default_actions = action_part[CONF_DEFAULT]
@@ -1209,21 +1212,34 @@ def _action_entities(action_part: dict, position: int, parent: int = None) -> li
 
     elif CONF_REPEAT in action_part:
         repeat_part = action_part[CONF_REPEAT]
-
+        has_cons = False
+        conditions = []
+        
         if CONF_WHILE in repeat_part:
             conditions = repeat_part[CONF_WHILE]
         elif CONF_UNTIL in repeat_part:
             conditions = repeat_part[CONF_UNTIL]
+        
         if isinstance(conditions, list):
-            new_parent = position
-            # create all condition entities which are needed for the repeated action/s
-            for condition in conditions:
-                position += 1
-                results = _condition_entities(condition, position, new_parent) 
+            if len(conditions) > 1:
+                has_cons = True
+                new_parent = position
+                # create all condition entities which are needed for the repeated action/s
+                for condition in conditions:
+                    position += 1
+                    results = _condition_entities(condition, position, new_parent) 
+                    Entity_list += results[0]
+                    position = results[1]
+            elif len(conditions) == 1:
+                has_cons = True
+                results = _condition_entities(conditions[0], position)
                 Entity_list += results[0]
                 position = results[1]
+        
 
         if CONF_SEQUENCE in repeat_part:
+            if has_cons:
+                position += 1
             if isinstance(repeat_part[CONF_SEQUENCE], list):
                 for action in repeat_part[CONF_SEQUENCE]:
                     results = _action_entities(action, position)
@@ -1239,12 +1255,12 @@ def _action_entities(action_part: dict, position: int, parent: int = None) -> li
                 results = _action_entities(action, position)
                 Entity_list += results[0]
                 # set the position for the next action
-                position = results[1]
+                position = results[1] + 1
             # set the position back to the last entity
             position -= 1
 
     elif CONF_CONDITION in action_part:
-        results = _condition_entities(action_part, position)
+        results = _condition_entities(action_part, position, parent)
         Entity_list += results[0]
         position = results[1]
 
@@ -1256,12 +1272,8 @@ def _action_entities(action_part: dict, position: int, parent: int = None) -> li
             for data_key in action_part[CONF_EVENT_DATA]:
                 event_data[data_key] = action_part[CONF_EVENT_DATA][data_key]
             exp_value[CONF_EVENT_DATA] = event_data
-        if CONF_EVENT_CONTEXT in action_part:
-            context = {}
-            for context_key in action_part[CONF_EVENT_CONTEXT]:
-                context[context_key] = action_part[CONF_EVENT_CONTEXT][context_key]
-            exp_value[CONF_EVENT_CONTEXT] = context
-
+        # prohibit the use of 'context' in action events
+        
         # create the entity
         Entity_list.append(
             Entity(
@@ -1327,12 +1339,13 @@ def _action_entities(action_part: dict, position: int, parent: int = None) -> li
         )
 
     elif SCRIPT_ACTION_WAIT_FOR_TRIGGER in action_part:
+        # just one of the triggers has to be true to continue (or-block)
         if isinstance(action_part[SCRIPT_ACTION_WAIT_FOR_TRIGGER], list):
             trigger_list = action_part[SCRIPT_ACTION_WAIT_FOR_TRIGGER]
             for trigger in trigger_list:
                 results = _trigger_entities(trigger, position)
                 for entity in results[0]:
-                    entity.param_role = INPUT
+                    entity.parameter_role = INPUT
                 Entity_list += results[0]
                 # set the position for the next trigger
                 position = results[1] + 1
@@ -1342,7 +1355,7 @@ def _action_entities(action_part: dict, position: int, parent: int = None) -> li
             trigger = action_part[SCRIPT_ACTION_WAIT_FOR_TRIGGER]
             results = _trigger_entities(trigger, position)
             for entity in results[0]:
-                entity.param_role = INPUT
+                entity.parameter_role = INPUT
             Entity_list += results[0]
             position = results[1]
 
