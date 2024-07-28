@@ -1,4 +1,4 @@
-alias: enitity test auto
+alias: enitity extraction test
 description: ""
 trigger:
   - platform: state
@@ -6,7 +6,9 @@ trigger:
       - media_player.bedroom
     enabled: true
   - platform: event
-    event_type: ""
+    event_type: test
+    event_data:
+      test: tst1
   - platform: numeric_state
     entity_id:
       - sensor.carbon_monoxide
@@ -37,9 +39,23 @@ trigger:
   - platform: calendar
     event: start
     entity_id: calendar.calendar_1
+    offset: "0:5:0"
   - platform: template
-    value_template: ""
-    for: "03:00:00"
+    value_template: "True"
+    for:
+      hours: 3
+      minutes: 0
+      seconds: 0
+      milliseconds: 0
+  - platform: zone
+    entity_id: device_tracker.demo_anne_therese
+    zone: zone.home
+    event: enter
+  - platform: state
+    entity_id:
+      - sensor.carbon_dioxide
+      - sensor.outside_humidity
+    attribute: battery_level
 condition:
   - condition: state
     entity_id: media_player.lounge_room
