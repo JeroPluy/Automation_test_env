@@ -9,6 +9,12 @@ import sys
 import json
 
 # read the arguments
-serialized_entities = sys.argv[1]
+serialized_inputs = sys.argv[1]
 
-entities_list = json.loads(serialized_entities)
+input_vals = json.loads(serialized_inputs)
+
+triggered = False
+trigger_id = None
+trigger = input_vals[0]
+
+
