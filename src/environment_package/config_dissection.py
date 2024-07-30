@@ -17,6 +17,10 @@ from environment_package.env_const import (
     SINGLE,
     START,
 )
+from environment_package.env_helper import Automation, Entity, is_jinja_template
+from environment_package.ha_automation.home_assistant_config_validation import (
+    valid_entity_id,
+)
 from .ha_automation.home_assistant_automation_validation import AutomationConfig
 from .ha_automation.home_assistant_const import (
     ATTR_AREA_ID,
@@ -100,113 +104,24 @@ from .ha_automation.home_assistant_const import (
     TAG_ID,
     test_leading_zero,
 )
-from environment_package.automation_script_gen import create_trigger_script, init_automation_script
+from environment_package.automation_script_gen import (
+    close_trigger_section,
+    create_combination_trigger_script,
+    create_trigger_script,
+    init_automation_script,
+)
 import re
 import voluptuous as vol
 import uuid
 
 
-class Automation:
-    """
-    Class to represent an automation.
-    """
-
-    a_name: str = None
-    autom_mode: int = None
-    max_instances: int = None
-    script: str = None
-    project: str = None
-
-    def __init__(
-        self,
-        automation_name,
-        automation_script,
-        project=None,
-        automation_mode=SINGLE,
-        max_instances=10,
-    ):
-        """
-        Create an automation from the automation part.
-
-        Args:
-            automation_name (str): The name of the automation
-            automation_mode (int): The mode of the automation
-            max_instances (int): The maximum instances of the automation
-            automation_script (str): The script of the automation
-            project (str): The project of the automation
-
-        Returns:
-            dict: The automation as a dictionary
-        """
-
-        self.a_name = automation_name
-        self.autom_mode = automation_mode
-        self.max_instances = max_instances
-        self.script = automation_script
-        self.project = project
-
-
-class Entity:
-    """
-    Class to represent an entity.
-    """
-
-    integration: str = None
-    entity_name: str | list = None
-    parameter_role: int = None
-    parent: int = None
-    position: int = None
-    expected_value: dict = None
-
-    def __init__(
-        self,
-        param_role,
-        position,
-        integration,
-        entity_name,
-        parent=None,
-        expected_value=None,
-    ):
-        """
-        Create an entity from the automation part.
-
-        Args:
-            integration (str): The integration of the entity
-            entity_name (str): The name of the entity
-            expected_value (int | str | dict): The possible value of the entity
-
-        Returns:
-            dict: The entity as a dictionary
-        """
-
-        self.parent = parent
-        self.position = position
-        self.parameter_role = param_role
-        self.integration = integration
-        self.entity_name = integration + "." + entity_name
-        if expected_value == {} or expected_value is None:
-            self.expected_value = None
-        else:
-            self.expected_value = expected_value.copy()
-
-    def serialize(self):
-        return {
-            "integration": self.integration,
-            "entity_name": self.entity_name,
-            "parameter_role": self.parameter_role,
-            "parent_position": self.parent,
-            "position": self.position,
-            "expected_value": self.expected_value,
-        }
-
-
-def _is_jinja_template(template_str: str) -> bool:
-    return "{" in template_str and (
-        "{%" in template_str or "{{" in template_str or "{#" in template_str
-    )
-
-
-def _trigger_entities(trigger_part: dict, position: int) -> list:
+def _trigger_entities(
+    trigger_part: dict,
+    position: int,
+    real_position: int,
+    script_path: str,
+    parent: int = None,
+) -> list:
     """The function creates a list of entities for one trigger list element.
 
     Args:
@@ -219,14 +134,23 @@ def _trigger_entities(trigger_part: dict, position: int) -> list:
 
     platform = trigger_part[CONF_PLATFORM]
     # list of entities in the trigger part
-    Entity_list = []
+    entity_list = []
     # entity parameter role is start
     param_role = START
 
+    trigger_id = None
+
     # check if the trigger is enabled
-    if f"{CONF_ENABLED}:" in trigger_part:
-        if trigger_part[CONF_ENABLED] is False:
-            return [Entity_list, position]
+    if CONF_ENABLED in trigger_part:
+        try:
+            bool_val = trigger_part[CONF_ENABLED]
+        except TypeError:
+            bool_val = None
+        if bool_val is False:
+            return [entity_list, position, real_position]
+
+    if CONF_ID in trigger_part:
+        trigger_id = trigger_part[CONF_ID]
 
     # if the trigger is an event
     if platform == CONF_EVENT:
@@ -246,21 +170,34 @@ def _trigger_entities(trigger_part: dict, position: int) -> list:
         # if the event type has multiple event entities
         if isinstance(trigger_part[CONF_EVENT_TYPE], list):
             parent = position
+            new_entity_list = []
             # create all entities in the trigger part
             for event_type in trigger_part[CONF_EVENT_TYPE]:
                 position += 1
                 exp_value[CONF_EVENT_TYPE] = event_type
                 # TODO limited templating as input
                 entity_name = str(uuid.uuid4())
-                new_entity = Entity(
-                    parent=parent,
-                    position=position,
-                    param_role=param_role,
-                    integration=CONF_EVENT,
-                    entity_name=entity_name,
-                    expected_value=exp_value,
+                new_entity_list.append(
+                    Entity(
+                        parent=parent,
+                        position=position,
+                        param_role=param_role,
+                        integration=CONF_EVENT,
+                        entity_name=entity_name,
+                        expected_value=exp_value,
+                    )
                 )
-                Entity_list.append(new_entity)
+            # create the script for the combination of the event trigger
+            real_position = create_combination_trigger_script(
+                CONF_EVENT,
+                new_entity_list,
+                real_position,
+                trigger_id,
+                script_path,
+            )
+            # add the new entities to the entity list
+            entity_list += new_entity_list
+
         else:
             # create the single entity in the event_type part
             exp_value[CONF_EVENT_TYPE] = trigger_part[CONF_EVENT_TYPE]
@@ -272,20 +209,25 @@ def _trigger_entities(trigger_part: dict, position: int) -> list:
                 entity_name=str(uuid.uuid4()),
                 expected_value=exp_value,
             )
-            Entity_list.append(entity)
+            real_position = create_trigger_script(
+                CONF_EVENT, entity, real_position, trigger_id, script_path
+            )
+            entity_list.append(entity)
 
     # if is a home_assistant start or shutdown event
     elif platform == "homeassistant":
         # create the home assistant entity
         exp_value = {CONF_EVENT: trigger_part[CONF_EVENT]}
-        Entity_list.append(
-            Entity(
-                position=position,
-                param_role=param_role,
-                integration="homeassistant",
-                entity_name="_",
-                expected_value=exp_value,
-            )
+        entity = Entity(
+            position=position,
+            param_role=param_role,
+            integration="homeassistant",
+            entity_name="_",
+            expected_value=exp_value,
+        )
+        entity_list.append(entity)
+        real_position = create_trigger_script(
+            "homeassistant", entity, real_position, trigger_id, script_path
         )
 
     # if the trigger is a mqtt message
@@ -305,29 +247,65 @@ def _trigger_entities(trigger_part: dict, position: int) -> list:
         # TODO value_template is missing
 
         # create the mqtt entity
-        Entity_list.append(
-            Entity(
-                position=position,
-                param_role=param_role,
-                integration="mqtt",
-                entity_name=trigger_part["topic"],
-                expected_value=exp_value,
-            )
+        entity = Entity(
+            position=position,
+            param_role=param_role,
+            integration="mqtt",
+            entity_name=trigger_part["topic"],
+            expected_value=exp_value,
+        )
+        entity_list.append(entity)
+        real_position = create_trigger_script(
+            "mqtt", entity, real_position, trigger_id, script_path
         )
 
     # if the trigger is a numerical state change
     elif platform == CONF_NUMERIC_STATE:
-        # add the possible value range to the entity/ies
-        exp_value_str = "__VALUE__"
-        if CONF_ABOVE in trigger_part:
-            exp_value_str = str(trigger_part[CONF_ABOVE]) + " < " + exp_value_str
-            # TODO extract entity input
-        if CONF_BELOW in trigger_part:
-            exp_value_str = exp_value_str + " < " + str(trigger_part[CONF_BELOW])
-            # TODO extract entity input
-        exp_value = {"value": exp_value_str}
-        # TODO value_template is missing
+        # cache the new entities for potential comparing entities
+        new_entity_list = []
+        exp_value_entity_list = []
+        parent = None
 
+        # add the possible value range to the entity/ies
+        # TODO value_template is missing
+        exp_value = {}
+        if CONF_ABOVE in trigger_part:
+            exp_value[CONF_ABOVE] = trigger_part[CONF_ABOVE]
+            # create the comparing entities for the numerical state trigger
+            if valid_entity_id(str(exp_value[CONF_ABOVE])):
+                parent = position
+                position += 1
+                
+                exp_value_entity_list.append(
+                    Entity(
+                        parent=parent,
+                        position=None,
+                        param_role=param_role,
+                        integration=trigger_part[CONF_ABOVE].split(".")[0],
+                        entity_name=trigger_part[CONF_ABOVE].split(".")[1],
+                        expected_value={CONF_BELOW: ""}, # added after the generation of the comparing entity/ies
+                    )
+                )
+        if CONF_BELOW in trigger_part:
+            exp_value[CONF_BELOW] = trigger_part[CONF_BELOW]
+            # create the comparing entities for the numerical state trigger
+            if valid_entity_id(str(exp_value[CONF_BELOW])):
+                # set the parent entity for the comparing entity/ies if no above entity exists
+                if parent is None:
+                    parent = position
+                    position += 1
+    
+                exp_value_entity_list.append(
+                    Entity(
+                        parent=parent,
+                        position=None,
+                        param_role=param_role,
+                        integration=trigger_part[CONF_BELOW].split(".")[0],
+                        entity_name=trigger_part[CONF_BELOW].split(".")[1],
+                        expected_value={CONF_ABOVE: ""}, # added after the generation of the comparing entity/ies
+                    )
+                )
+            
         # add the time the value has to stay in the trigger range
         if CONF_FOR in trigger_part:
             exp_value[CONF_FOR] = trigger_part[CONF_FOR]
@@ -345,7 +323,7 @@ def _trigger_entities(trigger_part: dict, position: int) -> list:
                 entity_name = entity.split(".")[1]
                 if CONF_ATTRIBUTE in trigger_part:
                     entity_name = entity_name + "." + str(trigger_part[CONF_ATTRIBUTE])
-                Entity_list.append(
+                new_entity_list.append(
                     Entity(
                         parent=parent,
                         position=position,
@@ -365,9 +343,11 @@ def _trigger_entities(trigger_part: dict, position: int) -> list:
 
             if CONF_ATTRIBUTE in trigger_part:
                 entity_name = entity_name + "." + str(trigger_part[CONF_ATTRIBUTE])
+                 
             # create the single entity in the event_type part
-            Entity_list.append(
+            new_entity_list.append(
                 Entity(
+                    parent=parent,
                     position=position,
                     param_role=param_role,
                     integration=integration,
@@ -376,9 +356,47 @@ def _trigger_entities(trigger_part: dict, position: int) -> list:
                 )
             )
 
+        # get all the names of the new entities and create the script for the number trigger
+        entity_names = []
+        if len(new_entity_list) > 1:
+            entity_names = []
+            for entity in new_entity_list:
+                entity_names.append(entity.entity_name)
+            real_position = create_combination_trigger_script(
+                CONF_NUMERIC_STATE,
+                new_entity_list,
+                real_position,
+                trigger_id,
+                script_path,
+            )
+        else:
+            entity_names = new_entity_list[0].entity_name
+            real_position = create_trigger_script(
+                CONF_NUMERIC_STATE,
+                new_entity_list[0],
+                real_position,
+                trigger_id,
+                script_path,
+            )
+        # add the names of the entities to the expected value of the comparing entities
+        for entity in exp_value_entity_list:
+            position += 1
+            entity.position = position
+            if CONF_BELOW in entity.expected_value:
+                entity.expected_value[CONF_BELOW] = entity_names
+            if CONF_ABOVE in entity.expected_value:
+                entity.expected_value[CONF_ABOVE] = entity_names
+
+        # add the comparing entities to the entity list
+        new_entity_list += exp_value_entity_list
+        # append the new entities to the entity list
+        entity_list += new_entity_list
+
     # if the trigger is a state change
     elif platform == CONF_STATE:
+        new_entity_list = []
         exp_value = {}
+
         # add the state values of the trigger
         if CONF_TO in trigger_part:
             exp_value[CONF_TO] = str(trigger_part[CONF_TO])
@@ -404,7 +422,7 @@ def _trigger_entities(trigger_part: dict, position: int) -> list:
                 entity_name = entity.split(".")[1]
                 if CONF_ATTRIBUTE in trigger_part:
                     entity_name = entity_name + "." + str(trigger_part[CONF_ATTRIBUTE])
-                Entity_list.append(
+                new_entity_list.append(
                     Entity(
                         parent=parent,
                         position=position,
@@ -414,10 +432,20 @@ def _trigger_entities(trigger_part: dict, position: int) -> list:
                         expected_value=exp_value,
                     )
                 )
+            # create the script for the combination of the state trigger
+            real_position = create_combination_trigger_script(
+                CONF_STATE,
+                new_entity_list,
+                real_position,
+                trigger_id,
+                script_path,
+            )
+            entity_list += new_entity_list
+
         else:
             if isinstance(trigger_part[CONF_ENTITY_ID], list):
                 if len(trigger_part[CONF_ENTITY_ID]) == 0:
-                    return [Entity_list, position]
+                    return [entity_list, position, real_position]
                 entity_name = trigger_part[CONF_ENTITY_ID][0].split(".")[1]
                 integration = trigger_part[CONF_ENTITY_ID][0].split(".")[0]
             else:
@@ -426,15 +454,17 @@ def _trigger_entities(trigger_part: dict, position: int) -> list:
             if CONF_ATTRIBUTE in trigger_part:
                 entity_name = entity_name + "." + str(trigger_part[CONF_ATTRIBUTE])
             # create the single entity in the event_type part
-            Entity_list.append(
-                Entity(
-                    position=position,
-                    param_role=param_role,
-                    integration=integration,
-                    entity_name=entity_name,
-                    expected_value=exp_value,
-                )
+            entity = Entity(
+                position=position,
+                param_role=param_role,
+                integration=integration,
+                entity_name=entity_name,
+                expected_value=exp_value,
             )
+            real_position = create_trigger_script(
+                CONF_STATE, entity, real_position, trigger_id, script_path
+            )
+            entity_list.append(entity)
 
     # if the trigger is the sunset or sunrise event
     elif platform == "sun":
@@ -444,18 +474,22 @@ def _trigger_entities(trigger_part: dict, position: int) -> list:
             exp_value[CONF_OFFSET] = trigger_part[CONF_OFFSET]
 
         # create the sun entity
-        Entity_list.append(
-            Entity(
-                position=position,
-                param_role=param_role,
-                integration="sun",
-                entity_name="sun",
-                expected_value=exp_value,
-            )
+        entity = Entity(
+            position=position,
+            param_role=param_role,
+            integration="sun",
+            entity_name="sun",
+            expected_value=exp_value,
+        )
+        entity_list.append(entity)
+        real_position = create_trigger_script(
+            "sun", entity, real_position, trigger_id, script_path
         )
 
     # if the trigger is tag scan
     elif platform == "tag":
+        new_entity_list = []
+
         # add the devics/s as possible values for the scan
         if CONF_DEVICE_ID in trigger_part:
             if isinstance(trigger_part[CONF_DEVICE_ID], list):
@@ -470,9 +504,12 @@ def _trigger_entities(trigger_part: dict, position: int) -> list:
         # create all tag entities in the trigger part
         if isinstance(trigger_part[TAG_ID], list):
             parent = position
+            new_entity_list = []
+
             for tag_id in trigger_part[TAG_ID]:
                 position += 1
-                Entity_list.append(
+
+                new_entity_list.append(
                     Entity(
                         parent=parent,
                         position=position,
@@ -482,17 +519,25 @@ def _trigger_entities(trigger_part: dict, position: int) -> list:
                         expected_value=exp_value,
                     )
                 )
-        else:
-            # create the single tag entity
-            Entity_list.append(
-                Entity(
-                    position=position,
-                    param_role=param_role,
-                    integration="tag",
-                    entity_name=trigger_part[TAG_ID],
-                    expected_value=exp_value,
-                )
+            # create the script for the combination of the tag trigger
+            real_position = create_combination_trigger_script(
+                "tag", new_entity_list, real_position, trigger_id, script_path
             )
+            entity_list += new_entity_list
+
+        else:
+            # create the single tag entity in the trigger part
+            entity = Entity(
+                position=position,
+                param_role=param_role,
+                integration="tag",
+                entity_name=trigger_part[TAG_ID],
+                expected_value=exp_value,
+            )
+            real_position = create_trigger_script(
+                "tag", entity, real_position, trigger_id, script_path
+            )
+            entity_list.append(entity)
 
     # if the trigger is a template
     elif platform == CONF_TEMPLATE:
@@ -501,7 +546,7 @@ def _trigger_entities(trigger_part: dict, position: int) -> list:
             template_str = trigger_part[CONF_VALUE_TEMPLATE]
 
             # check if the string is a Jinja2 template
-            if _is_jinja_template(template_str):
+            if is_jinja_template(template_str):
                 # add the possible value of the template
                 exp_value = {CONF_VALUE_TEMPLATE: template_str}
                 # TODO could be a bit more accurate than just the whole string
@@ -513,12 +558,15 @@ def _trigger_entities(trigger_part: dict, position: int) -> list:
 
                 # search for entities in the template string
                 entities = re.findall(r"\w+\.\w+", template_str)
+
                 parent = position
+                new_entity_list = []
+
                 for entity in entities:
                     position += 1
                     entity_integration = entity.split(".")[0]
                     entity_name = entity.split(".")[1]
-                    Entity_list.append(
+                    new_entity_list.append(
                         Entity(
                             parent=parent,
                             position=position,
@@ -528,16 +576,28 @@ def _trigger_entities(trigger_part: dict, position: int) -> list:
                             expected_value=exp_value,
                         )
                     )
+                # create the script for the combination of the template trigger
+                real_position = create_combination_trigger_script(
+                    CONF_TEMPLATE,
+                    
+                    new_entity_list,
+                    real_position,
+                    trigger_id,
+                    script_path,
+                )
+                entity_list += new_entity_list
 
     # if the trigger is a time event
     elif platform == CONF_TIME:
         # TODO extract entity input in AT
         if isinstance(trigger_part[CONF_AT], list):
             parent = position
+            new_entity_list = []
+
             for time in trigger_part[CONF_AT]:
                 position += 1
                 # create the time entity
-                Entity_list.append(
+                new_entity_list.append(
                     Entity(
                         parent=parent,
                         position=position,
@@ -547,17 +607,29 @@ def _trigger_entities(trigger_part: dict, position: int) -> list:
                         expected_value={CONF_AT: time},
                     )
                 )
+            # create the script for the combination of the time trigger
+            real_position = create_combination_trigger_script(
+                CONF_TIME,
+                
+                new_entity_list,
+                real_position,
+                trigger_id,
+                script_path,
+            )
+            entity_list += new_entity_list
         else:
             # create the single time entity
-            Entity_list.append(
-                Entity(
-                    position=position,
-                    param_role=param_role,
-                    integration=CONF_TIME,
-                    entity_name=CONF_TIME,
-                    expected_value={CONF_AT: trigger_part[CONF_AT]},
-                )
+            entity = Entity(
+                position=position,
+                param_role=param_role,
+                integration=CONF_TIME,
+                entity_name=CONF_TIME,
+                expected_value={CONF_AT: trigger_part[CONF_AT]},
             )
+            real_position = create_trigger_script(
+                CONF_TIME, entity, real_position, trigger_id, script_path
+            )
+            entity_list.append(entity)
 
     # if the trigger is a time pattern event
     elif platform == CONF_TIME_PATTERN:
@@ -576,15 +648,17 @@ def _trigger_entities(trigger_part: dict, position: int) -> list:
                 raise vol.Invalid("Leading zero in seconds is not allowed")
             exp_value[SECONDS] = trigger_part[SECONDS]
         # create the time pattern entity
-        Entity_list.append(
-            Entity(
-                position=position,
-                param_role=param_role,
-                integration=CONF_TIME_PATTERN,
-                entity_name=str(uuid.uuid4()),
-                expected_value=exp_value,
-            )
+        entity = Entity(
+            position=position,
+            param_role=param_role,
+            integration=CONF_TIME_PATTERN,
+            entity_name=str(uuid.uuid4()),
+            expected_value=exp_value,
         )
+        real_position = create_trigger_script(
+            CONF_TIME_PATTERN, entity, real_position, trigger_id, script_path
+        )
+        entity_list.append(entity)
 
     # if the trigger is a persistant notification
     elif platform == CONF_PERS_NOTIFICATION:
@@ -598,15 +672,17 @@ def _trigger_entities(trigger_part: dict, position: int) -> list:
         exp_value = {CONF_UPDATE_TYPE: trigger_part[CONF_UPDATE_TYPE]}
 
         # create the persistant notification entity
-        Entity_list.append(
-            Entity(
-                position=position,
-                param_role=param_role,
-                integration=CONF_PERS_NOTIFICATION,
-                entity_name=entity_name,
-                expected_value=exp_value,
-            )
+        entity = Entity(
+            position=position,
+            param_role=param_role,
+            integration=CONF_PERS_NOTIFICATION,
+            entity_name=entity_name,
+            expected_value=exp_value,
         )
+        real_position = create_trigger_script(
+            CONF_PERS_NOTIFICATION, entity, real_position, trigger_id, script_path
+        )
+        entity_list.append(entity)
 
     # if the trigger is a webhook
     elif platform == CONF_WEBHOOK:
@@ -616,15 +692,17 @@ def _trigger_entities(trigger_part: dict, position: int) -> list:
                 exp_value[CONF_LOCAL] = trigger_part[CONF_LOCAL]
 
         # create the webhook entity
-        Entity_list.append(
-            Entity(
-                position=position,
-                param_role=param_role,
-                integration=CONF_WEBHOOK,
-                entity_name=trigger_part[CONF_WEBHOOK_ID],
-                expected_value=exp_value,
-            )
+        entity = Entity(
+            position=position,
+            param_role=param_role,
+            integration=CONF_WEBHOOK,
+            entity_name=trigger_part[CONF_WEBHOOK_ID],
+            expected_value=exp_value,
         )
+        real_position = create_trigger_script(
+            CONF_WEBHOOK, entity, real_position, trigger_id, script_path
+        )
+        entity_list.append(entity)
 
     # if the trigger is a zone event (enter or leave)
     elif platform == CONF_ZONE:
@@ -633,15 +711,17 @@ def _trigger_entities(trigger_part: dict, position: int) -> list:
         exp_value[CONF_ENTITY_ID] = trigger_part[CONF_ENTITY_ID]
 
         # create the zone entity
-        Entity_list.append(
-            Entity(
-                position=position,
-                param_role=param_role,
-                integration=CONF_ZONE,
-                entity_name=trigger_part[CONF_ZONE].split(".")[1],
-                expected_value=exp_value,
-            )
+        entity = Entity(
+            position=position,
+            param_role=param_role,
+            integration=CONF_ZONE,
+            entity_name=trigger_part[CONF_ZONE].split(".")[1],
+            expected_value=exp_value,
         )
+        real_position = create_trigger_script(
+            CONF_ZONE, entity, real_position, trigger_id, script_path
+        )
+        entity_list.append(entity)
 
     # if the trigger is a geo location event
     elif platform == CONF_GEO_LOCATION:
@@ -650,15 +730,17 @@ def _trigger_entities(trigger_part: dict, position: int) -> list:
         exp_value[CONF_SOURCE] = trigger_part[CONF_SOURCE]
 
         # create the zone entity
-        Entity_list.append(
-            Entity(
-                position=position,
-                param_role=param_role,
-                integration=CONF_ZONE,
-                entity_name=trigger_part[CONF_ZONE].split(".")[1],
-                expected_value=exp_value,
-            )
+        entity = Entity(
+            position=position,
+            param_role=param_role,
+            integration=CONF_ZONE,
+            entity_name=trigger_part[CONF_ZONE].split(".")[1],
+            expected_value=exp_value,
         )
+        real_position = create_trigger_script(
+            CONF_GEO_LOCATION, entity, real_position, trigger_id, script_path
+        )
+        entity_list.append(entity)
 
     # if the trigger is a device event
     elif platform == CONF_DEVICE:
@@ -668,15 +750,17 @@ def _trigger_entities(trigger_part: dict, position: int) -> list:
         exp_value[CONF_DOMAIN] = trigger_part[CONF_DOMAIN]
 
         # create the device entity
-        Entity_list.append(
-            Entity(
-                position=position,
-                param_role=param_role,
-                integration=CONF_DEVICE,
-                entity_name=trigger_part[CONF_DEVICE_ID],
-                expected_value=exp_value,
-            )
+        entity = Entity(
+            position=position,
+            param_role=param_role,
+            integration=CONF_DEVICE,
+            entity_name=trigger_part[CONF_DEVICE_ID],
+            expected_value=exp_value,
         )
+        real_position = create_trigger_script(
+            CONF_DEVICE, entity, real_position, trigger_id, script_path
+        )
+        entity_list.append(entity)
 
     # if the trigger is a calendar event
     elif platform == CONF_CALENDAR:
@@ -686,24 +770,28 @@ def _trigger_entities(trigger_part: dict, position: int) -> list:
             exp_value[CONF_OFFSET] = trigger_part[CONF_OFFSET]
 
         # create the calendar entity
-        Entity_list.append(
-            Entity(
-                position=position,
-                param_role=param_role,
-                integration=CONF_CALENDAR,
-                entity_name=trigger_part[CONF_ENTITY_ID].split(".")[1],
-                expected_value=exp_value,
-            )
+        entity = Entity(
+            position=position,
+            param_role=param_role,
+            integration=CONF_CALENDAR,
+            entity_name=trigger_part[CONF_ENTITY_ID].split(".")[1],
+            expected_value=exp_value,
         )
+        real_position = create_trigger_script(
+            CONF_CALENDAR, entity, real_position, trigger_id, script_path
+        )
+        entity_list.append(entity)
 
     # if trigger is a sentence
     elif platform == CONF_CONVERSATION:
         if isinstance(trigger_part[CONF_COMMAND], list):
             parent = position
+            new_entity_list = []
+
             for command in trigger_part[CONF_COMMAND]:
                 position += 1
                 # create the conversation entity
-                Entity_list.append(
+                new_entity_list.append(
                     Entity(
                         parent=parent,
                         position=position,
@@ -713,23 +801,40 @@ def _trigger_entities(trigger_part: dict, position: int) -> list:
                         expected_value={CONF_COMMAND: command},
                     )
                 )
+            # create the script for the combination of the conversation trigger
+            real_position = create_combination_trigger_script(
+                CONF_CONVERSATION,
+                
+                new_entity_list,
+                real_position,
+                trigger_id,
+                script_path,
+            )
+            entity_list += new_entity_list
+
         else:
             # create the conversation entity
-            Entity_list.append(
-                Entity(
-                    position=position,
-                    param_role=param_role,
-                    integration=CONF_CONVERSATION,
-                    entity_name=str(uuid.uuid4()),
-                    expected_value={CONF_COMMAND: trigger_part[CONF_COMMAND]},
-                )
+            entity = Entity(
+                position=position,
+                param_role=param_role,
+                integration=CONF_CONVERSATION,
+                entity_name=str(uuid.uuid4()),
+                expected_value={CONF_COMMAND: trigger_part[CONF_COMMAND]},
             )
+            real_position = create_trigger_script(
+            CONF_CONVERSATION, entity, real_position, trigger_id, script_path
+            )
+            entity_list.append(entity)
 
-    return [Entity_list, position]
+    return [entity_list, position, real_position]
 
 
 def _condition_entities(
-    condition_part: dict, position: int, parent: int = None
+    condition_part: dict,
+    position: int,
+    real_position: int,
+    script_path: str,
+    parent: int = None,
 ) -> list:
     """The function creates a list of entities for one condition list element.
 
@@ -743,14 +848,18 @@ def _condition_entities(
     """
 
     # list of entities in the trigger part
-    Entity_list = []
+    entity_list = []
     # entity parameter role is start
     param_role = INPUT
 
     # check if the condition is enabled
-    if f"{CONF_ENABLED}:" in condition_part:
-        if condition_part[CONF_ENABLED] is False:
-            return [Entity_list, position]
+    if CONF_ENABLED in condition_part:
+        try:
+            bool_val = condition_part[CONF_ENABLED]
+        except TypeError:
+            bool_val = None
+        if bool_val is False:
+            return [entity_list, position, real_position]
 
     # check if the condition is a pure template
     if len(condition_part) > 1 and not isinstance(condition_part, str):
@@ -766,9 +875,13 @@ def _condition_entities(
             for sub_condition in condition_part[CONF_CONDITIONS]:
                 position += 1
                 result_list = _condition_entities(
-                    sub_condition, position, parent=new_parent
+                    sub_condition,
+                    position,
+                    parent=new_parent,
+                    script_path=script_path,
+                    real_position=real_position,
                 )
-                Entity_list += result_list[0]
+                entity_list += result_list[0]
                 position = result_list[1]
 
     # processes a numeric state condition
@@ -800,7 +913,7 @@ def _condition_entities(
                     entity_name = (
                         entity_name + "." + str(condition_part[CONF_ATTRIBUTE])
                     )
-                Entity_list.append(
+                entity_list.append(
                     Entity(
                         parent=new_parent,
                         position=position,
@@ -813,7 +926,7 @@ def _condition_entities(
         else:
             if isinstance(condition_part[CONF_ENTITY_ID], list):
                 if len(condition_part[CONF_ENTITY_ID]) == 0:
-                    return [Entity_list, position]
+                    return [entity_list, position, real_position]
                 entity_name = condition_part[CONF_ENTITY_ID][0].split(".")[1]
                 integration = condition_part[CONF_ENTITY_ID][0].split(".")[0]
             else:
@@ -822,7 +935,7 @@ def _condition_entities(
             if CONF_ATTRIBUTE in condition_part:
                 entity_name = entity_name + "." + str(condition_part[CONF_ATTRIBUTE])
             # create a single entity in the condion part
-            Entity_list.append(
+            entity_list.append(
                 Entity(
                     parent=parent,
                     position=position,
@@ -856,7 +969,7 @@ def _condition_entities(
                     entity_name = (
                         entity_name + "." + str(condition_part[CONF_ATTRIBUTE])
                     )
-                Entity_list.append(
+                entity_list.append(
                     Entity(
                         parent=new_parent,
                         position=position,
@@ -869,7 +982,7 @@ def _condition_entities(
         else:
             if isinstance(condition_part[CONF_ENTITY_ID], list):
                 if len(condition_part[CONF_ENTITY_ID]) == 0:
-                    return [Entity_list, position]
+                    return [entity_list, position, real_position]
                 entity_name = condition_part[CONF_ENTITY_ID][0].split(".")[1]
                 integration = condition_part[CONF_ENTITY_ID][0].split(".")[0]
             else:
@@ -879,7 +992,7 @@ def _condition_entities(
                 entity_name = entity_name + "." + str(condition_part[CONF_ATTRIBUTE])
 
             # create the entity in the condition part
-            Entity_list.append(
+            entity_list.append(
                 Entity(
                     parent=parent,
                     position=position,
@@ -898,7 +1011,7 @@ def _condition_entities(
         exp_value[CONF_DOMAIN] = condition_part[CONF_DOMAIN]
 
         # create the device entity
-        Entity_list.append(
+        entity_list.append(
             Entity(
                 parent=parent,
                 position=position,
@@ -922,7 +1035,7 @@ def _condition_entities(
                 exp_value[CONF_BEFORE_OFFSET] = condition_part[CONF_BEFORE_OFFSET]
 
         # create the sun entity
-        Entity_list.append(
+        entity_list.append(
             Entity(
                 parent=parent,
                 position=position,
@@ -944,7 +1057,7 @@ def _condition_entities(
             # TODO could be a bit more accurate than just the whole string
 
         # check if the string is a Jinja2 template
-        if _is_jinja_template(template_str):
+        if is_jinja_template(template_str):
             # add the possible value of the template
             exp_value = {CONF_VALUE_TEMPLATE: template_str}
 
@@ -957,7 +1070,7 @@ def _condition_entities(
                     position += 1
                     entity_integration = entity.split(".")[0]
                     entity_name = entity.split(".")[1]
-                    Entity_list.append(
+                    entity_list.append(
                         Entity(
                             parent=new_parent,
                             position=position,
@@ -974,7 +1087,7 @@ def _condition_entities(
                 else:
                     entity_integration = "template"
                     entity_name = str(uuid.uuid4())
-                Entity_list.append(
+                entity_list.append(
                     Entity(
                         parent=parent,
                         position=position,
@@ -998,7 +1111,7 @@ def _condition_entities(
             exp_value[CONF_WEEKDAY] = condition_part[CONF_WEEKDAY]
 
         # create the time entity
-        Entity_list.append(
+        entity_list.append(
             Entity(
                 parent=parent,
                 position=position,
@@ -1022,7 +1135,7 @@ def _condition_entities(
                 # add the trigger id of the trigger as the expected value
                 exp_value = {CONF_ID: trigger_id}
                 # create the trigger entity
-                Entity_list.append(
+                entity_list.append(
                     Entity(
                         parent=new_parent,
                         position=position,
@@ -1039,7 +1152,7 @@ def _condition_entities(
             else:
                 exp_value = {CONF_ID: condition_part[CONF_ID]}
             # create the trigger entity
-            Entity_list.append(
+            entity_list.append(
                 Entity(
                     parent=parent,
                     position=position,
@@ -1066,7 +1179,7 @@ def _condition_entities(
                 exp_value = {CONF_ENTITY_ID: None}
 
             # create the zone entity
-            Entity_list.append(
+            entity_list.append(
                 Entity(
                     parent=parent,
                     position=position,
@@ -1095,7 +1208,7 @@ def _condition_entities(
         #     for zone in condition_part[CONF_STATE]:
         #         position += 1
         #         # create the zone entity
-        #         Entity_list.append(
+        #         entity_list.append(
         #             Entity(
         #                 parent=new_parent,
         #                 position=position,
@@ -1106,10 +1219,16 @@ def _condition_entities(
         #             )
         #         )
 
-    return [Entity_list, position]
+    return [entity_list, position, real_position]
 
 
-def _action_entities(action_part: dict, position: int, parent: int = None) -> list:
+def _action_entities(
+    action_part: dict,
+    position: int,
+    real_position: int,
+    script_path: str,
+    parent: int = None,
+) -> list:
     """The function creates a list of entities for one action list element.
 
     Args:
@@ -1122,16 +1241,20 @@ def _action_entities(action_part: dict, position: int, parent: int = None) -> li
     """
 
     # list of entities in the trigger part
-    Entity_list = []
+    entity_list = []
     # entity parameter role is start
     param_role = OUTPUT
 
     # check if the action is enabled
-    if f"{CONF_ENABLED}:" in action_part:
-        if action_part[CONF_ENABLED] is False:
-            return [Entity_list, position]
+    if CONF_ENABLED in action_part:
+        try:
+            bool_val = action_part[CONF_ENABLED]
+        except TypeError:
+            bool_val = None
+        if bool_val is False:
+            return [entity_list, position, real_position]
 
-    # processes a conditional action 
+    # processes a conditional action
     if SCRIPT_ACTION_IF in action_part:
         conditions = action_part[SCRIPT_ACTION_IF]
         if len(conditions) > 1:
@@ -1140,13 +1263,17 @@ def _action_entities(action_part: dict, position: int, parent: int = None) -> li
             # create all condition entities which are needed for the action
             for condition in conditions:
                 position += 1
-                results = _condition_entities(condition, position, new_parent)
-                Entity_list += results[0]
+                results = _condition_entities(
+                    condition, position, new_parent, real_position, script_path
+                )
+                entity_list += results[0]
                 position = results[1]
         else:
             has_cons = True
-            results = _condition_entities(conditions[0], position)
-            Entity_list += results[0]
+            results = _condition_entities(
+                conditions[0], position, real_position, script_path
+            )
+            entity_list += results[0]
             position = results[1]
 
         if CONF_THEN in action_part:
@@ -1154,8 +1281,8 @@ def _action_entities(action_part: dict, position: int, parent: int = None) -> li
                 position += 1
             actions = action_part[CONF_THEN]
             for action in actions:
-                results = _action_entities(action, position)
-                Entity_list += results[0]
+                results = _action_entities(action, position, real_position, script_path)
+                entity_list += results[0]
                 # set the position for the next action
                 position = results[1] + 1
             # set the position back to the last entity
@@ -1166,8 +1293,8 @@ def _action_entities(action_part: dict, position: int, parent: int = None) -> li
                 position += 1
             actions = action_part[CONF_ELSE]
             for action in actions:
-                results = _action_entities(action, position)
-                Entity_list += results[0]
+                results = _action_entities(action, position, real_position, script_path)
+                entity_list += results[0]
                 # set the position for the next action
                 position = results[1] + 1
             # set the position back to the last entity
@@ -1184,14 +1311,22 @@ def _action_entities(action_part: dict, position: int, parent: int = None) -> li
                 # create all condition entities which are needed for the following action
                 for condition in option[CONF_CONDITIONS]:
                     position += 1
-                    results = _condition_entities(condition, position, new_parent)
-                    Entity_list += results[0]
+                    results = _condition_entities(
+                        condition_part=condition,
+                        position=position,
+                        parent=new_parent,
+                        script_path=script_path,
+                        real_position=real_position,
+                    )
+                    entity_list += results[0]
                     position = results[1]
 
             elif CONF_CONDITION in option:
                 has_cons = True
-                results = _condition_entities(option, position)
-                Entity_list += results[0]
+                results = _condition_entities(
+                    option, position, real_position, script_path
+                )
+                entity_list += results[0]
                 position = results[1]
 
             if CONF_SEQUENCE in option:
@@ -1200,8 +1335,10 @@ def _action_entities(action_part: dict, position: int, parent: int = None) -> li
                     if has_cons:
                         position += 1
                     for action in option[CONF_SEQUENCE]:
-                        results = _action_entities(action, position)
-                        Entity_list += results[0]
+                        results = _action_entities(
+                            action, position, real_position, script_path
+                        )
+                        entity_list += results[0]
                         # set the position for the next action
                         position = results[1] + 1
                     has_cons = False
@@ -1212,8 +1349,8 @@ def _action_entities(action_part: dict, position: int, parent: int = None) -> li
     elif CONF_DEFAULT in action_part:
         default_actions = action_part[CONF_DEFAULT]
         for action in default_actions:
-            results = _action_entities(action, position)
-            Entity_list += results[0]
+            results = _action_entities(action, position, real_position, script_path)
+            entity_list += results[0]
             # set the position for the next action
             position = results[1] + 1
         # set the position back to the last entity
@@ -1223,8 +1360,8 @@ def _action_entities(action_part: dict, position: int, parent: int = None) -> li
     elif CONF_PARALLEL in action_part:
         if isinstance(action_part[CONF_PARALLEL], list):
             for action in action_part[CONF_PARALLEL]:
-                results = _action_entities(action, position)
-                Entity_list += results[0]
+                results = _action_entities(action, position, real_position, script_path)
+                entity_list += results[0]
                 # set the position for the next action
                 position = results[1] + 1
             # set the position back to the last entity
@@ -1248,13 +1385,17 @@ def _action_entities(action_part: dict, position: int, parent: int = None) -> li
                 # create all condition entities which are needed for the repeated action/s
                 for condition in conditions:
                     position += 1
-                    results = _condition_entities(condition, position, new_parent)
-                    Entity_list += results[0]
+                    results = _condition_entities(
+                        condition, position, new_parent, real_position, script_path
+                    )
+                    entity_list += results[0]
                     position = results[1]
             elif len(conditions) == 1:
                 has_cons = True
-                results = _condition_entities(conditions[0], position)
-                Entity_list += results[0]
+                results = _condition_entities(
+                    conditions[0], position, real_position, script_path
+                )
+                entity_list += results[0]
                 position = results[1]
 
         if CONF_SEQUENCE in repeat_part:
@@ -1262,8 +1403,10 @@ def _action_entities(action_part: dict, position: int, parent: int = None) -> li
                 position += 1
             if isinstance(repeat_part[CONF_SEQUENCE], list):
                 for action in repeat_part[CONF_SEQUENCE]:
-                    results = _action_entities(action, position)
-                    Entity_list += results[0]
+                    results = _action_entities(
+                        action, position, real_position, script_path
+                    )
+                    entity_list += results[0]
                     # set the position for the next action
                     position = results[1] + 1
                 # set the position back to the last entity
@@ -1273,8 +1416,8 @@ def _action_entities(action_part: dict, position: int, parent: int = None) -> li
     elif CONF_SEQUENCE in action_part:
         if isinstance(action_part[CONF_SEQUENCE], list):
             for action in action_part[CONF_SEQUENCE]:
-                results = _action_entities(action, position)
-                Entity_list += results[0]
+                results = _action_entities(action, position, real_position, script_path)
+                entity_list += results[0]
                 # set the position for the next action
                 position = results[1] + 1
             # set the position back to the last entity
@@ -1282,8 +1425,10 @@ def _action_entities(action_part: dict, position: int, parent: int = None) -> li
 
     # processes a condition in the action part
     elif CONF_CONDITION in action_part:
-        results = _condition_entities(action_part, position, parent)
-        Entity_list += results[0]
+        results = _condition_entities(
+            action_part, position, parent, real_position, script_path
+        )
+        entity_list += results[0]
         position = results[1]
 
     # processes a event action
@@ -1298,7 +1443,7 @@ def _action_entities(action_part: dict, position: int, parent: int = None) -> li
         # prohibit the use of 'context' in action events
 
         # create the entity
-        Entity_list.append(
+        entity_list.append(
             Entity(
                 parent=parent,
                 position=position,
@@ -1328,7 +1473,7 @@ def _action_entities(action_part: dict, position: int, parent: int = None) -> li
                     else:
                         if isinstance(entity, list):
                             entity_name = entity[0].split(".")[1]
-                        elif _is_jinja_template(entity):
+                        elif is_jinja_template(entity):
                             entity_name = entity
                         else:
                             entity_name = entity.split(".")[1]
@@ -1351,7 +1496,7 @@ def _action_entities(action_part: dict, position: int, parent: int = None) -> li
                 exp_value[data_key] = service_data[data_key]
 
         # create the entity
-        Entity_list.append(
+        entity_list.append(
             Entity(
                 parent=parent,
                 position=position,
@@ -1368,20 +1513,22 @@ def _action_entities(action_part: dict, position: int, parent: int = None) -> li
         if isinstance(action_part[SCRIPT_ACTION_WAIT_FOR_TRIGGER], list):
             trigger_list = action_part[SCRIPT_ACTION_WAIT_FOR_TRIGGER]
             for trigger in trigger_list:
-                results = _trigger_entities(trigger, position)
+                results = _trigger_entities(
+                    trigger, position, real_position, script_path
+                )
                 for entity in results[0]:
                     entity.parameter_role = INPUT
-                Entity_list += results[0]
+                entity_list += results[0]
                 # set the position for the next trigger
                 position = results[1] + 1
             # set the position back to the last entity
             position -= 1
         else:
             trigger = action_part[SCRIPT_ACTION_WAIT_FOR_TRIGGER]
-            results = _trigger_entities(trigger, position)
+            results = _trigger_entities(trigger, position, real_position, script_path)
             for entity in results[0]:
                 entity.parameter_role = INPUT
-            Entity_list += results[0]
+            entity_list += results[0]
             position = results[1]
 
     # processes a device action
@@ -1394,7 +1541,7 @@ def _action_entities(action_part: dict, position: int, parent: int = None) -> li
         exp_value[CONF_SERVICE] = action_part[CONF_TYPE]
 
         # create the entity
-        Entity_list.append(
+        entity_list.append(
             Entity(
                 parent=parent,
                 position=position,
@@ -1415,10 +1562,10 @@ def _action_entities(action_part: dict, position: int, parent: int = None) -> li
     elif SCRIPT_ACTION_WAIT_TEMPLATE in action_part:
         pass
 
-    return [Entity_list, position]
+    return [entity_list, position, real_position]
 
 
-def _extract_all_trigger(automation_config: AutomationConfig) -> list:
+def _extract_all_trigger(automation_config: AutomationConfig, script_path: str) -> list:
     """
     Extracts the trigger from the data.
 
@@ -1431,15 +1578,21 @@ def _extract_all_trigger(automation_config: AutomationConfig) -> list:
     trigger_entities = []
     triggers = automation_config[CONF_TRIGGER]
     position = 0
+    real_position = 0
     for trigger in triggers:
-        return_list = _trigger_entities(trigger, position)
+        return_list = _trigger_entities(trigger, position, real_position, script_path)
         trigger_entities += return_list[0]
         position = return_list[1] + 1
-        create_trigger_script(return_list[0], return_list[2])
+        real_position = return_list[2]
+    if len(trigger_entities) != real_position:
+        raise vol.Invalid("The amount of entities and the real position do not match")
+    close_trigger_section(script_path)
     return trigger_entities
 
 
-def _extract_all_conditions(automation_config: AutomationConfig) -> list:
+def _extract_all_conditions(
+    automation_config: AutomationConfig, script_path: str
+) -> list:
     """
     Extract the condition from the data.
 
@@ -1452,14 +1605,18 @@ def _extract_all_conditions(automation_config: AutomationConfig) -> list:
     condition_entities = []
     conditions = automation_config[CONF_CONDITION]
     position = 0
+    real_position = 0
     for condition in conditions:
-        return_list = _condition_entities(condition, position)
+        return_list = _condition_entities(
+            condition, position, real_position, script_path
+        )
         condition_entities += return_list[0]
         position = return_list[1] + 1
+        real_position = return_list[2] + 1
     return condition_entities
 
 
-def _extract_all_actions(automation_config: AutomationConfig) -> list:
+def _extract_all_actions(automation_config: AutomationConfig, script_path: str) -> list:
     """
     Extract the action from the data.
 
@@ -1472,22 +1629,26 @@ def _extract_all_actions(automation_config: AutomationConfig) -> list:
     action_entities = []
     actions = automation_config[CONF_ACTION]
     position = 0
+    real_position = 0
     for action in actions:
-        return_list = _action_entities(action, position)
+        return_list = _action_entities(action, position, real_position, script_path)
         action_entities += return_list[0]
         position = return_list[1] + 1
+        real_position = return_list[2] + 1
     return action_entities
 
 
-def create_entity_list(automation_config: AutomationConfig) -> list:
+def create_procedure_list(
+    automation_config: AutomationConfig, script_path: str
+) -> list:
     """
     Create a list of entities from the automation configuration.
     """
-    Entity_list = []
-    Entity_list += _extract_all_trigger(automation_config)
-    Entity_list += _extract_all_conditions(automation_config)
-    Entity_list += _extract_all_actions(automation_config)
-    return Entity_list
+    entity_list = []
+    entity_list += _extract_all_trigger(automation_config, script_path)
+    entity_list += _extract_all_conditions(automation_config, script_path)
+    entity_list += _extract_all_actions(automation_config, script_path)
+    return entity_list
 
 
 def create_automation(automation_config: AutomationConfig) -> dict:
@@ -1495,7 +1656,7 @@ def create_automation(automation_config: AutomationConfig) -> dict:
     Create an automation from the automation configuration.
     """
     automation_data = {}
-    
+
     automation_name = automation_config.automation_name
     automation_script = init_automation_script(automation_name)
 
@@ -1515,10 +1676,10 @@ def create_automation(automation_config: AutomationConfig) -> dict:
         automation_mode=mode,
         max_instances=max_instances,
     )
-    
-    automation_data["entities"] = create_entity_list(automation_config)
-    automation_data["infos"] = automation
-    
-    return automation_data
-    
 
+    automation_data["entities"] = create_procedure_list(
+        automation_config, automation_script
+    )
+    automation_data["infos"] = automation
+
+    return automation_data
