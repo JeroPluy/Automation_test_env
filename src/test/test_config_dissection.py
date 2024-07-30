@@ -1,10 +1,15 @@
-"""Test cases for automation deselection module.
+"""
+Test cases for config dissection module.
 The python_path needs to be set to the src directory: (for venv) $env:PYTHONPATH = "D:\\Workspace\\Python\\custom_Tkinker_tryout\\src"
 
 """
 
+from asyncio import subprocess
+import json
+from os import path
 import voluptuous as vol
 
+from environment_package.automation_script_gen import _append_script_context_to_script, init_automation_script
 from environment_package.config_dissection import (
     _action_entities,
     _condition_entities,
@@ -76,12 +81,56 @@ from environment_package.ha_automation.home_assistant_const import (
     TAG_ID,
 )
 
+TEST_DIR = path.join("src","test", "test_scripts")
+
+# additional functions for testing 
+
+def run_automation(
+    script_path,
+    trigger_inputs: list,
+    condition_inputs: list,
+    combined_inputs: list = None,
+):
+    """
+    The function calls the automation script and returns the result
+
+    Args:
+        automation (Automation): the automation to run
+
+    Returns:
+        str: the result of the automation
+    """
+    if combined_inputs is None:
+        input_vals = [trigger_inputs, condition_inputs]
+    else:
+        input_vals = combined_inputs
+
+    serialized_inputs = json.dumps(input_vals)
+
+    result = subprocess.run(
+        ["python", script_path, serialized_inputs], capture_output=True
+    )
+    return result.stdout.decode("utf-8")
+
+def test_trigger_return(filepath: str) -> None:
+    """
+    This function adds a print statement to the script to test the trigger return value
+    
+    Args:
+        filepath (str): the path to the script file
+    """
+    script_context = "print(f'Triggered: {triggered} and trigger_id: {trigger_id}')"
+    _append_script_context_to_script(filepath, script_context)
+
+# test funcitons 
 
 def test_trigger_entities():
     # Test case 1: Event trigger with single event type
     trigger_part_event_1 = {CONF_PLATFORM: CONF_EVENT, CONF_EVENT_TYPE: "event_type_1"}
-    results = _trigger_entities(trigger_part_event_1, position=1)
-    entities_event_1, end_position = results
+    file_path = init_automation_script("trigger_part_event_1", TEST_DIR)
+    results = _trigger_entities(trigger_part_event_1, position=1, real_position=1, script_path=file_path)
+    test_trigger_return(file_path)
+    entities_event_1, end_position, real_pos = results
     assert len(entities_event_1) == 1
     assert entities_event_1[0].parent is None
     assert entities_event_1[0].position == 1
@@ -96,8 +145,10 @@ def test_trigger_entities():
         CONF_PLATFORM: CONF_EVENT,
         CONF_EVENT_TYPE: ["event_type_2", "event_type_3"],
     }
-    results = _trigger_entities(trigger_part_event_2, position=1)
-    entities_event_2, end_position = results
+    file_path = init_automation_script("trigger_part_event_2", TEST_DIR)
+    results = _trigger_entities(trigger_part_event_2, position=1, real_position=1, script_path=file_path)
+    test_trigger_return(file_path)
+    entities_event_2, end_position, real_pos = results
     assert len(entities_event_2) == 2
     assert entities_event_2[0].parent == 1
     assert entities_event_2[0].position == 2
@@ -119,8 +170,10 @@ def test_trigger_entities():
         CONF_EVENT_DATA: {"key_1": "value_1", "key_2": "value_2"},
         CONF_EVENT_CONTEXT: {"key_3-2": ["value_3-2-1", "value_3-2-2"]},
     }
-    results = _trigger_entities(trigger_part_event_3, position=1)
-    entities_event_3, end_position = results
+    file_path = init_automation_script("trigger_part_event_3", TEST_DIR)
+    results = _trigger_entities(trigger_part_event_3, position=1, real_position=1, script_path=file_path)
+    test_trigger_return(file_path)
+    entities_event_3, end_position, real_pos = results
     assert len(entities_event_3) == 1
     assert entities_event_3[0].parent is None
     assert entities_event_3[0].position == 1
@@ -136,8 +189,10 @@ def test_trigger_entities():
 
     # Test case 4: Home Assistant trigger with single event
     trigger_part_ha_1 = {CONF_PLATFORM: "homeassistant", CONF_EVENT: "start"}
-    results = _trigger_entities(trigger_part_ha_1, position=1)
-    entities_ha_1, end_position = results
+    file_path = init_automation_script("trigger_part_ha_1", TEST_DIR)
+    results = _trigger_entities(trigger_part_ha_1, position=1, real_position=1, script_path=file_path)
+    test_trigger_return(file_path)
+    entities_ha_1, end_position, real_pos = results
     assert len(entities_ha_1) == 1
     assert entities_ha_1[0].parent is None
     assert entities_ha_1[0].position == 1
@@ -149,8 +204,10 @@ def test_trigger_entities():
 
     # Test case 5: Home Assistant trigger with single event
     trigger_part_ha_2 = {CONF_PLATFORM: "homeassistant", CONF_EVENT: "shutdown"}
-    results = _trigger_entities(trigger_part_ha_2, position=1)
-    entities_ha_2, end_position = results
+    file_path = init_automation_script("trigger_part_ha_2", TEST_DIR)
+    results = _trigger_entities(trigger_part_ha_2, position=1, real_position=1, script_path=file_path)
+    test_trigger_return(file_path)
+    entities_ha_2, end_position, real_pos = results
     assert len(entities_ha_2) == 1
     assert entities_ha_2[0].parent is None
     assert entities_ha_2[0].position == 1
@@ -162,8 +219,10 @@ def test_trigger_entities():
 
     # Test case 6: MQTT trigger with qos
     trigger_part_mqtt_1 = {CONF_PLATFORM: "mqtt", "topic": "mqtt_topic", CONF_QOS: 0}
-    results = _trigger_entities(trigger_part_mqtt_1, position=1)
-    entities_mqtt_1, end_position = results
+    file_path = init_automation_script("trigger_part_mqtt_1", TEST_DIR)
+    results = _trigger_entities(trigger_part_mqtt_1, position=1, real_position=1, script_path=file_path)
+    test_trigger_return(file_path)
+    entities_mqtt_1, end_position, real_pos = results
     assert len(entities_mqtt_1) == 1
     assert entities_mqtt_1[0].parent is None
     assert entities_mqtt_1[0].position == 1
@@ -179,8 +238,10 @@ def test_trigger_entities():
         "topic": "mqtt_topic",
         CONF_PAYLOAD: "mqtt_payload",
     }
-    results = _trigger_entities(trigger_part_mqtt_2, position=1)
-    entities_mqtt_2, end_position = results
+    file_path = init_automation_script("trigger_part_mqtt_2", TEST_DIR)
+    results = _trigger_entities(trigger_part_mqtt_2, position=1, real_position=1, script_path=file_path)
+    test_trigger_return(file_path)
+    entities_mqtt_2, end_position, real_pos = results
     assert len(entities_mqtt_2) == 1
     assert entities_mqtt_2[0].parent is None
     assert entities_mqtt_2[0].position == 1
@@ -197,8 +258,10 @@ def test_trigger_entities():
         CONF_PAYLOAD: "mqtt_payload",
         CONF_QOS: 0,
     }
-    results = _trigger_entities(trigger_part_mqtt_3, position=1)
-    entities_mqtt_3, end_position = results
+    file_path = init_automation_script("trigger_part_mqtt_3", TEST_DIR)
+    results = _trigger_entities(trigger_part_mqtt_3, position=1, real_position=1, script_path=file_path)
+    test_trigger_return(file_path)
+    entities_mqtt_3, end_position, real_pos = results
     assert len(entities_mqtt_3) == 1
     assert entities_mqtt_3[0].parent is None
     assert entities_mqtt_3[0].position == 1
@@ -217,8 +280,10 @@ def test_trigger_entities():
         CONF_ENTITY_ID: ["sensor.temperature"],
         CONF_BELOW: 30,
     }
-    results = _trigger_entities(trigger_part_num_state_1, position=1)
-    entities_num_state_1, end_position = results
+    file_path = init_automation_script("trigger_part_num_state_1", TEST_DIR)
+    results = _trigger_entities(trigger_part_num_state_1, position=1, real_position=1, script_path=file_path)
+    test_trigger_return(file_path)
+    entities_num_state_1, end_position, real_pos = results
     assert len(entities_num_state_1) == 1
     assert entities_num_state_1[0].parent is None
     assert entities_num_state_1[0].position == 1
@@ -234,8 +299,10 @@ def test_trigger_entities():
         CONF_ENTITY_ID: ["sensor.temperature"],
         CONF_ABOVE: 20,
     }
-    results = _trigger_entities(trigger_part_num_state_2, position=1)
-    entities_num_state_2, end_position = results
+    file_path = init_automation_script("trigger_part_num_state_2", TEST_DIR)
+    results = _trigger_entities(trigger_part_num_state_2, position=1, real_position=1, script_path=file_path)
+    test_trigger_return(file_path)
+    entities_num_state_2, end_position, real_pos = results
     assert len(entities_num_state_2) == 1
     assert entities_num_state_2[0].parent is None
     assert entities_num_state_2[0].position == 1
@@ -252,8 +319,10 @@ def test_trigger_entities():
         CONF_ABOVE: 20,
         CONF_BELOW: 30,
     }
-    results = _trigger_entities(trigger_part_num_state_3, position=1)
-    entities_num_state_3, end_position = results
+    file_path = init_automation_script("trigger_part_num_state_3", TEST_DIR)
+    results = _trigger_entities(trigger_part_num_state_3, position=1, real_position=1, script_path=file_path)
+    test_trigger_return(file_path)
+    entities_num_state_3, end_position, real_pos = results
     assert len(entities_num_state_3) == 1
     assert entities_num_state_3[0].parent is None
     assert entities_num_state_3[0].position == 1
@@ -271,8 +340,10 @@ def test_trigger_entities():
         CONF_BELOW: 30,
         CONF_FOR: "00:01:00",
     }
-    results = _trigger_entities(trigger_part_num_state_4, position=1)
-    entities_num_state_4, end_position = results
+    file_path = init_automation_script("trigger_part_num_state_4", TEST_DIR)
+    results = _trigger_entities(trigger_part_num_state_4, position=1, real_position=1, script_path=file_path)
+    test_trigger_return(file_path)
+    entities_num_state_4, end_position, real_pos = results
     assert len(entities_num_state_4) == 1
     assert entities_num_state_4[0].parent is None
     assert entities_num_state_4[0].position == 1
@@ -292,8 +363,10 @@ def test_trigger_entities():
         CONF_ATTRIBUTE: "attribute_1",
         CONF_ABOVE: 20,
     }
-    results = _trigger_entities(trigger_part_num_state_5, position=1)
-    entities_num_state_5, end_position = results
+    file_path = init_automation_script("trigger_part_num_state_5", TEST_DIR)
+    results = _trigger_entities(trigger_part_num_state_5, position=1, real_position=1, script_path=file_path)
+    test_trigger_return(file_path)
+    entities_num_state_5, end_position, real_pos = results
     assert len(entities_num_state_5) == 1
     assert entities_num_state_5[0].parent is None
     assert entities_num_state_5[0].position == 1
@@ -308,8 +381,10 @@ def test_trigger_entities():
         CONF_PLATFORM: CONF_STATE,
         CONF_ENTITY_ID: ["binary_sensor.motion"],
     }
-    results = _trigger_entities(trigger_part_state_0, position=1)
-    entities_state_0, end_position = results
+    file_path = init_automation_script("trigger_part_state_0", TEST_DIR)
+    results = _trigger_entities(trigger_part_state_0, position=1, real_position=1, script_path=file_path)
+    test_trigger_return(file_path)
+    entities_state_0, end_position, real_pos = results
     assert len(entities_state_0) == 1
     assert entities_state_0[0].parent is None
     assert entities_state_0[0].position == 1
@@ -325,8 +400,10 @@ def test_trigger_entities():
         CONF_ENTITY_ID: ["binary_sensor.motion"],
         CONF_TO: "on",
     }
-    results = _trigger_entities(trigger_part_state_1, position=1)
-    entities_state_1, end_position = results
+    file_path = init_automation_script("trigger_part_state_1", TEST_DIR)
+    results = _trigger_entities(trigger_part_state_1, position=1, real_position=1, script_path=file_path)
+    test_trigger_return(file_path)
+    entities_state_1, end_position, real_pos = results
     assert len(entities_state_1) == 1
     assert entities_state_1[0].parent is None
     assert entities_state_1[0].position == 1
@@ -343,8 +420,10 @@ def test_trigger_entities():
         CONF_FROM: "off",
         CONF_TO: "on",
     }
-    results = _trigger_entities(trigger_part_state_2, position=1)
-    entities_state_2, end_position = results
+    file_path = init_automation_script("trigger_part_state_2", TEST_DIR)
+    results = _trigger_entities(trigger_part_state_2, position=1, real_position=1, script_path=file_path)
+    test_trigger_return(file_path)
+    entities_state_2, end_position, real_pos = results
     assert len(entities_state_2) == 1
     assert entities_state_2[0].parent is None
     assert entities_state_2[0].position == 1
@@ -362,8 +441,10 @@ def test_trigger_entities():
         CONF_TO: "on",
         CONF_FOR: "00:01:00",
     }
-    results = _trigger_entities(trigger_part_state_3, position=1)
-    entities_state_3, end_position = results
+    file_path = init_automation_script("trigger_part_state_3", TEST_DIR)
+    results = _trigger_entities(trigger_part_state_3, position=1, real_position=1, script_path=file_path)
+    test_trigger_return(file_path)
+    entities_state_3, end_position, real_pos = results
     assert len(entities_state_3) == 1
     assert entities_state_3[0].parent is None
     assert entities_state_3[0].position == 1
@@ -384,8 +465,10 @@ def test_trigger_entities():
         CONF_NOT_TO: "on",
         CONF_NOT_FROM: "off",
     }
-    results = _trigger_entities(trigger_part_state_4, position=1)
-    entities_state_4, end_position = results
+    file_path = init_automation_script("trigger_part_state_4", TEST_DIR)
+    results = _trigger_entities(trigger_part_state_4, position=1, real_position=1, script_path=file_path)
+    test_trigger_return(file_path)
+    entities_state_4, end_position, real_pos = results
     assert len(entities_state_4) == 1
     assert entities_state_4[0].parent is None
     assert entities_state_4[0].position == 1
@@ -406,8 +489,10 @@ def test_trigger_entities():
         CONF_TO: "temp2",
         CONF_FROM: "temp1",
     }
-    results = _trigger_entities(trigger_part_state_5, position=1)
-    entities_state_5, end_position = results
+    file_path = init_automation_script("trigger_part_state_5", TEST_DIR)
+    results = _trigger_entities(trigger_part_state_5, position=1, real_position=1, script_path=file_path)
+    test_trigger_return(file_path)
+    entities_state_5, end_position, real_pos = results
     assert len(entities_state_5) == 1
     assert entities_state_5[0].parent is None
     assert entities_state_5[0].position == 1
@@ -419,8 +504,10 @@ def test_trigger_entities():
 
     # Test case 20: Sun trigger
     trigger_part_sun_1 = {CONF_PLATFORM: "sun", CONF_EVENT: "sunset"}
-    results = _trigger_entities(trigger_part_sun_1, position=1)
-    entities_sun_1, end_position = results
+    file_path = init_automation_script("trigger_part_sun_1", TEST_DIR)
+    results = _trigger_entities(trigger_part_sun_1, position=1, real_position=1, script_path=file_path)
+    test_trigger_return(file_path)
+    entities_sun_1, end_position, real_pos = results
     assert len(entities_sun_1) == 1
     assert entities_sun_1[0].parent is None
     assert entities_sun_1[0].position == 1
@@ -436,8 +523,10 @@ def test_trigger_entities():
         CONF_EVENT: "sunset",
         CONF_OFFSET: "-01:00:00",
     }
-    results = _trigger_entities(trigger_part_sun_2, position=1)
-    entities_sun_2, end_position = results
+    file_path = init_automation_script("trigger_part_sun_2", TEST_DIR)
+    results = _trigger_entities(trigger_part_sun_2, position=1, real_position=1, script_path=file_path)
+    test_trigger_return(file_path)
+    entities_sun_2, end_position, real_pos = results
     assert len(entities_sun_2) == 1
     assert entities_sun_2[0].parent is None
     assert entities_sun_2[0].position == 1
@@ -456,8 +545,10 @@ def test_trigger_entities():
         TAG_ID: "tag_id_1",
         CONF_DEVICE_ID: "device_id_1",
     }
-    results = _trigger_entities(trigger_part_tag_1, position=1)
-    entities_tag_1, end_position = results
+    file_path = init_automation_script("trigger_part_tag_1", TEST_DIR)
+    results = _trigger_entities(trigger_part_tag_1, position=1, real_position=1, script_path=file_path)
+    test_trigger_return(file_path)
+    entities_tag_1, end_position, real_pos = results
     assert len(entities_tag_1) == 1
     assert entities_tag_1[0].parent is None
     assert entities_tag_1[0].position == 1
@@ -473,8 +564,10 @@ def test_trigger_entities():
         TAG_ID: "tag_id_2",
         CONF_DEVICE_ID: ["device_id_2", "device_id_3"],
     }
-    results = _trigger_entities(trigger_part_tag_2, position=1)
-    entities_tag_2, end_position = results
+    file_path = init_automation_script("trigger_part_tag_2", TEST_DIR)
+    results = _trigger_entities(trigger_part_tag_2, position=1, real_position=1, script_path=file_path)
+    test_trigger_return(file_path)
+    entities_tag_2, end_position, real_pos = results
     assert len(entities_tag_2) == 1
     assert entities_tag_2[0].parent is None
     assert entities_tag_2[0].position == 1
@@ -492,8 +585,10 @@ def test_trigger_entities():
         TAG_ID: ["tag_id_2", "tag_id_3"],
         CONF_DEVICE_ID: ["device_id_2", "device_id_3"],
     }
-    results = _trigger_entities(trigger_part_tag_3, position=1)
-    entities_tag_3, end_position = results
+    file_path = init_automation_script("trigger_part_tag_3", TEST_DIR)
+    results = _trigger_entities(trigger_part_tag_3, position=1, real_position=1, script_path=file_path)
+    test_trigger_return(file_path)
+    entities_tag_3, end_position, real_pos = results
     assert len(entities_tag_3) == 2
     assert entities_tag_3[0].parent == 1
     assert entities_tag_3[0].position == 2
@@ -517,8 +612,10 @@ def test_trigger_entities():
         CONF_PLATFORM: "template",
         CONF_VALUE_TEMPLATE: "{% if is_state('device_tracker.paulus', 'home') %}true{% endif %}",
     }
-    results = _trigger_entities(trigger_part_template_1, position=1)
-    entities_template_1, end_position = results
+    file_path = init_automation_script("trigger_part_template_1", TEST_DIR)
+    results = _trigger_entities(trigger_part_template_1, position=1, real_position=1, script_path=file_path)
+    test_trigger_return(file_path)
+    entities_template_1, end_position, real_pos = results
     assert len(entities_template_1) == 1
     assert entities_template_1[0].parent == 1
     assert entities_template_1[0].position == 2
@@ -535,8 +632,10 @@ def test_trigger_entities():
         CONF_PLATFORM: "template",
         CONF_VALUE_TEMPLATE: "{{ is_state('device_tracker.paulus', 'home') and is_state('device_tracker.anne_therese', 'home') }}",
     }
-    results = _trigger_entities(trigger_part_template_2, position=1)
-    entities_template_2, end_position = results
+    file_path = init_automation_script("trigger_part_template_2", TEST_DIR)
+    results = _trigger_entities(trigger_part_template_2, position=1, real_position=1, script_path=file_path)
+    test_trigger_return(file_path)
+    entities_template_2, end_position, real_pos = results
     assert len(entities_template_2) == 2
     assert entities_template_2[0].parent == 1
     assert entities_template_2[0].position == 2
@@ -561,8 +660,10 @@ def test_trigger_entities():
         CONF_VALUE_TEMPLATE: "{{ is_state('device_tracker.paulus', 'home') }}",
         CONF_FOR: "00:01:00",
     }
-    results = _trigger_entities(trigger_part_template_3, position=1)
-    entities_template_3, end_position = results
+    file_path = init_automation_script("trigger_part_template_3", TEST_DIR)
+    results = _trigger_entities(trigger_part_template_3, position=1, real_position=1, script_path=file_path)
+    test_trigger_return(file_path)
+    entities_template_3, end_position, real_pos = results
     assert len(entities_template_3) == 1
     assert entities_template_3[0].parent == 1
     assert entities_template_3[0].position == 2
@@ -577,8 +678,10 @@ def test_trigger_entities():
 
     # Test case 28: Time trigger at 06:05:02
     trigger_part_time_1 = {CONF_PLATFORM: "time", CONF_AT: "06:05:02"}
-    results = _trigger_entities(trigger_part_time_1, position=1)
-    entities_time_1, end_position = results
+    file_path = init_automation_script("trigger_part_time_1", TEST_DIR)
+    results = _trigger_entities(trigger_part_time_1, position=1, real_position=1, script_path=file_path)
+    test_trigger_return(file_path)
+    entities_time_1, end_position, real_pos = results
     assert len(entities_time_1) == 1
     assert entities_time_1[0].parent is None
     assert entities_time_1[0].position == 1
@@ -590,8 +693,10 @@ def test_trigger_entities():
 
     # Test case 29: Time trigger at 06:05 and 06:10
     trigger_part_time_2 = {CONF_PLATFORM: "time", CONF_AT: ["06:05", "06:10"]}
-    results = _trigger_entities(trigger_part_time_2, position=1)
-    entities_time_2, end_position = results
+    file_path = init_automation_script("trigger_part_time_2", TEST_DIR)
+    results = _trigger_entities(trigger_part_time_2, position=1, real_position=1, script_path=file_path)
+    test_trigger_return(file_path)
+    entities_time_2, end_position, real_pos = results
     assert len(entities_time_2) == 2
     assert entities_time_2[0].parent == 1
     assert entities_time_2[0].position == 2
@@ -608,8 +713,10 @@ def test_trigger_entities():
 
     # Test case 30: Time pattern trigger at **:**:02 seconds
     trigger_part_time_pattern_1 = {CONF_PLATFORM: "time_pattern", SECONDS: 2}
-    results = _trigger_entities(trigger_part_time_pattern_1, position=1)
-    entities_time_pattern_1, end_position = results
+    file_path = init_automation_script("trigger_part_time_pattern_1", TEST_DIR)
+    results = _trigger_entities(trigger_part_time_pattern_1, position=1, real_position=1, script_path=file_path)
+    test_trigger_return(file_path)
+    entities_time_pattern_1, end_position, real_pos = results
     assert len(entities_time_1) == 1
     assert entities_time_pattern_1[0].parent is None
     assert entities_time_pattern_1[0].position == 1
@@ -621,8 +728,10 @@ def test_trigger_entities():
 
     # Test case 31: Time pattern trigger at **:02:00
     trigger_part_time_pattern_2 = {CONF_PLATFORM: "time_pattern", MINUTES: 2}
-    results = _trigger_entities(trigger_part_time_pattern_2, position=1)
-    entities_time_pattern_2, end_position = results
+    file_path = init_automation_script("trigger_part_time_pattern_2", TEST_DIR)
+    results = _trigger_entities(trigger_part_time_pattern_2, position=1, real_position=1, script_path=file_path)
+    test_trigger_return(file_path)
+    entities_time_pattern_2, end_position, real_pos = results
     assert len(entities_time_pattern_2) == 1
     assert entities_time_pattern_2[0].parent is None
     assert entities_time_pattern_2[0].position == 1
@@ -634,8 +743,10 @@ def test_trigger_entities():
 
     # Test case 32: Time pattern trigger at 02:00:00
     trigger_part_time_pattern_3 = {CONF_PLATFORM: "time_pattern", HOURS: 2}
-    results = _trigger_entities(trigger_part_time_pattern_3, position=1)
-    entities_time_pattern_3, end_position = results
+    file_path = init_automation_script("trigger_part_time_pattern_3", TEST_DIR)
+    results = _trigger_entities(trigger_part_time_pattern_3, position=1, real_position=1, script_path=file_path)
+    test_trigger_return(file_path)
+    entities_time_pattern_3, end_position, real_pos = results
     assert len(entities_time_pattern_3) == 1
     assert entities_time_pattern_3[0].parent is None
     assert entities_time_pattern_3[0].position == 1
@@ -652,8 +763,9 @@ def test_trigger_entities():
         MINUTES: "5",
         SECONDS: "2",
     }
+    file_path = init_automation_script("trigger_part_time_pattern_4", TEST_DIR)
     try:
-        _trigger_entities(trigger_part_time_pattern_4, position=1)
+        _trigger_entities(trigger_part_time_pattern_4, position=1, real_position=1, script_path=file_path)
         assert False  # The function should raise an exception
     except vol.Invalid as e:
         assert str(e) == "Leading zero in hours is not allowed"
@@ -665,8 +777,9 @@ def test_trigger_entities():
         MINUTES: "05",
         SECONDS: 2,
     }
+    file_path = init_automation_script("trigger_part_time_pattern_5", TEST_DIR)
     try:
-        _trigger_entities(trigger_part_time_pattern_5, position=1)
+        _trigger_entities(trigger_part_time_pattern_5, position=1, real_position=1, script_path=file_path)
         assert False  # The function should raise an exception
     except vol.Invalid as e:
         assert str(e) == "Leading zero in minutes is not allowed"
@@ -678,16 +791,19 @@ def test_trigger_entities():
         MINUTES: 5,
         SECONDS: "02",
     }
+    file_path = init_automation_script("trigger_part_time_pattern_6", TEST_DIR)
     try:
-        _trigger_entities(trigger_part_time_pattern_6, position=1)
+        _trigger_entities(trigger_part_time_pattern_6, position=1, real_position=1, script_path=file_path)
         assert False  # The function should raise an exception
     except vol.Invalid as e:
         assert str(e) == "Leading zero in seconds is not allowed"
 
     # Test case 36: Time pattern trigger at every 5 minutes
     trigger_part_time_pattern_7 = {CONF_PLATFORM: "time_pattern", MINUTES: "/5"}
-    results = _trigger_entities(trigger_part_time_pattern_7, position=1)
-    entities_time_pattern_7, end_position = results
+    file_path = init_automation_script("trigger_part_time_pattern_7", TEST_DIR)
+    results = _trigger_entities(trigger_part_time_pattern_7, position=1, real_position=1, script_path=file_path)
+    test_trigger_return(file_path)
+    entities_time_pattern_7, end_position, real_pos = results
     assert len(entities_time_pattern_7) == 1
     assert entities_time_pattern_7[0].parent is None
     assert entities_time_pattern_7[0].position == 1
@@ -702,8 +818,10 @@ def test_trigger_entities():
         CONF_PLATFORM: "persistent_notification",
         CONF_UPDATE_TYPE: "create",
     }
-    results = _trigger_entities(trigger_part_pers_notify_1, position=1)
-    entities_pers_notify_1, end_position = results
+    file_path = init_automation_script("trigger_part_pers_notify_1", TEST_DIR)
+    results = _trigger_entities(trigger_part_pers_notify_1, position=1, real_position=1, script_path=file_path)
+    test_trigger_return(file_path)
+    entities_pers_notify_1, end_position, real_pos = results
     assert len(entities_pers_notify_1) == 1
     assert entities_pers_notify_1[0].parent is None
     assert entities_pers_notify_1[0].position == 1
@@ -719,8 +837,10 @@ def test_trigger_entities():
         CONF_UPDATE_TYPE: "create",
         CONF_NOFITY_ID: "notify_id_1",
     }
-    results = _trigger_entities(trigger_part_pers_notify_2, position=1)
-    entities_pers_notify_2, end_position = results
+    file_path = init_automation_script("trigger_part_pers_notify_2", TEST_DIR)
+    results = _trigger_entities(trigger_part_pers_notify_2, position=1, real_position=1, script_path=file_path)
+    test_trigger_return(file_path)
+    entities_pers_notify_2, end_position, real_pos = results
     assert len(entities_pers_notify_2) == 1
     assert entities_pers_notify_2[0].parent is None
     assert entities_pers_notify_2[0].position == 1
@@ -738,8 +858,10 @@ def test_trigger_entities():
         CONF_WEBHOOK_ID: "webhook_id_1",
         CONF_ALLOWED_METHODS: ["POST", "GET"],
     }
-    results = _trigger_entities(trigger_part_webhook_1, position=1)
-    entities_webhook_1, end_position = results
+    file_path = init_automation_script("trigger_part_webhook_1", TEST_DIR)
+    results = _trigger_entities(trigger_part_webhook_1, position=1, real_position=1, script_path=file_path)
+    test_trigger_return(file_path)
+    entities_webhook_1, end_position, real_pos = results
     assert len(entities_webhook_1) == 1
     assert entities_webhook_1[0].parent is None
     assert entities_webhook_1[0].position == 1
@@ -758,8 +880,10 @@ def test_trigger_entities():
         CONF_ALLOWED_METHODS: ["POST"],
         CONF_LOCAL: True,
     }
-    results = _trigger_entities(trigger_part_webhook_2, position=1)
-    entities_webhook_2, end_position = results
+    file_path = init_automation_script("trigger_part_webhook_2", TEST_DIR)
+    results = _trigger_entities(trigger_part_webhook_2, position=1, real_position=1, script_path=file_path)
+    test_trigger_return(file_path)
+    entities_webhook_2, end_position, real_pos = results
     assert len(entities_webhook_2) == 1
     assert entities_webhook_2[0].parent is None
     assert entities_webhook_2[0].position == 1
@@ -778,8 +902,10 @@ def test_trigger_entities():
         CONF_EVENT: "enter",
         CONF_ENTITY_ID: "device_tracker.paulus",
     }
-    results = _trigger_entities(trigger_part_zone_1, position=1)
-    entities_zone_1, end_position = results
+    file_path = init_automation_script("trigger_part_zone_1", TEST_DIR)
+    results = _trigger_entities(trigger_part_zone_1, position=1, real_position=1, script_path=file_path)
+    test_trigger_return(file_path)
+    entities_zone_1, end_position, real_pos = results
     assert len(entities_zone_1) == 1
     assert entities_zone_1[0].parent is None
     assert entities_zone_1[0].position == 1
@@ -799,8 +925,10 @@ def test_trigger_entities():
         CONF_EVENT: "enter",
         CONF_SOURCE: "geo_location-source",
     }
-    results = _trigger_entities(trigger_part_geo_local_1, position=1)
-    entities_geo_local_1, end_position = results
+    file_path = init_automation_script("trigger_part_geo_local_1", TEST_DIR)
+    results = _trigger_entities(trigger_part_geo_local_1, position=1, real_position=1, script_path=file_path)
+    test_trigger_return(file_path)
+    entities_geo_local_1, end_position, real_pos = results
     assert len(entities_geo_local_1) == 1
     assert entities_geo_local_1[0].parent is None
     assert entities_geo_local_1[0].position == 1
@@ -821,8 +949,10 @@ def test_trigger_entities():
         CONF_TYPE: "do something",
         CONF_DOMAIN: "domain",
     }
-    results = _trigger_entities(trigger_part_device_1, position=1)
-    entities_device_1, end_position = results
+    file_path = init_automation_script("trigger_part_device_1", TEST_DIR)
+    results = _trigger_entities(trigger_part_device_1, position=1, real_position=1, script_path=file_path)
+    test_trigger_return(file_path)
+    entities_device_1, end_position, real_pos = results
     assert len(entities_device_1) == 1
     assert entities_device_1[0].parent is None
     assert entities_device_1[0].position == 1
@@ -842,8 +972,10 @@ def test_trigger_entities():
         CONF_ENTITY_ID: "calendar.calendar_name",
         CONF_EVENT: "event_name",
     }
-    results = _trigger_entities(trigger_part_calendar_1, position=1)
-    entities_calendar_1, end_position = results
+    file_path = init_automation_script("trigger_part_calendar_1", TEST_DIR)
+    results = _trigger_entities(trigger_part_calendar_1, position=1, real_position=1, script_path=file_path)
+    test_trigger_return(file_path)
+    entities_calendar_1, end_position, real_pos = results
     assert len(entities_calendar_1) == 1
     assert entities_calendar_1[0].parent is None
     assert entities_calendar_1[0].position == 1
@@ -860,8 +992,10 @@ def test_trigger_entities():
         CONF_EVENT: "event_name",
         CONF_OFFSET: "-01:00:00",
     }
-    results = _trigger_entities(trigger_part_calendar_2, position=1)
-    entities_calendar_2, end_position = results
+    file_path = init_automation_script("trigger_part_calendar_2", TEST_DIR)
+    results = _trigger_entities(trigger_part_calendar_2, position=1, real_position=1, script_path=file_path)
+    entities_calendar_2, end_position, real_pos = results
+    test_trigger_return(file_path)
     assert len(entities_calendar_2) == 1
     assert entities_calendar_2[0].parent is None
     assert entities_calendar_2[0].position == 1
@@ -879,8 +1013,10 @@ def test_trigger_entities():
         CONF_PLATFORM: "conversation",
         CONF_COMMAND: "intentional_name",
     }
-    results = _trigger_entities(trigger_part_conversation_1, position=1)
-    entities_conversation_1, end_position = results
+    file_path = init_automation_script("trigger_part_conversation_1", TEST_DIR)
+    results = _trigger_entities(trigger_part_conversation_1, position=1, real_position=1, script_path=file_path)
+    entities_conversation_1, end_position, real_pos = results
+    test_trigger_return(file_path)
     assert len(entities_conversation_1) == 1
     assert entities_conversation_1[0].parent is None
     assert entities_conversation_1[0].position == 1
@@ -897,8 +1033,10 @@ def test_trigger_entities():
         CONF_PLATFORM: "conversation",
         CONF_COMMAND: ["intentional_name", "be my guest"],
     }
-    results = _trigger_entities(trigger_part_conversation_2, position=1)
-    entities_conversation_2, end_position = results
+    file_path = init_automation_script("trigger_part_conversation_2", TEST_DIR)
+    results = _trigger_entities(trigger_part_conversation_2, position=1, real_position=1, script_path=file_path)
+    test_trigger_return(file_path)
+    entities_conversation_2, end_position, real_pos = results
     assert len(entities_conversation_2) == 2
     assert entities_conversation_2[0].parent == 1
     assert entities_conversation_2[0].position == 2
@@ -917,8 +1055,10 @@ def test_trigger_entities():
 
     # Test case 48: Unsupported platform
     trigger_part_x = {CONF_PLATFORM: "unsupported"}
-    results = _trigger_entities(trigger_part_x, position=1)
-    entities_x, end_position = results
+    file_path = init_automation_script("trigger_part_x", TEST_DIR)
+    results = _trigger_entities(trigger_part_x, position=1, real_position=1, script_path=file_path)
+    test_trigger_return(file_path)
+    entities_x, end_position, real_pos = results
     assert len(entities_x) == 0
 
     # Test case 49: State trigger with disabled set to false
@@ -927,8 +1067,10 @@ def test_trigger_entities():
         CONF_ENABLED: False,
         CONF_ENTITY_ID: "sensor.temperature",
     }
-    results = _trigger_entities(trigger_part_x2, position=1)
-    entities_x2, end_position = results
+    file_path = init_automation_script("trigger_part_x2", TEST_DIR)
+    results = _trigger_entities(trigger_part_x2, position=1, real_position=1, script_path=file_path)
+    test_trigger_return(file_path)
+    entities_x2, end_position, real_pos = results
     assert len(entities_x2) == 0
 
     print("All trigger test cases passed!")
@@ -942,7 +1084,7 @@ def test_condition_entities():
         CONF_BELOW: 30,
     }
     results = _condition_entities(condition_part_num_state_1, position=1)
-    entities_num_state_1, end_position = results
+    entities_num_state_1, end_position, real_pos = results
     assert len(entities_num_state_1) == 1
     assert entities_num_state_1[0].parent is None
     assert entities_num_state_1[0].position == 1
@@ -959,7 +1101,7 @@ def test_condition_entities():
         CONF_ABOVE: 20,
     }
     results = _condition_entities(condition_part_num_state_2, position=1)
-    entities_num_state_2, end_position = results
+    entities_num_state_2, end_position, real_pos = results
     assert len(entities_num_state_2) == 1
     assert entities_num_state_2[0].parent is None
     assert entities_num_state_2[0].position == 1
@@ -977,7 +1119,7 @@ def test_condition_entities():
         CONF_ABOVE: 20,
     }
     results = _condition_entities(condition_part_num_state_3, position=1)
-    entities_num_state_3, end_position = results
+    entities_num_state_3, end_position, real_pos = results
     assert len(entities_num_state_3) == 1
     assert entities_num_state_3[0].parent is None
     assert entities_num_state_3[0].position == 1
@@ -994,7 +1136,7 @@ def test_condition_entities():
         CONF_BELOW: 50,
     }
     results = _condition_entities(condition_part_num_state_4, position=1)
-    entities_num_state_4, end_position = results
+    entities_num_state_4, end_position, real_pos = results
     assert len(entities_num_state_4) == 2
     assert entities_num_state_4[0].parent == 1
     assert entities_num_state_4[0].position == 2
@@ -1016,7 +1158,7 @@ def test_condition_entities():
         CONF_ABOVE: 20,
     }
     results = _condition_entities(condition_part_num_state_5, position=1)
-    entities_num_state_5, end_position = results
+    entities_num_state_5, end_position, real_pos = results
     assert len(entities_num_state_5) == 1
     assert entities_num_state_5[0].parent is None
     assert entities_num_state_5[0].position == 1
@@ -1033,7 +1175,7 @@ def test_condition_entities():
         CONF_ABOVE: 20,
     }
     results = _condition_entities(condition_part_num_state_6, position=4, parent=2)
-    entities_num_state_6, end_position = results
+    entities_num_state_6, end_position, real_pos = results
     assert len(entities_num_state_6) == 1
     assert entities_num_state_6[0].parent == 2
     assert entities_num_state_6[0].position == 4
@@ -1050,7 +1192,7 @@ def test_condition_entities():
         CONF_BELOW: 30,
     }
     results = _condition_entities(condition_part_num_state_7, position=4, parent=2)
-    entities_num_state_7, end_position = results
+    entities_num_state_7, end_position, real_pos = results
     assert len(entities_num_state_7) == 2
     assert entities_num_state_7[0].parent == 4
     assert entities_num_state_7[0].position == 5
@@ -1073,7 +1215,7 @@ def test_condition_entities():
         CONF_STATE: "on",
     }
     results = _condition_entities(condition_part_state_1, position=1)
-    entities_state_1, end_position = results
+    entities_state_1, end_position, real_pos = results
     assert len(entities_state_1) == 1
     assert entities_state_1[0].parent is None
     assert entities_state_1[0].position == 1
@@ -1091,7 +1233,7 @@ def test_condition_entities():
         CONF_FOR: "00:05:00",
     }
     results = _condition_entities(condition_part_state_2, position=1)
-    entities_state_2, end_position = results
+    entities_state_2, end_position, real_pos = results
     assert len(entities_state_2) == 1
     assert entities_state_2[0].parent is None
     assert entities_state_2[0].position == 1
@@ -1108,7 +1250,7 @@ def test_condition_entities():
         CONF_STATE: "off",
     }
     results = _condition_entities(condition_part_state_3, position=1)
-    entities_state_3, end_position = results
+    entities_state_3, end_position, real_pos = results
     assert len(entities_state_3) == 2
     assert entities_state_3[0].parent == 1
     assert entities_state_3[0].position == 2
@@ -1131,7 +1273,7 @@ def test_condition_entities():
         CONF_STATE: "on",
     }
     results = _condition_entities(condition_part_state_4, position=4, parent=2)
-    entities_state_4, end_position = results
+    entities_state_4, end_position, real_pos = results
     assert len(entities_state_4) == 1
     assert entities_state_4[0].parent == 2
     assert entities_state_4[0].position == 4
@@ -1148,7 +1290,7 @@ def test_condition_entities():
         CONF_STATE: "off",
     }
     results = _condition_entities(condition_part_state_5, position=4, parent=2)
-    entities_state_5, end_position = results
+    entities_state_5, end_position, real_pos = results
     assert len(entities_state_5) == 2
     assert entities_state_5[0].parent == 4
     assert entities_state_5[0].position == 5
@@ -1171,7 +1313,7 @@ def test_condition_entities():
         CONF_STATE: ["on", "off"],
     }
     results = _condition_entities(condition_part_state_6, position=4, parent=2)
-    entities_state_6, end_position = results
+    entities_state_6, end_position, real_pos = results
     assert len(entities_state_6) == 1
     assert entities_state_6[0].parent == 2
     assert entities_state_6[0].position == 4
@@ -1188,7 +1330,7 @@ def test_condition_entities():
         CONF_STATE: ["on", "off"],
     }
     results = _condition_entities(condition_part_state_7, position=4, parent=2)
-    entities_state_7, end_position = results
+    entities_state_7, end_position, real_pos = results
     assert len(entities_state_7) == 2
     assert entities_state_7[0].parent == 4
     assert entities_state_7[0].position == 5
@@ -1210,7 +1352,7 @@ def test_condition_entities():
         CONF_VALUE_TEMPLATE: "{{ is_state('device_tracker.paulus', 'home') }}",
     }
     results = _condition_entities(condition_part_template_1, position=1)
-    entities_template_1, end_position = results
+    entities_template_1, end_position, real_pos = results
     assert len(entities_template_1) == 1
     assert entities_template_1[0].parent is None
     assert entities_template_1[0].position == 1
@@ -1228,7 +1370,7 @@ def test_condition_entities():
         CONF_VALUE_TEMPLATE: "{{ is_state('device_tracker.paulus', 'home') and is_state('device_tracker.anne_therese', 'home') }}",
     }
     results = _condition_entities(condition_part_template_2, position=1)
-    entities_template_2, end_position = results
+    entities_template_2, end_position, real_pos = results
     assert len(entities_template_2) == 2
     assert entities_template_2[0].parent == 1
     assert entities_template_2[0].position == 2
@@ -1254,7 +1396,7 @@ def test_condition_entities():
         CONF_VALUE_TEMPLATE: "{{ is_state('device_tracker.paulus', 'home') }}",
     }
     results = _condition_entities(condition_part_template_3, position=4, parent=2)
-    entities_template_3, end_position = results
+    entities_template_3, end_position, real_pos = results
     assert len(entities_template_3) == 1
     assert entities_template_3[0].parent == 2
     assert entities_template_3[0].position == 4
@@ -1272,7 +1414,7 @@ def test_condition_entities():
         CONF_VALUE_TEMPLATE: "{{ is_state('device_tracker.paulus', 'home') and is_state('device_tracker.anne_therese', 'home') }}",
     }
     results = _condition_entities(condition_part_template_4, position=4, parent=2)
-    entities_template_4, end_position = results
+    entities_template_4, end_position, real_pos = results
     assert len(entities_template_4) == 2
     assert entities_template_4[0].parent == 4
     assert entities_template_4[0].position == 5
@@ -1296,7 +1438,7 @@ def test_condition_entities():
     condition_part_template_5 = ("{{ is_state('device_tracker.paulus', 'home') }}",)
 
     results = _condition_entities(condition_part_template_5, position=1)
-    entities_template_5, end_position = results
+    entities_template_5, end_position, real_pos = results
     assert len(entities_template_5) == 1
     assert entities_template_5[0].parent is None
     assert entities_template_5[0].position == 1
@@ -1314,7 +1456,7 @@ def test_condition_entities():
         CONF_AFTER: "sunset",
     }
     results = _condition_entities(condition_part_sun_1, position=1)
-    entities_sun_1, end_position = results
+    entities_sun_1, end_position, real_pos = results
     assert len(entities_sun_1) == 1
     assert entities_sun_1[0].parent is None
     assert entities_sun_1[0].position == 1
@@ -1330,7 +1472,7 @@ def test_condition_entities():
         CONF_BEFORE: "sunset",
     }
     results = _condition_entities(condition_part_sun_2, position=1)
-    entities_sun_2, end_position = results
+    entities_sun_2, end_position, real_pos = results
     assert len(entities_sun_2) == 1
     assert entities_sun_2[0].parent is None
     assert entities_sun_2[0].position == 1
@@ -1349,7 +1491,7 @@ def test_condition_entities():
         CONF_AFTER_OFFSET: "01:00:00",
     }
     results = _condition_entities(condition_part_sun_3, position=1)
-    entities_sun_3, end_position = results
+    entities_sun_3, end_position, real_pos = results
     assert len(entities_sun_3) == 1
     assert entities_sun_3[0].parent is None
     assert entities_sun_3[0].position == 1
@@ -1371,7 +1513,7 @@ def test_condition_entities():
         CONF_BEFORE: "sunrise",
     }
     results = _condition_entities(condition_part_sun_4, position=3, parent=2)
-    entities_sun_4, end_position = results
+    entities_sun_4, end_position, real_pos = results
     assert len(entities_sun_4) == 1
     assert entities_sun_4[0].parent == 2
     assert entities_sun_4[0].position == 3
@@ -1390,7 +1532,7 @@ def test_condition_entities():
         CONF_TYPE: "do something",
     }
     results = _condition_entities(condition_part_device_1, position=1)
-    entities_device_1, end_position = results
+    entities_device_1, end_position, real_pos = results
     assert len(entities_device_1) == 1
     assert entities_device_1[0].parent is None
     assert entities_device_1[0].position == 1
@@ -1413,7 +1555,7 @@ def test_condition_entities():
         CONF_TYPE: "do something",
     }
     results = _condition_entities(condition_part_device_2, position=5, parent=2)
-    entities_device_2, end_position = results
+    entities_device_2, end_position, real_pos = results
     assert len(entities_device_2) == 1
     assert entities_device_2[0].parent == 2
     assert entities_device_2[0].position == 5
@@ -1433,7 +1575,7 @@ def test_condition_entities():
         CONF_BEFORE: "12:00:00",
     }
     results = _condition_entities(condition_part_time_1, position=1)
-    entities_time_1, end_position = results
+    entities_time_1, end_position, real_pos = results
     assert len(entities_time_1) == 1
     assert entities_time_1[0].parent is None
     assert entities_time_1[0].position == 1
@@ -1449,7 +1591,7 @@ def test_condition_entities():
         CONF_AFTER: "12:00:00",
     }
     results = _condition_entities(condition_part_time_2, position=1)
-    entities_time_2, end_position = results
+    entities_time_2, end_position, real_pos = results
     assert len(entities_time_2) == 1
     assert entities_time_2[0].parent is None
     assert entities_time_2[0].position == 1
@@ -1467,7 +1609,7 @@ def test_condition_entities():
         CONF_WEEKDAY: "mon",
     }
     results = _condition_entities(condition_part_time_3, position=1)
-    entities_time_3, end_position = results
+    entities_time_3, end_position, real_pos = results
     assert len(entities_time_3) == 1
     assert entities_time_3[0].parent is None
     assert entities_time_3[0].position == 1
@@ -1489,7 +1631,7 @@ def test_condition_entities():
         CONF_WEEKDAY: "fri",
     }
     results = _condition_entities(condition_part_time_4, position=12, parent=10)
-    entities_time_4, end_position = results
+    entities_time_4, end_position, real_pos = results
     assert len(entities_time_4) == 1
     assert entities_time_4[0].parent == 10
     assert entities_time_4[0].position == 12
@@ -1506,7 +1648,7 @@ def test_condition_entities():
     # Test case 30: Trigger condition with a trigger that has an string id
     condition_part_trigger_1 = {CONF_CONDITION: "trigger", CONF_ID: "trigger_1"}
     results = _condition_entities(condition_part_trigger_1, position=1)
-    entities_trigger_1, end_position = results
+    entities_trigger_1, end_position, real_pos = results
     assert len(entities_trigger_1) == 1
     assert entities_trigger_1[0].parent is None
     assert entities_trigger_1[0].position == 1
@@ -1519,7 +1661,7 @@ def test_condition_entities():
     # Test case 31: Trigger condition with a trigger that has an integer id
     condition_part_trigger_2 = {CONF_CONDITION: "trigger", CONF_ID: 1}
     results = _condition_entities(condition_part_trigger_2, position=1)
-    entities_trigger_2, end_position = results
+    entities_trigger_2, end_position, real_pos = results
     assert len(entities_trigger_2) == 1
     assert entities_trigger_2[0].parent is None
     assert entities_trigger_2[0].position == 1
@@ -1532,7 +1674,7 @@ def test_condition_entities():
     # Test case 32: Trigger condition with a trigger that has an string id at a specific position
     condition_part_trigger_3 = {CONF_CONDITION: "trigger", CONF_ID: "trigger_1"}
     results = _condition_entities(condition_part_trigger_3, position=4, parent=2)
-    entities_trigger_3, end_position = results
+    entities_trigger_3, end_position, real_pos = results
     assert len(entities_trigger_3) == 1
     assert entities_trigger_3[0].parent == 2
     assert entities_trigger_3[0].position == 4
@@ -1549,7 +1691,7 @@ def test_condition_entities():
         CONF_ZONE: "zone.home",
     }
     results = _condition_entities(condition_part_zone_1, position=1)
-    entities_zone_1, end_position = results
+    entities_zone_1, end_position, real_pos = results
     assert len(entities_zone_1) == 1
     assert entities_zone_1[0].parent is None
     assert entities_zone_1[0].position == 1
@@ -1566,7 +1708,7 @@ def test_condition_entities():
         CONF_ZONE: "zone.home",
     }
     results = _condition_entities(condition_part_zone_2, position=1)
-    entities_zone_2, end_position = results
+    entities_zone_2, end_position, real_pos = results
     assert len(entities_zone_2) == 1
     assert entities_zone_2[0].parent is None
     assert entities_zone_2[0].position == 1
@@ -1583,7 +1725,7 @@ def test_condition_entities():
         CONF_ZONE: "zone.home",
     }
     results = _condition_entities(condition_part_zone_3, position=1)
-    entities_zone_3, end_position = results
+    entities_zone_3, end_position, real_pos = results
     assert len(entities_zone_3) == 1
     assert entities_zone_3[0].parent is None
     assert entities_zone_3[0].position == 1
@@ -1602,7 +1744,7 @@ def test_condition_entities():
         CONF_ZONE: "zone.home",
     }
     results = _condition_entities(condition_part_zone_4, position=4, parent=2)
-    entities_zone_4, end_position = results
+    entities_zone_4, end_position, real_pos = results
     assert len(entities_zone_4) == 1
     assert entities_zone_4[0].parent == 2
     assert entities_zone_4[0].position == 4
@@ -1620,7 +1762,7 @@ def test_condition_entities():
         CONF_SERVICE_DATA: {"entity_id": "light.kitchen"},
     }
     results = _condition_entities(condition_part_x, position=1)
-    entities_x, end_position = results
+    entities_x, end_position, real_pos = results
     assert len(entities_x) == 0
 
     # Test case 38: disabled condition
@@ -1631,7 +1773,7 @@ def test_condition_entities():
         CONF_ENABLED: False,
     }
     results = _condition_entities(condition_part_x2, position=1)
-    entities_x2, end_position = results
+    entities_x2, end_position, real_pos = results
     assert len(entities_x2) == 0
 
     print("All condition test cases passed!")
@@ -1644,7 +1786,7 @@ def test_action_entities():
         CONF_TARGET: {CONF_ENTITY_ID: "light.kitchen"},
     }
     results = _action_entities(action_part_call_service_1, position=1)
-    entities_call_service_1, end_position = results
+    entities_call_service_1, end_position, real_pos = results
     assert len(entities_call_service_1) == 1
     assert entities_call_service_1[0].parent is None
     assert entities_call_service_1[0].position == 1
@@ -1660,7 +1802,7 @@ def test_action_entities():
         CONF_TARGET: {CONF_ENTITY_ID: ["light.kitchen", "light.living_room"]},
     }
     results = _action_entities(action_part_call_service_2, position=1)
-    entities_call_service_2, end_position = results
+    entities_call_service_2, end_position, real_pos = results
     assert len(entities_call_service_2) == 1
     assert entities_call_service_2[0].parent is None
     assert entities_call_service_2[0].position == 1
@@ -1683,7 +1825,7 @@ def test_action_entities():
         },
     }
     results = _action_entities(action_part_call_service_3, position=1)
-    entities_call_service_3, end_position = results
+    entities_call_service_3, end_position, real_pos = results
     assert len(entities_call_service_3) == 1
     assert entities_call_service_3[0].parent is None
     assert entities_call_service_3[0].position == 1
@@ -1704,7 +1846,7 @@ def test_action_entities():
         CONF_SERVICE_DATA: {"entity_id": "light.kitchen"},
     }
     results = _action_entities(action_part_call_service_4, position=1)
-    entities_call_service_4, end_position = results
+    entities_call_service_4, end_position, real_pos = results
     assert len(entities_call_service_4) == 1
     assert entities_call_service_4[0].parent is None
     assert entities_call_service_4[0].position == 1
@@ -1723,7 +1865,7 @@ def test_action_entities():
         CONF_ENTITY_ID: "light.kitchen",
     }
     results = _action_entities(action_part_call_service_5, position=20, parent=10)
-    entities_call_service_5, end_position = results
+    entities_call_service_5, end_position, real_pos = results
     assert len(entities_call_service_5) == 1
     assert entities_call_service_5[0].parent == 10
     assert entities_call_service_5[0].position == 20
@@ -1738,7 +1880,7 @@ def test_action_entities():
         CONF_ENTITY_ID: [],
     }
     results = _action_entities(action_part_call_service_6, position=1)
-    entities_call_service_6, end_position = results
+    entities_call_service_6, end_position, real_pos = results
     assert len(entities_call_service_6) == 1
     assert entities_call_service_6[0].parent is None
     assert entities_call_service_6[0].position == 1
@@ -1765,7 +1907,7 @@ def test_action_entities():
         ],
     }
     results = _action_entities(action_part_if_1, position=1)
-    entities_if_1, end_position = results
+    entities_if_1, end_position, real_pos = results
     assert len(entities_if_1) == 2
     assert entities_if_1[0].parent is None
     assert entities_if_1[0].position == 1
@@ -1804,7 +1946,7 @@ def test_action_entities():
         ],
     }
     results = _action_entities(action_part_if_2, position=1)
-    entities_if_2, end_position = results
+    entities_if_2, end_position, real_pos = results
     assert len(entities_if_2) == 3
     assert entities_if_2[0].parent is None
     assert entities_if_2[0].position == 1
@@ -1843,7 +1985,7 @@ def test_action_entities():
         ],
     }
     results = _action_entities(action_part_if_3, position=1)
-    entities_if_3, end_position = results
+    entities_if_3, end_position, real_pos = results
     assert len(entities_if_3) == 2
     assert entities_if_3[0].parent is None
     assert entities_if_3[0].position == 1
@@ -1881,7 +2023,7 @@ def test_action_entities():
         ],
     }
     results = _action_entities(action_part_if_4, position=1)
-    entities_if_4, end_position = results
+    entities_if_4, end_position, real_pos = results
     assert len(entities_if_4) == 3
     assert entities_if_4[0].parent == 1
     assert entities_if_4[0].position == 2
@@ -1931,7 +2073,7 @@ def test_action_entities():
         ],
     }
     results = _action_entities(action_part_if_5, position=27)
-    entities_if_5, end_position = results
+    entities_if_5, end_position, real_pos = results
     assert len(entities_if_5) == 4
     assert entities_if_5[0].parent == 27
     assert entities_if_5[0].position == 28
@@ -1980,7 +2122,7 @@ def test_action_entities():
         ],
     }
     results = _action_entities(action_part_choose_1, position=1)
-    entities_choose_1, end_position = results
+    entities_choose_1, end_position, real_pos = results
     assert len(entities_choose_1) == 3
     assert entities_choose_1[0].parent is None
     assert entities_choose_1[0].position == 1
@@ -2032,7 +2174,7 @@ def test_action_entities():
         ],
     }
     results = _action_entities(action_part_choose_2, position=1)
-    entities_choose_2, end_position = results
+    entities_choose_2, end_position, real_pos = results
     assert len(entities_choose_2) == 4
     assert entities_choose_2[0].parent == 1
     assert entities_choose_2[0].position == 2
@@ -2114,7 +2256,7 @@ def test_action_entities():
         ],
     }
     results = _action_entities(action_part_choose_3, position=1)
-    entities_choose_3, end_position = results
+    entities_choose_3, end_position, real_pos = results
     assert len(entities_choose_3) == 8
     assert entities_choose_3[0].parent == 1
     assert entities_choose_3[0].position == 2
@@ -2202,10 +2344,10 @@ def test_action_entities():
         ],
     }
     results = _action_entities(action_part_choose_4, position=1)
-    entities_choose_4, end_position = results
+    entities_choose_4, end_position, real_pos = results
     results = _action_entities(action_part_choose_5, position=end_position + 1)
     entities_choose_4 += results[0]
-    end_position = results[1]
+    end_position, real_pos = results[1]
     assert len(entities_choose_4) == 5
     assert entities_choose_4[0].parent is None
     assert entities_choose_4[0].position == 1
@@ -2267,7 +2409,7 @@ def test_action_entities():
         ],
     }
     results = _action_entities(action_part_choose_6, position=18)
-    entities_choose_6, end_position = results
+    entities_choose_6, end_position, real_pos = results
     assert len(entities_choose_6) == 4
     assert entities_choose_6[0].parent is None
     assert entities_choose_6[0].position == 18
@@ -2306,7 +2448,7 @@ def test_action_entities():
         ],
     }
     results = _action_entities(action_part_parallel_1, position=1)
-    entities_parallel_1, end_position = results
+    entities_parallel_1, end_position, real_pos = results
     assert len(entities_parallel_1) == 2
     assert entities_parallel_1[0].parent is None
     assert entities_parallel_1[0].position == 1
@@ -2336,7 +2478,7 @@ def test_action_entities():
         ],
     }
     results = _action_entities(action_part_parallel_2, position=20)
-    entities_parallel_2, end_position = results
+    entities_parallel_2, end_position, real_pos = results
     assert len(entities_parallel_2) == 2
     assert entities_parallel_2[0].parent is None
     assert entities_parallel_2[0].position == 20
@@ -2365,7 +2507,7 @@ def test_action_entities():
         },
     }
     results = _action_entities(action_part_repeat_1, position=1)
-    entities_repeat_1, end_position = results
+    entities_repeat_1, end_position, real_pos = results
     assert len(entities_repeat_1) == 1
     assert entities_repeat_1[0].parent is None
     assert entities_repeat_1[0].position == 1
@@ -2394,7 +2536,7 @@ def test_action_entities():
         },
     }
     results = _action_entities(action_part_repeat_2, position=1)
-    entities_repeat_2, end_position = results
+    entities_repeat_2, end_position, real_pos = results
     assert len(entities_repeat_2) == 2
     assert entities_repeat_2[0].parent is None
     assert entities_repeat_2[0].position == 1
@@ -2429,7 +2571,7 @@ def test_action_entities():
         },
     }
     results = _action_entities(action_part_repeat_3, position=1)
-    entities_repeat_3, end_position = results
+    entities_repeat_3, end_position, real_pos = results
     assert len(entities_repeat_3) == 2
     assert entities_repeat_3[0].parent is None
     assert entities_repeat_3[0].position == 1
@@ -2469,7 +2611,7 @@ def test_action_entities():
         },
     }
     results = _action_entities(action_part_repeat_4, position=1)
-    entities_repeat_4, end_position = results
+    entities_repeat_4, end_position, real_pos = results
     assert len(entities_repeat_4) == 3
     assert entities_repeat_4[0].parent == 1
     assert entities_repeat_4[0].position == 2
@@ -2515,7 +2657,7 @@ def test_action_entities():
         },
     }
     results = _action_entities(action_part_repeat_5, position=1)
-    entities_repeat_5, end_position = results
+    entities_repeat_5, end_position, real_pos = results
     assert len(entities_repeat_5) == 3
     assert entities_repeat_5[0].parent == 1
     assert entities_repeat_5[0].position == 2
@@ -2554,7 +2696,7 @@ def test_action_entities():
         },
     }
     results = _action_entities(action_part_repeat_6, position=1)
-    entities_repeat_6, end_position = results
+    entities_repeat_6, end_position, real_pos = results
     assert len(entities_repeat_6) == 2
     assert entities_repeat_6[0].parent is None
     assert entities_repeat_6[0].position == 1
@@ -2598,7 +2740,7 @@ def test_action_entities():
         },
     }
     results = _action_entities(action_part_repeat_7, position=18)
-    entities_repeat_7, end_position = results
+    entities_repeat_7, end_position, real_pos = results
     assert len(entities_repeat_7) == 4
     assert entities_repeat_7[0].parent == 18
     assert entities_repeat_7[0].position == 19
@@ -2636,7 +2778,7 @@ def test_action_entities():
         ],
     }
     results = _action_entities(action_part_sequence_1, position=1)
-    entities_sequence_1, end_position = results
+    entities_sequence_1, end_position, real_pos = results
     assert len(entities_sequence_1) == 1
     assert entities_sequence_1[0].parent is None
     assert entities_sequence_1[0].position == 1
@@ -2664,7 +2806,7 @@ def test_action_entities():
         ],
     }
     results = _action_entities(action_part_sequence_2, position=1)
-    entities_sequence_2, end_position = results
+    entities_sequence_2, end_position, real_pos = results
     assert len(entities_sequence_2) == 3
     assert entities_sequence_2[0].parent is None
     assert entities_sequence_2[0].position == 1
@@ -2700,7 +2842,7 @@ def test_action_entities():
         ],
     }
     results = _action_entities(action_part_sequence_3, position=557)
-    entities_sequence_3, end_position = results
+    entities_sequence_3, end_position, real_pos = results
     assert len(entities_sequence_3) == 2
     assert entities_sequence_3[0].parent is None
     assert entities_sequence_3[0].position == 557
@@ -2723,7 +2865,7 @@ def test_action_entities():
         CONF_STATE: "on",
     }
     results = _action_entities(action_part_condition_1, position=1)
-    entities_condition_1, end_position = results
+    entities_condition_1, end_position, real_pos = results
     assert len(entities_condition_1) == 1
     assert entities_condition_1[0].parent is None
     assert entities_condition_1[0].position == 1
@@ -2740,7 +2882,7 @@ def test_action_entities():
         CONF_STATE: "on",
     }
     results = _action_entities(action_part_condition_2, position=10, parent=1)
-    entities_condition_2, end_position = results
+    entities_condition_2, end_position, real_pos = results
     assert len(entities_condition_2) == 1
     assert entities_condition_2[0].parent == 1
     assert entities_condition_2[0].position == 10
@@ -2758,7 +2900,7 @@ def test_action_entities():
         },
     }
     results = _action_entities(action_part_event_1, position=1)
-    entities_event_1, end_position = results
+    entities_event_1, end_position, real_pos = results
     assert len(entities_event_1) == 1
     assert entities_event_1[0].parent is None
     assert entities_event_1[0].position == 1
@@ -2779,7 +2921,7 @@ def test_action_entities():
         },
     }
     results = _action_entities(action_part_event_2, position=10)
-    entities_event_2, end_position = results
+    entities_event_2, end_position, real_pos = results
     assert len(entities_event_2) == 1
     assert entities_event_2[0].parent is None
     assert entities_event_2[0].position == 10
@@ -2802,7 +2944,7 @@ def test_action_entities():
         ],
     }
     results = _action_entities(action_part_wait_for_trigger_1, position=1)
-    entities_wait_for_trigger_1, end_position = results
+    entities_wait_for_trigger_1, end_position, real_pos = results
     assert len(entities_wait_for_trigger_1) == 1
     assert entities_wait_for_trigger_1[0].parent is None
     assert entities_wait_for_trigger_1[0].position == 1
@@ -2821,7 +2963,7 @@ def test_action_entities():
         },
     }
     results = _action_entities(action_part_wait_for_trigger_2, position=1)
-    entities_wait_for_trigger_2, end_position = results
+    entities_wait_for_trigger_2, end_position, real_pos = results
     assert len(entities_wait_for_trigger_2) == 1
     assert entities_wait_for_trigger_2[0].parent is None
     assert entities_wait_for_trigger_2[0].position == 1
@@ -2847,7 +2989,7 @@ def test_action_entities():
         ],
     }
     results = _action_entities(action_part_wait_for_trigger_3, position=1)
-    entities_wait_for_trigger_3, end_position = results
+    entities_wait_for_trigger_3, end_position, real_pos = results
     assert len(entities_wait_for_trigger_3) == 2
     assert entities_wait_for_trigger_3[0].parent is None
     assert entities_wait_for_trigger_3[0].position == 1
@@ -2879,7 +3021,7 @@ def test_action_entities():
         ],
     }
     results = _action_entities(action_part_wait_for_trigger_4, position=10)
-    entities_wait_for_trigger_4, end_position = results
+    entities_wait_for_trigger_4, end_position, real_pos = results
     assert len(entities_wait_for_trigger_4) == 2
     assert entities_wait_for_trigger_4[0].parent is None
     assert entities_wait_for_trigger_4[0].position == 10
@@ -2903,7 +3045,7 @@ def test_action_entities():
         CONF_TYPE: "turn_on",
     }
     results = _action_entities(action_part_device_1, position=1)
-    entities_device_1, end_position = results
+    entities_device_1, end_position, real_pos = results
     assert len(entities_device_1) == 1
     assert entities_device_1[0].parent is None
     assert entities_device_1[0].position == 1
@@ -2920,7 +3062,7 @@ def test_action_entities():
         CONF_TYPE: "turn_on",
     }
     results = _action_entities(action_part_device_2, position=1)
-    entities_device_2, end_position = results
+    entities_device_2, end_position, real_pos = results
     assert len(entities_device_2) == 1
     assert entities_device_2[0].parent is None
     assert entities_device_2[0].position == 1
@@ -2938,7 +3080,7 @@ def test_action_entities():
         CONF_TYPE: "turn_on",
     }
     results = _action_entities(action_part_device_3, position=10)
-    entities_device_3, end_position = results
+    entities_device_3, end_position, real_pos = results
     assert len(entities_device_3) == 1
     assert entities_device_3[0].parent is None
     assert entities_device_3[0].position == 10
@@ -2953,7 +3095,23 @@ def test_action_entities():
     print("All action test cases passed!")
 
 
+def test_trigger_script_gen():
+    
+    trigger_part_event_1 = {CONF_PLATFORM: CONF_EVENT, CONF_EVENT_TYPE: "event_type_1"}
+    file_path = init_automation_script("trigger_part_event_1")
+    test_trigger_return(file_path)
+    trigger_inputs = [True]
+    assert run_automation(file_path, trigger_inputs, []) == "Triggered: True and trigger_id: None"
+    trigger_inputs = [False]
+    assert run_automation(file_path, trigger_inputs, []) == "Triggered: False and trigger_id: None"
+
+
+
+
+
+
 if __name__ == "__main__":
     test_trigger_entities()
     test_condition_entities()
     test_action_entities()
+    test_trigger_script_gen()
