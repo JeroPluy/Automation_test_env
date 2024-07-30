@@ -120,3 +120,4 @@ dmypy.json
 # vscode settings
 .vscode/
 test_data/basis_automation.info
+src/environment_package/automation_script_templates/test_script.py

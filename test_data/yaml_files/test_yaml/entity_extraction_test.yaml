@@ -1,10 +1,10 @@
-alias: enitity extraction test
+alias: entity extraction test
 description: ""
 trigger:
   - platform: state
     entity_id:
       - media_player.bedroom
-    enabled: true
+    enabled: false
     id: "1"
   - platform: event
     event_type: test
@@ -14,11 +14,18 @@ trigger:
     context:
       user_id:
         - 6f8af16663684b4db69e8ec90e6e4e42
+  - platform: event
+    event_type: 
+      - test
+      - test2
+    id: "2"
+    event_data:
+      test: tst1
   - platform: numeric_state
     entity_id:
       - sensor.carbon_monoxide
     above: 10
-    below: 50000
+    below: binary_sensor.moving_living_room
     id: "3"
   - platform: persistent_notification
     update_type:
@@ -99,6 +106,12 @@ trigger:
     event: enter
   - platform: conversation
     command: test
+  - platform: state
+    id: 1
+    entity_id:
+      - binary_sensor.moving_living_room
+      - binary_sensor.basement_floor_wet
+    to: "on"
 condition:
   - condition: state
     entity_id: media_player.lounge_room
