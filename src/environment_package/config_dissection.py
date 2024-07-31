@@ -105,10 +105,12 @@ from .ha_automation.home_assistant_const import (
     test_leading_zero,
 )
 from environment_package.automation_script_gen import (
+    close_script,
     close_trigger_section,
     create_combination_trigger_script,
     create_trigger_script,
     init_automation_script,
+    init_condition_part,
 )
 import re
 import voluptuous as vol
@@ -1671,6 +1673,7 @@ def _extract_all_conditions(
     Returns:
         list: A list of condition entities extracted from the data.
     """
+    init_condition_part(script_path)
     condition_entities = []
     conditions = automation_config[CONF_CONDITION]
     position = 0
@@ -1717,6 +1720,7 @@ def create_procedure_list(
     entity_list += _extract_all_trigger(automation_config, script_path)
     entity_list += _extract_all_conditions(automation_config, script_path)
     entity_list += _extract_all_actions(automation_config, script_path)
+    close_script(script_path)
     return entity_list
 
 

@@ -141,12 +141,15 @@ def test_trigger_return(filepath: str) -> None:
         filepath (str): the path to the script file
     """
     script_context = """
-output = {
-"triggered": triggered,
-"trigger_id": trigger_id
-}
+\toutput = {
+\t"triggered": triggered,
+\t"trigger_id": trigger_id
+\t}
 
-print(json.dumps(output)) """
+\tprint(json.dumps(output)) 
+
+trigger(input_vals)
+"""
     _append_script_context_to_script(filepath, script_context)
 
 

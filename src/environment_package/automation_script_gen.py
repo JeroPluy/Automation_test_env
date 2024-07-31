@@ -28,8 +28,8 @@ from environment_package.ha_automation.home_assistant_const import (
 
 TEMPLATE_PATH = path.join("src", "environment_package", "automation_script_templates")
 
-IF_TEMPLATE = "if ("
-END_IF_TEMPLATE = "):\n"
+IF_TEMPLATE = "\tif ("
+END_IF_TEMPLATE = "\t):\n"
 
 
 def init_automation_script(automation_name: str, dir_path: str = None) -> str:
@@ -50,14 +50,18 @@ def init_automation_script(automation_name: str, dir_path: str = None) -> str:
     if dir_path is None:
         filepath = path.join(AUTOMATION_SCRIPT, file_name)
     else:
+        # for testing purposes
         filepath = path.join(dir_path, file_name)
 
     init_template = path.join(TEMPLATE_PATH, "init_template.py")
     try:
-        with open(init_template, "r") as file:
+        with open(init_template, "r") as file:  
             script_content = file.read()
     except FileNotFoundError:
         raise FileNotFoundError(f"Template file {init_template} not found")
+   
+    # ! tabs aren't taken into account and are converted to 4 spaces
+    script_content = script_content.replace("    ", "\t")
 
     with open(filepath, "w") as script:
         script.write(script_content)
@@ -81,7 +85,7 @@ def _append_script_context_to_script(filepath: str, script_context: str) -> None
     except FileNotFoundError:
         raise FileNotFoundError(f"File {filepath} not found")
 
-
+    
 def _get_trigger_conditional_expression(
     trigger_type: str, entity: Entity, trigger_pos: int, above_position: int = None
 ) -> list:
@@ -265,10 +269,22 @@ def create_combination_trigger_script(
     trigger_pos: int,
     trigger_id: str | None,
     filepath: str,
-    combination: str = CONF_OR,
 ) -> int:
+    """
+    Create the trigger condition one trigger entity in the automation script.
+
+    Args:
+        trigger_type (str): the type / platform of the trigger
+        entity (Entity): the main entity of the trigger
+        trigger_pos (int): the position of the trigger in the automation script based on former triggers
+        trigger_id (str | None):  the id of the trigger is used to identify the trigger for later call backs of which trigger was triggered
+        filepath (str): the path to the automation script file
+
+    Returns:
+        int: the new trigger_pos for the next trigger entity (is the next trigger_pos in the automation script)
+    """
     # set the combinator for the if statement
-    combinator = combination
+    combinator = CONF_OR
 
     # create the if statement for the trigger list
     if len(entity_list) > 1:
@@ -287,7 +303,7 @@ def create_combination_trigger_script(
                 script_context += trigger_expression[0] + "\n"
             else:
                 # add the trigger expression to the script with the combinator
-                script_context += f"\t{combinator} " + trigger_expression[0] + "\n"
+                script_context += f"\t\t{combinator} " + trigger_expression[0] + "\n"
 
             # set the trigger_pos for the next trigger expression
             if trigger_type == CONF_NUMERIC_STATE:
@@ -318,9 +334,9 @@ def create_combination_trigger_script(
 
     # add the trigger_id to the script and the triggered flag
     if trigger_id is None:
-        script_context += "\ttrigger_id = None\n\ttriggered = True\n\n"
+        script_context += "\t\ttrigger_id = None\n\t\ttriggered = True\n\n"
     else:
-        script_context += f"\ttrigger_id = '{trigger_id}' \n\ttriggered = True\n\n"
+        script_context += f"\t\ttrigger_id = '{trigger_id}' \n\t\ttriggered = True\n\n"
     _append_script_context_to_script(filepath, script_context)
 
     return trigger_pos
@@ -333,6 +349,20 @@ def create_trigger_script(
     trigger_id: str | None,
     filepath: str,
 ) -> int:
+    """
+    Create the trigger condition one trigger entity in the automation script.
+
+    Args:
+        trigger_type (str): the type / platform of the trigger
+        entity (Entity): the main entity of the trigger
+        trigger_pos (int): the position of the trigger in the automation script based on former triggers
+        trigger_id (str | None):  the id of the trigger is used to identify the trigger for later call backs of which trigger was triggered
+        filepath (str): the path to the automation script file
+
+    Returns:
+        int: the new trigger_pos for the next trigger entity (is the next trigger_pos in the automation script)
+    """
+    
     # create the trigger expression for the entity
     trigger_expression = _get_trigger_conditional_expression(
         trigger_type, entity, trigger_pos
@@ -350,9 +380,9 @@ def create_trigger_script(
 
     # add the trigger_id to the script and the triggered flag
     if trigger_id is None:
-        script_context += "\ttrigger_id = None\n\ttriggered = True\n\n"
+        script_context += "\t\ttrigger_id = None\n\t\ttriggered = True\n\n"
     else:
-        script_context += f"\ttrigger_id = '{trigger_id}' \n\ttriggered = True\n\n"
+        script_context += f"\t\ttrigger_id = '{trigger_id}' \n\t\ttriggered = True\n\n"
     _append_script_context_to_script(filepath, script_context)
 
     return trigger_pos + 1
@@ -365,12 +395,30 @@ def close_trigger_section(filepath: str) -> None:
     Args:
         filepath (str): The path to the automation script file.
     """
-    # TODO remove print statement
     script_context = (
-        "# The end of the trigger section \nif triggered: \n\tprint('Triggered')\n"
+        "\t# The end of the trigger section\n\treturn {'triggered': triggered, 'trigger_id' : trigger_id}\n\n"
     )
     _append_script_context_to_script(filepath, script_context)
 
+
+def init_condition_part(filepath: str) -> None:
+    """
+    Initialize the condition part in the automation script.
+
+    Args:
+        filepath (str): The path to the automation script file.
+    """
+    
+    condition_template = path.join(TEMPLATE_PATH, "condition_template.py")
+    try:
+        with open(condition_template, "r") as file:  
+            script_content = file.read()
+    except FileNotFoundError:
+        raise FileNotFoundError(f"Template file {condition_template} not found")
+    # ! tabs aren't taken into account and are converted to 4 spaces
+    script_content = script_content.replace("    ", "\t")
+    
+    _append_script_context_to_script(filepath, script_content)
 
 def _get_condition_expression(
     condition_type: str, entity: Entity, condition_pos: int
@@ -386,6 +434,38 @@ def create_condition_script(
     filepath: str,
 ) -> int:
     pass
+
+
+def close_condition_section(filepath: str) -> None:
+    """
+    Close the condition section in the automation script.
+
+    Args:
+        filepath (str): The path to the automation script file.
+    """
+    script_context = (
+        "\t# The end of the condition section\n\treturn {'condition_passed': condition_passed}\n\n"
+    )
+    _append_script_context_to_script(filepath, script_context)
+
+def close_script(filepath: str) -> None:
+    """
+    Close the automation script.
+
+    Args:
+        filepath (str): The path to the automation script file.
+    """
+    
+    main_function_template = path.join(TEMPLATE_PATH, "run_main_template.py")
+    try:
+        with open(main_function_template, "r") as file:  
+            script_content = file.read()
+    except FileNotFoundError:
+        raise FileNotFoundError(f"Template file {main_function_template} not found")
+    # ! tabs aren't taken into account and are converted to 4 spaces
+    script_content = script_content.replace("    ", "\t")
+    
+    _append_script_context_to_script(filepath, script_content)
 
 
 def create_locked_message(filepath: str) -> None:
