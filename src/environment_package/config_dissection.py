@@ -275,7 +275,7 @@ def _trigger_entities(
             if valid_entity_id(str(exp_value[CONF_ABOVE])):
                 parent = position
                 position += 1
-                
+
                 exp_value_entity_list.append(
                     Entity(
                         parent=parent,
@@ -283,7 +283,9 @@ def _trigger_entities(
                         param_role=param_role,
                         integration=trigger_part[CONF_ABOVE].split(".")[0],
                         entity_name=trigger_part[CONF_ABOVE].split(".")[1],
-                        expected_value={CONF_BELOW: ""}, # added after the generation of the comparing entity/ies
+                        expected_value={
+                            CONF_BELOW: ""
+                        },  # added after the generation of the comparing entity/ies
                     )
                 )
         if CONF_BELOW in trigger_part:
@@ -294,7 +296,7 @@ def _trigger_entities(
                 if parent is None:
                     parent = position
                     position += 1
-    
+
                 exp_value_entity_list.append(
                     Entity(
                         parent=parent,
@@ -302,10 +304,12 @@ def _trigger_entities(
                         param_role=param_role,
                         integration=trigger_part[CONF_BELOW].split(".")[0],
                         entity_name=trigger_part[CONF_BELOW].split(".")[1],
-                        expected_value={CONF_ABOVE: ""}, # added after the generation of the comparing entity/ies
+                        expected_value={
+                            CONF_ABOVE: ""
+                        },  # added after the generation of the comparing entity/ies
                     )
                 )
-            
+
         # add the time the value has to stay in the trigger range
         if CONF_FOR in trigger_part:
             exp_value[CONF_FOR] = trigger_part[CONF_FOR]
@@ -343,7 +347,7 @@ def _trigger_entities(
 
             if CONF_ATTRIBUTE in trigger_part:
                 entity_name = entity_name + "." + str(trigger_part[CONF_ATTRIBUTE])
-                 
+
             # create the single entity in the event_type part
             new_entity_list.append(
                 Entity(
@@ -395,17 +399,73 @@ def _trigger_entities(
     # if the trigger is a state change
     elif platform == CONF_STATE:
         new_entity_list = []
+        exp_value_entity_list = []
         exp_value = {}
+        to_trigger = None
 
         # add the state values of the trigger
         if CONF_TO in trigger_part:
-            exp_value[CONF_TO] = str(trigger_part[CONF_TO])
+            to_trigger = CONF_TO
+            if isinstance(trigger_part[CONF_TO], list):
+                exp_value[CONF_TO] = trigger_part[CONF_TO]
+            else:
+                exp_value[CONF_TO] = str(trigger_part[CONF_TO])
+
         elif CONF_NOT_TO in trigger_part:
-            exp_value[CONF_NOT_TO] = str(trigger_part[CONF_NOT_TO])
+            to_trigger = CONF_NOT_TO
+            if isinstance(trigger_part[CONF_NOT_TO], list):
+                exp_value[CONF_NOT_TO] = trigger_part[CONF_NOT_TO]
+            else:
+                exp_value[CONF_NOT_TO] = str(trigger_part[CONF_NOT_TO])
+
+        if to_trigger is not None:
+            if isinstance(exp_value[to_trigger], list):
+                _has_entity_id = False
+                # check if entity ids are upon the values
+                for value in exp_value[to_trigger]:
+                    if valid_entity_id(str(value)):
+                        _has_entity_id = True
+                        break
+                if _has_entity_id:
+                    parent = position
+                    position += 1
+                    for value in exp_value[to_trigger]:
+                        # because the list can contain entity ids and strings status values
+                        if valid_entity_id(str(value)):
+                            # create the comparing entities for the state trigger
+                            exp_value_entity_list.append(
+                                Entity(
+                                    parent=parent,
+                                    position=None,
+                                    param_role=param_role,
+                                    integration=value.split(".")[0],
+                                    entity_name=value.split(".")[1],
+                                    # expected value could be taken from the same entity in another trigger maybe later
+                                )
+                            )
+            elif isinstance(exp_value[to_trigger], str) and valid_entity_id(
+                str(exp_value[to_trigger])
+            ):
+                # create the comparing entities for the state trigger
+                parent = position
+                position += 1
+                exp_value_entity_list.append(
+                    Entity(
+                        parent=parent,
+                        position=None,
+                        param_role=param_role,
+                        integration=trigger_part[to_trigger].split(".")[0],
+                        entity_name=trigger_part[to_trigger].split(".")[1],
+                        # expected value could be taken from the same entity in another trigger maybe later
+                    )
+                )
+
+        # TODO create entity/ies for the state from trigger
         if CONF_FROM in trigger_part:
             exp_value[CONF_FROM] = str(trigger_part[CONF_FROM])
         elif CONF_NOT_FROM in trigger_part:
             exp_value[CONF_NOT_FROM] = str(trigger_part[CONF_NOT_FROM])
+
         if CONF_FOR in trigger_part:
             exp_value[CONF_FOR] = trigger_part[CONF_FOR]
             # TODO limited templating as input
@@ -440,7 +500,6 @@ def _trigger_entities(
                 trigger_id,
                 script_path,
             )
-            entity_list += new_entity_list
 
         else:
             if isinstance(trigger_part[CONF_ENTITY_ID], list):
@@ -455,16 +514,29 @@ def _trigger_entities(
                 entity_name = entity_name + "." + str(trigger_part[CONF_ATTRIBUTE])
             # create the single entity in the event_type part
             entity = Entity(
+                parent=parent,
                 position=position,
                 param_role=param_role,
                 integration=integration,
                 entity_name=entity_name,
                 expected_value=exp_value,
             )
+
             real_position = create_trigger_script(
                 CONF_STATE, entity, real_position, trigger_id, script_path
             )
-            entity_list.append(entity)
+
+            new_entity_list.append(entity)
+
+        # add the names of the entities to the expected value of the comparing entities
+        for entity in exp_value_entity_list:
+            position += 1
+            entity.position = position
+
+        # add the comparing entities to the entity list
+        new_entity_list += exp_value_entity_list
+        # append the new entities to the entity list
+        entity_list += new_entity_list
 
     # if the trigger is the sunset or sunrise event
     elif platform == "sun":
@@ -579,7 +651,6 @@ def _trigger_entities(
                 # create the script for the combination of the template trigger
                 real_position = create_combination_trigger_script(
                     CONF_TEMPLATE,
-                    
                     new_entity_list,
                     real_position,
                     trigger_id,
@@ -610,7 +681,6 @@ def _trigger_entities(
             # create the script for the combination of the time trigger
             real_position = create_combination_trigger_script(
                 CONF_TIME,
-                
                 new_entity_list,
                 real_position,
                 trigger_id,
@@ -804,7 +874,6 @@ def _trigger_entities(
             # create the script for the combination of the conversation trigger
             real_position = create_combination_trigger_script(
                 CONF_CONVERSATION,
-                
                 new_entity_list,
                 real_position,
                 trigger_id,
@@ -822,7 +891,7 @@ def _trigger_entities(
                 expected_value={CONF_COMMAND: trigger_part[CONF_COMMAND]},
             )
             real_position = create_trigger_script(
-            CONF_CONVERSATION, entity, real_position, trigger_id, script_path
+                CONF_CONVERSATION, entity, real_position, trigger_id, script_path
             )
             entity_list.append(entity)
 

@@ -100,21 +100,75 @@ def _get_trigger_conditional_expression(
 
     if trigger_type == CONF_STATE:
         if entity.expected_value is not None:
+            comparison_str = f"{not_none_condition} ("
+            operator = None
+
             if CONF_TO in entity.expected_value:
                 value = entity.expected_value[CONF_TO]
-                if not is_jinja_template(str(value)):
-                    if isinstance(value, str):
-                        return [f"{not_none_condition} trigger[{trigger_pos}] == '{value}'"]
-                    else:
-                        return [f"{not_none_condition} trigger[{trigger_pos}] == {value}"]
+                operator = "=="
             elif CONF_NOT_TO in entity.expected_value:
                 value = entity.expected_value[CONF_NOT_TO]
-                if not is_jinja_template(str(value)):
-                    if isinstance(value, str):
-                        return [f"{not_none_condition} trigger[{trigger_pos}] != '{value}'"]
+                operator = "!="
+
+            if isinstance(value, list):
+                if above_position is None:
+                    for value in entity.expected_value[CONF_TO]:
+                        if valid_entity_id(str(value)):
+                            above_position = trigger_pos
+                            trigger_pos += 1
+
+                current_com_entity_pos = 0
+                start_val = True
+                for value in entity.expected_value[CONF_TO]:
+                    # set an or before the next comparison
+                    if start_val:
+                        start_val = False
                     else:
-                        return [f"{not_none_condition} trigger[{trigger_pos}] != {value}"]
-        return [f"{not_none_condition} trigger[{trigger_pos}]"]
+                        comparison_str += " or "
+                        
+                    if valid_entity_id(str(value)):
+                        comparison_str += f"trigger[{trigger_pos}] {operator} trigger[{current_com_entity_pos}]"
+                        current_com_entity_pos += 1
+                    else:
+                        if isinstance(value, str):
+                            # replace double quotes with single quotes using str.replace()
+                            value = value.replace('"', "'")
+                            comparison_str += (
+                                f'trigger[{trigger_pos}] {operator} "{value}"'
+                            )
+                        else:
+                            comparison_str += (
+                                f"trigger[{trigger_pos}] {operator} {value}"
+                            )
+
+                comparison_str += ")"                
+
+            else:
+                if above_position is None:
+                    if valid_entity_id(str(value)):
+                        above_position = trigger_pos
+                        trigger_pos += 1
+                if valid_entity_id(str(value)):
+                    comparison_str += (
+                        f"trigger[{trigger_pos}] {operator} trigger[{above_position}])"
+                    )
+                else:
+                    if isinstance(value, str):
+                        # replace double quotes with single quotes using str.replace()
+                        value = value.replace('"', "'")
+                        comparison_str += (
+                            f'trigger[{trigger_pos}] {operator} "{value}")'
+                        )
+                    # float or int value
+                    else:
+                        comparison_str += (
+                            f"trigger[{trigger_pos}] {operator} {value})"
+                        )
+
+            return [comparison_str, trigger_pos, above_position]
+        # if no expected state value is given, just return the 
+        else:
+            return [f"trigger[{trigger_pos}]", trigger_pos]
 
     elif trigger_type == CONF_NUMERIC_STATE:
         complete_condition_str = None
@@ -184,14 +238,18 @@ def _get_trigger_conditional_expression(
     elif trigger_type == CONF_PERS_NOTIFICATION:
         value = entity.expected_value[CONF_UPDATE_TYPE]
         if isinstance(value, str):
-            return [f"trigger[{trigger_pos}] == '{value}'"]
+            # replace double quotes with single quotes using str.replace()
+            value = value.replace('"', "'")
+            return [f'trigger[{trigger_pos}] == "{value}"']
         elif isinstance(value, list):
             return [f"trigger[{trigger_pos}] == {value}"]
 
     elif trigger_type == CONF_DEVICE:
         value = entity.expected_value[CONF_TYPE]
         if isinstance(value, str):
-            return [f"trigger[{trigger_pos}] == '{value}'"]
+            # replace double quotes with single quotes using str.replace()
+            value = value.replace('"', "'")
+            return [f'trigger[{trigger_pos}] == "{value}"']
         elif isinstance(value, list):
             return [f"trigger[{trigger_pos}] == {value}"]
 
@@ -214,7 +272,7 @@ def create_combination_trigger_script(
 
     # create the if statement for the trigger list
     if len(entity_list) > 1:
-        script_context = IF_TEMPLATE 
+        script_context = IF_TEMPLATE
         # cache for the trigger_pos of the above condition
         above_position = None
 
@@ -230,7 +288,7 @@ def create_combination_trigger_script(
             else:
                 # add the trigger expression to the script with the combinator
                 script_context += f"\t{combinator} " + trigger_expression[0] + "\n"
-            
+
             # set the trigger_pos for the next trigger expression
             if trigger_type == CONF_NUMERIC_STATE:
                 trigger_pos = trigger_expression[1]
@@ -246,7 +304,7 @@ def create_combination_trigger_script(
         script_context = IF_TEMPLATE + trigger_expression[0]
 
         # set the trigger_pos for the next trigger expression
-        if trigger_type == CONF_NUMERIC_STATE:
+        if trigger_type == CONF_NUMERIC_STATE or trigger_type == CONF_STATE:
             trigger_pos = trigger_expression[1]
         trigger_pos += 1
 
@@ -283,9 +341,10 @@ def create_trigger_script(
     script_context = IF_TEMPLATE + trigger_expression[0] + END_IF_TEMPLATE
 
     # set the trigger_pos for the next trigger expression and replace the XXXX with the trigger_pos of the below condition
-    if trigger_type == CONF_NUMERIC_STATE:
+    if trigger_type == CONF_NUMERIC_STATE or trigger_type == CONF_STATE:
         trigger_pos = trigger_expression[1]
-        if "XXXX" in script_context:
+        
+        if trigger_type == CONF_NUMERIC_STATE and "XXXX" in script_context:
             trigger_pos += 1
             script_context = script_context.replace("XXXX", str((trigger_pos)))
 
@@ -307,8 +366,17 @@ def close_trigger_section(filepath: str) -> None:
         filepath (str): The path to the automation script file.
     """
     # TODO remove print statement
-    script_context = "# The end of the trigger section \nif triggered: \n\tprint('Triggered')\n"
+    script_context = (
+        "# The end of the trigger section \nif triggered: \n\tprint('Triggered')\n"
+    )
     _append_script_context_to_script(filepath, script_context)
+
+
+def _get_condition_expression(
+    condition_type: str, entity: Entity, condition_pos: int
+) -> str:
+    pass
+
 
 def create_condition_script(
     condition_type: str,
@@ -318,7 +386,7 @@ def create_condition_script(
     filepath: str,
 ) -> int:
     pass
-    
+
 
 def create_locked_message(filepath: str) -> None:
     """

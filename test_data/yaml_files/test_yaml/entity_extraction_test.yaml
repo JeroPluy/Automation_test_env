@@ -15,7 +15,7 @@ trigger:
       user_id:
         - 6f8af16663684b4db69e8ec90e6e4e42
   - platform: event
-    event_type: 
+    event_type:
       - test
       - test2
     id: "2"
@@ -25,7 +25,7 @@ trigger:
     entity_id:
       - sensor.carbon_monoxide
     above: 10
-    below: binary_sensor.moving_living_room
+    below: 50000
     id: "3"
   - platform: persistent_notification
     update_type:
@@ -40,7 +40,7 @@ trigger:
       hours: 0
       minutes: 10
       seconds: 0
-    above: 2
+    above: sensor.carbon_dioxide
     below: 4000
     id: "5"
   - platform: mqtt
@@ -78,20 +78,6 @@ trigger:
     device_id: 7a0da52b720a09ec110abc1176236897
     entity_id: 39673709b7df2572bb84431e672ebef5
     domain: light
-  - platform: state
-    entity_id:
-      - humidifier.hygrostat
-    attribute: humidity
-    to: "20"
-  - platform: homeassistant
-    event: start
-  - platform: tag
-    tag_id: e8f49c73-5394-44e1-a6c1-9c6088840ce8
-  - platform: sun
-    event: sunrise
-    offset: 0
-  - platform: time
-    at: "10:00:00"
   - platform: time_pattern
     hours: "8"
   - platform: webhook
@@ -107,16 +93,34 @@ trigger:
   - platform: conversation
     command: test
   - platform: state
-    id: 1
+    entity_id:
+      - humidifier.hygrostat
+    attribute: humidity
+    to:
+      - 1
+      - "20"
+      - sensor.outside_humidity
+  - platform: homeassistant
+    event: start
+  - platform: tag
+    tag_id: e8f49c73-5394-44e1-a6c1-9c6088840ce8
+  - platform: sun
+    event: sunrise
+    offset: 0
+  - platform: time
+    at: "10:00:00"
+  - platform: state
     entity_id:
       - binary_sensor.moving_living_room
       - binary_sensor.basement_floor_wet
-    to: "on"
+    not_to: "on"
 condition:
   - condition: state
     entity_id: media_player.lounge_room
     attribute: device_class
-    state: tv
+    state:
+      - media_player.bedroom
+      - media_player.kitchen
   - condition: state
     entity_id: media_player.walkman
     state: playing
@@ -132,9 +136,11 @@ condition:
     before: sunrise
     after_offset: "55"
   - condition: time
-    weekday:
-      - fri
     after: "10:00:00"
+    before: "10:00:00"
+    weekday:
+      - mon
+      - sun
   - condition: zone
     entity_id: device_tracker.demo_paulus
     zone: zone.home
@@ -168,12 +174,97 @@ condition:
     value_template: "{{ False }}"
   - condition: or
     conditions: []
+  - condition: state
+    entity_id: light.bed_light
+    state: "{{ states('light.atmo_lights_living_room')}}"
+  - condition: trigger
+    id:
+      - "1"
+  - condition: zone
+    entity_id: device_tracker.paulus
+    zone: zone.home
+  - condition: state
+    entity_id: script.lampe_togglen
+    state: ""
 action:
+  - service: persistent_notification.create
+    metadata: {}
+    data:
+      message: geht
   - service: cover.set_cover_tilt_position
     metadata: {}
     data: {}
     target:
       entity_id: cover.living_room_window
+  - choose:
+      - conditions:
+          - condition: zone
+            entity_id: device_tracker.demo_anne_therese
+            zone: zone.kuche
+          - condition: state
+            entity_id: vacuum.0_ground_floor
+            state: cleaning
+        sequence: []
+      - conditions:
+          - condition: numeric_state
+            entity_id: sensor.light_living_room
+            above: 102
+        sequence:
+          - service: fan.turn_on
+            metadata: {}
+            data: {}
+            target:
+              entity_id: fan.ceiling_fan
+    default:
+      - service: cover.open_cover
+        metadata: {}
+        data: {}
+        target:
+          entity_id: cover.garage_door
+  - repeat:
+      sequence:
+        - service: cover.set_cover_tilt_position
+          metadata: {}
+          data: {}
+          target:
+            entity_id: cover.living_room_window
+        - service: alarm_control_panel.alarm_arm_night
+          metadata: {}
+          data: {}
+          target:
+            entity_id: alarm_control_panel.security
+      while:
+        - condition: state
+          entity_id: vacuum.1_first_floor
+          state: docked
+  - event: test
+    event_data:
+      test: test data
+      test2: test_data2
+  - wait_for_trigger:
+      - platform: state
+        entity_id:
+          - binary_sensor.moving_living_room
+      - platform: state
+        entity_id:
+          - light.bed_light
+  - service: todo.update_item
+    metadata: {}
+    data: {}
+  - type: turn_off
+    device_id: 7f6e169dcdf4b5ef7904aeff83333410
+    entity_id: c6ff22d2817f164c951419c23a07a12b
+    domain: switch
+  - wait_for_trigger:
+      - platform: state
+        entity_id: []
+      - platform: state
+        entity_id:
+          - light.bed_light
+        to: "on"
+  - condition: state
+    entity_id: vacuum.2_second_floor
+    state: unavailable
 mode: single
 trace:
   stored_traces: 6

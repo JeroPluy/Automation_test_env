@@ -88,6 +88,7 @@ TEST_DIR = path.join("src", "test", "test_scripts")
 
 # additional functions for testing
 
+
 async def run_automation(
     script_path,
     trigger_inputs: list,
@@ -153,11 +154,10 @@ print(json.dumps(output)) """
 
 
 async def test_trigger_entities():
-    
     TRIGGER_DIR = path.join(TEST_DIR, "trigger")
     if not path.exists(TRIGGER_DIR):
         mkdir(TRIGGER_DIR)
-    
+
     async def test_trigger_event():
         # Test case 1: Event trigger with single event type
         trigger_part_event_1 = {
@@ -1017,7 +1017,7 @@ async def test_trigger_entities():
         assert real_pos == 6
 
     async def test_trigger_state():
-        # Test case 16: State trigger with on values
+        # # Test case 16: State trigger with on values
         trigger_part_state_0 = {
             CONF_PLATFORM: CONF_STATE,
             CONF_ENTITY_ID: ["binary_sensor.motion"],
@@ -1337,6 +1337,170 @@ async def test_trigger_entities():
         }
 
         assert real_pos == 2
+
+        # Test case 7: State trigger with conditional entity state
+        trigger_part_state_7 = {
+            CONF_PLATFORM: CONF_STATE,
+            CONF_ENTITY_ID: ["binary_sensor.motion"],
+            CONF_TO: "binary_sensor.motion_2",
+        }
+        file_path = init_automation_script("trigger_part_state_7", TRIGGER_DIR)
+        results = _trigger_entities(
+            trigger_part_state_7, position=1, real_position=0, script_path=file_path
+        )
+        test_trigger_return(file_path)
+
+        entities_state_7, end_position, real_pos = results
+        assert len(entities_state_7) == 2
+        assert entities_state_7[0].parent == 1
+        assert entities_state_7[0].position == 2
+        assert entities_state_7[0].parameter_role == START
+        assert entities_state_7[0].integration == "binary_sensor"
+        assert entities_state_7[0].entity_name == "binary_sensor.motion"
+        assert entities_state_7[0].expected_value == {CONF_TO: "binary_sensor.motion_2"}
+        assert entities_state_7[1].parent == 1
+        assert entities_state_7[1].position == 3
+        assert entities_state_7[1].parameter_role == START
+        assert entities_state_7[1].integration == "binary_sensor"
+        assert entities_state_7[1].entity_name == "binary_sensor.motion_2"
+        assert end_position == 3
+
+        trigger_part_state_7_input = ["on", "off"]
+        assert (await run_automation(file_path, trigger_part_state_7_input, [])) == {
+            "triggered": False,
+            "trigger_id": None,
+        }
+
+        trigger_part_state_7_input = ["off", "off"]
+        assert (await run_automation(file_path, trigger_part_state_7_input, [])) == {
+            "triggered": True,
+            "trigger_id": None,
+        }
+
+        trigger_part_state_7_input = ["on", "on"]
+        assert (await run_automation(file_path, trigger_part_state_7_input, [])) == {
+            "triggered": True,
+            "trigger_id": None,
+        }
+
+        trigger_part_state_7_input = [None, "on"]
+        assert (await run_automation(file_path, trigger_part_state_7_input, [])) == {
+            "triggered": False,
+            "trigger_id": None,
+        }
+
+        trigger_part_state_7_input = [None, None]
+        assert (await run_automation(file_path, trigger_part_state_7_input, [])) == {
+            "triggered": False,
+            "trigger_id": None,
+        }
+
+        trigger_part_state_7_input = ["on", None]
+        assert (await run_automation(file_path, trigger_part_state_7_input, [])) == {
+            "triggered": False,
+            "trigger_id": None,
+        }
+
+        assert real_pos == 2
+
+        trigger_part_state_8 = {
+            CONF_PLATFORM: CONF_STATE,
+            CONF_ENTITY_ID: ["binary_sensor.motion", "binary_sensor.motion_2"],
+            CONF_TO: [
+                "binary_sensor.motion_3",
+                "unknown",
+                "binary_sensor.motion_4",
+                "on",
+            ],
+        }
+        file_path = init_automation_script("trigger_part_state_8", TRIGGER_DIR)
+        results = _trigger_entities(
+            trigger_part_state_8, position=1, real_position=0, script_path=file_path
+        )
+        test_trigger_return(file_path)
+
+        entities_state_8, end_position, real_pos = results
+        assert len(entities_state_8) == 4
+        assert entities_state_8[0].parent == 2
+        assert entities_state_8[0].position == 3
+        assert entities_state_8[0].parameter_role == START
+        assert entities_state_8[0].integration == "binary_sensor"
+        assert entities_state_8[0].entity_name == "binary_sensor.motion"
+        assert entities_state_8[0].expected_value == {
+            CONF_TO: [
+                "binary_sensor.motion_3",
+                "unknown",
+                "binary_sensor.motion_4",
+                "on",
+            ]
+        }
+        assert entities_state_8[1].parent == 2
+        assert entities_state_8[1].position == 4
+        assert entities_state_8[1].parameter_role == START
+        assert entities_state_8[1].integration == "binary_sensor"
+        assert entities_state_8[1].entity_name == "binary_sensor.motion_2"
+        assert entities_state_8[1].expected_value == {
+            CONF_TO: [
+                "binary_sensor.motion_3",
+                "unknown",
+                "binary_sensor.motion_4",
+                "on",
+            ]
+        }
+        assert entities_state_8[2].parent == 1
+        assert entities_state_8[2].position == 5
+        assert entities_state_8[2].parameter_role == START
+        assert entities_state_8[2].integration == "binary_sensor"
+        assert entities_state_8[2].entity_name == "binary_sensor.motion_3"
+        assert entities_state_8[3].parent == 1
+        assert entities_state_8[3].position == 6
+        assert entities_state_8[3].parameter_role == START
+        assert entities_state_8[3].integration == "binary_sensor"
+        assert entities_state_8[3].entity_name == "binary_sensor.motion_4"
+        assert end_position == 6
+        
+        entities_state_8_input = ["test1", "off", "test1", "test"]
+        assert (await run_automation(file_path, entities_state_8_input, [])) == {
+            "triggered": True,
+            "trigger_id": None,
+        }
+        
+        entities_state_8_input = ["off", "test1", "test", "test1"]
+        assert (await run_automation(file_path, entities_state_8_input, [])) == {
+            "triggered": True,
+            "trigger_id": None,
+        }
+        
+        entities_state_8_input = ["on", "off", "off", "on"]
+        assert (await run_automation(file_path, entities_state_8_input, [])) == {
+            "triggered": True,
+            "trigger_id": None,
+        }
+        
+        entities_state_8_input = [None, None , "off", "off"]
+        assert (await run_automation(file_path, entities_state_8_input, [])) == {
+            "triggered": False,
+            "trigger_id": None,
+        }
+        
+        entities_state_8_input = [None, "unknown", None , None]
+        assert (await run_automation(file_path, entities_state_8_input, [])) == {
+            "triggered": True,
+            "trigger_id": None,
+        }
+        
+        entities_state_8_input = ["on", None, None, None]
+        assert (await run_automation(file_path, entities_state_8_input, [])) == {
+            "triggered": True,
+            "trigger_id": None,
+        }
+        
+        entities_state_8_input = [None, None, None , None]
+        assert (await run_automation(file_path, entities_state_8_input, [])) == {
+            "triggered": False,
+            "trigger_id": None,
+        }
+        
 
     async def test_trigger_sun():
         # Test case 23: Sun trigger
@@ -2298,13 +2462,13 @@ async def test_trigger_entities():
         }
         assert end_position == 1
 
-        trigger_part_device_1_input = ['do something']
+        trigger_part_device_1_input = ["do something"]
         assert (await run_automation(file_path, trigger_part_device_1_input, [])) == {
             "triggered": True,
             "trigger_id": None,
         }
 
-        trigger_part_device_1_input = ['do nothing']
+        trigger_part_device_1_input = ["do nothing"]
         assert (await run_automation(file_path, trigger_part_device_1_input, [])) == {
             "triggered": False,
             "trigger_id": None,
@@ -2587,11 +2751,10 @@ async def test_trigger_entities():
 
 
 async def test_condition_entities():
-    
     CONDITION_DIR = path.join(TEST_DIR, "conditions")
     if not path.exists(CONDITION_DIR):
         mkdir(CONDITION_DIR)
-    
+
     async def test_condition_num_state():
         # Test case 1: Numeric state condition with below value and on entity
         condition_part_num_state_1 = {
@@ -2642,7 +2805,9 @@ async def test_condition_entities():
         assert entities_num_state_3[0].parameter_role == INPUT
         assert entities_num_state_3[0].integration == "sensor"
         assert entities_num_state_3[0].entity_name == "sensor.temperature"
-        assert entities_num_state_3[0].expected_value == {"value": "20 < __VALUE__ < 30"}
+        assert entities_num_state_3[0].expected_value == {
+            "value": "20 < __VALUE__ < 30"
+        }
         assert end_position == 1
 
         # Test case 4: Numeric state condition with below value and two entities
@@ -2725,7 +2890,6 @@ async def test_condition_entities():
         assert end_position == 6
 
     async def test_condition_state():
-
         # Test case 8: State condition with one entity in that state
         condition_part_state_1 = {
             CONF_CONDITION: CONF_STATE,
@@ -2865,7 +3029,6 @@ async def test_condition_entities():
         assert end_position == 6
 
     async def test_condition_template():
-        
         # Test case 15: Template condition with one entity
         condition_part_template_1 = {
             CONF_CONDITION: CONF_TEMPLATE,
@@ -2969,9 +3132,8 @@ async def test_condition_entities():
             CONF_VALUE_TEMPLATE: "{{ is_state('device_tracker.paulus', 'home') }}"
         }
         assert end_position == 1
-        
-    async def test_condition_sun():
 
+    async def test_condition_sun():
         # Test case 20: Sun condition after the sunset
         condition_part_sun_1 = {
             CONF_CONDITION: "sun",
@@ -3042,11 +3204,13 @@ async def test_condition_entities():
         assert entities_sun_4[0].parameter_role == INPUT
         assert entities_sun_4[0].integration == "sun"
         assert entities_sun_4[0].entity_name == "sun.sun"
-        assert entities_sun_4[0].expected_value == {"after": "sunset", "before": "sunrise"}
+        assert entities_sun_4[0].expected_value == {
+            "after": "sunset",
+            "before": "sunrise",
+        }
         assert end_position == 3
 
     async def test_condition_device():
-
         # Test case 24: Device condition with a device that does something
         condition_part_device_1 = {
             CONF_CONDITION: "device",
@@ -3092,9 +3256,8 @@ async def test_condition_entities():
             CONF_DOMAIN: "domain",
         }
         assert end_position == 5
-        
-    async def test_condition_time():
 
+    async def test_condition_time():
         # Test case 26: Time condition before a specific time
         condition_part_time_1 = {
             CONF_CONDITION: "time",
@@ -3172,7 +3335,6 @@ async def test_condition_entities():
         assert end_position == 12
 
     async def test_condition_trigger():
-    
         # Test case 30: Trigger condition with a trigger that has an string id
         condition_part_trigger_1 = {CONF_CONDITION: "trigger", CONF_ID: "trigger_1"}
         results = _condition_entities(condition_part_trigger_1, position=1)
@@ -3213,7 +3375,6 @@ async def test_condition_entities():
         assert end_position == 4
 
     async def test_condition_zone():
-
         # Test case 33: Zone condition with one entity
         condition_part_zone_1 = {
             CONF_CONDITION: "zone",
@@ -3228,7 +3389,9 @@ async def test_condition_entities():
         assert entities_zone_1[0].parameter_role == INPUT
         assert entities_zone_1[0].integration == "zone"
         assert entities_zone_1[0].entity_name == "zone.home"
-        assert entities_zone_1[0].expected_value == {"entity_id": "device_tracker.paulus"}
+        assert entities_zone_1[0].expected_value == {
+            "entity_id": "device_tracker.paulus"
+        }
         assert end_position == 1
 
         # Test case 34: Zone condition with one entity in a list
@@ -3245,7 +3408,9 @@ async def test_condition_entities():
         assert entities_zone_2[0].parameter_role == INPUT
         assert entities_zone_2[0].integration == "zone"
         assert entities_zone_2[0].entity_name == "zone.home"
-        assert entities_zone_2[0].expected_value == {"entity_id": ["device_tracker.paulus"]}
+        assert entities_zone_2[0].expected_value == {
+            "entity_id": ["device_tracker.paulus"]
+        }
         assert end_position == 1
 
         # Test case 35: Zone condition with two entities
@@ -3287,7 +3452,6 @@ async def test_condition_entities():
         assert end_position == 4
 
     async def test_condition_unsupported():
-
         # Test case 37: unknown condition
         condition_part_x = {
             CONF_CONDITION: "x",
@@ -3298,7 +3462,6 @@ async def test_condition_entities():
         assert len(entities_x) == 0
 
     async def test_condition_disabled():
-
         # Test case 38: disabled condition
         condition_part_x2 = {
             CONF_CONDITION: "state",
@@ -3321,13 +3484,12 @@ async def test_condition_entities():
         await test_condition_zone()
         await test_condition_unsupported()
         await test_condition_disabled()
-    
-    test_condition_all()    
+
+    test_condition_all()
     print("All condition test cases passed!")
 
 
 async def test_action_entities():
-    
     async def test_action_call_service():
         # Test case 1: Call service action for one entity
         action_part_call_service_1 = {
@@ -3342,7 +3504,9 @@ async def test_action_entities():
         assert entities_call_service_1[0].parameter_role == OUTPUT
         assert entities_call_service_1[0].integration == "light"
         assert entities_call_service_1[0].entity_name == "light.kitchen"
-        assert entities_call_service_1[0].expected_value == {CONF_SERVICE: "doSomething"}
+        assert entities_call_service_1[0].expected_value == {
+            CONF_SERVICE: "doSomething"
+        }
         assert end_position == 1
 
         # Test case 2: Call service action for two entity
@@ -3436,11 +3600,12 @@ async def test_action_entities():
         assert entities_call_service_6[0].parameter_role == OUTPUT
         assert entities_call_service_6[0].integration == "light"
         assert entities_call_service_6[0].entity_name is not None
-        assert entities_call_service_6[0].expected_value == {CONF_SERVICE: "doSomething"}
+        assert entities_call_service_6[0].expected_value == {
+            CONF_SERVICE: "doSomething"
+        }
         assert end_position == 1
 
     async def test_action_branching():
-    
         # Test case 7: Test branching action based on one condition
         action_part_if_1 = {
             SCRIPT_ACTION_IF: [
@@ -3653,7 +3818,6 @@ async def test_action_entities():
         assert end_position == 31
 
     async def test_action_choose():
-        
         # Test case 12: Test branching action with one option
         action_part_choose_1 = {
             CONF_CHOOSE: [
@@ -3988,7 +4152,6 @@ async def test_action_entities():
         assert entities_choose_6[3].integration == "light"
 
     async def test_action_parallel():
-
         # Test case 17: parallel action with two actions
         action_part_parallel_1 = {
             CONF_PARALLEL: [
@@ -4050,7 +4213,6 @@ async def test_action_entities():
         assert end_position == 21
 
     async def test_action_repeat():
-
         # Test case 19: count repeat action with one action
         action_part_repeat_1 = {
             CONF_REPEAT: {
@@ -4326,7 +4488,6 @@ async def test_action_entities():
         assert end_position == 22
 
     async def test_action_sequence():
-
         # Test case 26: sequence of action with one action
         action_part_sequence_1 = {
             CONF_SEQUENCE: [
@@ -4418,7 +4579,6 @@ async def test_action_entities():
         assert end_position == 558
 
     async def test_action_condition():
-
         # Test case 29: condition action with one condition
         action_part_condition_1 = {
             CONF_CONDITION: "state",
@@ -4454,7 +4614,6 @@ async def test_action_entities():
         assert end_position == 10
 
     async def test_action_event():
-
         # Test case 31: event action with one event
         action_part_event_1 = {
             CONF_EVENT: "test_event",
@@ -4497,7 +4656,6 @@ async def test_action_entities():
         assert end_position == 10
 
     async def test_action_wait_for_trigger():
-
         # Test case 33: wait for trigger action with one trigger
         action_part_wait_for_trigger_1 = {
             SCRIPT_ACTION_WAIT_FOR_TRIGGER: [
@@ -4603,7 +4761,6 @@ async def test_action_entities():
         assert end_position == 11
 
     async def test_action_device():
-
         # Test case 37: device action
         action_part_device_1 = {
             CONF_DEVICE_ID: "test_device",
@@ -4667,14 +4824,14 @@ async def test_action_entities():
         await test_action_call_service()
         await test_action_branching()
         await test_action_choose()
-        await test_action_parallel()    
+        await test_action_parallel()
         await test_action_repeat()
         await test_action_sequence()
         await test_action_condition()
         await test_action_event()
         await test_action_wait_for_trigger()
         await test_action_device()
-    
+
     test_action_all()
     print("All action test cases passed!")
 
@@ -4682,7 +4839,7 @@ async def test_action_entities():
 if __name__ == "__main__":
     if not path.exists(TEST_DIR):
         mkdir(TEST_DIR)
-    
+
     async_run(test_trigger_entities())
 
     # file_path = path.join(TEST_DIR, "trigger_part_event_1.py")
