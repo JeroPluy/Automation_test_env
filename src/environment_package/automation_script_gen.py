@@ -55,11 +55,11 @@ def init_automation_script(automation_name: str, dir_path: str = None) -> str:
 
     init_template = path.join(TEMPLATE_PATH, "init_template.py")
     try:
-        with open(init_template, "r") as file:  
+        with open(init_template, "r") as file:
             script_content = file.read()
     except FileNotFoundError:
         raise FileNotFoundError(f"Template file {init_template} not found")
-   
+
     # ! tabs aren't taken into account and are converted to 4 spaces
     script_content = script_content.replace("    ", "\t")
 
@@ -85,7 +85,7 @@ def _append_script_context_to_script(filepath: str, script_context: str) -> None
     except FileNotFoundError:
         raise FileNotFoundError(f"File {filepath} not found")
 
-    
+
 def _get_trigger_conditional_expression(
     trigger_type: str, entity: Entity, trigger_pos: int, above_position: int = None
 ) -> list:
@@ -96,6 +96,7 @@ def _get_trigger_conditional_expression(
         trigger_type (str): Depending on the trigger type, the conditional expression is created.
         entity (Entity): The entity is used to create the conditional expression based on the expected value.
         trigger_pos (int): The real position of the trigger in automation script.
+        above_position (int, optional): The position of the above entity in the automation script.
 
     Returns:
         str: The conditional expression for the trigger.
@@ -129,7 +130,7 @@ def _get_trigger_conditional_expression(
                         start_val = False
                     else:
                         comparison_str += " or "
-                        
+
                     if valid_entity_id(str(value)):
                         comparison_str += f"trigger[{trigger_pos}] {operator} trigger[{current_com_entity_pos}]"
                         current_com_entity_pos += 1
@@ -145,7 +146,7 @@ def _get_trigger_conditional_expression(
                                 f"trigger[{trigger_pos}] {operator} {value}"
                             )
 
-                comparison_str += ")"                
+                comparison_str += ")"
 
             else:
                 if above_position is None:
@@ -165,12 +166,10 @@ def _get_trigger_conditional_expression(
                         )
                     # float or int value
                     else:
-                        comparison_str += (
-                            f"trigger[{trigger_pos}] {operator} {value})"
-                        )
+                        comparison_str += f"trigger[{trigger_pos}] {operator} {value})"
 
             return [comparison_str, trigger_pos, above_position]
-        # if no expected state value is given, just return the 
+        # if no expected state value is given, just return the trigger entity as a condition
         else:
             return [f"trigger[{trigger_pos}]", trigger_pos]
 
@@ -231,11 +230,11 @@ def _get_trigger_conditional_expression(
             if_statement = None
 
             if above_condition_str is not None and below_condition_str is not None:
-                if_statement = f"((trigger[{above_position}] is not None and trigger[{trigger_pos}] is not None and trigger[XXXX] is not None) and ({complete_condition_str})) or (trigger[{trigger_pos}] is not None and trigger[XXXX] is None and trigger[{above_position}] is None) or (trigger[{trigger_pos}] is not None and (trigger[{above_position}] is None and ({below_condition_str}))) or (trigger[{trigger_pos}] is not None and (trigger[XXXX] is None and ({above_condition_str})))"
+                if_statement = f"(((trigger[{above_position}] is not None and trigger[{trigger_pos}] is not None and trigger[XXXX] is not None) and ({complete_condition_str})) or (trigger[{trigger_pos}] is not None and trigger[XXXX] is None and trigger[{above_position}] is None) or (trigger[{trigger_pos}] is not None and (trigger[{above_position}] is None and ({below_condition_str}))) or (trigger[{trigger_pos}] is not None and (trigger[XXXX] is None and ({above_condition_str}))))"
             elif below_condition_str is None:
-                if_statement = f"((trigger[{above_position}] is not None and trigger[{trigger_pos}] is not None) and ({complete_condition_str})) or (trigger[{trigger_pos}] is not None and trigger[{above_position}] is None)"
+                if_statement = f"(((trigger[{above_position}] is not None and trigger[{trigger_pos}] is not None) and ({complete_condition_str})) or (trigger[{trigger_pos}] is not None and trigger[{above_position}] is None))"
             elif above_condition_str is None:
-                if_statement = f"((trigger[{trigger_pos}] is not None and trigger[XXXX] is not None) and ({complete_condition_str})) or (trigger[{trigger_pos}] is not None and trigger[XXXX] is None)"
+                if_statement = f"(((trigger[{trigger_pos}] is not None and trigger[XXXX] is not None) and ({complete_condition_str})) or (trigger[{trigger_pos}] is not None and trigger[XXXX] is None))"
 
             return [if_statement, trigger_pos, above_position]
 
@@ -362,18 +361,18 @@ def create_trigger_script(
     Returns:
         int: the new trigger_pos for the next trigger entity (is the next trigger_pos in the automation script)
     """
-    
+
     # create the trigger expression for the entity
     trigger_expression = _get_trigger_conditional_expression(
         trigger_type, entity, trigger_pos
     )
     # complete the trigger expression for the entity
-    script_context = IF_TEMPLATE + trigger_expression[0] + END_IF_TEMPLATE
+    script_context = IF_TEMPLATE + trigger_expression[0] + "):\n"
 
     # set the trigger_pos for the next trigger expression and replace the XXXX with the trigger_pos of the below condition
     if trigger_type == CONF_NUMERIC_STATE or trigger_type == CONF_STATE:
         trigger_pos = trigger_expression[1]
-        
+
         if trigger_type == CONF_NUMERIC_STATE and "XXXX" in script_context:
             trigger_pos += 1
             script_context = script_context.replace("XXXX", str((trigger_pos)))
@@ -395,9 +394,7 @@ def close_trigger_section(filepath: str) -> None:
     Args:
         filepath (str): The path to the automation script file.
     """
-    script_context = (
-        "\t# The end of the trigger section\n\treturn {'triggered': triggered, 'trigger_id' : trigger_id}\n\n"
-    )
+    script_context = "\t# The end of the trigger section\n\treturn {'triggered': triggered, 'trigger_id' : trigger_id}\n\n"
     _append_script_context_to_script(filepath, script_context)
 
 
@@ -408,32 +405,217 @@ def init_condition_part(filepath: str) -> None:
     Args:
         filepath (str): The path to the automation script file.
     """
-    
+
     condition_template = path.join(TEMPLATE_PATH, "condition_template.py")
     try:
-        with open(condition_template, "r") as file:  
+        with open(condition_template, "r") as file:
             script_content = file.read()
     except FileNotFoundError:
         raise FileNotFoundError(f"Template file {condition_template} not found")
     # ! tabs aren't taken into account and are converted to 4 spaces
     script_content = script_content.replace("    ", "\t")
-    
+
     _append_script_context_to_script(filepath, script_content)
 
+
 def _get_condition_expression(
-    condition_type: str, entity: Entity, condition_pos: int
-) -> str:
-    pass
+    condition_type: str, entity: Entity, condition_pos: int, above_position: int = None
+) -> list:
+    """
+    Create the conditional expression for the condition.
+
+    Args:
+        condition_type (str): Depending on the condition type, the conditional expression is created.
+        entity (Entity): The entity is used to create the conditional expression based on the expected value.
+        condition_pos (int): The real position of the condition in the automation script.
+        above_position (int, optional): The position of the above entity in the automation script.
+
+    Returns:
+        str: The conditional expression for the condition.
+    """
+    not_none_condition = f"condition[{condition_pos}] is not None and"
+
+    if condition_type == CONF_STATE:
+        comparison_str = f"{not_none_condition} ("
+
+
+    elif condition_type == CONF_NUMERIC_STATE:
+        comparison_str = None
+        above_condition_str = None
+        below_condition_str = None
+        middle_condition_str = None
+
+        if CONF_ABOVE in entity.expected_value:
+            value = entity.expected_value[CONF_ABOVE]
+            if isinstance(value, (int, float)):
+                comparison_str = f"{value} < "
+            elif not is_jinja_template(str(value)) and valid_entity_id(str(value)):
+                if above_position is not None:
+                    comparison_str = f"condition[{above_position}] < "
+                else:
+                    above_position = condition_pos
+                    comparison_str = f"condition[{condition_pos}] < "
+
+                # cache the above condition
+                above_condition_str = comparison_str
+
+        # move the condition_pos after the above condition
+        if above_condition_str is not None:
+            if above_position == condition_pos:
+                condition_pos += 1
+            middle_condition_str = f"condition[{condition_pos}]"
+            comparison_str += middle_condition_str
+            # complete the above condition
+            above_condition_str += middle_condition_str
+        else:
+            middle_condition_str = f"condition[{condition_pos}]"
+            # checks if a above value is in the complete condition
+            if comparison_str is None:
+                comparison_str = middle_condition_str
+            else:
+                comparison_str += middle_condition_str
+
+        if CONF_BELOW in entity.expected_value:
+            value = entity.expected_value[CONF_BELOW]
+            if isinstance(value, (int, float)):
+                comparison_str += f" < {value}"
+            elif not is_jinja_template(str(value)) and valid_entity_id(str(value)):
+                comparison_str += " < condition[XXXX]"
+                # cache the below condition
+                below_condition_str = f"{middle_condition_str} < condition[XXXX]"
+
+        # add the none exception for the entity values to the condition
+        if above_condition_str is None and below_condition_str is None:
+            return [
+                f"{not_none_condition} ({comparison_str})",
+                condition_pos,
+                above_position,
+            ]
+        else:
+            # create the if statement for the condition entities and handle the None exception
+            if_statement = None
+
+            if above_condition_str is not None and below_condition_str is not None:
+                if_statement = f"(((condition[{above_position}] is not None and condition[{condition_pos}] is not None and condition[XXXX] is not None) and ({comparison_str})) or (condition[{condition_pos}] is not None and condition[{above_position}] is None) or (condition[{condition_pos}] is not None and (condition[{above_position}] is None and ({below_condition_str}))) or (condition[{condition_pos}] is not None and (condition[XXXX] is None and ({above_condition_str}))))"
+            elif below_condition_str is None:
+                if_statement = f"(((condition[{above_position}] is not None and condition[{condition_pos}] is not None) and ({comparison_str})) or (condition[{condition_pos}] is not None and condition[{above_position}] is None))"
+            elif above_condition_str is None:
+                if_statement = f"(((condition[{condition_pos}] is not None and condition[XXXX] is not None) and ({comparison_str})) or (condition[{condition_pos}] is not None and condition[XXXX] is None))"
+
+            return [if_statement, condition_pos, above_position]
+
+
+def create_combination_condition_script(
+    condition_type: str,
+    entity_list: list,
+    condition_pos: int,
+    filepath: str,
+) -> int:
+    """
+    Create the condition of multiple condition entities in the automation script.
+
+    Args:
+        condition_type (str): The type of the condition.
+        entity_list (list): The list of entities of the condition.
+        condition_pos (int): The real position of the condition in the automation script.
+        filepath (str): The path to the automation script file.
+
+    Returns:
+        int: The new condition_pos for the next condition entity (is the next condition_pos in the automation script).
+    """
+    # set the combinator for the if statement
+    combinator = CONF_AND
+
+    # create the if statement for the condition list
+    if len(entity_list) > 1:
+        script_context = IF_TEMPLATE
+        # cache for the condition_pos of the above condition
+        above_position = None
+
+        for x in range(0, len(entity_list)):
+            # create the condition expression for the entities
+            condition_expression = _get_condition_expression(
+                condition_type, entity_list[x], condition_pos, above_position
+            )
+
+            if x == 0:
+                # add the trigger expression to the script without the combinator
+                script_context += condition_expression[0] + "\n"
+            else:
+                # add the trigger expression to the script with the combinator
+                script_context += f"\t\t{combinator} " + condition_expression[0] + "\n"
+
+            # set the condition_pos for the next trigger expression
+            if condition_type == CONF_NUMERIC_STATE:
+                condition_pos = condition_expression[1]
+                above_position = condition_expression[2]
+            condition_pos += 1
+    elif len(entity_list) == 1:
+        # create the trigger expression for the entities
+        condition_expression = _get_condition_expression(
+            condition_type, entity_list[0], condition_pos
+        )
+        # add the first trigger expression to the script
+        script_context = IF_TEMPLATE + condition_expression[0]
+
+        # set the condition_pos for the next trigger expression
+        if condition_type == CONF_NUMERIC_STATE or condition_type == CONF_STATE:
+            condition_pos = condition_expression[1]
+        condition_pos += 1
+
+    # close the if statement
+    script_context += END_IF_TEMPLATE
+
+    if condition_type == CONF_NUMERIC_STATE:
+        if "XXXX" in script_context:
+            script_context = script_context.replace("XXXX", str((condition_pos)))
+            condition_pos += 1
+
+    # add the trigger_id to the script and the triggered flag
+    script_context += "\t\tcondition_passed = True\n\n"
+    _append_script_context_to_script(filepath, script_context)
+
+    return condition_pos
 
 
 def create_condition_script(
     condition_type: str,
     entity: Entity,
     condition_pos: int,
-    trigger_id: str | None,
     filepath: str,
 ) -> int:
-    pass
+    """
+    Create the condition of one ondition entity in the automation script.
+
+    Args:
+        condition_type (str): The type of the condition.
+        entity (Entity): The entity of the condition.
+        condition_pos (int): The position of the condition in the automation script based on former conditions.
+        filepath (str): The path to the automation script file.
+
+    Returns:
+        int: The new condition_pos for the next condition entity (is the next condition_pos in the automation script).
+    """
+    # create the trigger expression for the entity
+    condition_expression = _get_condition_expression(
+        condition_type, entity, condition_pos
+    )
+    # complete the condition expression for the entity
+    script_context = IF_TEMPLATE + condition_expression[0] + "):\n"
+
+    # set the condition_pos for the next condition expression
+    if condition_type == CONF_NUMERIC_STATE or condition_type == CONF_STATE:
+        condition_pos = condition_expression[1]
+
+        if condition_type == CONF_NUMERIC_STATE and "XXXX" in script_context:
+            condition_pos += 1
+            script_context = script_context.replace("XXXX", str((condition_pos)))
+
+    # add the condition_id to the script and the condition_passed flag
+    script_context += "\t\tcondition_passed = True\n\n"
+    _append_script_context_to_script(filepath, script_context)
+
+    return condition_pos + 1
 
 
 def close_condition_section(filepath: str) -> None:
@@ -443,10 +625,9 @@ def close_condition_section(filepath: str) -> None:
     Args:
         filepath (str): The path to the automation script file.
     """
-    script_context = (
-        "\t# The end of the condition section\n\treturn {'condition_passed': condition_passed}\n\n"
-    )
+    script_context = "\t# The end of the condition section\n\treturn {'condition_passed': condition_passed}\n\n"
     _append_script_context_to_script(filepath, script_context)
+
 
 def close_script(filepath: str) -> None:
     """
@@ -455,16 +636,16 @@ def close_script(filepath: str) -> None:
     Args:
         filepath (str): The path to the automation script file.
     """
-    
+
     main_function_template = path.join(TEMPLATE_PATH, "run_main_template.py")
     try:
-        with open(main_function_template, "r") as file:  
+        with open(main_function_template, "r") as file:
             script_content = file.read()
     except FileNotFoundError:
         raise FileNotFoundError(f"Template file {main_function_template} not found")
     # ! tabs aren't taken into account and are converted to 4 spaces
     script_content = script_content.replace("    ", "\t")
-    
+
     _append_script_context_to_script(filepath, script_content)
 
 

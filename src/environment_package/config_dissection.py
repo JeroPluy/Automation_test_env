@@ -105,9 +105,12 @@ from .ha_automation.home_assistant_const import (
     test_leading_zero,
 )
 from environment_package.automation_script_gen import (
+    close_condition_section,
     close_script,
     close_trigger_section,
+    create_combination_condition_script,
     create_combination_trigger_script,
+    create_condition_script,
     create_trigger_script,
     init_automation_script,
     init_condition_part,
@@ -129,6 +132,9 @@ def _trigger_entities(
     Args:
         trigger_part (dict): The trigger list element
         position (int): The position of the entity in the list
+        real_position (int): The real position of the entity for the input value into the script
+        script_path (str): The path to the script
+        parent (int): The parent entity of the entity
 
     Returns:
         list: A list of entities as Entity objects
@@ -266,7 +272,7 @@ def _trigger_entities(
         # cache the new entities for potential comparing entities
         new_entity_list = []
         exp_value_entity_list = []
-        parent = None
+        parent = parent
 
         # add the possible value range to the entity/ies
         # TODO value_template is missing
@@ -290,6 +296,7 @@ def _trigger_entities(
                         },  # added after the generation of the comparing entity/ies
                     )
                 )
+
         if CONF_BELOW in trigger_part:
             exp_value[CONF_BELOW] = trigger_part[CONF_BELOW]
             # create the comparing entities for the numerical state trigger
@@ -341,6 +348,8 @@ def _trigger_entities(
                 )
         else:
             if isinstance(trigger_part[CONF_ENTITY_ID], list):
+                if len(trigger_part[CONF_ENTITY_ID]) == 0:
+                    return [entity_list, position, real_position]
                 entity_name = trigger_part[CONF_ENTITY_ID][0].split(".")[1]
                 integration = trigger_part[CONF_ENTITY_ID][0].split(".")[0]
             else:
@@ -462,11 +471,11 @@ def _trigger_entities(
                     )
                 )
 
-        # TODO create entity/ies for the state from trigger
         if CONF_FROM in trigger_part:
             exp_value[CONF_FROM] = str(trigger_part[CONF_FROM])
         elif CONF_NOT_FROM in trigger_part:
             exp_value[CONF_NOT_FROM] = str(trigger_part[CONF_NOT_FROM])
+            # TODO create entity/ies for the state from trigger
 
         if CONF_FOR in trigger_part:
             exp_value[CONF_FOR] = trigger_part[CONF_FOR]
@@ -912,6 +921,8 @@ def _condition_entities(
     Args:
         condition_part (dict): The condition list element
         position (int): The position of the entity in the list
+        real_position (int):  The real position of the entity for the input value into the script
+        script_path (str): The path to the script file
         parent (int): The parent entity of the entity
 
     Returns:
@@ -957,16 +968,61 @@ def _condition_entities(
 
     # processes a numeric state condition
     elif condition == CONF_NUMERIC_STATE:
-        # add the value range to the entity
-        exp_value_str = "__VALUE__"
-        if CONF_ABOVE in condition_part:
-            exp_value_str = str(condition_part[CONF_ABOVE]) + " < " + exp_value_str
-            # TODO extract entity input
-        if CONF_BELOW in condition_part:
-            exp_value_str = exp_value_str + " < " + str(condition_part[CONF_BELOW])
-            # TODO extract entity input
-        exp_value = {"value": exp_value_str}
+              
+        # cache the new entities for potential comparing entities
+        new_entity_list = []
+        exp_value_entity_list = []
+        parent = parent
+
+        # add the possible value range to the entity/ies
         # TODO value_template is missing
+        exp_value = {}
+        if CONF_ABOVE in condition_part:
+            exp_value[CONF_ABOVE] = condition_part[CONF_ABOVE]
+            # create the comparing entities for the numerical state trigger
+            if valid_entity_id(str(exp_value[CONF_ABOVE])):
+                parent = position
+                position += 1
+
+                exp_value_entity_list.append(
+                    Entity(
+                        parent=parent,
+                        position=None,
+                        param_role=param_role,
+                        integration=condition_part[CONF_ABOVE].split(".")[0],
+                        entity_name=condition_part[CONF_ABOVE].split(".")[1],
+                        expected_value={
+                            CONF_BELOW: ""
+                        },  # added after the generation of the comparing entity/ies
+                    )
+                )
+
+        if CONF_BELOW in condition_part:
+            exp_value[CONF_BELOW] = condition_part[CONF_BELOW]
+            # create the comparing entities for the numerical state trigger
+            if valid_entity_id(str(exp_value[CONF_BELOW])):
+                # set the parent entity for the comparing entity/ies if no above entity exists
+                if parent is None:
+                    parent = position
+                    position += 1
+
+                exp_value_entity_list.append(
+                    Entity(
+                        parent=parent,
+                        position=None,
+                        param_role=param_role,
+                        integration=condition_part[CONF_BELOW].split(".")[0],
+                        entity_name=condition_part[CONF_BELOW].split(".")[1],
+                        expected_value={
+                            CONF_ABOVE: ""
+                        },  # added after the generation of the comparing entity/ies
+                    )
+                )
+        # add the time the value has to stay in the trigger range
+        if CONF_FOR in condition_part:
+            exp_value[CONF_FOR] = condition_part[CONF_FOR]
+            # TODO limited templating as input
+
 
         # check if multiple entities has to reach the condition
         if (
@@ -984,7 +1040,7 @@ def _condition_entities(
                     entity_name = (
                         entity_name + "." + str(condition_part[CONF_ATTRIBUTE])
                     )
-                entity_list.append(
+                new_entity_list.append(
                     Entity(
                         parent=new_parent,
                         position=position,
@@ -1006,7 +1062,7 @@ def _condition_entities(
             if CONF_ATTRIBUTE in condition_part:
                 entity_name = entity_name + "." + str(condition_part[CONF_ATTRIBUTE])
             # create a single entity in the condion part
-            entity_list.append(
+            new_entity_list.append(
                 Entity(
                     parent=parent,
                     position=position,
@@ -1016,11 +1072,51 @@ def _condition_entities(
                     expected_value=exp_value,
                 )
             )
+            
+        # get all the names of the new entities and create the script for the number trigger
+        entity_names = []
+        if len(new_entity_list) > 1:
+            entity_names = []
+            for entity in new_entity_list:
+                entity_names.append(entity.entity_name)
+            real_position = create_combination_condition_script(
+                CONF_NUMERIC_STATE,
+                new_entity_list,
+                real_position,
+                script_path,
+            )
+        else:
+            entity_names = new_entity_list[0].entity_name
+            real_position = create_condition_script(
+                CONF_NUMERIC_STATE,
+                new_entity_list[0],
+                real_position,
+                script_path,
+            )
+        # add the names of the entities to the expected value of the comparing entities
+        for entity in exp_value_entity_list:
+            position += 1
+            entity.position = position
+            if CONF_BELOW in entity.expected_value:
+                entity.expected_value[CONF_BELOW] = entity_names
+            if CONF_ABOVE in entity.expected_value:
+                entity.expected_value[CONF_ABOVE] = entity_names
+
+        # add the comparing entities to the entity list
+        new_entity_list += exp_value_entity_list
+        # append the new entities to the entity list
+        entity_list += new_entity_list
 
     # processes a state condition
     elif condition == CONF_STATE:
+        new_entity_list = []
+        exp_value_entity_list = []
+        exp_value = {}
+        
         # add the state value/s of the condition
         exp_value = {CONF_STATE: condition_part[CONF_STATE]}
+        
+        
         if CONF_FOR in condition_part:
             exp_value[CONF_FOR] = condition_part[CONF_FOR]
             # TODO limited templating as input
@@ -1685,6 +1781,9 @@ def _extract_all_conditions(
         condition_entities += return_list[0]
         position = return_list[1] + 1
         real_position = return_list[2] + 1
+    if len(condition_entities) != real_position:
+        raise vol.Invalid("The amount of entities and the real position do not match")
+    close_condition_section(script_path)
     return condition_entities
 
 
