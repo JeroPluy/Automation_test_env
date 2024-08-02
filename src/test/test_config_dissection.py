@@ -1,6 +1,7 @@
 """
 Test cases for config dissection module.
-The python_path needs to be set to the src directory: (for venv) $env:PYTHONPATH = "D:\\Workspace\\Python\\custom_Tkinker_tryout\\src"
+The python_path needs to be set to the src directory: (for venv)
+$env:PYTHONPATH = "D:\\Workspace\\Python\\custom_Tkinker_tryout\\src"
 
 """
 
@@ -26,6 +27,7 @@ from environment_package.ha_automation.home_assistant_const import (
     CONF_AFTER,
     CONF_AFTER_OFFSET,
     CONF_ALLOWED_METHODS,
+    CONF_AND,
     CONF_AT,
     CONF_ATTRIBUTE,
     CONF_BEFORE,
@@ -51,10 +53,12 @@ from environment_package.ha_automation.home_assistant_const import (
     CONF_ID,
     CONF_LOCAL,
     CONF_NOFITY_ID,
+    CONF_NOT,
     CONF_NOT_FROM,
     CONF_NOT_TO,
     CONF_NUMERIC_STATE,
     CONF_OFFSET,
+    CONF_OR,
     CONF_PARALLEL,
     CONF_PAYLOAD,
     CONF_PLATFORM,
@@ -124,7 +128,9 @@ async def run_automation(
 
     # wait for the process to finish and decode the output
     stdout, stderr = await proc.communicate()
+
     output = json.loads(stdout.decode("utf-8"))
+
     return output
 
     # synchron subprocess implementation
@@ -141,7 +147,7 @@ def test_trigger_return(filepath: str) -> None:
     Args:
         filepath (str): the path to the script file
     """
-    script_context = "\n\toutput = { 'triggered': triggered, 'trigger_id': trigger_id}\n\tprint(json.dumps(output))\ntrigger(input_vals)"
+    script_context = "\n\toutput = { 'triggered': triggered, 'trigger_id': trigger_id}\n\treturn output\n\nprint(json.dumps(trigger(input_vals)))"
     _append_script_context_to_script(filepath, script_context)
 
 
@@ -167,7 +173,7 @@ def test_condition_return(filepath: str) -> None:
     Args:
         filepath (str): the path to the script file
     """
-    script_context = "\n\toutput = {'condition_passed': condition_passed}\n\tprint(json.dumps(output))\n\ncondition(input_vals)"
+    script_context = "\n\toutput = {'condition_passed': condition_passed}\n\treturn output\n\nprint(json.dumps(condition(input_vals)))"
     _append_script_context_to_script(filepath, script_context)
 
 
@@ -1038,64 +1044,10 @@ async def test_trigger_entities():
         assert real_pos == 6
 
     async def test_trigger_state():
-        # # Test case 16: State trigger with on values
-        trigger_part_state_0 = {
-            CONF_PLATFORM: CONF_STATE,
-            CONF_ENTITY_ID: ["binary_sensor.motion"],
-        }
-        file_path = init_automation_script("trigger_part_state_0", TRIGGER_DIR)
-        results = _trigger_entities(
-            trigger_part_state_0, position=1, real_position=0, script_path=file_path
-        )
-        test_trigger_return(file_path)
-
-        entities_state_0, end_position, real_pos = results
-        assert len(entities_state_0) == 1
-        assert entities_state_0[0].parent is None
-        assert entities_state_0[0].position == 1
-        assert entities_state_0[0].parameter_role == START
-        assert entities_state_0[0].integration == "binary_sensor"
-        assert entities_state_0[0].entity_name == "binary_sensor.motion"
-        assert entities_state_0[0].expected_value is None
-        assert end_position == 1
-
-        trigger_part_state_0_input = ["on"]
-        assert (await run_automation(file_path, trigger_part_state_0_input, [])) == {
-            "triggered": True,
-            "trigger_id": None,
-        }
-
-        trigger_part_state_0_input = ["off"]
-        assert (await run_automation(file_path, trigger_part_state_0_input, [])) == {
-            "triggered": True,
-            "trigger_id": None,
-        }
-
-        trigger_part_state_0_input = ["unknown"]
-        assert (await run_automation(file_path, trigger_part_state_0_input, [])) == {
-            "triggered": True,
-            "trigger_id": None,
-        }
-
-        trigger_part_state_0_input = ["unavailable"]
-        assert (await run_automation(file_path, trigger_part_state_0_input, [])) == {
-            "triggered": True,
-            "trigger_id": None,
-        }
-
-        trigger_part_state_0_input = [None]
-        assert (await run_automation(file_path, trigger_part_state_0_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
-
-        assert real_pos == 1
-
-        # Test case 17: State trigger with on values
+        # # Test case 1: State trigger with on values
         trigger_part_state_1 = {
             CONF_PLATFORM: CONF_STATE,
             CONF_ENTITY_ID: ["binary_sensor.motion"],
-            CONF_TO: "on",
         }
         file_path = init_automation_script("trigger_part_state_1", TRIGGER_DIR)
         results = _trigger_entities(
@@ -1110,7 +1062,7 @@ async def test_trigger_entities():
         assert entities_state_1[0].parameter_role == START
         assert entities_state_1[0].integration == "binary_sensor"
         assert entities_state_1[0].entity_name == "binary_sensor.motion"
-        assert entities_state_1[0].expected_value == {CONF_TO: "on"}
+        assert entities_state_1[0].expected_value is None
         assert end_position == 1
 
         trigger_part_state_1_input = ["on"]
@@ -1119,19 +1071,36 @@ async def test_trigger_entities():
             "trigger_id": None,
         }
 
-        for state_val in ["off", "unknown", "unavailable", None]:
-            trigger_part_state_1_input = [state_val]
-            assert (
-                await run_automation(file_path, trigger_part_state_1_input, [])
-            ) == {"triggered": False, "trigger_id": None}
+        trigger_part_state_1_input = ["off"]
+        assert (await run_automation(file_path, trigger_part_state_1_input, [])) == {
+            "triggered": True,
+            "trigger_id": None,
+        }
+
+        trigger_part_state_1_input = ["unknown"]
+        assert (await run_automation(file_path, trigger_part_state_1_input, [])) == {
+            "triggered": True,
+            "trigger_id": None,
+        }
+
+        trigger_part_state_1_input = ["unavailable"]
+        assert (await run_automation(file_path, trigger_part_state_1_input, [])) == {
+            "triggered": True,
+            "trigger_id": None,
+        }
+
+        trigger_part_state_1_input = [None]
+        assert (await run_automation(file_path, trigger_part_state_1_input, [])) == {
+            "triggered": False,
+            "trigger_id": None,
+        }
 
         assert real_pos == 1
 
-        # Test case 18: State trigger with from and to values
+        # Test case 2: State trigger with on values
         trigger_part_state_2 = {
             CONF_PLATFORM: CONF_STATE,
             CONF_ENTITY_ID: ["binary_sensor.motion"],
-            CONF_FROM: "off",
             CONF_TO: "on",
         }
         file_path = init_automation_script("trigger_part_state_2", TRIGGER_DIR)
@@ -1147,7 +1116,7 @@ async def test_trigger_entities():
         assert entities_state_2[0].parameter_role == START
         assert entities_state_2[0].integration == "binary_sensor"
         assert entities_state_2[0].entity_name == "binary_sensor.motion"
-        assert entities_state_2[0].expected_value == {CONF_TO: "on", CONF_FROM: "off"}
+        assert entities_state_2[0].expected_value == {CONF_TO: "on"}
         assert end_position == 1
 
         trigger_part_state_2_input = ["on"]
@@ -1164,13 +1133,12 @@ async def test_trigger_entities():
 
         assert real_pos == 1
 
-        # Test case 19: State trigger with from, to, and for values
+        # Test case 3: State trigger with from and to values
         trigger_part_state_3 = {
             CONF_PLATFORM: CONF_STATE,
             CONF_ENTITY_ID: ["binary_sensor.motion"],
             CONF_FROM: "off",
             CONF_TO: "on",
-            CONF_FOR: "00:01:00",
         }
         file_path = init_automation_script("trigger_part_state_3", TRIGGER_DIR)
         results = _trigger_entities(
@@ -1185,11 +1153,7 @@ async def test_trigger_entities():
         assert entities_state_3[0].parameter_role == START
         assert entities_state_3[0].integration == "binary_sensor"
         assert entities_state_3[0].entity_name == "binary_sensor.motion"
-        assert entities_state_3[0].expected_value == {
-            CONF_TO: "on",
-            CONF_FROM: "off",
-            CONF_FOR: "00:01:00",
-        }
+        assert entities_state_3[0].expected_value == {CONF_TO: "on", CONF_FROM: "off"}
         assert end_position == 1
 
         trigger_part_state_3_input = ["on"]
@@ -1206,12 +1170,13 @@ async def test_trigger_entities():
 
         assert real_pos == 1
 
-        # Test case 20: State trigger with not from and not to values
+        # Test case 4: State trigger with from, to, and for values
         trigger_part_state_4 = {
             CONF_PLATFORM: CONF_STATE,
             CONF_ENTITY_ID: ["binary_sensor.motion"],
-            CONF_NOT_TO: "on",
-            CONF_NOT_FROM: "off",
+            CONF_FROM: "off",
+            CONF_TO: "on",
+            CONF_FOR: "00:01:00",
         }
         file_path = init_automation_script("trigger_part_state_4", TRIGGER_DIR)
         results = _trigger_entities(
@@ -1227,38 +1192,32 @@ async def test_trigger_entities():
         assert entities_state_4[0].integration == "binary_sensor"
         assert entities_state_4[0].entity_name == "binary_sensor.motion"
         assert entities_state_4[0].expected_value == {
-            CONF_NOT_TO: "on",
-            CONF_NOT_FROM: "off",
+            CONF_TO: "on",
+            CONF_FROM: "off",
+            CONF_FOR: "00:01:00",
         }
         assert end_position == 1
 
         trigger_part_state_4_input = ["on"]
         assert (await run_automation(file_path, trigger_part_state_4_input, [])) == {
-            "triggered": False,
+            "triggered": True,
             "trigger_id": None,
         }
 
-        trigger_part_state_4_input = [None]
-        assert (await run_automation(file_path, trigger_part_state_4_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
-
-        for state_val in ["off", "unknown", "unavailable"]:
+        for state_val in ["off", "unknown", "unavailable", None]:
             trigger_part_state_4_input = [state_val]
             assert (
                 await run_automation(file_path, trigger_part_state_4_input, [])
-            ) == {"triggered": True, "trigger_id": None}
+            ) == {"triggered": False, "trigger_id": None}
 
         assert real_pos == 1
 
-        # Test case 21: State trigger with attribute value
+        # Test case 5: State trigger with not from and not to values
         trigger_part_state_5 = {
             CONF_PLATFORM: CONF_STATE,
             CONF_ENTITY_ID: ["binary_sensor.motion"],
-            CONF_ATTRIBUTE: "attribute_1",
-            CONF_TO: "temp2",
-            CONF_FROM: "temp1",
+            CONF_NOT_TO: "on",
+            CONF_NOT_FROM: "off",
         }
         file_path = init_automation_script("trigger_part_state_5", TRIGGER_DIR)
         results = _trigger_entities(
@@ -1272,32 +1231,40 @@ async def test_trigger_entities():
         assert entities_state_5[0].position == 1
         assert entities_state_5[0].parameter_role == START
         assert entities_state_5[0].integration == "binary_sensor"
-        assert entities_state_5[0].entity_name == "binary_sensor.motion.attribute_1"
+        assert entities_state_5[0].entity_name == "binary_sensor.motion"
         assert entities_state_5[0].expected_value == {
-            CONF_TO: "temp2",
-            CONF_FROM: "temp1",
+            CONF_NOT_TO: "on",
+            CONF_NOT_FROM: "off",
         }
         assert end_position == 1
 
-        trigger_part_state_5_input = ["temp2"]
+        trigger_part_state_5_input = ["on"]
         assert (await run_automation(file_path, trigger_part_state_5_input, [])) == {
-            "triggered": True,
+            "triggered": False,
             "trigger_id": None,
         }
 
-        for state_val in ["temp1", "temp3", "temp4", None]:
+        trigger_part_state_5_input = [None]
+        assert (await run_automation(file_path, trigger_part_state_5_input, [])) == {
+            "triggered": False,
+            "trigger_id": None,
+        }
+
+        for state_val in ["off", "unknown", "unavailable"]:
             trigger_part_state_5_input = [state_val]
             assert (
                 await run_automation(file_path, trigger_part_state_5_input, [])
-            ) == {"triggered": False, "trigger_id": None}
+            ) == {"triggered": True, "trigger_id": None}
 
         assert real_pos == 1
 
-        # Test case 22: State trigger with multiple entity ids
+        # Test case 6: State trigger with attribute value
         trigger_part_state_6 = {
             CONF_PLATFORM: CONF_STATE,
-            CONF_ENTITY_ID: ["binary_sensor.motion", "binary_sensor.motion_2"],
-            CONF_TO: "on",
+            CONF_ENTITY_ID: ["binary_sensor.motion"],
+            CONF_ATTRIBUTE: "attribute_1",
+            CONF_TO: "temp2",
+            CONF_FROM: "temp1",
         }
         file_path = init_automation_script("trigger_part_state_6", TRIGGER_DIR)
         results = _trigger_entities(
@@ -1306,64 +1273,37 @@ async def test_trigger_entities():
         test_trigger_return(file_path)
 
         entities_state_6, end_position, real_pos = results
-        assert len(entities_state_6) == 2
-        assert entities_state_6[0].parent == 1
-        assert entities_state_6[0].position == 2
+        assert len(entities_state_6) == 1
+        assert entities_state_6[0].parent is None
+        assert entities_state_6[0].position == 1
         assert entities_state_6[0].parameter_role == START
         assert entities_state_6[0].integration == "binary_sensor"
-        assert entities_state_6[0].entity_name == "binary_sensor.motion"
-        assert entities_state_6[0].expected_value == {CONF_TO: "on"}
-        assert entities_state_6[1].parent == 1
-        assert entities_state_6[1].position == 3
-        assert entities_state_6[1].parameter_role == START
-        assert entities_state_6[1].integration == "binary_sensor"
-        assert entities_state_6[1].entity_name == "binary_sensor.motion_2"
-        assert entities_state_6[1].expected_value == {CONF_TO: "on"}
-        assert end_position == 3
+        assert entities_state_6[0].entity_name == "binary_sensor.motion.attribute_1"
+        assert entities_state_6[0].expected_value == {
+            CONF_TO: "temp2",
+            CONF_FROM: "temp1",
+        }
+        assert end_position == 1
 
-        trigger_part_state_6_input = ["on", "off"]
+        trigger_part_state_6_input = ["temp2"]
         assert (await run_automation(file_path, trigger_part_state_6_input, [])) == {
             "triggered": True,
             "trigger_id": None,
         }
 
-        trigger_part_state_6_input = ["off", "on"]
-        assert (await run_automation(file_path, trigger_part_state_6_input, [])) == {
-            "triggered": True,
-            "trigger_id": None,
-        }
+        for state_val in ["temp1", "temp3", "temp4", None]:
+            trigger_part_state_6_input = [state_val]
+            assert (
+                await run_automation(file_path, trigger_part_state_6_input, [])
+            ) == {"triggered": False, "trigger_id": None}
 
-        trigger_part_state_6_input = ["off", "off"]
-        assert (await run_automation(file_path, trigger_part_state_6_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
+        assert real_pos == 1
 
-        trigger_part_state_6_input = ["on", None]
-        assert (await run_automation(file_path, trigger_part_state_6_input, [])) == {
-            "triggered": True,
-            "trigger_id": None,
-        }
-
-        trigger_part_state_6_input = [None, "on"]
-        assert (await run_automation(file_path, trigger_part_state_6_input, [])) == {
-            "triggered": True,
-            "trigger_id": None,
-        }
-
-        trigger_part_state_6_input = [None, None]
-        assert (await run_automation(file_path, trigger_part_state_6_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
-
-        assert real_pos == 2
-
-        # Test case 7: State trigger with conditional entity state
+        # Test case 7: State trigger with multiple entity ids
         trigger_part_state_7 = {
             CONF_PLATFORM: CONF_STATE,
-            CONF_ENTITY_ID: ["binary_sensor.motion"],
-            CONF_TO: "binary_sensor.motion_2",
+            CONF_ENTITY_ID: ["binary_sensor.motion", "binary_sensor.motion_2"],
+            CONF_TO: "on",
         }
         file_path = init_automation_script("trigger_part_state_7", TRIGGER_DIR)
         results = _trigger_entities(
@@ -1378,45 +1318,55 @@ async def test_trigger_entities():
         assert entities_state_7[0].parameter_role == START
         assert entities_state_7[0].integration == "binary_sensor"
         assert entities_state_7[0].entity_name == "binary_sensor.motion"
-        assert entities_state_7[0].expected_value == {CONF_TO: "binary_sensor.motion_2"}
+        assert entities_state_7[0].expected_value == {CONF_TO: "on"}
         assert entities_state_7[1].parent == 1
         assert entities_state_7[1].position == 3
         assert entities_state_7[1].parameter_role == START
         assert entities_state_7[1].integration == "binary_sensor"
         assert entities_state_7[1].entity_name == "binary_sensor.motion_2"
+        assert entities_state_7[1].expected_value == {CONF_TO: "on"}
         assert end_position == 3
 
+        # border test cases
+        # the list build like this [CONF_ENTITY_ID/s]
+
+        # the first entity is on
         trigger_part_state_7_input = ["on", "off"]
         assert (await run_automation(file_path, trigger_part_state_7_input, [])) == {
-            "triggered": False,
+            "triggered": True,
             "trigger_id": None,
         }
 
+        # the first entity is off
+        trigger_part_state_7_input = ["off", "on"]
+        assert (await run_automation(file_path, trigger_part_state_7_input, [])) == {
+            "triggered": True,
+            "trigger_id": None,
+        }
+
+        # both entities are off
         trigger_part_state_7_input = ["off", "off"]
         assert (await run_automation(file_path, trigger_part_state_7_input, [])) == {
-            "triggered": True,
+            "triggered": False,
             "trigger_id": None,
         }
 
-        trigger_part_state_7_input = ["on", "on"]
+        # the first entity is on and the second is None
+        trigger_part_state_7_input = ["on", None]
         assert (await run_automation(file_path, trigger_part_state_7_input, [])) == {
             "triggered": True,
             "trigger_id": None,
         }
 
+        # the first entity is None and the second is on
         trigger_part_state_7_input = [None, "on"]
         assert (await run_automation(file_path, trigger_part_state_7_input, [])) == {
-            "triggered": False,
+            "triggered": True,
             "trigger_id": None,
         }
 
+        # both entities are None
         trigger_part_state_7_input = [None, None]
-        assert (await run_automation(file_path, trigger_part_state_7_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
-
-        trigger_part_state_7_input = ["on", None]
         assert (await run_automation(file_path, trigger_part_state_7_input, [])) == {
             "triggered": False,
             "trigger_id": None,
@@ -1424,7 +1374,80 @@ async def test_trigger_entities():
 
         assert real_pos == 2
 
+        # Test case 8: State trigger with conditional entity state
         trigger_part_state_8 = {
+            CONF_PLATFORM: CONF_STATE,
+            CONF_ENTITY_ID: ["binary_sensor.motion"],
+            CONF_TO: "binary_sensor.motion_2",
+        }
+        file_path = init_automation_script("trigger_part_state_8", TRIGGER_DIR)
+        results = _trigger_entities(
+            trigger_part_state_8, position=1, real_position=0, script_path=file_path
+        )
+        test_trigger_return(file_path)
+
+        entities_state_8, end_position, real_pos = results
+        assert len(entities_state_8) == 2
+        assert entities_state_8[0].parent == 1
+        assert entities_state_8[0].position == 2
+        assert entities_state_8[0].parameter_role == START
+        assert entities_state_8[0].integration == "binary_sensor"
+        assert entities_state_8[0].entity_name == "binary_sensor.motion"
+        assert entities_state_8[0].expected_value == {CONF_TO: "binary_sensor.motion_2"}
+        assert entities_state_8[1].parent == 1
+        assert entities_state_8[1].position == 3
+        assert entities_state_8[1].parameter_role == START
+        assert entities_state_8[1].integration == "binary_sensor"
+        assert entities_state_8[1].entity_name == "binary_sensor.motion_2"
+        assert end_position == 3
+
+        # border test cases - the list build like this [CONF_TO, CONF_ENTITY_ID/s]
+        # the enitity is off but the expected value is on
+        trigger_part_state_8_input = ["on", "off"]
+        assert (await run_automation(file_path, trigger_part_state_8_input, [])) == {
+            "triggered": False,
+            "trigger_id": None,
+        }
+
+        # the enitity is off as expected
+        trigger_part_state_8_input = ["off", "off"]
+        assert (await run_automation(file_path, trigger_part_state_8_input, [])) == {
+            "triggered": True,
+            "trigger_id": None,
+        }
+
+        # the enitity is on as expected
+        trigger_part_state_8_input = ["on", "on"]
+        assert (await run_automation(file_path, trigger_part_state_8_input, [])) == {
+            "triggered": True,
+            "trigger_id": None,
+        }
+
+        # the enitity is None
+        trigger_part_state_8_input = [None, "on"]
+        assert (await run_automation(file_path, trigger_part_state_8_input, [])) == {
+            "triggered": False,
+            "trigger_id": None,
+        }
+
+        # the enitity is None
+        trigger_part_state_8_input = [None, None]
+        assert (await run_automation(file_path, trigger_part_state_8_input, [])) == {
+            "triggered": False,
+            "trigger_id": None,
+        }
+
+        # the enitity is on but the expected value is None
+        trigger_part_state_8_input = ["on", None]
+        assert (await run_automation(file_path, trigger_part_state_8_input, [])) == {
+            "triggered": False,
+            "trigger_id": None,
+        }
+
+        assert real_pos == 2
+
+        # Test case 9: State trigger with multiple entity ids and conditional entity state
+        trigger_part_state_9 = {
             CONF_PLATFORM: CONF_STATE,
             CONF_ENTITY_ID: ["binary_sensor.motion", "binary_sensor.motion_2"],
             CONF_TO: [
@@ -1434,20 +1457,20 @@ async def test_trigger_entities():
                 "on",
             ],
         }
-        file_path = init_automation_script("trigger_part_state_8", TRIGGER_DIR)
+        file_path = init_automation_script("trigger_part_state_9", TRIGGER_DIR)
         results = _trigger_entities(
-            trigger_part_state_8, position=1, real_position=0, script_path=file_path
+            trigger_part_state_9, position=1, real_position=0, script_path=file_path
         )
         test_trigger_return(file_path)
 
-        entities_state_8, end_position, real_pos = results
-        assert len(entities_state_8) == 4
-        assert entities_state_8[0].parent == 2
-        assert entities_state_8[0].position == 3
-        assert entities_state_8[0].parameter_role == START
-        assert entities_state_8[0].integration == "binary_sensor"
-        assert entities_state_8[0].entity_name == "binary_sensor.motion"
-        assert entities_state_8[0].expected_value == {
+        entities_state_9, end_position, real_pos = results
+        assert len(entities_state_9) == 4
+        assert entities_state_9[0].parent == 2
+        assert entities_state_9[0].position == 3
+        assert entities_state_9[0].parameter_role == START
+        assert entities_state_9[0].integration == "binary_sensor"
+        assert entities_state_9[0].entity_name == "binary_sensor.motion"
+        assert entities_state_9[0].expected_value == {
             CONF_TO: [
                 "binary_sensor.motion_3",
                 "unknown",
@@ -1455,12 +1478,12 @@ async def test_trigger_entities():
                 "on",
             ]
         }
-        assert entities_state_8[1].parent == 2
-        assert entities_state_8[1].position == 4
-        assert entities_state_8[1].parameter_role == START
-        assert entities_state_8[1].integration == "binary_sensor"
-        assert entities_state_8[1].entity_name == "binary_sensor.motion_2"
-        assert entities_state_8[1].expected_value == {
+        assert entities_state_9[1].parent == 2
+        assert entities_state_9[1].position == 4
+        assert entities_state_9[1].parameter_role == START
+        assert entities_state_9[1].integration == "binary_sensor"
+        assert entities_state_9[1].entity_name == "binary_sensor.motion_2"
+        assert entities_state_9[1].expected_value == {
             CONF_TO: [
                 "binary_sensor.motion_3",
                 "unknown",
@@ -1468,59 +1491,62 @@ async def test_trigger_entities():
                 "on",
             ]
         }
-        assert entities_state_8[2].parent == 1
-        assert entities_state_8[2].position == 5
-        assert entities_state_8[2].parameter_role == START
-        assert entities_state_8[2].integration == "binary_sensor"
-        assert entities_state_8[2].entity_name == "binary_sensor.motion_3"
-        assert entities_state_8[3].parent == 1
-        assert entities_state_8[3].position == 6
-        assert entities_state_8[3].parameter_role == START
-        assert entities_state_8[3].integration == "binary_sensor"
-        assert entities_state_8[3].entity_name == "binary_sensor.motion_4"
+        assert entities_state_9[2].parent == 1
+        assert entities_state_9[2].position == 5
+        assert entities_state_9[2].parameter_role == START
+        assert entities_state_9[2].integration == "binary_sensor"
+        assert entities_state_9[2].entity_name == "binary_sensor.motion_3"
+        assert entities_state_9[3].parent == 1
+        assert entities_state_9[3].position == 6
+        assert entities_state_9[3].parameter_role == START
+        assert entities_state_9[3].integration == "binary_sensor"
+        assert entities_state_9[3].entity_name == "binary_sensor.motion_4"
         assert end_position == 6
 
-        entities_state_8_input = ["test1", "off", "test1", "test"]
-        assert (await run_automation(file_path, entities_state_8_input, [])) == {
+        # border test cases - the list build like this [CONF_TO, CONF_ENTITY_ID/s]
+        trigger_part_state_9_input = ["test1", "test", "test1", "off"]
+        assert (await run_automation(file_path, trigger_part_state_9_input, [])) == {
             "triggered": True,
             "trigger_id": None,
         }
 
-        entities_state_8_input = ["off", "test1", "test", "test1"]
-        assert (await run_automation(file_path, entities_state_8_input, [])) == {
-            "triggered": True,
-            "trigger_id": None,
-        }
-
-        entities_state_8_input = ["on", "off", "off", "on"]
-        assert (await run_automation(file_path, entities_state_8_input, [])) == {
-            "triggered": True,
-            "trigger_id": None,
-        }
-
-        entities_state_8_input = [None, None, "off", "off"]
-        assert (await run_automation(file_path, entities_state_8_input, [])) == {
+        trigger_part_state_9_input = ["test1", "test1", "test", "off"]
+        assert (await run_automation(file_path, trigger_part_state_9_input, [])) == {
             "triggered": False,
             "trigger_id": None,
         }
 
-        entities_state_8_input = [None, "unknown", None, None]
-        assert (await run_automation(file_path, entities_state_8_input, [])) == {
+        trigger_part_state_9_input = ["on", "off", "off", "on"]
+        assert (await run_automation(file_path, trigger_part_state_9_input, [])) == {
             "triggered": True,
             "trigger_id": None,
         }
 
-        entities_state_8_input = ["on", None, None, None]
-        assert (await run_automation(file_path, entities_state_8_input, [])) == {
-            "triggered": True,
-            "trigger_id": None,
-        }
-
-        entities_state_8_input = [None, None, None, None]
-        assert (await run_automation(file_path, entities_state_8_input, [])) == {
+        trigger_part_state_9_input = [None, None, "off", "off"]
+        assert (await run_automation(file_path, trigger_part_state_9_input, [])) == {
             "triggered": False,
             "trigger_id": None,
         }
+
+        trigger_part_state_9_input = [None, None, "unknown", None]
+        assert (await run_automation(file_path, trigger_part_state_9_input, [])) == {
+            "triggered": True,
+            "trigger_id": None,
+        }
+
+        trigger_part_state_9_input = [None, None, None, "on"]
+        assert (await run_automation(file_path, trigger_part_state_9_input, [])) == {
+            "triggered": True,
+            "trigger_id": None,
+        }
+
+        trigger_part_state_9_input = [None, None, None, None]
+        assert (await run_automation(file_path, trigger_part_state_9_input, [])) == {
+            "triggered": False,
+            "trigger_id": None,
+        }
+
+        real_pos == 4
 
     async def test_trigger_sun():
         # Test case 23: Sun trigger
@@ -2586,7 +2612,7 @@ async def test_trigger_entities():
         assert real_pos == 1
 
     async def test_trigger_conversation():
-        # Test case 49: Trigger when conversation has an intentional_name command
+        # Test case 1: Trigger when conversation has an intentional_name command
         trigger_part_conversation_1 = {
             CONF_PLATFORM: "conversation",
             CONF_COMMAND: "intentional_name",
@@ -2629,7 +2655,7 @@ async def test_trigger_entities():
 
         assert real_pos == 1
 
-        # Test case 50: Trigger when conversation has a be my guest command or a intentional_name command
+        # Test case 2: Trigger when conversation has a be my guest command or a intentional_name command
         trigger_part_conversation_2 = {
             CONF_PLATFORM: "conversation",
             CONF_COMMAND: ["intentional_name", "be my guest"],
@@ -2694,7 +2720,7 @@ async def test_trigger_entities():
         assert real_pos == 2
 
     async def test_trigger_unsupported():
-        # Test case 51: Unsupported platform
+        # Test case 1: Unsupported platform
         trigger_part_x = {CONF_PLATFORM: "unsupported"}
         file_path = init_automation_script("trigger_part_x", TRIGGER_DIR)
         results = _trigger_entities(
@@ -2718,7 +2744,7 @@ async def test_trigger_entities():
 
         assert real_pos == 0
 
-        # Test case 52: State trigger with disabled set to false
+        # Test case 2: State trigger with disabled set to false
         trigger_part_x2 = {
             CONF_PLATFORM: "state",
             CONF_ENABLED: False,
@@ -2827,9 +2853,7 @@ async def test_condition_entities():
         condition_part_num_state_1_input = [None]
         assert (
             await run_automation(file_path, [], condition_part_num_state_1_input)
-        ) == {
-            "condition_passed": False,
-        }
+        ) == {"ValueError": "Condition values cannot be None"}
 
         assert real_pos == 1
 
@@ -2884,9 +2908,7 @@ async def test_condition_entities():
         condition_part_num_state_2_input = [None]
         assert (
             await run_automation(file_path, [], condition_part_num_state_2_input)
-        ) == {
-            "condition_passed": False,
-        }
+        ) == {"ValueError": "Condition values cannot be None"}
 
         assert real_pos == 1
 
@@ -2956,9 +2978,7 @@ async def test_condition_entities():
         condition_part_num_state_3_input = [None]
         assert (
             await run_automation(file_path, [], condition_part_num_state_3_input)
-        ) == {
-            "condition_passed": False,
-        }
+        ) == {"ValueError": "Condition values cannot be None"}
 
         assert real_pos == 1
 
@@ -3023,7 +3043,7 @@ async def test_condition_entities():
         condition_part_num_state_4_input = [None]
         assert (
             await run_automation(file_path, [], condition_part_num_state_4_input)
-        ) == {"condition_passed": False}
+        ) == {"ValueError": "Condition values cannot be None"}
 
         assert real_pos == 1
 
@@ -3071,6 +3091,9 @@ async def test_condition_entities():
         ) == {"condition_passed": False}
 
         condition_part_num_state_5_input = [None]
+        assert (
+            await run_automation(file_path, [], condition_part_num_state_5_input)
+        ) == {"ValueError": "Condition values cannot be None"}
         assert real_pos == 1
 
         # Test case 6: Numeric state condition with below value and two entities
@@ -3129,23 +3152,17 @@ async def test_condition_entities():
         condition_part_num_state_6_input = [None, 45]
         assert (
             await run_automation(file_path, [], condition_part_num_state_6_input)
-        ) == {
-            "condition_passed": False,
-        }
+        ) == {"ValueError": "Condition values cannot be None"}
 
         condition_part_num_state_6_input = [40, None]
         assert (
             await run_automation(file_path, [], condition_part_num_state_6_input)
-        ) == {
-            "condition_passed": False,
-        }
+        ) == {"ValueError": "Condition values cannot be None"}
 
         condition_part_num_state_6_input = [None, None]
         assert (
             await run_automation(file_path, [], condition_part_num_state_6_input)
-        ) == {
-            "condition_passed": False,
-        }
+        ) == {"ValueError": "Condition values cannot be None"}
 
         assert real_pos == 2
 
@@ -3199,9 +3216,7 @@ async def test_condition_entities():
         condition_part_num_state_7_input = [None]
         assert (
             await run_automation(file_path, [], condition_part_num_state_7_input)
-        ) == {
-            "condition_passed": False,
-        }
+        ) == {"ValueError": "Condition values cannot be None"}
 
         assert real_pos == 1
 
@@ -3249,9 +3264,7 @@ async def test_condition_entities():
         condition_part_num_state_8_input = [None]
         assert (
             await run_automation(file_path, [], condition_part_num_state_8_input)
-        ) == {
-            "condition_passed": False,
-        }
+        ) == {"ValueError": "Condition values cannot be None"}
 
         real_pos == 1
 
@@ -3315,23 +3328,17 @@ async def test_condition_entities():
         condition_part_num_state_9_input = [None, 25]
         assert (
             await run_automation(file_path, [], condition_part_num_state_9_input)
-        ) == {
-            "condition_passed": True,
-        }
+        ) == {"ValueError": "Condition values cannot be None"}
 
         condition_part_num_state_9_input = [25, None]
         assert (
             await run_automation(file_path, [], condition_part_num_state_9_input)
-        ) == {
-            "condition_passed": False,
-        }
+        ) == {"ValueError": "Condition values cannot be None"}
 
         condition_part_num_state_9_input = [None, None]
         assert (
             await run_automation(file_path, [], condition_part_num_state_9_input)
-        ) == {
-            "condition_passed": False,
-        }
+        ) == {"ValueError": "Condition values cannot be None"}
 
         assert real_pos == 2
 
@@ -3395,57 +3402,55 @@ async def test_condition_entities():
         condition_part_num_state_10_input = ["", "", 10, 20, 20, 30]
         assert (
             await run_automation(file_path, [], condition_part_num_state_10_input)
-        ) == {"condition_passed": True,}
+        ) == {
+            "condition_passed": True,
+        }
 
         condition_part_num_state_10_input = ["", "", 23, 20, 20, 30]
         assert (
             await run_automation(file_path, [], condition_part_num_state_10_input)
-        ) == {"condition_passed": False,}
+        ) == {
+            "condition_passed": False,
+        }
 
         condition_part_num_state_10_input = ["", "", 10, 20, 20, 19]
         assert (
             await run_automation(file_path, [], condition_part_num_state_10_input)
-        ) == {"condition_passed": False,}
+        ) == {
+            "condition_passed": False,
+        }
 
         condition_part_num_state_10_input = ["", "", 10, 20, 18, 19]
         assert (
             await run_automation(file_path, [], condition_part_num_state_10_input)
-        ) == {"condition_passed": False,}
+        ) == {
+            "condition_passed": False,
+        }
 
         condition_part_num_state_10_input = ["", "", None, None, 20, None]
         assert (
             await run_automation(file_path, [], condition_part_num_state_10_input)
-        ) == {"condition_passed": False,}
+        ) == {"ValueError": "Condition values cannot be None"}
 
         condition_part_num_state_10_input = ["", "", None, 20, None, 544]
         assert (
             await run_automation(file_path, [], condition_part_num_state_10_input)
-        ) == {"condition_passed": False,}
+        ) == {"ValueError": "Condition values cannot be None"}
 
         condition_part_num_state_10_input = ["", "", 2, 20, None, None]
         assert (
             await run_automation(file_path, [], condition_part_num_state_10_input)
-        ) == {"condition_passed": False,}
-
-        condition_part_num_state_10_input = ["", "", 2, None, None, None]
-        assert (
-            await run_automation(file_path, [], condition_part_num_state_10_input)
-        ) == {"condition_passed": False,}
-
-        condition_part_num_state_10_input = ["", "", 2, None, None, 50]
-        assert (
-            await run_automation(file_path, [], condition_part_num_state_10_input)
-        ) == {"condition_passed": False,}
+        ) == {"ValueError": "Condition values cannot be None"}
 
         condition_part_num_state_10_input = ["", "", None, None, None, None]
         assert (
             await run_automation(file_path, [], condition_part_num_state_10_input)
-        ) == {"condition_passed": False,}
+        ) == {"ValueError": "Condition values cannot be None"}
 
         assert real_pos == 6
 
     async def test_condition_state():
-        # Test case 8: State condition with one entity in that state
+        # Test case 1: State condition with one entity in that state
         condition_part_state_1 = {
             CONF_CONDITION: CONF_STATE,
             CONF_ENTITY_ID: ["binary_sensor.motion"],
@@ -3468,7 +3473,25 @@ async def test_condition_entities():
         assert entities_state_1[0].expected_value == {"state": "on"}
         assert end_position == 1
 
-        # Test case 9: State condition with one entity in that state and for a specific time
+        condition_part_state_1_input = ["on"]
+        assert (await run_automation(file_path, [], condition_part_state_1_input)) == {
+            "condition_passed": True,
+        }
+
+        for state_val in ["off", "unavailable", "unknown"]:
+            condition_part_state_1_input = [state_val]
+            assert (
+                await run_automation(file_path, [], condition_part_state_1_input)
+            ) == {"condition_passed": False}
+
+        condition_part_state_1_input = [None]
+        assert (await run_automation(file_path, [], condition_part_state_1_input)) == {
+            "ValueError": "Condition values cannot be None"
+        }
+
+        real_pos == 1
+
+        # Test case 2: State condition with one entity in that state and for a specific time
         condition_part_state_2 = {
             CONF_CONDITION: CONF_STATE,
             CONF_ENTITY_ID: ["binary_sensor.motion"],
@@ -3492,7 +3515,27 @@ async def test_condition_entities():
         assert entities_state_2[0].expected_value == {"state": "off", "for": "00:05:00"}
         assert end_position == 1
 
-        # Test case 10: State condition with two entities in that state
+        condition_part_state_2_input = ["off"]
+        assert (await run_automation(file_path, [], condition_part_state_2_input)) == {
+            "condition_passed": True,
+        }
+
+        for state_val in ["on", "unavailable", "unknown"]:
+            condition_part_state_2_input = [state_val]
+            assert (
+                await run_automation(file_path, [], condition_part_state_2_input)
+            ) == {
+                "condition_passed": False,
+            }
+
+        condition_part_state_2_input = [None]
+        assert (await run_automation(file_path, [], condition_part_state_2_input)) == {
+            "ValueError": "Condition values cannot be None"
+        }
+
+        real_pos == 1
+
+        # Test case 3: State condition with two entities in that state
         condition_part_state_3 = {
             CONF_CONDITION: CONF_STATE,
             CONF_ENTITY_ID: ["binary_sensor.motion", "switch.light"],
@@ -3521,7 +3564,34 @@ async def test_condition_entities():
         assert entities_state_3[1].expected_value == {"state": "off"}
         assert end_position == 3
 
-        # Test case 11: State condition with one entity in that state and at a specific position
+        condition_part_state_3_input = ["on", "off"]
+        assert (await run_automation(file_path, [], condition_part_state_3_input)) == {
+            "condition_passed": False,
+        }
+
+        condition_part_state_3_input = ["off", "on"]
+        assert (await run_automation(file_path, [], condition_part_state_3_input)) == {
+            "condition_passed": False,
+        }
+
+        condition_part_state_3_input = ["off", "off"]
+        assert (await run_automation(file_path, [], condition_part_state_3_input)) == {
+            "condition_passed": True,
+        }
+
+        condition_part_state_3_input = ["on", None]
+        assert (await run_automation(file_path, [], condition_part_state_3_input)) == {
+            "ValueError": "Condition values cannot be None"
+        }
+
+        condition_part_state_3_input = [None, None]
+        assert (await run_automation(file_path, [], condition_part_state_3_input)) == {
+            "ValueError": "Condition values cannot be None"
+        }
+
+        assert real_pos == 2
+
+        # Test case 4: State condition with one entity in that state and at a specific position
         condition_part_state_4 = {
             CONF_CONDITION: CONF_STATE,
             CONF_ENTITY_ID: ["binary_sensor.motion"],
@@ -3529,7 +3599,13 @@ async def test_condition_entities():
         }
         file_path = init_automation_script("condition_part_state_4", CONDITION_DIR)
         test_trigger_fill(file_path)
-        results = _condition_entities(condition_part_state_4, position=4, parent=2)
+        results = _condition_entities(
+            condition_part_state_4,
+            position=4,
+            parent=2,
+            real_position=0,
+            script_path=file_path,
+        )
         test_condition_return(file_path)
 
         entities_state_4, end_position, real_pos = results
@@ -3542,7 +3618,27 @@ async def test_condition_entities():
         assert entities_state_4[0].expected_value == {"state": "on"}
         assert end_position == 4
 
-        # Test case 12: State condition with two entities in that state and at a specific position
+        condition_part_state_4_input = ["on"]
+        assert (await run_automation(file_path, [], condition_part_state_4_input)) == {
+            "condition_passed": True,
+        }
+
+        for state_val in ["off", "unavailable", "unknown"]:
+            condition_part_state_4_input = [state_val]
+            assert (
+                await run_automation(file_path, [], condition_part_state_4_input)
+            ) == {
+                "condition_passed": False,
+            }
+
+        condition_part_state_4_input = [None]
+        assert (await run_automation(file_path, [], condition_part_state_4_input)) == {
+            "ValueError": "Condition values cannot be None"
+        }
+
+        real_pos == 1
+
+        # Test case 5: State condition with two entities in that state and at a specific position
         condition_part_state_5 = {
             CONF_CONDITION: CONF_STATE,
             CONF_ENTITY_ID: ["binary_sensor.motion", "switch.light"],
@@ -3550,7 +3646,13 @@ async def test_condition_entities():
         }
         file_path = init_automation_script("condition_part_state_5", CONDITION_DIR)
         test_trigger_fill(file_path)
-        results = _condition_entities(condition_part_state_5, position=4, parent=2)
+        results = _condition_entities(
+            condition_part_state_5,
+            position=4,
+            parent=2,
+            real_position=0,
+            script_path=file_path,
+        )
         test_condition_return(file_path)
 
         entities_state_5, end_position, real_pos = results
@@ -3569,7 +3671,34 @@ async def test_condition_entities():
         assert entities_state_5[1].expected_value == {"state": "off"}
         assert end_position == 6
 
-        # Test case 13: State condition with one entity in two possible states and at a specific position
+        condition_part_state_5_input = ["on", "off"]
+        assert (await run_automation(file_path, [], condition_part_state_5_input)) == {
+            "condition_passed": False,
+        }
+
+        condition_part_state_5_input = ["off", "on"]
+        assert (await run_automation(file_path, [], condition_part_state_5_input)) == {
+            "condition_passed": False,
+        }
+
+        condition_part_state_5_input = ["off", "off"]
+        assert (await run_automation(file_path, [], condition_part_state_5_input)) == {
+            "condition_passed": True,
+        }
+
+        condition_part_state_5_input = ["on", None]
+        assert (await run_automation(file_path, [], condition_part_state_5_input)) == {
+            "ValueError": "Condition values cannot be None"
+        }
+
+        condition_part_state_5_input = [None, None]
+        assert (await run_automation(file_path, [], condition_part_state_5_input)) == {
+            "ValueError": "Condition values cannot be None"
+        }
+
+        assert real_pos == 2
+
+        # Test case 6: State condition with one entity in two possible states and at a specific position
         condition_part_state_6 = {
             CONF_CONDITION: CONF_STATE,
             CONF_ENTITY_ID: ["binary_sensor.motion"],
@@ -3577,7 +3706,13 @@ async def test_condition_entities():
         }
         file_path = init_automation_script("condition_part_state_6", CONDITION_DIR)
         test_trigger_fill(file_path)
-        results = _condition_entities(condition_part_state_6, position=4, parent=2)
+        results = _condition_entities(
+            condition_part_state_6,
+            position=4,
+            parent=2,
+            real_position=0,
+            script_path=file_path,
+        )
         test_condition_return(file_path)
 
         entities_state_6, end_position, real_pos = results
@@ -3590,7 +3725,32 @@ async def test_condition_entities():
         assert entities_state_6[0].expected_value == {"state": ["on", "off"]}
         assert end_position == 4
 
-        # Test case 14: State condition with two entity two possible states and at a specific position
+        condition_part_state_6_input = ["off"]
+        assert (await run_automation(file_path, [], condition_part_state_6_input)) == {
+            "condition_passed": True,
+        }
+
+        condition_part_state_6_input = ["off"]
+        assert (await run_automation(file_path, [], condition_part_state_6_input)) == {
+            "condition_passed": True,
+        }
+
+        for state_val in ["unavailable", "unknown"]:
+            condition_part_state_6_input = [state_val]
+            assert (
+                await run_automation(file_path, [], condition_part_state_6_input)
+            ) == {
+                "condition_passed": False,
+            }
+
+        condition_part_state_6_input = [None]
+        assert (await run_automation(file_path, [], condition_part_state_6_input)) == {
+            "ValueError": "Condition values cannot be None"
+        }
+
+        real_pos == 1
+
+        # Test case 7: State condition with two entity two possible states and at a specific position
         condition_part_state_7 = {
             CONF_CONDITION: CONF_STATE,
             CONF_ENTITY_ID: ["binary_sensor.motion", "switch.light"],
@@ -3598,7 +3758,13 @@ async def test_condition_entities():
         }
         file_path = init_automation_script("condition_part_state_7", CONDITION_DIR)
         test_trigger_fill(file_path)
-        results = _condition_entities(condition_part_state_7, position=4, parent=2)
+        results = _condition_entities(
+            condition_part_state_7,
+            position=4,
+            parent=2,
+            real_position=0,
+            script_path=file_path,
+        )
         test_condition_return(file_path)
 
         entities_state_7, end_position, real_pos = results
@@ -3617,8 +3783,962 @@ async def test_condition_entities():
         assert entities_state_7[1].expected_value == {"state": ["on", "off"]}
         assert end_position == 6
 
+        # Test case 8: State condition with conditional entity state
+        condition_part_state_8 = {
+            CONF_CONDITION: CONF_STATE,
+            CONF_ENTITY_ID: ["binary_sensor.motion"],
+            CONF_STATE: "binary_sensor.motion_2",
+        }
+        file_path = init_automation_script("condition_part_state_8", CONDITION_DIR)
+        test_trigger_fill(file_path)
+        results = _condition_entities(
+            condition_part_state_8, position=1, real_position=0, script_path=file_path
+        )
+        test_condition_return(file_path)
+
+        entities_state_8, end_position, real_pos = results
+        assert len(entities_state_8) == 2
+        assert entities_state_8[0].parent == 1
+        assert entities_state_8[0].position == 2
+        assert entities_state_8[0].parameter_role == INPUT
+        assert entities_state_8[0].integration == "binary_sensor"
+        assert entities_state_8[0].entity_name == "binary_sensor.motion"
+        assert entities_state_8[0].expected_value == {
+            CONF_STATE: "binary_sensor.motion_2"
+        }
+        assert entities_state_8[1].parent == 1
+        assert entities_state_8[1].position == 3
+        assert entities_state_8[1].parameter_role == INPUT
+        assert entities_state_8[1].integration == "binary_sensor"
+        assert entities_state_8[1].entity_name == "binary_sensor.motion_2"
+        assert end_position == 3
+
+        # border test cases - the list build like this [CONF_STATE/s, CONF_ENTITY_ID/s]
+        condition_part_state_8_input = ["on", "off"]
+        assert (await run_automation(file_path, [], condition_part_state_8_input)) == {
+            "condition_passed": False,
+        }
+
+        condition_part_state_8_input = ["off", "off"]
+        assert (await run_automation(file_path, [], condition_part_state_8_input)) == {
+            "condition_passed": True,
+        }
+
+        condition_part_state_8_input = ["on", "on"]
+        assert (await run_automation(file_path, [], condition_part_state_8_input)) == {
+            "condition_passed": True,
+        }
+
+        condition_part_state_8_input = [None, "on"]
+        assert (await run_automation(file_path, [], condition_part_state_8_input)) == {
+            "ValueError": "Condition values cannot be None"
+        }
+
+        condition_part_state_8_input = [None, None]
+        assert (await run_automation(file_path, [], condition_part_state_8_input)) == {
+            "ValueError": "Condition values cannot be None"
+        }
+
+        assert real_pos == 2
+
+        # Test case 9: State condition with multiple entity ids and conditional entity state
+        condition_part_state_9 = {
+            CONF_CONDITION: CONF_STATE,
+            CONF_ENTITY_ID: ["binary_sensor.motion", "binary_sensor.motion_2"],
+            CONF_STATE: [
+                "binary_sensor.motion_3",
+                "unknown",
+                "binary_sensor.motion_4",
+                "on",
+            ],
+        }
+        file_path = init_automation_script("condition_part_state_9", CONDITION_DIR)
+        test_trigger_fill(file_path)
+        results = _condition_entities(
+            condition_part_state_9, position=1, real_position=0, script_path=file_path
+        )
+        test_condition_return(file_path)
+
+        entities_state_9, end_position, real_pos = results
+        assert len(entities_state_9) == 4
+        assert entities_state_9[0].parent == 2
+        assert entities_state_9[0].position == 3
+        assert entities_state_9[0].parameter_role == INPUT
+        assert entities_state_9[0].integration == "binary_sensor"
+        assert entities_state_9[0].entity_name == "binary_sensor.motion"
+        assert entities_state_9[0].expected_value == {
+            CONF_STATE: [
+                "binary_sensor.motion_3",
+                "unknown",
+                "binary_sensor.motion_4",
+                "on",
+            ]
+        }
+        assert entities_state_9[1].parent == 2
+        assert entities_state_9[1].position == 4
+        assert entities_state_9[1].parameter_role == INPUT
+        assert entities_state_9[1].integration == "binary_sensor"
+        assert entities_state_9[1].entity_name == "binary_sensor.motion_2"
+        assert entities_state_9[1].expected_value == {
+            CONF_STATE: [
+                "binary_sensor.motion_3",
+                "unknown",
+                "binary_sensor.motion_4",
+                "on",
+            ]
+        }
+        assert entities_state_9[2].parent == 1
+        assert entities_state_9[2].position == 5
+        assert entities_state_9[2].parameter_role == INPUT
+        assert entities_state_9[2].integration == "binary_sensor"
+        assert entities_state_9[2].entity_name == "binary_sensor.motion_3"
+        assert entities_state_9[3].parent == 1
+        assert entities_state_9[3].position == 6
+        assert entities_state_9[3].parameter_role == INPUT
+        assert entities_state_9[3].integration == "binary_sensor"
+        assert entities_state_9[3].entity_name == "binary_sensor.motion_4"
+        assert end_position == 6
+
+        # border test cases - the list build like this [CONF_STATE/s, CONF_ENTITY_ID/s]
+        condition_part_state_9_input = ["test1", "test", "test1", "on"]
+        assert (
+            await run_automation(
+                file_path,
+                [],
+                condition_part_state_9_input,
+            )
+        ) == {
+            "condition_passed": True,
+        }
+
+        condition_part_state_9_input = ["test", "test1", "on", "test1"]
+        assert (
+            await run_automation(
+                file_path,
+                [],
+                condition_part_state_9_input,
+            )
+        ) == {
+            "condition_passed": True,
+        }
+
+        condition_part_state_9_input = ["on", "Test1", "Test1", "Test1"]
+        assert (
+            await run_automation(
+                file_path,
+                [],
+                condition_part_state_9_input,
+            )
+        ) == {
+            "condition_passed": True,
+        }
+
+        condition_part_state_9_input = ["Test1", "off", "Test1", "Test1"]
+        assert (
+            await run_automation(
+                file_path,
+                [],
+                condition_part_state_9_input,
+            )
+        ) == {
+            "condition_passed": True,
+        }
+
+        condition_part_state_9_input = [None, None, "off", "off"]
+        assert (
+            await run_automation(
+                file_path,
+                [],
+                condition_part_state_9_input,
+            )
+        ) == {"ValueError": "Condition values cannot be None"}
+
+        condition_part_state_9_input = [None, None, "unknown", None]
+        assert (
+            await run_automation(
+                file_path,
+                [],
+                condition_part_state_9_input,
+            )
+        ) == {"ValueError": "Condition values cannot be None"}
+
+        condition_part_state_9_input = [None, None, "on", None]
+        assert (
+            await run_automation(
+                file_path,
+                [],
+                condition_part_state_9_input,
+            )
+        ) == {"ValueError": "Condition values cannot be None"}
+
+        condition_part_state_9_input = [None, None, None, None]
+        assert (
+            await run_automation(
+                file_path,
+                [],
+                condition_part_state_9_input,
+            )
+        ) == {"ValueError": "Condition values cannot be None"}
+
+        real_pos == 4
+
+    async def test_condition_or():
+        # test with one entity
+        condition_part_or_1 = {
+            CONF_CONDITION: CONF_OR,
+            CONF_CONDITIONS: [
+                {
+                    CONF_CONDITION: CONF_STATE,
+                    CONF_ENTITY_ID: "binary_sensor.motion",
+                    CONF_STATE: "on",
+                },
+            ],
+        }
+        file_path = init_automation_script("condition_part_or_1", CONDITION_DIR)
+        test_trigger_fill(file_path)
+        results = _condition_entities(
+            condition_part_or_1,
+            position=1,
+            real_position=0,
+            script_path=file_path,
+        )
+        test_condition_return(file_path)
+
+        entities_or_1, end_position, real_pos = results
+        assert len(entities_or_1) == 1
+        assert entities_or_1[0].parent == 1
+        assert entities_or_1[0].position == 2
+        assert entities_or_1[0].parameter_role == INPUT
+        assert entities_or_1[0].integration == "binary_sensor"
+        assert entities_or_1[0].entity_name == "binary_sensor.motion"
+        assert entities_or_1[0].expected_value == {CONF_STATE: "on"}
+        assert end_position == 2
+
+        condition_part_or_1_input = ["on"]
+        assert (await run_automation(file_path, [], condition_part_or_1_input)) == {
+            "condition_passed": True,
+        }
+
+        for state_val in ["off", "unavailable", "unknown"]:
+            condition_part_or_1_input = [state_val]
+            assert (await run_automation(file_path, [], condition_part_or_1_input)) == {
+                "condition_passed": False,
+            }
+
+        condition_part_or_1_input = [None]
+        assert (await run_automation(file_path, [], condition_part_or_1_input)) == {
+            "ValueError": "Condition values cannot be None"
+        }
+
+        real_pos == 1
+
+        # test with two entities
+        condition_part_or_2 = {
+            CONF_CONDITION: CONF_OR,
+            CONF_CONDITIONS: [
+                {
+                    CONF_CONDITION: CONF_NUMERIC_STATE,
+                    CONF_ENTITY_ID: ["binary_sensor.motion"],
+                    CONF_ABOVE: 10,
+                },
+                {
+                    CONF_CONDITION: CONF_STATE,
+                    CONF_ENTITY_ID: "binary_sensor.motion_2",
+                    CONF_STATE: "off",
+                },
+            ],
+        }
+        file_path = init_automation_script("condition_part_or_2", CONDITION_DIR)
+        test_trigger_fill(file_path)
+        results = _condition_entities(
+            condition_part_or_2,
+            position=1,
+            real_position=0,
+            script_path=file_path,
+        )
+        test_condition_return(file_path)
+
+        entities_or_2, end_position, real_pos = results
+        assert len(entities_or_2) == 2
+        assert entities_or_2[0].parent == 1
+        assert entities_or_2[0].position == 2
+        assert entities_or_2[0].parameter_role == INPUT
+        assert entities_or_2[0].integration == "binary_sensor"
+        assert entities_or_2[0].entity_name == "binary_sensor.motion"
+        assert entities_or_2[0].expected_value == {CONF_ABOVE: 10}
+        assert entities_or_2[1].parent == 1
+        assert entities_or_2[1].position == 3
+        assert entities_or_2[1].parameter_role == INPUT
+        assert entities_or_2[1].integration == "binary_sensor"
+        assert entities_or_2[1].entity_name == "binary_sensor.motion_2"
+        assert entities_or_2[1].expected_value == {CONF_STATE: "off"}
+        assert end_position == 3
+
+        # border test cases - the list build like this [CONF_NUM_STATE, CONF_STATE]
+        # both conditions are True so the result is True
+        condition_part_or_2_input = [11, "off"]
+        assert (await run_automation(file_path, [], condition_part_or_2_input)) == {
+            "condition_passed": True,
+        }
+
+        # second condition is True so the result is True
+        condition_part_or_2_input = [9, "off"]
+        assert (await run_automation(file_path, [], condition_part_or_2_input)) == {
+            "condition_passed": True,
+        }
+
+        # first condition is True so the result is True
+        condition_part_or_2_input = [11, "on"]
+        assert (await run_automation(file_path, [], condition_part_or_2_input)) == {
+            "condition_passed": True,
+        }
+
+        # both conditions are False so the result is False
+        condition_part_or_2_input = [9, "on"]
+        assert (await run_automation(file_path, [], condition_part_or_2_input)) == {
+            "condition_passed": False,
+        }
+
+        # first condition is True so the result is True
+        condition_part_or_2_input = [11, None]
+        assert (await run_automation(file_path, [], condition_part_or_2_input)) == {
+            "ValueError": "Condition values cannot be None"
+        }
+
+        # both conditions are None so the result is False
+        condition_part_or_2_input = [None, None]
+        assert (await run_automation(file_path, [], condition_part_or_2_input)) == {
+            "ValueError": "Condition values cannot be None"
+        }
+
+        real_pos == 2
+
+        # test with three entities
+        condition_part_or_3 = {
+            CONF_CONDITION: CONF_OR,
+            CONF_CONDITIONS: [
+                {
+                    CONF_CONDITION: CONF_STATE,
+                    CONF_ENTITY_ID: ["binary_sensor.motion", "binary_sensor.motion_3"],
+                    CONF_STATE: "on",
+                },
+                {
+                    CONF_CONDITION: CONF_STATE,
+                    CONF_ENTITY_ID: "binary_sensor.motion_2",
+                    CONF_STATE: ["off", "unavailable", "sensor.temperature"],
+                },
+                {
+                    CONF_CONDITION: CONF_NUMERIC_STATE,
+                    CONF_ENTITY_ID: "sensor.temperature",
+                    CONF_BELOW: "sensor.temperature2",
+                    CONF_ABOVE: "sensor.temperature3",
+                },
+            ],
+        }
+        file_path = init_automation_script("condition_part_or_3", CONDITION_DIR)
+        test_trigger_fill(file_path)
+        results = _condition_entities(
+            condition_part_or_3,
+            position=1,
+            real_position=0,
+            script_path=file_path,
+        )
+        test_condition_return(file_path)
+
+        entities_or_3, end_position, real_pos = results
+        assert len(entities_or_3) == 7
+        assert entities_or_3[0].parent == 2
+        assert entities_or_3[0].position == 3
+        assert entities_or_3[0].parameter_role == INPUT
+        assert entities_or_3[0].integration == "binary_sensor"
+        assert entities_or_3[0].entity_name == "binary_sensor.motion"
+        assert entities_or_3[0].expected_value == {CONF_STATE: "on"}
+        assert entities_or_3[1].parent == 2
+        assert entities_or_3[1].position == 4
+        assert entities_or_3[1].parameter_role == INPUT
+        assert entities_or_3[1].integration == "binary_sensor"
+        assert entities_or_3[1].entity_name == "binary_sensor.motion_3"
+        assert entities_or_3[1].expected_value == {CONF_STATE: "on"}
+        assert entities_or_3[2].parent == 5
+        assert entities_or_3[2].position == 6
+        assert entities_or_3[2].parameter_role == INPUT
+        assert entities_or_3[2].integration == "binary_sensor"
+        assert entities_or_3[2].entity_name == "binary_sensor.motion_2"
+        assert entities_or_3[2].expected_value == {
+            CONF_STATE: ["off", "unavailable", "sensor.temperature"]
+        }
+        assert entities_or_3[3].parent == 5
+        assert entities_or_3[3].position == 7
+        assert entities_or_3[3].parameter_role == INPUT
+        assert entities_or_3[3].integration == "sensor"
+        assert entities_or_3[3].entity_name == "sensor.temperature"
+        assert entities_or_3[4].parent == 8
+        assert entities_or_3[4].position == 9
+        assert entities_or_3[4].parameter_role == INPUT
+        assert entities_or_3[4].integration == "sensor"
+        assert entities_or_3[4].entity_name == "sensor.temperature"
+        assert entities_or_3[4].expected_value == {
+            CONF_BELOW: "sensor.temperature2",
+            CONF_ABOVE: "sensor.temperature3",
+        }
+        assert entities_or_3[5].parent == 8
+        assert entities_or_3[5].position == 10
+        assert entities_or_3[5].parameter_role == INPUT
+        assert entities_or_3[5].integration == "sensor"
+        assert entities_or_3[5].entity_name == "sensor.temperature3"
+        assert entities_or_3[5].expected_value == {CONF_BELOW: "sensor.temperature"}
+        assert entities_or_3[6].parent == 8
+        assert entities_or_3[6].position == 11
+        assert entities_or_3[6].parameter_role == INPUT
+        assert entities_or_3[6].integration == "sensor"
+        assert entities_or_3[6].entity_name == "sensor.temperature2"
+        assert entities_or_3[6].expected_value == {CONF_ABOVE: "sensor.temperature"}
+        assert end_position == 11
+
+        # the structure of the input:
+        # ([(ENTITY_ID_STATE, ENTITY_ID_STATE), (ENTITY_ID_STATE, CONF_STATE), (CONF_ABOVE, ENTITY_ID_STATE, CONF_BELOW)])
+
+        # every condition is True so the result should be True
+        condition_part_or_3_input = ["on", "on", "off", 10, 5, 10, 20]
+        assert (await run_automation(file_path, [], condition_part_or_3_input)) == {
+            "condition_passed": True,
+        }
+
+        # only last condition is False so the result should be True
+        condition_part_or_3_input = ["on", "on", "off", 10, 5, 10, 5]
+        assert (await run_automation(file_path, [], condition_part_or_3_input)) == {
+            "condition_passed": True,
+        }
+
+        # only first two conditions are False so the result should be True
+        condition_part_or_3_input = ["off", "off", "on", 10, 5, 10, 20]
+        assert (await run_automation(file_path, [], condition_part_or_3_input)) == {
+            "condition_passed": True,
+        }
+
+        # all conditions are False so the result should be False
+        condition_part_or_3_input = ["off", "off", "on", 10, 5, 10, 5]
+        assert (await run_automation(file_path, [], condition_part_or_3_input)) == {
+            "condition_passed": False,
+        }
+
+        # all values are None so the result should be False
+        condition_part_or_3_input = [None, None, None, None, None, None, None]
+        assert (await run_automation(file_path, [], condition_part_or_3_input)) == {
+            "ValueError": "Condition values cannot be None"
+        }
+
+        assert real_pos == 7
+
+    async def test_condition_and():
+        # test with one entity
+        condition_part_and_1 = {
+            CONF_CONDITION: CONF_AND,
+            CONF_CONDITIONS: [
+                {
+                    CONF_CONDITION: CONF_STATE,
+                    CONF_ENTITY_ID: "binary_sensor.motion",
+                    CONF_STATE: "on",
+                },
+            ],
+        }
+        file_path = init_automation_script("condition_part_and_1", CONDITION_DIR)
+        test_trigger_fill(file_path)
+        results = _condition_entities(
+            condition_part_and_1,
+            position=1,
+            real_position=0,
+            script_path=file_path,
+        )
+        test_condition_return(file_path)
+
+        entities_and_1, end_position, real_pos = results
+        assert len(entities_and_1) == 1
+        assert entities_and_1[0].parent == 1
+        assert entities_and_1[0].position == 2
+        assert entities_and_1[0].parameter_role == INPUT
+        assert entities_and_1[0].integration == "binary_sensor"
+        assert entities_and_1[0].entity_name == "binary_sensor.motion"
+        assert entities_and_1[0].expected_value == {CONF_STATE: "on"}
+        assert end_position == 2
+
+        condition_part_and_1_input = ["on"]
+        assert (await run_automation(file_path, [], condition_part_and_1_input)) == {
+            "condition_passed": True,
+        }
+
+        for state_val in ["off", "unavailable", "unknown"]:
+            condition_part_and_1_input = [state_val]
+            assert (
+                await run_automation(file_path, [], condition_part_and_1_input)
+            ) == {
+                "condition_passed": False,
+            }
+
+        condition_part_and_1_input = [None]
+        assert (await run_automation(file_path, [], condition_part_and_1_input)) == {
+            "ValueError": "Condition values cannot be None"
+        }
+
+        real_pos == 1
+
+        # test with two entities
+        condition_part_and_2 = {
+            CONF_CONDITION: CONF_AND,
+            CONF_CONDITIONS: [
+                {
+                    CONF_CONDITION: CONF_NUMERIC_STATE,
+                    CONF_ENTITY_ID: ["binary_sensor.motion"],
+                    CONF_ABOVE: 10,
+                },
+                {
+                    CONF_CONDITION: CONF_STATE,
+                    CONF_ENTITY_ID: "binary_sensor.motion_2",
+                    CONF_STATE: "off",
+                },
+            ],
+        }
+        file_path = init_automation_script("condition_part_and_2", CONDITION_DIR)
+        test_trigger_fill(file_path)
+        results = _condition_entities(
+            condition_part_and_2,
+            position=1,
+            real_position=0,
+            script_path=file_path,
+        )
+        test_condition_return(file_path)
+
+        entities_and_2, end_position, real_pos = results
+        assert len(entities_and_2) == 2
+        assert entities_and_2[0].parent == 1
+        assert entities_and_2[0].position == 2
+        assert entities_and_2[0].parameter_role == INPUT
+        assert entities_and_2[0].integration == "binary_sensor"
+        assert entities_and_2[0].entity_name == "binary_sensor.motion"
+        assert entities_and_2[0].expected_value == {CONF_ABOVE: 10}
+        assert entities_and_2[1].parent == 1
+        assert entities_and_2[1].position == 3
+        assert entities_and_2[1].parameter_role == INPUT
+        assert entities_and_2[1].integration == "binary_sensor"
+        assert entities_and_2[1].entity_name == "binary_sensor.motion_2"
+        assert entities_and_2[1].expected_value == {CONF_STATE: "off"}
+        assert end_position == 3
+
+        # border test cases - the list build like this [CONF_NUM_STATE, CONF_STATE]
+        # both conditions are True so the result should be True
+        condition_part_and_2_input = [11, "off"]
+        assert (await run_automation(file_path, [], condition_part_and_2_input)) == {
+            "condition_passed": True,
+        }
+
+        # first condition is False so the result should be False
+        condition_part_and_2_input = [9, "off"]
+        assert (await run_automation(file_path, [], condition_part_and_2_input)) == {
+            "condition_passed": False,
+        }
+
+        # second condition is False so the result should be False
+        condition_part_and_2_input = [11, "on"]
+        assert (await run_automation(file_path, [], condition_part_and_2_input)) == {
+            "condition_passed": False,
+        }
+
+        # both conditions are False so the result should be False
+        condition_part_and_2_input = [9, "on"]
+        assert (await run_automation(file_path, [], condition_part_and_2_input)) == {
+            "condition_passed": False,
+        }
+
+        # the first condition is None so the result should be False
+        condition_part_and_2_input = [9, None]
+        assert (await run_automation(file_path, [], condition_part_and_2_input)) == {
+            "ValueError": "Condition values cannot be None"
+        }
+
+        # both values are None so the result should be False
+        condition_part_and_2_input = [None, None]
+        assert (await run_automation(file_path, [], condition_part_and_2_input)) == {
+            "ValueError": "Condition values cannot be None"
+        }
+        real_pos == 2
+
+        # test with three entities
+        condition_part_and_3 = {
+            CONF_CONDITION: CONF_AND,
+            CONF_CONDITIONS: [
+                {
+                    CONF_CONDITION: CONF_STATE,
+                    CONF_ENTITY_ID: ["binary_sensor.motion", "binary_sensor.motion_3"],
+                    CONF_STATE: "on",
+                },
+                {
+                    CONF_CONDITION: CONF_STATE,
+                    CONF_ENTITY_ID: "binary_sensor.motion_2",
+                    CONF_STATE: ["off", "unavailable", "sensor.temperature"],
+                },
+                {
+                    CONF_CONDITION: CONF_NUMERIC_STATE,
+                    CONF_ENTITY_ID: "sensor.temperature",
+                    CONF_BELOW: "sensor.temperature2",
+                    CONF_ABOVE: "sensor.temperature3",
+                },
+            ],
+        }
+        file_path = init_automation_script("condition_part_and_3", CONDITION_DIR)
+        test_trigger_fill(file_path)
+        results = _condition_entities(
+            condition_part_and_3,
+            position=1,
+            real_position=0,
+            script_path=file_path,
+        )
+        test_condition_return(file_path)
+
+        entities_and_3, end_position, real_pos = results
+        assert len(entities_and_3) == 7
+        assert entities_and_3[0].parent == 2
+        assert entities_and_3[0].position == 3
+        assert entities_and_3[0].parameter_role == INPUT
+        assert entities_and_3[0].integration == "binary_sensor"
+        assert entities_and_3[0].entity_name == "binary_sensor.motion"
+        assert entities_and_3[0].expected_value == {CONF_STATE: "on"}
+        assert entities_and_3[1].parent == 2
+        assert entities_and_3[1].position == 4
+        assert entities_and_3[1].parameter_role == INPUT
+        assert entities_and_3[1].integration == "binary_sensor"
+        assert entities_and_3[1].entity_name == "binary_sensor.motion_3"
+        assert entities_and_3[1].expected_value == {CONF_STATE: "on"}
+        assert entities_and_3[2].parent == 5
+        assert entities_and_3[2].position == 6
+        assert entities_and_3[2].parameter_role == INPUT
+        assert entities_and_3[2].integration == "binary_sensor"
+        assert entities_and_3[2].entity_name == "binary_sensor.motion_2"
+        assert entities_and_3[2].expected_value == {
+            CONF_STATE: ["off", "unavailable", "sensor.temperature"]
+        }
+        assert entities_and_3[3].parent == 5
+        assert entities_and_3[3].position == 7
+        assert entities_and_3[3].parameter_role == INPUT
+        assert entities_and_3[3].integration == "sensor"
+        assert entities_and_3[3].entity_name == "sensor.temperature"
+        assert entities_and_3[4].parent == 8
+        assert entities_and_3[4].position == 9
+        assert entities_and_3[4].parameter_role == INPUT
+        assert entities_and_3[4].integration == "sensor"
+        assert entities_and_3[4].entity_name == "sensor.temperature"
+        assert entities_and_3[4].expected_value == {
+            CONF_BELOW: "sensor.temperature2",
+            CONF_ABOVE: "sensor.temperature3",
+        }
+        assert entities_and_3[5].parent == 8
+        assert entities_and_3[5].position == 10
+        assert entities_and_3[5].parameter_role == INPUT
+        assert entities_and_3[5].integration == "sensor"
+        assert entities_and_3[5].entity_name == "sensor.temperature3"
+        assert entities_and_3[5].expected_value == {CONF_BELOW: "sensor.temperature"}
+        assert entities_and_3[6].parent == 8
+        assert entities_and_3[6].position == 11
+        assert entities_and_3[6].parameter_role == INPUT
+        assert entities_and_3[6].integration == "sensor"
+        assert entities_and_3[6].entity_name == "sensor.temperature2"
+        assert entities_and_3[6].expected_value == {CONF_ABOVE: "sensor.temperature"}
+        assert end_position == 11
+
+        # the structure of the input: ([(ENTITY_ID, ENTITY_ID), (EXP_ENTITY_STATE, ENTITY_ID), (BELOW, STATE, ABOVE)])
+        # every condition is True so the result should be True
+        condition_part_and_3_input = ["on", "on", 10, "off", 5, 10, 20]
+        assert (await run_automation(file_path, [], condition_part_and_3_input)) == {
+            "condition_passed": True,
+        }
+
+        # last condition is False so the result should be False
+        condition_part_and_3_input = ["on", "on", 10, "off", 5, 10, 5]
+        assert (await run_automation(file_path, [], condition_part_and_3_input)) == {
+            "condition_passed": False,
+        }
+
+        # first two conditions are False so the result should be False
+        condition_part_and_3_input = ["off", "off", 10, "on", 5, 10, 20]
+        assert (await run_automation(file_path, [], condition_part_and_3_input)) == {
+            "condition_passed": False,
+        }
+
+        # all conditions are False so the result should be False
+        condition_part_and_3_input = ["off", "off", 10, "on", 5, 10, 5]
+        assert (await run_automation(file_path, [], condition_part_and_3_input)) == {
+            "condition_passed": False,
+        }
+        
+        # all conditions are True and the second condition is like the comparing entity so the result should be True
+        condition_part_not_3_input = ["on", "on", "test1", "test1", 5, 10, 35]
+        assert (await run_automation(file_path, [], condition_part_not_3_input)) == {
+            "condition_passed": True,
+        }
+
+        # all values are None so the result should be False
+        condition_part_and_3_input = [None, None, None, None, None, None, None]
+        assert (await run_automation(file_path, [], condition_part_and_3_input)) == {
+            "ValueError": "Condition values cannot be None"
+        }
+
+        assert real_pos == 7
+
+    async def test_condition_not():
+        # test with one entity
+        condition_part_not_1 = {
+            CONF_CONDITION: CONF_NOT,
+            CONF_CONDITIONS: [
+                {
+                    CONF_CONDITION: CONF_STATE,
+                    CONF_ENTITY_ID: "binary_sensor.motion",
+                    CONF_STATE: "on",
+                },
+            ],
+        }
+        file_path = init_automation_script("condition_part_not_1", CONDITION_DIR)
+        test_trigger_fill(file_path)
+        results = _condition_entities(
+            condition_part_not_1,
+            position=1,
+            real_position=0,
+            script_path=file_path,
+        )
+        test_condition_return(file_path)
+
+        entities_not_1, end_position, real_pos = results
+        assert len(entities_not_1) == 1
+        assert entities_not_1[0].parent == 1
+        assert entities_not_1[0].position == 2
+        assert entities_not_1[0].parameter_role == INPUT
+        assert entities_not_1[0].integration == "binary_sensor"
+        assert entities_not_1[0].entity_name == "binary_sensor.motion"
+        assert entities_not_1[0].expected_value == {CONF_STATE: "on"}
+        assert end_position == 2
+
+        condition_part_not_1_input = ["on"]
+        assert (await run_automation(file_path, [], condition_part_not_1_input)) == {
+            "condition_passed": False,
+        }
+
+        for state_val in ["off", "unavailable", "unknown"]:
+            condition_part_not_1_input = [state_val]
+            assert (
+                await run_automation(file_path, [], condition_part_not_1_input)
+            ) == {
+                "condition_passed": True,
+            }
+
+        condition_part_not_1_input = [None]
+        assert (await run_automation(file_path, [], condition_part_not_1_input)) == {
+            "ValueError": "Condition values cannot be None"
+        }
+
+        real_pos == 1
+
+        # test with two entities
+        condition_part_not_2 = {
+            CONF_CONDITION: CONF_NOT,
+            CONF_CONDITIONS: [
+                {
+                    CONF_CONDITION: CONF_NUMERIC_STATE,
+                    CONF_ENTITY_ID: ["binary_sensor.motion"],
+                    CONF_ABOVE: 10,
+                },
+                {
+                    CONF_CONDITION: CONF_STATE,
+                    CONF_ENTITY_ID: "binary_sensor.motion_2",
+                    CONF_STATE: "off",
+                },
+            ],
+        }
+        file_path = init_automation_script("condition_part_not_2", CONDITION_DIR)
+        test_trigger_fill(file_path)
+        results = _condition_entities(
+            condition_part_not_2,
+            position=1,
+            real_position=0,
+            script_path=file_path,
+        )
+        test_condition_return(file_path)
+
+        entities_not_2, end_position, real_pos = results
+        assert len(entities_not_2) == 2
+        assert entities_not_2[0].parent == 1
+        assert entities_not_2[0].position == 2
+        assert entities_not_2[0].parameter_role == INPUT
+        assert entities_not_2[0].integration == "binary_sensor"
+        assert entities_not_2[0].entity_name == "binary_sensor.motion"
+        assert entities_not_2[0].expected_value == {CONF_ABOVE: 10}
+        assert entities_not_2[1].parent == 1
+        assert entities_not_2[1].position == 3
+        assert entities_not_2[1].parameter_role == INPUT
+        assert entities_not_2[1].integration == "binary_sensor"
+        assert entities_not_2[1].entity_name == "binary_sensor.motion_2"
+        assert entities_not_2[1].expected_value == {CONF_STATE: "off"}
+        assert end_position == 3
+
+        # border test cases - the list build like this [CONF_NUM_STATE, CONF_STATE]
+        # both conditions are True so the result should be False
+        condition_part_not_2_input = [11, "off"]
+        assert (await run_automation(file_path, [], condition_part_not_2_input)) == {
+            "condition_passed": False,
+        }
+
+        # the second condition is True so the result is False
+        condition_part_not_2_input = [9, "off"]
+        assert (await run_automation(file_path, [], condition_part_not_2_input)) == {
+            "condition_passed": False,
+        }
+
+        # the first condition is True so the result should be False
+        condition_part_not_2_input = [11, "on"]
+        assert (await run_automation(file_path, [], condition_part_not_2_input)) == {
+            "condition_passed": False,
+        }
+
+        # both conditions are False so the result is True
+        condition_part_not_2_input = [9, "on"]
+        assert (await run_automation(file_path, [], condition_part_not_2_input)) == {
+            "condition_passed": True,
+        }
+
+        #  the first condition is True so the result should be False
+        condition_part_not_2_input = [11, None]
+        assert (await run_automation(file_path, [], condition_part_not_2_input)) == {
+            "ValueError": "Condition values cannot be None"
+        }
+
+        # the first condition is False and the second condition is None so the result should be True
+        condition_part_not_2_input = [9, None]
+        assert (await run_automation(file_path, [], condition_part_not_2_input)) == {
+            "ValueError": "Condition values cannot be None"
+        }
+
+        # both values are None so the result should be True
+        condition_part_not_2_input = [None, None]
+        assert (await run_automation(file_path, [], condition_part_not_2_input)) == {
+            "ValueError": "Condition values cannot be None"
+        }
+
+        real_pos == 2
+
+        # test with three entities
+        condition_part_not_3 = {
+            CONF_CONDITION: CONF_NOT,
+            CONF_CONDITIONS: [
+                {
+                    CONF_CONDITION: CONF_STATE,
+                    CONF_ENTITY_ID: ["binary_sensor.motion", "binary_sensor.motion_3"],
+                    CONF_STATE: "on",
+                },
+                {
+                    CONF_CONDITION: CONF_STATE,
+                    CONF_ENTITY_ID: "binary_sensor.motion_2",
+                    CONF_STATE: ["off", "unavailable", "sensor.temperature"],
+                },
+                {
+                    CONF_CONDITION: CONF_NUMERIC_STATE,
+                    CONF_ENTITY_ID: "sensor.temperature",
+                    CONF_BELOW: "sensor.temperature2",
+                    CONF_ABOVE: "sensor.temperature3",
+                },
+            ],
+        }
+        file_path = init_automation_script("condition_part_not_3", CONDITION_DIR)
+        test_trigger_fill(file_path)
+        results = _condition_entities(
+            condition_part_not_3,
+            position=1,
+            real_position=0,
+            script_path=file_path,
+        )
+        test_condition_return(file_path)
+
+        entities_not_3, end_position, real_pos = results
+        assert len(entities_not_3) == 7
+        assert entities_not_3[0].parent == 2
+        assert entities_not_3[0].position == 3
+        assert entities_not_3[0].parameter_role == INPUT
+        assert entities_not_3[0].integration == "binary_sensor"
+        assert entities_not_3[0].entity_name == "binary_sensor.motion"
+        assert entities_not_3[0].expected_value == {CONF_STATE: "on"}
+        assert entities_not_3[1].parent == 2
+        assert entities_not_3[1].position == 4
+        assert entities_not_3[1].parameter_role == INPUT
+        assert entities_not_3[1].integration == "binary_sensor"
+        assert entities_not_3[1].entity_name == "binary_sensor.motion_3"
+        assert entities_not_3[1].expected_value == {CONF_STATE: "on"}
+        assert entities_not_3[2].parent == 5
+        assert entities_not_3[2].position == 6
+        assert entities_not_3[2].parameter_role == INPUT
+        assert entities_not_3[2].integration == "binary_sensor"
+        assert entities_not_3[2].entity_name == "binary_sensor.motion_2"
+        assert entities_not_3[2].expected_value == {
+            CONF_STATE: ["off", "unavailable", "sensor.temperature"]
+        }
+        assert entities_not_3[3].parent == 5
+        assert entities_not_3[3].position == 7
+        assert entities_not_3[3].parameter_role == INPUT
+        assert entities_not_3[3].integration == "sensor"
+        assert entities_not_3[3].entity_name == "sensor.temperature"
+        assert entities_not_3[4].parent == 8
+        assert entities_not_3[4].position == 9
+        assert entities_not_3[4].parameter_role == INPUT
+        assert entities_not_3[4].integration == "sensor"
+        assert entities_not_3[4].entity_name == "sensor.temperature"
+        assert entities_not_3[4].expected_value == {
+            CONF_BELOW: "sensor.temperature2",
+            CONF_ABOVE: "sensor.temperature3",
+        }
+        assert entities_not_3[5].parent == 8
+        assert entities_not_3[5].position == 10
+        assert entities_not_3[5].parameter_role == INPUT
+        assert entities_not_3[5].integration == "sensor"
+        assert entities_not_3[5].entity_name == "sensor.temperature3"
+        assert entities_not_3[5].expected_value == {CONF_BELOW: "sensor.temperature"}
+        assert entities_not_3[6].parent == 8
+        assert entities_not_3[6].position == 11
+        assert entities_not_3[6].parameter_role == INPUT
+        assert entities_not_3[6].integration == "sensor"
+        assert entities_not_3[6].entity_name == "sensor.temperature2"
+        assert entities_not_3[6].expected_value == {CONF_ABOVE: "sensor.temperature"}
+        assert end_position == 11
+
+        # the structure of the input: ([(ENTITY_ID, ENTITY_ID), (EXP_ENTITY_STATE, ENTITY_ID), (BELOW, STATE, ABOVE)])
+        # every condition is True so the result should be False
+        condition_part_not_3_input = ["on", "on", 10, "off", 5, 10, 20]
+        assert (await run_automation(file_path, [], condition_part_not_3_input)) == {
+            "condition_passed": False,
+        }
+
+        # only the last condition is False so the result should be False
+        condition_part_not_3_input = ["on", "on", 10, "off", 5, 10, 5]
+        assert (await run_automation(file_path, [], condition_part_not_3_input)) == {
+            "condition_passed": False,
+        }
+
+        # only the first two conditions are False so the result should be False
+        condition_part_not_3_input = ["off", "off", 10, "on", 5, 10, 20]
+        assert (await run_automation(file_path, [], condition_part_not_3_input)) == {
+            "condition_passed": False,
+        }
+
+        # all conditions are False so the result should be True
+        condition_part_not_3_input = ["off", "off", 10, "on", 5, 10, 5]
+        assert (await run_automation(file_path, [], condition_part_not_3_input)) == {
+            "condition_passed": True,
+        }
+
+        # all values are None so the result should be True
+        condition_part_not_3_input = [None, None, None, None, None, None, None]
+        assert (await run_automation(file_path, [], condition_part_not_3_input)) == {
+            "ValueError": "Condition values cannot be None"
+        }
+
+        assert real_pos == 7
+
     async def test_condition_template():
-        # Test case 15: Template condition with one entity
+        # Test case 1: Template condition with one entity
         condition_part_template_1 = {
             CONF_CONDITION: CONF_TEMPLATE,
             CONF_VALUE_TEMPLATE: "{{ is_state('device_tracker.paulus', 'home') }}",
@@ -3644,8 +4764,25 @@ async def test_condition_entities():
             CONF_VALUE_TEMPLATE: "{{ is_state('device_tracker.paulus', 'home') }}"
         }
         assert end_position == 1
+        
+        condition_part_template_1_input = [True]
+        assert (await run_automation(file_path, [], condition_part_template_1_input)) == {
+            "condition_passed": True,
+        }
+        
+        condition_part_template_1_input = [False]
+        assert (await run_automation(file_path, [], condition_part_template_1_input)) == {
+            "condition_passed": False,
+        }
+        
+        condition_part_template_1_input = [None]
+        assert (await run_automation(file_path, [], condition_part_template_1_input)) == {
+            "ValueError": "Condition values cannot be None"
+        }
+        
+        assert real_pos == 1
 
-        # Test case 16: Template condition with two entities
+        # Test case 2: Template condition with two entities
         condition_part_template_2 = {
             CONF_CONDITION: CONF_TEMPLATE,
             CONF_VALUE_TEMPLATE: "{{ is_state('device_tracker.paulus', 'home') and is_state('device_tracker.anne_therese', 'home') }}",
@@ -3679,15 +4816,41 @@ async def test_condition_entities():
             CONF_VALUE_TEMPLATE: "{{ is_state('device_tracker.paulus', 'home') and is_state('device_tracker.anne_therese', 'home') }}"
         }
         assert end_position == 3
+        
+        # both entity conditions are True so the result is True
+        condition_part_template_2_input = [True, True]
+        assert (await run_automation(file_path, [], condition_part_template_2_input)) == {
+            "condition_passed": True,
+        }
+        
+        # one of the entity conditions is False so the result is False
+        condition_part_template_2_input = [False, True]
+        assert (await run_automation(file_path, [], condition_part_template_2_input)) == {
+            "condition_passed": False,
+        }
+        
+        # if one of the values is None the result is an error
+        condition_part_template_2_input = [None, None]
+        assert (await run_automation(file_path, [], condition_part_template_2_input)) == {
+            "ValueError": "Condition values cannot be None"
+        }
+        
+        assert real_pos == 2
 
-        # Test case 17: Template condition with one entity and at a specific position
+        # Test case 3: Template condition with one entity and at a specific position
         condition_part_template_3 = {
             CONF_CONDITION: CONF_TEMPLATE,
             CONF_VALUE_TEMPLATE: "{{ is_state('device_tracker.paulus', 'home') }}",
         }
         file_path = init_automation_script("condition_part_template_3", CONDITION_DIR)
         test_trigger_fill(file_path)
-        results = _condition_entities(condition_part_template_3, position=4, parent=2)
+        results = _condition_entities(
+            condition_part_template_3,
+            position=4,
+            parent=2,
+            real_position=0,
+            script_path=file_path,
+        )
         test_condition_return(file_path)
 
         entities_template_3, end_position, real_pos = results
@@ -3701,15 +4864,38 @@ async def test_condition_entities():
             CONF_VALUE_TEMPLATE: "{{ is_state('device_tracker.paulus', 'home') }}"
         }
         assert end_position == 4
+        
+        condition_part_template_3_input = [True]
+        assert (await run_automation(file_path, [], condition_part_template_3_input)) == {
+            "condition_passed": True,
+        }
+        
+        condition_part_template_3_input = [False]
+        assert (await run_automation(file_path, [], condition_part_template_3_input)) == {
+            "condition_passed": False,
+        }
+        
+        condition_part_template_3_input = [None]
+        assert (await run_automation(file_path, [], condition_part_template_3_input)) == {
+            "ValueError": "Condition values cannot be None"
+        }
+        
+        assert real_pos == 1
 
-        # Test case 18: Template condition with two entities and at a specific position
+        # Test case 4: Template condition with two entities and at a specific position
         condition_part_template_4 = {
             CONF_CONDITION: CONF_TEMPLATE,
             CONF_VALUE_TEMPLATE: "{{ is_state('device_tracker.paulus', 'home') and is_state('device_tracker.anne_therese', 'home') }}",
         }
         file_path = init_automation_script("condition_part_template_4", CONDITION_DIR)
         test_trigger_fill(file_path)
-        results = _condition_entities(condition_part_template_4, position=4, parent=2)
+        results = _condition_entities(
+            condition_part_template_4,
+            position=4,
+            parent=2,
+            real_position=0,
+            script_path=file_path,
+        )
         test_condition_return(file_path)
 
         entities_template_4, end_position, real_pos = results
@@ -3731,8 +4917,25 @@ async def test_condition_entities():
             CONF_VALUE_TEMPLATE: "{{ is_state('device_tracker.paulus', 'home') and is_state('device_tracker.anne_therese', 'home') }}"
         }
         assert end_position == 6
+        
+        condition_part_template_4_input = [True, True]
+        assert (await run_automation(file_path, [], condition_part_template_4_input)) == {
+            "condition_passed": True,
+        }
+        
+        condition_part_template_4_input = [False, True]
+        assert (await run_automation(file_path, [], condition_part_template_4_input)) == {
+            "condition_passed": False,
+        }
+        
+        condition_part_template_4_input = [None, None]
+        assert (await run_automation(file_path, [], condition_part_template_4_input)) == {
+            "ValueError": "Condition values cannot be None"
+        }
+        
+        assert real_pos == 2
 
-        # Test case 19: Template condition without a condition parameter
+        # Test case 5: Template condition without a condition parameter
         condition_part_template_5 = ("{{ is_state('device_tracker.paulus', 'home') }}",)
         file_path = init_automation_script("condition_part_template_5", CONDITION_DIR)
         test_trigger_fill(file_path)
@@ -3755,6 +4958,23 @@ async def test_condition_entities():
             CONF_VALUE_TEMPLATE: "{{ is_state('device_tracker.paulus', 'home') }}"
         }
         assert end_position == 1
+        
+        condition_part_template_5_input = [True]
+        assert (await run_automation(file_path, [], condition_part_template_5_input)) == {
+            "condition_passed": True,
+        }
+        
+        condition_part_template_5_input = [False]
+        assert (await run_automation(file_path, [], condition_part_template_5_input)) == {
+            "condition_passed": False,
+        }
+        
+        condition_part_template_5_input = [None]
+        assert (await run_automation(file_path, [], condition_part_template_5_input)) == {
+            "ValueError": "Condition values cannot be None"
+        }
+        
+        assert real_pos == 1
 
     async def test_condition_sun():
         # Test case 20: Sun condition after the sunset
@@ -3778,6 +4998,24 @@ async def test_condition_entities():
         assert entities_sun_1[0].entity_name == "sun.sun"
         assert entities_sun_1[0].expected_value == {"after": "sunset"}
         assert end_position == 1
+        
+        condition_part_sun_1_input = [True]
+        assert (await run_automation(file_path, [], condition_part_sun_1_input)) == {
+            "condition_passed": True,
+        }
+        
+        condition_part_sun_1_input = [False]
+        assert (await run_automation(file_path, [], condition_part_sun_1_input)) == {
+            "condition_passed": False,
+        }
+        
+        condition_part_sun_1_input = [None]
+        assert (await run_automation(file_path, [], condition_part_sun_1_input)) == {
+            "ValueError": "Condition values cannot be None"
+        }
+        
+        assert real_pos == 1
+        
 
         # Test case 21: Sun condition before the sunset
         condition_part_sun_2 = {
@@ -3800,6 +5038,23 @@ async def test_condition_entities():
         assert entities_sun_2[0].entity_name == "sun.sun"
         assert entities_sun_2[0].expected_value == {"before": "sunset"}
         assert end_position == 1
+        
+        condition_part_sun_2_input = [True]
+        assert (await run_automation(file_path, [], condition_part_sun_2_input)) == {
+            "condition_passed": True,
+        }
+        
+        condition_part_sun_2_input = [False]
+        assert (await run_automation(file_path, [], condition_part_sun_2_input)) == {
+            "condition_passed": False,
+        }
+        
+        condition_part_sun_2_input = [None]
+        assert (await run_automation(file_path, [], condition_part_sun_2_input)) == {
+            "ValueError": "Condition values cannot be None"
+        }
+        
+        assert real_pos == 1
 
         # Test case 22: Sun condition 1 hour after the sunset and 1 hour after the sunrise
         condition_part_sun_3 = {
@@ -3830,6 +5085,23 @@ async def test_condition_entities():
             "after_offset": "01:00:00",
         }
         assert end_position == 1
+        
+        condition_part_sun_3_input = [True]
+        assert (await run_automation(file_path, [], condition_part_sun_3_input)) == {
+            "condition_passed": True,
+        }
+        
+        condition_part_sun_3_input = [False]
+        assert (await run_automation(file_path, [], condition_part_sun_3_input)) == {
+            "condition_passed": False,
+        }
+        
+        condition_part_sun_3_input = [None]
+        assert (await run_automation(file_path, [], condition_part_sun_3_input)) == {
+            "ValueError": "Condition values cannot be None"
+        }
+        
+        assert real_pos == 1
 
         # Test case 23: Sun condition after the sunset and before the sunrise at a specific position
         condition_part_sun_4 = {
@@ -3839,7 +5111,13 @@ async def test_condition_entities():
         }
         file_path = init_automation_script("condition_part_sun_4", CONDITION_DIR)
         test_trigger_fill(file_path)
-        results = _condition_entities(condition_part_sun_4, position=3, parent=2)
+        results = _condition_entities(
+            condition_part_sun_4,
+            position=3,
+            parent=2,
+            real_position=0,
+            script_path=file_path,
+        )
         test_condition_return(file_path)
 
         entities_sun_4, end_position, real_pos = results
@@ -3854,6 +5132,23 @@ async def test_condition_entities():
             "before": "sunrise",
         }
         assert end_position == 3
+        
+        condition_part_sun_4_input = [True]
+        assert (await run_automation(file_path, [], condition_part_sun_4_input)) == {
+            "condition_passed": True,
+        }
+        
+        condition_part_sun_4_input = [False]
+        assert (await run_automation(file_path, [], condition_part_sun_4_input)) == {
+            "condition_passed": False,
+        }
+        
+        condition_part_sun_4_input = [None]
+        assert (await run_automation(file_path, [], condition_part_sun_4_input)) == {
+            "ValueError": "Condition values cannot be None"
+        }
+        
+        assert real_pos == 1
 
     async def test_condition_device():
         # Test case 24: Device condition with a device that does something
@@ -3895,7 +5190,13 @@ async def test_condition_entities():
         }
         file_path = init_automation_script("condition_part_device_2", CONDITION_DIR)
         test_trigger_fill(file_path)
-        results = _condition_entities(condition_part_device_2, position=5, parent=2)
+        results = _condition_entities(
+            condition_part_device_2,
+            position=5,
+            parent=2,
+            real_position=0,
+            script_path=file_path,
+        )
         test_condition_return(file_path)
 
         entities_device_2, end_position, real_pos = results
@@ -4060,7 +5361,13 @@ async def test_condition_entities():
         condition_part_trigger_3 = {CONF_CONDITION: "trigger", CONF_ID: "trigger_1"}
         file_path = init_automation_script("condition_part_trigger_3", CONDITION_DIR)
         test_trigger_fill(file_path)
-        results = _condition_entities(condition_part_trigger_3, position=4, parent=2)
+        results = _condition_entities(
+            condition_part_trigger_3,
+            position=4,
+            parent=2,
+            real_position=0,
+            script_path=file_path,
+        )
         test_condition_return(file_path)
 
         entities_trigger_3, end_position, real_pos = results
@@ -4157,7 +5464,13 @@ async def test_condition_entities():
         }
         file_path = init_automation_script("condition_part_zone_4", CONDITION_DIR)
         test_trigger_fill(file_path)
-        results = _condition_entities(condition_part_zone_4, position=4, parent=2)
+        results = _condition_entities(
+            condition_part_zone_4,
+            position=4,
+            parent=2,
+            real_position=0,
+            script_path=file_path,
+        )
         test_condition_return(file_path)
 
         entities_zone_4, end_position, real_pos = results
@@ -4208,15 +5521,18 @@ async def test_condition_entities():
 
     async def test_condition_all():
         await test_condition_num_state()
-        # await test_condition_state()
-        # await test_condition_template()
-        # await test_condition_sun()
-        # await test_condition_device()
-        # await test_condition_time()
-        # await test_condition_trigger()
-        # await test_condition_zone()
-        # await test_condition_unsupported()
-        # await test_condition_disabled()
+        await test_condition_state()
+        await test_condition_or()
+        await test_condition_and()
+        await test_condition_not()
+        await test_condition_template()
+        await test_condition_sun()
+        await test_condition_device()
+        await test_condition_time()
+        await test_condition_trigger()
+        await test_condition_zone()
+        await test_condition_unsupported()
+        await test_condition_disabled()
 
     await test_condition_all()
     print("All condition test cases passed!")
@@ -5793,7 +7109,9 @@ if __name__ == "__main__":
     if not path.exists(TEST_DIR):
         mkdir(TEST_DIR)
 
+    # async_run(test_trigger_entities())
     async_run(test_condition_entities())
+    # async_run(test_action_entities())
 
     # file_path = path.join(TEST_DIR, "trigger_part_event_1.py")
 
