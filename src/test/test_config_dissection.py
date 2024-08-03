@@ -148,7 +148,7 @@ def test_trigger_return(filepath: str) -> None:
     Args:
         filepath (str): the path to the script file
     """
-    script_context = "\n\toutput = triggered\n\treturn output\n\nprint(json.dumps(trigger(input_vals)))"
+    script_context = "\n\toutput = triggered\n\treturn output\n\nprint(json.dumps(trigger_check(input_vals)))"
     _append_script_context_to_script(filepath, script_context)
 
 
@@ -178,7 +178,7 @@ def test_condition_return(filepath: str) -> None:
     """
     script_context = "\t):\n\t\tcondition_passed = True\n\toutput = {'condition_passed': condition_passed}\n\n\treturn output"
     script_context += (
-        "\n\nif trigger(input_vals):\n\tprint(json.dumps(condition(input_vals)))"
+        "\n\nif trigger_check(input_vals):\n\tprint(json.dumps(condition_evaluation(input_vals)))"
     )
     _append_script_context_to_script(filepath, script_context)
 
@@ -2705,10 +2705,10 @@ async def test_trigger_entities():
         assert real_pos == 0
 
     async def test_trigger_all():
-        # await test_trigger_event()
-        # await test_trigger_ha()
-        # await test_trigger_mqtt()
-        # await test_trigger_num_state()
+        await test_trigger_event()
+        await test_trigger_ha()
+        await test_trigger_mqtt()
+        await test_trigger_num_state()
         await test_trigger_state()
         await test_trigger_sun()
         await test_trigger_tag()

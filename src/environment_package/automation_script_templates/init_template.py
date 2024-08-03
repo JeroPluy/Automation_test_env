@@ -16,7 +16,7 @@ input_vals = json.loads(serialized_inputs)
 trigger_id: str = None
 
 
-def trigger(input_vals) -> bool:
+def trigger_check(input_vals) -> bool:
     triggered = False
     trigger = input_vals[0]
     global trigger_id

@@ -1,3 +1,4 @@
 if __name__ == "__main__":
-    if trigger(input_vals):
-        condition_result = condition(input_vals)
+    if trigger_check(input_vals):
+        if condition_evaluation(input_vals):
+            action_execution(input_vals)
