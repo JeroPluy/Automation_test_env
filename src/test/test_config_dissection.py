@@ -73,6 +73,7 @@ from environment_package.ha_automation.home_assistant_const import (
     CONF_TEMPLATE,
     CONF_THEN,
     CONF_TO,
+    CONF_TRIGGER,
     CONF_TYPE,
     CONF_UNTIL,
     CONF_UPDATE_TYPE,
@@ -147,11 +148,11 @@ def test_trigger_return(filepath: str) -> None:
     Args:
         filepath (str): the path to the script file
     """
-    script_context = "\n\toutput = { 'triggered': triggered, 'trigger_id': trigger_id}\n\treturn output\n\nprint(json.dumps(trigger(input_vals)))"
+    script_context = "\n\toutput = triggered\n\treturn output\n\nprint(json.dumps(trigger(input_vals)))"
     _append_script_context_to_script(filepath, script_context)
 
 
-def test_trigger_fill(filepath: str) -> None:
+def test_trigger_fill(filepath: str, trigger_id: str = None) -> None:
     """
     This function adds a print statement to the script to test the trigger return value
 
@@ -159,7 +160,9 @@ def test_trigger_fill(filepath: str) -> None:
         filepath (str): the path to the script file
     """
     # insert trigger return list
-    script_context = "\treturn [True, None]\n\n"
+    script_context = (
+        f"\n# just test inputs\n\ttrigger_id = '{trigger_id}'\n\treturn True\n\n"
+    )
     _append_script_context_to_script(filepath, script_context)
 
     # insert condition definition
@@ -173,7 +176,10 @@ def test_condition_return(filepath: str) -> None:
     Args:
         filepath (str): the path to the script file
     """
-    script_context = "\n\toutput = {'condition_passed': condition_passed}\n\treturn output\n\nprint(json.dumps(condition(input_vals)))"
+    script_context = "\t):\n\t\tcondition_passed = True\n\toutput = {'condition_passed': condition_passed}\n\n\treturn output"
+    script_context += (
+        "\n\nif trigger(input_vals):\n\tprint(json.dumps(condition(input_vals)))"
+    )
     _append_script_context_to_script(filepath, script_context)
 
 
@@ -209,22 +215,17 @@ async def test_trigger_entities():
 
         # test run the automation script
         trigger_part_event_1_input = [True]
-        assert (await run_automation(file_path, trigger_part_event_1_input, [])) == {
-            "triggered": True,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_event_1_input, [])) is True
 
         trigger_part_event_1_input = [False]
-        assert (await run_automation(file_path, trigger_part_event_1_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
+        assert (
+            await run_automation(file_path, trigger_part_event_1_input, [])
+        ) is False
 
         trigger_part_event_1_input = [None]
-        assert (await run_automation(file_path, trigger_part_event_1_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
+        assert (
+            await run_automation(file_path, trigger_part_event_1_input, [])
+        ) is False
 
         assert real_pos == 1
 
@@ -255,46 +256,31 @@ async def test_trigger_entities():
         assert end_position == 3
         # test run the automation script
         trigger_part_event_2_input = [False, True]
-        assert (await run_automation(file_path, trigger_part_event_2_input, [])) == {
-            "triggered": True,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_event_2_input, [])) is True
 
         trigger_part_event_2_input = [False, False]
-        assert (await run_automation(file_path, trigger_part_event_2_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
+        assert (
+            await run_automation(file_path, trigger_part_event_2_input, [])
+        ) is False
 
         trigger_part_event_2_input = [True, False]
-        assert (await run_automation(file_path, trigger_part_event_2_input, [])) == {
-            "triggered": True,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_event_2_input, [])) is True
 
         trigger_part_event_2_input = [True, True]
-        assert (await run_automation(file_path, trigger_part_event_2_input, [])) == {
-            "triggered": True,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_event_2_input, [])) is True
 
         trigger_part_event_2_input = [None, None]
-        assert (await run_automation(file_path, trigger_part_event_2_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
+        assert (
+            await run_automation(file_path, trigger_part_event_2_input, [])
+        ) is False
 
         trigger_part_event_2_input = [True, None]
-        assert (await run_automation(file_path, trigger_part_event_2_input, [])) == {
-            "triggered": True,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_event_2_input, [])) is True
 
         trigger_part_event_2_input = [False, None]
-        assert (await run_automation(file_path, trigger_part_event_2_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
+        assert (
+            await run_automation(file_path, trigger_part_event_2_input, [])
+        ) is False
 
         assert real_pos == 2
 
@@ -327,22 +313,17 @@ async def test_trigger_entities():
 
         # test run the automation script
         trigger_part_event_3_input = [True]
-        assert (await run_automation(file_path, trigger_part_event_3_input, [])) == {
-            "triggered": True,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_event_3_input, [])) is True
 
         trigger_part_event_3_input = [False]
-        assert (await run_automation(file_path, trigger_part_event_3_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
+        assert (
+            await run_automation(file_path, trigger_part_event_3_input, [])
+        ) is False
 
         trigger_part_event_3_input = [None]
-        assert (await run_automation(file_path, trigger_part_event_3_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
+        assert (
+            await run_automation(file_path, trigger_part_event_3_input, [])
+        ) is False
 
         assert real_pos == 1
 
@@ -367,22 +348,13 @@ async def test_trigger_entities():
 
         # test run the automation script
         trigger_part_ha_1_input = [True]
-        assert (await run_automation(file_path, trigger_part_ha_1_input, [])) == {
-            "triggered": True,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_ha_1_input, [])) is True
 
         trigger_part_ha_1_input = [False]
-        assert (await run_automation(file_path, trigger_part_ha_1_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_ha_1_input, [])) is False
 
         trigger_part_ha_1_input = [None]
-        assert (await run_automation(file_path, trigger_part_ha_1_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_ha_1_input, [])) is False
 
         assert real_pos == 1
 
@@ -406,22 +378,13 @@ async def test_trigger_entities():
 
         # test run the automation script
         trigger_part_ha_2_input = [True]
-        assert (await run_automation(file_path, trigger_part_ha_2_input, [])) == {
-            "triggered": True,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_ha_2_input, [])) is True
 
         trigger_part_ha_2_input = [False]
-        assert (await run_automation(file_path, trigger_part_ha_2_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_ha_2_input, [])) is False
 
         trigger_part_ha_2_input = [None]
-        assert (await run_automation(file_path, trigger_part_ha_2_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_ha_2_input, [])) is False
 
         assert real_pos == 1
 
@@ -450,22 +413,13 @@ async def test_trigger_entities():
 
         # test run the automation script
         trigger_part_mqtt_1_input = [True]
-        assert (await run_automation(file_path, trigger_part_mqtt_1_input, [])) == {
-            "triggered": True,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_mqtt_1_input, [])) is True
 
         trigger_part_mqtt_1_input = [False]
-        assert (await run_automation(file_path, trigger_part_mqtt_1_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_mqtt_1_input, [])) is False
 
         trigger_part_mqtt_1_input = [None]
-        assert (await run_automation(file_path, trigger_part_mqtt_1_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_mqtt_1_input, [])) is False
 
         assert real_pos == 1
 
@@ -492,22 +446,13 @@ async def test_trigger_entities():
         assert end_position == 1
 
         trigger_part_mqtt_2_input = [True]
-        assert (await run_automation(file_path, trigger_part_mqtt_2_input, [])) == {
-            "triggered": True,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_mqtt_2_input, [])) is True
 
         trigger_part_mqtt_2_input = [False]
-        assert (await run_automation(file_path, trigger_part_mqtt_2_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_mqtt_2_input, [])) is False
 
         trigger_part_mqtt_2_input = [None]
-        assert (await run_automation(file_path, trigger_part_mqtt_2_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_mqtt_2_input, [])) is False
 
         assert real_pos == 1
 
@@ -538,22 +483,13 @@ async def test_trigger_entities():
         assert end_position == 1
 
         trigger_part_mqtt_3_input = [True]
-        assert (await run_automation(file_path, trigger_part_mqtt_3_input, [])) == {
-            "triggered": True,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_mqtt_3_input, [])) is True
 
         trigger_part_mqtt_3_input = [False]
-        assert (await run_automation(file_path, trigger_part_mqtt_3_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_mqtt_3_input, [])) is False
 
         trigger_part_mqtt_3_input = [None]
-        assert (await run_automation(file_path, trigger_part_mqtt_3_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_mqtt_3_input, [])) is False
 
         assert real_pos == 1
 
@@ -584,22 +520,22 @@ async def test_trigger_entities():
         trigger_part_num_state_1_input = [16]
         assert (
             await run_automation(file_path, trigger_part_num_state_1_input, [])
-        ) == {"triggered": True, "trigger_id": None}
+        ) is True
 
         trigger_part_num_state_1_input = [30]
         assert (
             await run_automation(file_path, trigger_part_num_state_1_input, [])
-        ) == {"triggered": False, "trigger_id": None}
+        ) is False
 
         trigger_part_num_state_1_input = [31]
         assert (
             await run_automation(file_path, trigger_part_num_state_1_input, [])
-        ) == {"triggered": False, "trigger_id": None}
+        ) is False
 
         trigger_part_num_state_1_input = [None]
         assert (
             await run_automation(file_path, trigger_part_num_state_1_input, [])
-        ) == {"triggered": False, "trigger_id": None}
+        ) is False
 
         assert real_pos == 1
 
@@ -629,22 +565,22 @@ async def test_trigger_entities():
         trigger_part_num_state_2_input = [25]
         assert (
             await run_automation(file_path, trigger_part_num_state_2_input, [])
-        ) == {"triggered": True, "trigger_id": None}
+        ) is True
 
         trigger_part_num_state_2_input = [20]
         assert (
             await run_automation(file_path, trigger_part_num_state_2_input, [])
-        ) == {"triggered": False, "trigger_id": None}
+        ) is False
 
         trigger_part_num_state_2_input = [19]
         assert (
             await run_automation(file_path, trigger_part_num_state_2_input, [])
-        ) == {"triggered": False, "trigger_id": None}
+        ) is False
 
         trigger_part_num_state_2_input = [None]
         assert (
             await run_automation(file_path, trigger_part_num_state_2_input, [])
-        ) == {"triggered": False, "trigger_id": None}
+        ) is False
 
         assert real_pos == 1
 
@@ -678,32 +614,32 @@ async def test_trigger_entities():
         trigger_part_num_state_3_input = [25]
         assert (
             await run_automation(file_path, trigger_part_num_state_3_input, [])
-        ) == {"triggered": True, "trigger_id": None}
+        ) is True
 
         trigger_part_num_state_3_input = [30]
         assert (
             await run_automation(file_path, trigger_part_num_state_3_input, [])
-        ) == {"triggered": False, "trigger_id": None}
+        ) is False
 
         trigger_part_num_state_3_input = [31]
         assert (
             await run_automation(file_path, trigger_part_num_state_3_input, [])
-        ) == {"triggered": False, "trigger_id": None}
+        ) is False
 
         trigger_part_num_state_3_input = [20]
         assert (
             await run_automation(file_path, trigger_part_num_state_3_input, [])
-        ) == {"triggered": False, "trigger_id": None}
+        ) is False
 
         trigger_part_num_state_3_input = [19]
         assert (
             await run_automation(file_path, trigger_part_num_state_3_input, [])
-        ) == {"triggered": False, "trigger_id": None}
+        ) is False
 
         trigger_part_num_state_3_input = [None]
         assert (
             await run_automation(file_path, trigger_part_num_state_3_input, [])
-        ) == {"triggered": False, "trigger_id": None}
+        ) is False
 
         assert real_pos == 1
 
@@ -739,32 +675,32 @@ async def test_trigger_entities():
         trigger_part_num_state_4_input = [25]
         assert (
             await run_automation(file_path, trigger_part_num_state_4_input, [])
-        ) == {"triggered": True, "trigger_id": None}
+        ) is True
 
         trigger_part_num_state_4_input = [30]
         assert (
             await run_automation(file_path, trigger_part_num_state_4_input, [])
-        ) == {"triggered": False, "trigger_id": None}
+        ) is False
 
         trigger_part_num_state_4_input = [31]
         assert (
             await run_automation(file_path, trigger_part_num_state_4_input, [])
-        ) == {"triggered": False, "trigger_id": None}
+        ) is False
 
         trigger_part_num_state_4_input = [20]
         assert (
             await run_automation(file_path, trigger_part_num_state_4_input, [])
-        ) == {"triggered": False, "trigger_id": None}
+        ) is False
 
         trigger_part_num_state_4_input = [19]
         assert (
             await run_automation(file_path, trigger_part_num_state_4_input, [])
-        ) == {"triggered": False, "trigger_id": None}
+        ) is False
 
         trigger_part_num_state_4_input = [None]
         assert (
             await run_automation(file_path, trigger_part_num_state_4_input, [])
-        ) == {"triggered": False, "trigger_id": None}
+        ) is False
 
         assert real_pos == 1
 
@@ -795,17 +731,17 @@ async def test_trigger_entities():
         trigger_part_num_state_5_input = [25]
         assert (
             await run_automation(file_path, trigger_part_num_state_5_input, [])
-        ) == {"triggered": True, "trigger_id": None}
+        ) is True
 
         trigger_part_num_state_5_input = [20]
         assert (
             await run_automation(file_path, trigger_part_num_state_5_input, [])
-        ) == {"triggered": False, "trigger_id": None}
+        ) is False
 
         trigger_part_num_state_5_input = [19]
         assert (
             await run_automation(file_path, trigger_part_num_state_5_input, [])
-        ) == {"triggered": False, "trigger_id": None}
+        ) is False
 
         trigger_part_num_state_5_input = [None]
         assert real_pos == 1
@@ -845,32 +781,32 @@ async def test_trigger_entities():
         trigger_part_num_state_6_input = [20, 25]
         assert (
             await run_automation(file_path, trigger_part_num_state_6_input, [])
-        ) == {"triggered": True, "trigger_id": None}
+        ) is True
 
         trigger_part_num_state_6_input = [20, 20]
         assert (
             await run_automation(file_path, trigger_part_num_state_6_input, [])
-        ) == {"triggered": False, "trigger_id": None}
+        ) is False
 
         trigger_part_num_state_6_input = [20, 19]
         assert (
             await run_automation(file_path, trigger_part_num_state_6_input, [])
-        ) == {"triggered": False, "trigger_id": None}
+        ) is False
 
         trigger_part_num_state_6_input = [20, None]
         assert (
             await run_automation(file_path, trigger_part_num_state_6_input, [])
-        ) == {"triggered": True, "trigger_id": None}
+        ) is True
 
         trigger_part_num_state_6_input = [None, 20]
         assert (
             await run_automation(file_path, trigger_part_num_state_6_input, [])
-        ) == {"triggered": False, "trigger_id": None}
+        ) is False
 
         trigger_part_num_state_6_input = [None, None]
         assert (
             await run_automation(file_path, trigger_part_num_state_6_input, [])
-        ) == {"triggered": False, "trigger_id": None}
+        ) is False
 
         assert real_pos == 2
 
@@ -909,32 +845,32 @@ async def test_trigger_entities():
         trigger_part_num_state_7_input = [20, 25]
         assert (
             await run_automation(file_path, trigger_part_num_state_7_input, [])
-        ) == {"triggered": True, "trigger_id": None}
+        ) is True
 
         trigger_part_num_state_7_input = [20, 20]
         assert (
             await run_automation(file_path, trigger_part_num_state_7_input, [])
-        ) == {"triggered": False, "trigger_id": None}
+        ) is False
 
         trigger_part_num_state_7_input = [35, 30]
         assert (
             await run_automation(file_path, trigger_part_num_state_7_input, [])
-        ) == {"triggered": False, "trigger_id": None}
+        ) is False
 
         trigger_part_num_state_7_input = [20, None]
         assert (
             await run_automation(file_path, trigger_part_num_state_7_input, [])
-        ) == {"triggered": False, "trigger_id": None}
+        ) is False
 
         trigger_part_num_state_7_input = [None, 20]
         assert (
             await run_automation(file_path, trigger_part_num_state_7_input, [])
-        ) == {"triggered": True, "trigger_id": None}
+        ) is True
 
         trigger_part_num_state_7_input = [None, None]
         assert (
             await run_automation(file_path, trigger_part_num_state_7_input, [])
-        ) == {"triggered": False, "trigger_id": None}
+        ) is False
 
         assert real_pos == 2
 
@@ -994,52 +930,52 @@ async def test_trigger_entities():
         trigger_part_num_state_8_input = ["", "", 10, 20, 20, 30]
         assert (
             await run_automation(file_path, trigger_part_num_state_8_input, [])
-        ) == {"triggered": True, "trigger_id": None}
+        ) is True
 
         trigger_part_num_state_8_input = ["", "", 23, 20, 20, 30]
         assert (
             await run_automation(file_path, trigger_part_num_state_8_input, [])
-        ) == {"triggered": False, "trigger_id": None}
+        ) is False
 
         trigger_part_num_state_8_input = ["", "", 10, 20, 20, 19]
         assert (
             await run_automation(file_path, trigger_part_num_state_8_input, [])
-        ) == {"triggered": False, "trigger_id": None}
+        ) is False
 
         trigger_part_num_state_8_input = ["", "", 10, 20, 18, 19]
         assert (
             await run_automation(file_path, trigger_part_num_state_8_input, [])
-        ) == {"triggered": True, "trigger_id": None}
+        ) is True
 
         trigger_part_num_state_8_input = ["", "", None, None, 20, None]
         assert (
             await run_automation(file_path, trigger_part_num_state_8_input, [])
-        ) == {"triggered": True, "trigger_id": None}
+        ) is True
 
         trigger_part_num_state_8_input = ["", "", None, 20, None, 544]
         assert (
             await run_automation(file_path, trigger_part_num_state_8_input, [])
-        ) == {"triggered": True, "trigger_id": None}
+        ) is True
 
         trigger_part_num_state_8_input = ["", "", 2, 20, None, None]
         assert (
             await run_automation(file_path, trigger_part_num_state_8_input, [])
-        ) == {"triggered": True, "trigger_id": None}
+        ) is True
 
         trigger_part_num_state_8_input = ["", "", 2, None, None, None]
         assert (
             await run_automation(file_path, trigger_part_num_state_8_input, [])
-        ) == {"triggered": False, "trigger_id": None}
+        ) is False
 
         trigger_part_num_state_8_input = ["", "", 2, None, None, 50]
         assert (
             await run_automation(file_path, trigger_part_num_state_8_input, [])
-        ) == {"triggered": False, "trigger_id": None}
+        ) is False
 
         trigger_part_num_state_8_input = ["", "", None, None, None, None]
         assert (
             await run_automation(file_path, trigger_part_num_state_8_input, [])
-        ) == {"triggered": False, "trigger_id": None}
+        ) is False
 
         assert real_pos == 6
 
@@ -1066,34 +1002,21 @@ async def test_trigger_entities():
         assert end_position == 1
 
         trigger_part_state_1_input = ["on"]
-        assert (await run_automation(file_path, trigger_part_state_1_input, [])) == {
-            "triggered": True,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_state_1_input, [])) is True
 
         trigger_part_state_1_input = ["off"]
-        assert (await run_automation(file_path, trigger_part_state_1_input, [])) == {
-            "triggered": True,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_state_1_input, [])) is True
 
         trigger_part_state_1_input = ["unknown"]
-        assert (await run_automation(file_path, trigger_part_state_1_input, [])) == {
-            "triggered": True,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_state_1_input, [])) is True
 
         trigger_part_state_1_input = ["unavailable"]
-        assert (await run_automation(file_path, trigger_part_state_1_input, [])) == {
-            "triggered": True,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_state_1_input, [])) is True
 
         trigger_part_state_1_input = [None]
-        assert (await run_automation(file_path, trigger_part_state_1_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
+        assert (
+            await run_automation(file_path, trigger_part_state_1_input, [])
+        ) is False
 
         assert real_pos == 1
 
@@ -1120,16 +1043,13 @@ async def test_trigger_entities():
         assert end_position == 1
 
         trigger_part_state_2_input = ["on"]
-        assert (await run_automation(file_path, trigger_part_state_2_input, [])) == {
-            "triggered": True,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_state_2_input, [])) is True
 
         for state_val in ["off", "unknown", "unavailable", None]:
             trigger_part_state_2_input = [state_val]
             assert (
                 await run_automation(file_path, trigger_part_state_2_input, [])
-            ) == {"triggered": False, "trigger_id": None}
+            ) is False
 
         assert real_pos == 1
 
@@ -1157,16 +1077,13 @@ async def test_trigger_entities():
         assert end_position == 1
 
         trigger_part_state_3_input = ["on"]
-        assert (await run_automation(file_path, trigger_part_state_3_input, [])) == {
-            "triggered": True,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_state_3_input, [])) is True
 
         for state_val in ["off", "unknown", "unavailable", None]:
             trigger_part_state_3_input = [state_val]
             assert (
                 await run_automation(file_path, trigger_part_state_3_input, [])
-            ) == {"triggered": False, "trigger_id": None}
+            ) is False
 
         assert real_pos == 1
 
@@ -1199,16 +1116,13 @@ async def test_trigger_entities():
         assert end_position == 1
 
         trigger_part_state_4_input = ["on"]
-        assert (await run_automation(file_path, trigger_part_state_4_input, [])) == {
-            "triggered": True,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_state_4_input, [])) is True
 
         for state_val in ["off", "unknown", "unavailable", None]:
             trigger_part_state_4_input = [state_val]
             assert (
                 await run_automation(file_path, trigger_part_state_4_input, [])
-            ) == {"triggered": False, "trigger_id": None}
+            ) is False
 
         assert real_pos == 1
 
@@ -1239,22 +1153,20 @@ async def test_trigger_entities():
         assert end_position == 1
 
         trigger_part_state_5_input = ["on"]
-        assert (await run_automation(file_path, trigger_part_state_5_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
+        assert (
+            await run_automation(file_path, trigger_part_state_5_input, [])
+        ) is False
 
         trigger_part_state_5_input = [None]
-        assert (await run_automation(file_path, trigger_part_state_5_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
+        assert (
+            await run_automation(file_path, trigger_part_state_5_input, [])
+        ) is False
 
         for state_val in ["off", "unknown", "unavailable"]:
             trigger_part_state_5_input = [state_val]
             assert (
                 await run_automation(file_path, trigger_part_state_5_input, [])
-            ) == {"triggered": True, "trigger_id": None}
+            ) is True
 
         assert real_pos == 1
 
@@ -1286,16 +1198,13 @@ async def test_trigger_entities():
         assert end_position == 1
 
         trigger_part_state_6_input = ["temp2"]
-        assert (await run_automation(file_path, trigger_part_state_6_input, [])) == {
-            "triggered": True,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_state_6_input, [])) is True
 
         for state_val in ["temp1", "temp3", "temp4", None]:
             trigger_part_state_6_input = [state_val]
             assert (
                 await run_automation(file_path, trigger_part_state_6_input, [])
-            ) == {"triggered": False, "trigger_id": None}
+            ) is False
 
         assert real_pos == 1
 
@@ -1332,45 +1241,31 @@ async def test_trigger_entities():
 
         # the first entity is on
         trigger_part_state_7_input = ["on", "off"]
-        assert (await run_automation(file_path, trigger_part_state_7_input, [])) == {
-            "triggered": True,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_state_7_input, [])) is True
 
         # the first entity is off
         trigger_part_state_7_input = ["off", "on"]
-        assert (await run_automation(file_path, trigger_part_state_7_input, [])) == {
-            "triggered": True,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_state_7_input, [])) is True
 
         # both entities are off
         trigger_part_state_7_input = ["off", "off"]
-        assert (await run_automation(file_path, trigger_part_state_7_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
+        assert (
+            await run_automation(file_path, trigger_part_state_7_input, [])
+        ) is False
 
         # the first entity is on and the second is None
         trigger_part_state_7_input = ["on", None]
-        assert (await run_automation(file_path, trigger_part_state_7_input, [])) == {
-            "triggered": True,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_state_7_input, [])) is True
 
         # the first entity is None and the second is on
         trigger_part_state_7_input = [None, "on"]
-        assert (await run_automation(file_path, trigger_part_state_7_input, [])) == {
-            "triggered": True,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_state_7_input, [])) is True
 
         # both entities are None
         trigger_part_state_7_input = [None, None]
-        assert (await run_automation(file_path, trigger_part_state_7_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
+        assert (
+            await run_automation(file_path, trigger_part_state_7_input, [])
+        ) is False
 
         assert real_pos == 2
 
@@ -1404,45 +1299,35 @@ async def test_trigger_entities():
         # border test cases - the list build like this [CONF_TO, CONF_ENTITY_ID/s]
         # the enitity is off but the expected value is on
         trigger_part_state_8_input = ["on", "off"]
-        assert (await run_automation(file_path, trigger_part_state_8_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
+        assert (
+            await run_automation(file_path, trigger_part_state_8_input, [])
+        ) is False
 
         # the enitity is off as expected
         trigger_part_state_8_input = ["off", "off"]
-        assert (await run_automation(file_path, trigger_part_state_8_input, [])) == {
-            "triggered": True,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_state_8_input, [])) is True
 
         # the enitity is on as expected
         trigger_part_state_8_input = ["on", "on"]
-        assert (await run_automation(file_path, trigger_part_state_8_input, [])) == {
-            "triggered": True,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_state_8_input, [])) is True
 
         # the enitity is None
         trigger_part_state_8_input = [None, "on"]
-        assert (await run_automation(file_path, trigger_part_state_8_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
+        assert (
+            await run_automation(file_path, trigger_part_state_8_input, [])
+        ) is False
 
         # the enitity is None
         trigger_part_state_8_input = [None, None]
-        assert (await run_automation(file_path, trigger_part_state_8_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
+        assert (
+            await run_automation(file_path, trigger_part_state_8_input, [])
+        ) is False
 
         # the enitity is on but the expected value is None
         trigger_part_state_8_input = ["on", None]
-        assert (await run_automation(file_path, trigger_part_state_8_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
+        assert (
+            await run_automation(file_path, trigger_part_state_8_input, [])
+        ) is False
 
         assert real_pos == 2
 
@@ -1505,48 +1390,198 @@ async def test_trigger_entities():
 
         # border test cases - the list build like this [CONF_TO, CONF_ENTITY_ID/s]
         trigger_part_state_9_input = ["test1", "test", "test1", "off"]
-        assert (await run_automation(file_path, trigger_part_state_9_input, [])) == {
-            "triggered": True,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_state_9_input, [])) is True
 
         trigger_part_state_9_input = ["test1", "test1", "test", "off"]
-        assert (await run_automation(file_path, trigger_part_state_9_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
+        assert (
+            await run_automation(file_path, trigger_part_state_9_input, [])
+        ) is False
 
         trigger_part_state_9_input = ["on", "off", "off", "on"]
-        assert (await run_automation(file_path, trigger_part_state_9_input, [])) == {
-            "triggered": True,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_state_9_input, [])) is True
 
         trigger_part_state_9_input = [None, None, "off", "off"]
-        assert (await run_automation(file_path, trigger_part_state_9_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
+        assert (
+            await run_automation(file_path, trigger_part_state_9_input, [])
+        ) is False
 
         trigger_part_state_9_input = [None, None, "unknown", None]
-        assert (await run_automation(file_path, trigger_part_state_9_input, [])) == {
-            "triggered": True,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_state_9_input, [])) is True
 
         trigger_part_state_9_input = [None, None, None, "on"]
-        assert (await run_automation(file_path, trigger_part_state_9_input, [])) == {
-            "triggered": True,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_state_9_input, [])) is True
 
         trigger_part_state_9_input = [None, None, None, None]
-        assert (await run_automation(file_path, trigger_part_state_9_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
+        assert (
+            await run_automation(file_path, trigger_part_state_9_input, [])
+        ) is False
 
         real_pos == 4
+
+        trigger_part_state_10 = {
+            "platform": "state",
+            "entity_id": ["humidifier.hygrostat"],
+            "attribute": "humidity",
+            "to": [1, "20", "sensor.outside_humidity"],
+        }
+        file_path = init_automation_script("trigger_part_state_10", TRIGGER_DIR)
+        results = _trigger_entities(
+            trigger_part_state_10, position=23, real_position=19, script_path=file_path
+        )
+        test_trigger_return(file_path)
+
+        entities_state_10, end_position, real_pos = results
+        assert len(entities_state_10) == 2
+        assert entities_state_10[0].parent == 23
+        assert entities_state_10[0].position == 24
+        assert entities_state_10[0].parameter_role == START
+        assert entities_state_10[0].integration == "humidifier"
+        assert entities_state_10[0].entity_name == "humidifier.hygrostat.humidity"
+        assert entities_state_10[0].expected_value == {
+            "to": [1, "20", "sensor.outside_humidity"]
+        }
+        assert entities_state_10[1].parent == 23
+        assert entities_state_10[1].position == 25
+        assert entities_state_10[1].parameter_role == START
+        assert entities_state_10[1].integration == "sensor"
+        assert entities_state_10[1].entity_name == "sensor.outside_humidity"
+        assert end_position == 25
+
+        # border test cases - the list build like this [CONF_TO, CONF_ENTITY_ID/s]
+        trigger_part_state_10_input = [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "test",
+            "20",
+        ]
+        assert (
+            await run_automation(file_path, trigger_part_state_10_input, [])
+        ) is True
+
+        trigger_part_state_10_input = [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "test",
+            21,
+        ]
+        assert (
+            await run_automation(file_path, trigger_part_state_10_input, [])
+        ) is False
+
+        trigger_part_state_10_input = [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            1,
+            None,
+        ]
+        assert (
+            await run_automation(file_path, trigger_part_state_10_input, [])
+        ) is False
+
+        trigger_part_state_10_input = [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "79",
+            "79",
+        ]
+        assert (
+            await run_automation(file_path, trigger_part_state_10_input, [])
+        ) is True
+
+        trigger_part_state_10_input = [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "test",
+            1,
+        ]
+        assert (
+            await run_automation(file_path, trigger_part_state_10_input, [])
+        ) is True
 
     async def test_trigger_sun():
         # Test case 23: Sun trigger
@@ -1568,22 +1603,13 @@ async def test_trigger_entities():
         assert end_position == 1
 
         trigger_part_sun_1_input = [True]
-        assert (await run_automation(file_path, trigger_part_sun_1_input, [])) == {
-            "triggered": True,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_sun_1_input, [])) is True
 
         trigger_part_sun_1_input = [False]
-        assert (await run_automation(file_path, trigger_part_sun_1_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_sun_1_input, [])) is False
 
         trigger_part_sun_1_input = [None]
-        assert (await run_automation(file_path, trigger_part_sun_1_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_sun_1_input, [])) is False
 
         assert real_pos == 1
 
@@ -1613,22 +1639,13 @@ async def test_trigger_entities():
         assert end_position == 1
 
         trigger_part_sun_2_input = [True]
-        assert (await run_automation(file_path, trigger_part_sun_2_input, [])) == {
-            "triggered": True,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_sun_2_input, [])) is True
 
         trigger_part_sun_2_input = [False]
-        assert (await run_automation(file_path, trigger_part_sun_2_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_sun_2_input, [])) is False
 
         trigger_part_sun_2_input = [None]
-        assert (await run_automation(file_path, trigger_part_sun_2_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_sun_2_input, [])) is False
 
         assert real_pos == 1
 
@@ -1656,22 +1673,13 @@ async def test_trigger_entities():
         assert end_position == 1
 
         trigger_part_tag_1_input = [True]
-        assert (await run_automation(file_path, trigger_part_tag_1_input, [])) == {
-            "triggered": True,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_tag_1_input, [])) is True
 
         trigger_part_tag_1_input = [False]
-        assert (await run_automation(file_path, trigger_part_tag_1_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_tag_1_input, [])) is False
 
         trigger_part_tag_1_input = [None]
-        assert (await run_automation(file_path, trigger_part_tag_1_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_tag_1_input, [])) is False
 
         assert real_pos == 1
 
@@ -1700,22 +1708,13 @@ async def test_trigger_entities():
         assert end_position == 1
 
         trigger_part_tag_2_input = [True]
-        assert (await run_automation(file_path, trigger_part_tag_2_input, [])) == {
-            "triggered": True,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_tag_2_input, [])) is True
 
         trigger_part_tag_2_input = [False]
-        assert (await run_automation(file_path, trigger_part_tag_2_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_tag_2_input, [])) is False
 
         trigger_part_tag_2_input = [None]
-        assert (await run_automation(file_path, trigger_part_tag_2_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_tag_2_input, [])) is False
 
         assert real_pos == 1
 
@@ -1750,34 +1749,19 @@ async def test_trigger_entities():
         }
         assert end_position == 3
         trigger_part_tag_3_input = [True, False]
-        assert (await run_automation(file_path, trigger_part_tag_3_input, [])) == {
-            "triggered": True,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_tag_3_input, [])) is True
 
         trigger_part_tag_3_input = [False, True]
-        assert (await run_automation(file_path, trigger_part_tag_3_input, [])) == {
-            "triggered": True,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_tag_3_input, [])) is True
 
         trigger_part_tag_3_input = [None, None]
-        assert (await run_automation(file_path, trigger_part_tag_3_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_tag_3_input, [])) is False
 
         trigger_part_tag_3_input = [None, True]
-        assert (await run_automation(file_path, trigger_part_tag_3_input, [])) == {
-            "triggered": True,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_tag_3_input, [])) is True
 
         trigger_part_tag_3_input = [False, None]
-        assert (await run_automation(file_path, trigger_part_tag_3_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_tag_3_input, [])) is False
 
         assert real_pos == 2
 
@@ -1805,20 +1789,17 @@ async def test_trigger_entities():
         }
         assert end_position == 2
         trigger_part_template_1_input = [True]
-        assert (await run_automation(file_path, trigger_part_template_1_input, [])) == {
-            "triggered": True,
-            "trigger_id": None,
-        }
+        assert (
+            await run_automation(file_path, trigger_part_template_1_input, [])
+        ) is True
         trigger_part_template_1_input = [False]
-        assert (await run_automation(file_path, trigger_part_template_1_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
+        assert (
+            await run_automation(file_path, trigger_part_template_1_input, [])
+        ) is False
         trigger_part_template_1_input = [None]
-        assert (await run_automation(file_path, trigger_part_template_1_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
+        assert (
+            await run_automation(file_path, trigger_part_template_1_input, [])
+        ) is False
         assert real_pos == 1
 
         # Test case 29: Template trigger with two values
@@ -1851,35 +1832,29 @@ async def test_trigger_entities():
         }
         assert end_position == 3
         trigger_part_template_2_input = [True, True]
-        assert (await run_automation(file_path, trigger_part_template_2_input, [])) == {
-            "triggered": True,
-            "trigger_id": None,
-        }
+        assert (
+            await run_automation(file_path, trigger_part_template_2_input, [])
+        ) is True
         trigger_part_template_2_input = [True, False]
-        assert (await run_automation(file_path, trigger_part_template_2_input, [])) == {
-            "triggered": True,
-            "trigger_id": None,
-        }
+        assert (
+            await run_automation(file_path, trigger_part_template_2_input, [])
+        ) is True
         trigger_part_template_2_input = [None, True]
-        assert (await run_automation(file_path, trigger_part_template_2_input, [])) == {
-            "triggered": True,
-            "trigger_id": None,
-        }
+        assert (
+            await run_automation(file_path, trigger_part_template_2_input, [])
+        ) is True
         trigger_part_template_2_input = [False, False]
-        assert (await run_automation(file_path, trigger_part_template_2_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
+        assert (
+            await run_automation(file_path, trigger_part_template_2_input, [])
+        ) is False
         trigger_part_template_2_input = [None, None]
-        assert (await run_automation(file_path, trigger_part_template_2_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
+        assert (
+            await run_automation(file_path, trigger_part_template_2_input, [])
+        ) is False
         trigger_part_template_2_input = [None, False]
-        assert (await run_automation(file_path, trigger_part_template_2_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
+        assert (
+            await run_automation(file_path, trigger_part_template_2_input, [])
+        ) is False
         assert real_pos == 2
 
         # Test case 30: Template trigger with value and for
@@ -1907,20 +1882,17 @@ async def test_trigger_entities():
         }
         assert end_position == 2
         trigger_part_template_3_input = [True]
-        assert (await run_automation(file_path, trigger_part_template_3_input, [])) == {
-            "triggered": True,
-            "trigger_id": None,
-        }
+        assert (
+            await run_automation(file_path, trigger_part_template_3_input, [])
+        ) is True
         trigger_part_template_3_input = [False]
-        assert (await run_automation(file_path, trigger_part_template_3_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
+        assert (
+            await run_automation(file_path, trigger_part_template_3_input, [])
+        ) is False
         trigger_part_template_3_input = [None]
-        assert (await run_automation(file_path, trigger_part_template_3_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
+        assert (
+            await run_automation(file_path, trigger_part_template_3_input, [])
+        ) is False
         assert real_pos == 1
 
     async def test_trigger_time():
@@ -1943,22 +1915,13 @@ async def test_trigger_entities():
         assert end_position == 1
 
         trigger_part_time_1_input = [True]
-        assert (await run_automation(file_path, trigger_part_time_1_input, [])) == {
-            "triggered": True,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_time_1_input, [])) is True
 
         trigger_part_time_1_input = [False]
-        assert (await run_automation(file_path, trigger_part_time_1_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_time_1_input, [])) is False
 
         trigger_part_time_1_input = [None]
-        assert (await run_automation(file_path, trigger_part_time_1_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_time_1_input, [])) is False
 
         assert real_pos == 1
 
@@ -1984,35 +1947,21 @@ async def test_trigger_entities():
         assert entities_time_2[1].entity_name == "time.time"
         assert entities_time_2[1].expected_value == {CONF_AT: "06:10"}
         assert end_position == 3
+
         trigger_part_time_2_input = [True, False]
-        assert (await run_automation(file_path, trigger_part_time_2_input, [])) == {
-            "triggered": True,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_time_2_input, [])) is True
 
         trigger_part_time_2_input = [False, True]
-        assert (await run_automation(file_path, trigger_part_time_2_input, [])) == {
-            "triggered": True,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_time_2_input, [])) is True
 
         trigger_part_time_2_input = [None, None]
-        assert (await run_automation(file_path, trigger_part_time_2_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_time_2_input, [])) is False
 
         trigger_part_time_2_input = [None, True]
-        assert (await run_automation(file_path, trigger_part_time_2_input, [])) == {
-            "triggered": True,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_time_2_input, [])) is True
 
         trigger_part_time_2_input = [False, None]
-        assert (await run_automation(file_path, trigger_part_time_2_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_time_2_input, [])) is False
 
         assert real_pos == 2
 
@@ -2041,17 +1990,17 @@ async def test_trigger_entities():
         trigger_part_time_pattern_1_input = [True]
         assert (
             await run_automation(file_path, trigger_part_time_pattern_1_input, [])
-        ) == {"triggered": True, "trigger_id": None}
+        ) is True
 
         trigger_part_time_pattern_1_input = [False]
         assert (
             await run_automation(file_path, trigger_part_time_pattern_1_input, [])
-        ) == {"triggered": False, "trigger_id": None}
+        ) is False
 
         trigger_part_time_pattern_1_input = [None]
         assert (
             await run_automation(file_path, trigger_part_time_pattern_1_input, [])
-        ) == {"triggered": False, "trigger_id": None}
+        ) is False
 
         assert real_pos == 1
 
@@ -2079,17 +2028,17 @@ async def test_trigger_entities():
         trigger_part_time_pattern_2_input = [True]
         assert (
             await run_automation(file_path, trigger_part_time_pattern_2_input, [])
-        ) == {"triggered": True, "trigger_id": None}
+        ) is True
 
         trigger_part_time_pattern_2_input = [False]
         assert (
             await run_automation(file_path, trigger_part_time_pattern_2_input, [])
-        ) == {"triggered": False, "trigger_id": None}
+        ) is False
 
         trigger_part_time_pattern_2_input = [None]
         assert (
             await run_automation(file_path, trigger_part_time_pattern_2_input, [])
-        ) == {"triggered": False, "trigger_id": None}
+        ) is False
 
         assert real_pos == 1
 
@@ -2117,17 +2066,17 @@ async def test_trigger_entities():
         trigger_part_time_pattern_3_input = [True]
         assert (
             await run_automation(file_path, trigger_part_time_pattern_3_input, [])
-        ) == {"triggered": True, "trigger_id": None}
+        ) is True
 
         trigger_part_time_pattern_3_input = [False]
         assert (
             await run_automation(file_path, trigger_part_time_pattern_3_input, [])
-        ) == {"triggered": False, "trigger_id": None}
+        ) is False
 
         trigger_part_time_pattern_3_input = [None]
         assert (
             await run_automation(file_path, trigger_part_time_pattern_3_input, [])
-        ) == {"triggered": False, "trigger_id": None}
+        ) is False
 
         assert real_pos == 1
 
@@ -2212,17 +2161,17 @@ async def test_trigger_entities():
         trigger_part_time_pattern_7_input = [True]
         assert (
             await run_automation(file_path, trigger_part_time_pattern_7_input, [])
-        ) == {"triggered": True, "trigger_id": None}
+        ) is True
 
         trigger_part_time_pattern_7_input = [False]
         assert (
             await run_automation(file_path, trigger_part_time_pattern_7_input, [])
-        ) == {"triggered": False, "trigger_id": None}
+        ) is False
 
         trigger_part_time_pattern_7_input = [None]
         assert (
             await run_automation(file_path, trigger_part_time_pattern_7_input, [])
-        ) == {"triggered": False, "trigger_id": None}
+        ) is False
 
         assert real_pos == 1
 
@@ -2254,13 +2203,13 @@ async def test_trigger_entities():
         trigger_part_pers_notify_1_input = ["added"]
         assert (
             await run_automation(file_path, trigger_part_pers_notify_1_input, [])
-        ) == {"triggered": True, "trigger_id": None}
+        ) is True
 
         for update_type in ["updated", "removed", "current", None]:
             trigger_part_pers_notify_1_input = [update_type]
             assert (
                 await run_automation(file_path, trigger_part_pers_notify_1_input, [])
-            ) == {"triggered": False, "trigger_id": None}
+            ) is False
 
         assert real_pos == 1
 
@@ -2295,13 +2244,13 @@ async def test_trigger_entities():
         trigger_part_pers_notify_2_input = ["added"]
         assert (
             await run_automation(file_path, trigger_part_pers_notify_2_input, [])
-        ) == {"triggered": True, "trigger_id": None}
+        ) is True
 
         for update_type in ["updated", "removed", "current", None]:
             trigger_part_pers_notify_2_input = [update_type]
             assert (
                 await run_automation(file_path, trigger_part_pers_notify_2_input, [])
-            ) == {"triggered": False, "trigger_id": None}
+            ) is False
 
         assert real_pos == 1
 
@@ -2331,20 +2280,17 @@ async def test_trigger_entities():
         assert end_position == 1
 
         trigger_part_webhook_1_input = [True]
-        assert (await run_automation(file_path, trigger_part_webhook_1_input, [])) == {
-            "triggered": True,
-            "trigger_id": None,
-        }
+        assert (
+            await run_automation(file_path, trigger_part_webhook_1_input, [])
+        ) is True
         trigger_part_webhook_1_input = [False]
-        assert (await run_automation(file_path, trigger_part_webhook_1_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
+        assert (
+            await run_automation(file_path, trigger_part_webhook_1_input, [])
+        ) is False
         trigger_part_webhook_1_input = [None]
-        assert (await run_automation(file_path, trigger_part_webhook_1_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
+        assert (
+            await run_automation(file_path, trigger_part_webhook_1_input, [])
+        ) is False
         assert real_pos == 1
 
         # Test case 43: Trigger at the post of a webhook with id "webhook_id_2" only locally
@@ -2372,20 +2318,17 @@ async def test_trigger_entities():
             CONF_LOCAL: True,
         }
         trigger_part_webhook_2_input = [True]
-        assert (await run_automation(file_path, trigger_part_webhook_2_input, [])) == {
-            "triggered": True,
-            "trigger_id": None,
-        }
+        assert (
+            await run_automation(file_path, trigger_part_webhook_2_input, [])
+        ) is True
         trigger_part_webhook_2_input = [False]
-        assert (await run_automation(file_path, trigger_part_webhook_2_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
+        assert (
+            await run_automation(file_path, trigger_part_webhook_2_input, [])
+        ) is False
         trigger_part_webhook_2_input = [None]
-        assert (await run_automation(file_path, trigger_part_webhook_2_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
+        assert (
+            await run_automation(file_path, trigger_part_webhook_2_input, [])
+        ) is False
         assert real_pos == 1
 
     async def test_trigger_zone():
@@ -2416,22 +2359,13 @@ async def test_trigger_entities():
         assert end_position == 1
 
         trigger_part_zone_1_input = [True]
-        assert (await run_automation(file_path, trigger_part_zone_1_input, [])) == {
-            "triggered": True,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_zone_1_input, [])) is True
 
         trigger_part_zone_1_input = [False]
-        assert (await run_automation(file_path, trigger_part_zone_1_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_zone_1_input, [])) is False
 
         trigger_part_zone_1_input = [None]
-        assert (await run_automation(file_path, trigger_part_zone_1_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_zone_1_input, [])) is False
 
         assert real_pos == 1
 
@@ -2465,17 +2399,17 @@ async def test_trigger_entities():
         trigger_part_geo_local_1_input = [True]
         assert (
             await run_automation(file_path, trigger_part_geo_local_1_input, [])
-        ) == {"triggered": True, "trigger_id": None}
+        ) is True
 
         trigger_part_geo_local_1_input = [False]
         assert (
             await run_automation(file_path, trigger_part_geo_local_1_input, [])
-        ) == {"triggered": False, "trigger_id": None}
+        ) is False
 
         trigger_part_geo_local_1_input = [None]
         assert (
             await run_automation(file_path, trigger_part_geo_local_1_input, [])
-        ) == {"triggered": False, "trigger_id": None}
+        ) is False
 
         assert real_pos == 1
 
@@ -2509,22 +2443,19 @@ async def test_trigger_entities():
         assert end_position == 1
 
         trigger_part_device_1_input = ["do something"]
-        assert (await run_automation(file_path, trigger_part_device_1_input, [])) == {
-            "triggered": True,
-            "trigger_id": None,
-        }
+        assert (
+            await run_automation(file_path, trigger_part_device_1_input, [])
+        ) is True
 
         trigger_part_device_1_input = ["do nothing"]
-        assert (await run_automation(file_path, trigger_part_device_1_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
+        assert (
+            await run_automation(file_path, trigger_part_device_1_input, [])
+        ) is False
 
         trigger_part_device_1_input = [None]
-        assert (await run_automation(file_path, trigger_part_device_1_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
+        assert (
+            await run_automation(file_path, trigger_part_device_1_input, [])
+        ) is False
 
         assert real_pos == 1
 
@@ -2552,20 +2483,17 @@ async def test_trigger_entities():
         assert end_position == 1
 
         trigger_part_calendar_1_input = [True]
-        assert (await run_automation(file_path, trigger_part_calendar_1_input, [])) == {
-            "triggered": True,
-            "trigger_id": None,
-        }
+        assert (
+            await run_automation(file_path, trigger_part_calendar_1_input, [])
+        ) is True
         trigger_part_calendar_1_input = [False]
-        assert (await run_automation(file_path, trigger_part_calendar_1_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
+        assert (
+            await run_automation(file_path, trigger_part_calendar_1_input, [])
+        ) is False
         trigger_part_calendar_1_input = [None]
-        assert (await run_automation(file_path, trigger_part_calendar_1_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
+        assert (
+            await run_automation(file_path, trigger_part_calendar_1_input, [])
+        ) is False
         assert real_pos == 1
 
         # Test case 48: Trigger when calender_name has an event event_name with an offset of -01:00:00
@@ -2595,20 +2523,17 @@ async def test_trigger_entities():
         assert end_position == 1
 
         trigger_part_calendar_2_input = [True]
-        assert (await run_automation(file_path, trigger_part_calendar_2_input, [])) == {
-            "triggered": True,
-            "trigger_id": None,
-        }
+        assert (
+            await run_automation(file_path, trigger_part_calendar_2_input, [])
+        ) is True
         trigger_part_calendar_2_input = [False]
-        assert (await run_automation(file_path, trigger_part_calendar_2_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
+        assert (
+            await run_automation(file_path, trigger_part_calendar_2_input, [])
+        ) is False
         trigger_part_calendar_2_input = [None]
-        assert (await run_automation(file_path, trigger_part_calendar_2_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
+        assert (
+            await run_automation(file_path, trigger_part_calendar_2_input, [])
+        ) is False
         assert real_pos == 1
 
     async def test_trigger_conversation():
@@ -2641,17 +2566,17 @@ async def test_trigger_entities():
         trigger_part_conversation_1_input = [True]
         assert (
             await run_automation(file_path, trigger_part_conversation_1_input, [])
-        ) == {"triggered": True, "trigger_id": None}
+        ) is True
 
         trigger_part_conversation_1_input = [False]
         assert (
             await run_automation(file_path, trigger_part_conversation_1_input, [])
-        ) == {"triggered": False, "trigger_id": None}
+        ) is False
 
         trigger_part_conversation_1_input = [None]
         assert (
             await run_automation(file_path, trigger_part_conversation_1_input, [])
-        ) == {"triggered": False, "trigger_id": None}
+        ) is False
 
         assert real_pos == 1
 
@@ -2690,32 +2615,32 @@ async def test_trigger_entities():
         trigger_part_conversation_2_input = [True, True]
         assert (
             await run_automation(file_path, trigger_part_conversation_2_input, [])
-        ) == {"triggered": True, "trigger_id": None}
+        ) is True
 
         trigger_part_conversation_2_input = [True, False]
         assert (
             await run_automation(file_path, trigger_part_conversation_2_input, [])
-        ) == {"triggered": True, "trigger_id": None}
+        ) is True
 
         trigger_part_conversation_2_input = [None, True]
         assert (
             await run_automation(file_path, trigger_part_conversation_2_input, [])
-        ) == {"triggered": True, "trigger_id": None}
+        ) is True
 
         trigger_part_conversation_2_input = [False, False]
         assert (
             await run_automation(file_path, trigger_part_conversation_2_input, [])
-        ) == {"triggered": False, "trigger_id": None}
+        ) is False
 
         trigger_part_conversation_2_input = [None, None]
         assert (
             await run_automation(file_path, trigger_part_conversation_2_input, [])
-        ) == {"triggered": False, "trigger_id": None}
+        ) is False
 
         trigger_part_conversation_2_input = [False, None]
         assert (
             await run_automation(file_path, trigger_part_conversation_2_input, [])
-        ) == {"triggered": False, "trigger_id": None}
+        ) is False
 
         assert real_pos == 2
 
@@ -2730,17 +2655,12 @@ async def test_trigger_entities():
 
         entities_x, end_position, real_pos = results
         assert len(entities_x) == 0
+        assert end_position == 1
         trigger_part_x_input = [True]
-        assert (await run_automation(file_path, trigger_part_x_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_x_input, [])) is False
 
         trigger_part_x_input = [None]
-        assert (await run_automation(file_path, trigger_part_x_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_x_input, [])) is False
 
         assert real_pos == 0
 
@@ -2758,25 +2678,37 @@ async def test_trigger_entities():
 
         entities_x2, end_position, real_pos = results
         assert len(entities_x2) == 0
+        assert end_position == 1
         trigger_part_x2_input = [True]
-        assert (await run_automation(file_path, trigger_part_x2_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_x2_input, [])) is False
 
         trigger_part_x2_input = [None]
-        assert (await run_automation(file_path, trigger_part_x2_input, [])) == {
-            "triggered": False,
-            "trigger_id": None,
-        }
+        assert (await run_automation(file_path, trigger_part_x2_input, [])) is False
 
         assert real_pos == 0
 
+    async def test_trigger_disabled():
+        trigger_part_disabled = {
+            CONF_PLATFORM: "state",
+            CONF_ENTITY_ID: "sensor.temperature",
+            CONF_ENABLED: False,
+        }
+        file_path = init_automation_script("trigger_part_disabled", TRIGGER_DIR)
+        results = _trigger_entities(
+            trigger_part_disabled, position=1, real_position=0, script_path=file_path
+        )
+        test_trigger_return(file_path)
+
+        entities_disabled, end_position, real_pos = results
+        assert len(entities_disabled) == 0
+        assert end_position == 1
+        assert real_pos == 0
+
     async def test_trigger_all():
-        await test_trigger_event()
-        await test_trigger_ha()
-        await test_trigger_mqtt()
-        await test_trigger_num_state()
+        # await test_trigger_event()
+        # await test_trigger_ha()
+        # await test_trigger_mqtt()
+        # await test_trigger_num_state()
         await test_trigger_state()
         await test_trigger_sun()
         await test_trigger_tag()
@@ -2791,6 +2723,7 @@ async def test_trigger_entities():
         await test_trigger_calendar()
         await test_trigger_conversation()
         await test_trigger_unsupported()
+        await test_trigger_disabled()
 
     await test_trigger_all()
     print("All trigger test cases passed!")
@@ -3982,6 +3915,202 @@ async def test_condition_entities():
 
         real_pos == 4
 
+        condition_part_state_10 = {
+            "condition": "state",
+            "entity_id": ["humidifier.hygrostat"],
+            "attribute": "humidity",
+            "state": [1, "20", "sensor.outside_humidity"],
+        }
+        file_path = init_automation_script("condition_part_state_10", CONDITION_DIR)
+        test_trigger_fill(file_path)
+        results = _condition_entities(
+            condition_part_state_10,
+            position=23,
+            real_position=19,
+            script_path=file_path,
+        )
+        test_condition_return(file_path)
+
+        entities_state_10, end_position, real_pos = results
+        assert len(entities_state_10) == 2
+        assert entities_state_10[0].parent == 23
+        assert entities_state_10[0].position == 24
+        assert entities_state_10[0].parameter_role == INPUT
+        assert entities_state_10[0].integration == "humidifier"
+        assert entities_state_10[0].entity_name == "humidifier.hygrostat.humidity"
+        assert entities_state_10[0].expected_value == {
+            "state": [1, "20", "sensor.outside_humidity"]
+        }
+        assert entities_state_10[1].parent == 23
+        assert entities_state_10[1].position == 25
+        assert entities_state_10[1].parameter_role == INPUT
+        assert entities_state_10[1].integration == "sensor"
+        assert entities_state_10[1].entity_name == "sensor.outside_humidity"
+        assert end_position == 25
+
+        # border test cases - the list build like this [CONF_TO, CONF_ENTITY_ID/s]
+        condition_part_state_10_input = [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "test",
+            "20",
+        ]
+        assert (await run_automation(file_path, [], condition_part_state_10_input)) == {
+            "condition_passed": True,
+        }
+
+        condition_part_state_10_input = [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "test",
+            21,
+        ]
+        assert (await run_automation(file_path, [], condition_part_state_10_input)) == {
+            "condition_passed": False,
+        }
+
+        condition_part_state_10_input = [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            1,
+            None,
+        ]
+        assert (await run_automation(file_path, [], condition_part_state_10_input)) == {
+            "ValueError": "Condition values cannot be None"
+        }
+
+        condition_part_state_10_input = [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "79",
+            "79",
+        ]
+        assert (await run_automation(file_path, [], condition_part_state_10_input)) == {
+            "condition_passed": True,
+        }
+
+        condition_part_state_10_input = [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            None,
+            1,
+        ]
+        assert (await run_automation(file_path, [], condition_part_state_10_input)) == {
+            "ValueError": "Condition values cannot be None"
+        }
+
+        condition_part_state_10_input = [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "test",
+            1,
+        ]
+        assert (await run_automation(file_path, [], condition_part_state_10_input)) == {
+            "condition_passed": True,
+        }
+
     async def test_condition_or():
         # test with one entity
         condition_part_or_1 = {
@@ -4468,7 +4597,7 @@ async def test_condition_entities():
         assert (await run_automation(file_path, [], condition_part_and_3_input)) == {
             "condition_passed": False,
         }
-        
+
         # all conditions are True and the second condition is like the comparing entity so the result should be True
         condition_part_not_3_input = ["on", "on", "test1", "test1", 5, 10, 35]
         assert (await run_automation(file_path, [], condition_part_not_3_input)) == {
@@ -4764,22 +4893,26 @@ async def test_condition_entities():
             CONF_VALUE_TEMPLATE: "{{ is_state('device_tracker.paulus', 'home') }}"
         }
         assert end_position == 1
-        
+
         condition_part_template_1_input = [True]
-        assert (await run_automation(file_path, [], condition_part_template_1_input)) == {
+        assert (
+            await run_automation(file_path, [], condition_part_template_1_input)
+        ) == {
             "condition_passed": True,
         }
-        
+
         condition_part_template_1_input = [False]
-        assert (await run_automation(file_path, [], condition_part_template_1_input)) == {
+        assert (
+            await run_automation(file_path, [], condition_part_template_1_input)
+        ) == {
             "condition_passed": False,
         }
-        
+
         condition_part_template_1_input = [None]
-        assert (await run_automation(file_path, [], condition_part_template_1_input)) == {
-            "ValueError": "Condition values cannot be None"
-        }
-        
+        assert (
+            await run_automation(file_path, [], condition_part_template_1_input)
+        ) == {"ValueError": "Condition values cannot be None"}
+
         assert real_pos == 1
 
         # Test case 2: Template condition with two entities
@@ -4816,25 +4949,29 @@ async def test_condition_entities():
             CONF_VALUE_TEMPLATE: "{{ is_state('device_tracker.paulus', 'home') and is_state('device_tracker.anne_therese', 'home') }}"
         }
         assert end_position == 3
-        
+
         # both entity conditions are True so the result is True
         condition_part_template_2_input = [True, True]
-        assert (await run_automation(file_path, [], condition_part_template_2_input)) == {
+        assert (
+            await run_automation(file_path, [], condition_part_template_2_input)
+        ) == {
             "condition_passed": True,
         }
-        
+
         # one of the entity conditions is False so the result is False
         condition_part_template_2_input = [False, True]
-        assert (await run_automation(file_path, [], condition_part_template_2_input)) == {
+        assert (
+            await run_automation(file_path, [], condition_part_template_2_input)
+        ) == {
             "condition_passed": False,
         }
-        
+
         # if one of the values is None the result is an error
         condition_part_template_2_input = [None, None]
-        assert (await run_automation(file_path, [], condition_part_template_2_input)) == {
-            "ValueError": "Condition values cannot be None"
-        }
-        
+        assert (
+            await run_automation(file_path, [], condition_part_template_2_input)
+        ) == {"ValueError": "Condition values cannot be None"}
+
         assert real_pos == 2
 
         # Test case 3: Template condition with one entity and at a specific position
@@ -4864,22 +5001,26 @@ async def test_condition_entities():
             CONF_VALUE_TEMPLATE: "{{ is_state('device_tracker.paulus', 'home') }}"
         }
         assert end_position == 4
-        
+
         condition_part_template_3_input = [True]
-        assert (await run_automation(file_path, [], condition_part_template_3_input)) == {
+        assert (
+            await run_automation(file_path, [], condition_part_template_3_input)
+        ) == {
             "condition_passed": True,
         }
-        
+
         condition_part_template_3_input = [False]
-        assert (await run_automation(file_path, [], condition_part_template_3_input)) == {
+        assert (
+            await run_automation(file_path, [], condition_part_template_3_input)
+        ) == {
             "condition_passed": False,
         }
-        
+
         condition_part_template_3_input = [None]
-        assert (await run_automation(file_path, [], condition_part_template_3_input)) == {
-            "ValueError": "Condition values cannot be None"
-        }
-        
+        assert (
+            await run_automation(file_path, [], condition_part_template_3_input)
+        ) == {"ValueError": "Condition values cannot be None"}
+
         assert real_pos == 1
 
         # Test case 4: Template condition with two entities and at a specific position
@@ -4917,22 +5058,26 @@ async def test_condition_entities():
             CONF_VALUE_TEMPLATE: "{{ is_state('device_tracker.paulus', 'home') and is_state('device_tracker.anne_therese', 'home') }}"
         }
         assert end_position == 6
-        
+
         condition_part_template_4_input = [True, True]
-        assert (await run_automation(file_path, [], condition_part_template_4_input)) == {
+        assert (
+            await run_automation(file_path, [], condition_part_template_4_input)
+        ) == {
             "condition_passed": True,
         }
-        
+
         condition_part_template_4_input = [False, True]
-        assert (await run_automation(file_path, [], condition_part_template_4_input)) == {
+        assert (
+            await run_automation(file_path, [], condition_part_template_4_input)
+        ) == {
             "condition_passed": False,
         }
-        
+
         condition_part_template_4_input = [None, None]
-        assert (await run_automation(file_path, [], condition_part_template_4_input)) == {
-            "ValueError": "Condition values cannot be None"
-        }
-        
+        assert (
+            await run_automation(file_path, [], condition_part_template_4_input)
+        ) == {"ValueError": "Condition values cannot be None"}
+
         assert real_pos == 2
 
         # Test case 5: Template condition without a condition parameter
@@ -4958,22 +5103,26 @@ async def test_condition_entities():
             CONF_VALUE_TEMPLATE: "{{ is_state('device_tracker.paulus', 'home') }}"
         }
         assert end_position == 1
-        
+
         condition_part_template_5_input = [True]
-        assert (await run_automation(file_path, [], condition_part_template_5_input)) == {
+        assert (
+            await run_automation(file_path, [], condition_part_template_5_input)
+        ) == {
             "condition_passed": True,
         }
-        
+
         condition_part_template_5_input = [False]
-        assert (await run_automation(file_path, [], condition_part_template_5_input)) == {
+        assert (
+            await run_automation(file_path, [], condition_part_template_5_input)
+        ) == {
             "condition_passed": False,
         }
-        
+
         condition_part_template_5_input = [None]
-        assert (await run_automation(file_path, [], condition_part_template_5_input)) == {
-            "ValueError": "Condition values cannot be None"
-        }
-        
+        assert (
+            await run_automation(file_path, [], condition_part_template_5_input)
+        ) == {"ValueError": "Condition values cannot be None"}
+
         assert real_pos == 1
 
     async def test_condition_sun():
@@ -4998,24 +5147,23 @@ async def test_condition_entities():
         assert entities_sun_1[0].entity_name == "sun.sun"
         assert entities_sun_1[0].expected_value == {"after": "sunset"}
         assert end_position == 1
-        
+
         condition_part_sun_1_input = [True]
         assert (await run_automation(file_path, [], condition_part_sun_1_input)) == {
             "condition_passed": True,
         }
-        
+
         condition_part_sun_1_input = [False]
         assert (await run_automation(file_path, [], condition_part_sun_1_input)) == {
             "condition_passed": False,
         }
-        
+
         condition_part_sun_1_input = [None]
         assert (await run_automation(file_path, [], condition_part_sun_1_input)) == {
             "ValueError": "Condition values cannot be None"
         }
-        
+
         assert real_pos == 1
-        
 
         # Test case 21: Sun condition before the sunset
         condition_part_sun_2 = {
@@ -5038,22 +5186,22 @@ async def test_condition_entities():
         assert entities_sun_2[0].entity_name == "sun.sun"
         assert entities_sun_2[0].expected_value == {"before": "sunset"}
         assert end_position == 1
-        
+
         condition_part_sun_2_input = [True]
         assert (await run_automation(file_path, [], condition_part_sun_2_input)) == {
             "condition_passed": True,
         }
-        
+
         condition_part_sun_2_input = [False]
         assert (await run_automation(file_path, [], condition_part_sun_2_input)) == {
             "condition_passed": False,
         }
-        
+
         condition_part_sun_2_input = [None]
         assert (await run_automation(file_path, [], condition_part_sun_2_input)) == {
             "ValueError": "Condition values cannot be None"
         }
-        
+
         assert real_pos == 1
 
         # Test case 22: Sun condition 1 hour after the sunset and 1 hour after the sunrise
@@ -5085,22 +5233,22 @@ async def test_condition_entities():
             "after_offset": "01:00:00",
         }
         assert end_position == 1
-        
+
         condition_part_sun_3_input = [True]
         assert (await run_automation(file_path, [], condition_part_sun_3_input)) == {
             "condition_passed": True,
         }
-        
+
         condition_part_sun_3_input = [False]
         assert (await run_automation(file_path, [], condition_part_sun_3_input)) == {
             "condition_passed": False,
         }
-        
+
         condition_part_sun_3_input = [None]
         assert (await run_automation(file_path, [], condition_part_sun_3_input)) == {
             "ValueError": "Condition values cannot be None"
         }
-        
+
         assert real_pos == 1
 
         # Test case 23: Sun condition after the sunset and before the sunrise at a specific position
@@ -5132,32 +5280,32 @@ async def test_condition_entities():
             "before": "sunrise",
         }
         assert end_position == 3
-        
+
         condition_part_sun_4_input = [True]
         assert (await run_automation(file_path, [], condition_part_sun_4_input)) == {
             "condition_passed": True,
         }
-        
+
         condition_part_sun_4_input = [False]
         assert (await run_automation(file_path, [], condition_part_sun_4_input)) == {
             "condition_passed": False,
         }
-        
+
         condition_part_sun_4_input = [None]
         assert (await run_automation(file_path, [], condition_part_sun_4_input)) == {
             "ValueError": "Condition values cannot be None"
         }
-        
+
         assert real_pos == 1
 
     async def test_condition_device():
-        # Test case 24: Device condition with a device that does something
+        # Test case 24: Device condition with a device that is [CONF_IS_ON, IS_OFF]
         condition_part_device_1 = {
             CONF_CONDITION: "device",
             CONF_DEVICE_ID: "device_id_1",
             CONF_DOMAIN: "domain",
             CONF_ENTITY_ID: "test_entity_id",
-            CONF_TYPE: "do something",
+            CONF_TYPE: "is_on",
         }
         file_path = init_automation_script("condition_part_device_1", CONDITION_DIR)
         test_trigger_fill(file_path)
@@ -5175,10 +5323,25 @@ async def test_condition_entities():
         assert entities_device_1[0].entity_name == "device.device_id_1"
         assert entities_device_1[0].expected_value == {
             CONF_ENTITY_ID: "test_entity_id",
-            CONF_TYPE: "do something",
+            CONF_TYPE: "is_on",
             CONF_DOMAIN: "domain",
         }
         assert end_position == 1
+
+        condition_part_device_1_input = ["is_on"]
+        assert (await run_automation(file_path, [], condition_part_device_1_input)) == {
+            "condition_passed": True,
+        }
+
+        condition_part_device_1_input = ["is_off"]
+        assert (await run_automation(file_path, [], condition_part_device_1_input)) == {
+            "condition_passed": False,
+        }
+
+        condition_part_device_1_input = [None]
+        assert (await run_automation(file_path, [], condition_part_device_1_input)) == {
+            "ValueError": "Condition values cannot be None"
+        }
 
         # Test case 25: Device condition with a device that does something at a specific position
         condition_part_device_2 = {
@@ -5186,7 +5349,7 @@ async def test_condition_entities():
             CONF_DEVICE_ID: "device_id_1",
             CONF_DOMAIN: "domain",
             CONF_ENTITY_ID: "test_entity_id",
-            CONF_TYPE: "do something",
+            CONF_TYPE: "is_on",
         }
         file_path = init_automation_script("condition_part_device_2", CONDITION_DIR)
         test_trigger_fill(file_path)
@@ -5208,10 +5371,27 @@ async def test_condition_entities():
         assert entities_device_2[0].entity_name == "device.device_id_1"
         assert entities_device_2[0].expected_value == {
             CONF_ENTITY_ID: "test_entity_id",
-            CONF_TYPE: "do something",
+            CONF_TYPE: "is_on",
             CONF_DOMAIN: "domain",
         }
         assert end_position == 5
+
+        condition_part_device_2_input = ["is_on"]
+        assert (await run_automation(file_path, [], condition_part_device_2_input)) == {
+            "condition_passed": True,
+        }
+
+        condition_part_device_2_input = ["is_off"]
+        assert (await run_automation(file_path, [], condition_part_device_2_input)) == {
+            "condition_passed": False,
+        }
+
+        condition_part_device_2_input = [None]
+        assert (await run_automation(file_path, [], condition_part_device_2_input)) == {
+            "ValueError": "Condition values cannot be None"
+        }
+
+        assert real_pos == 1
 
     async def test_condition_time():
         # Test case 26: Time condition before a specific time
@@ -5236,6 +5416,23 @@ async def test_condition_entities():
         assert entities_time_1[0].expected_value == {"before": "12:00:00"}
         assert end_position == 1
 
+        condtion_part_time_1_input = [True]
+        assert (await run_automation(file_path, [], condtion_part_time_1_input)) == {
+            "condition_passed": True,
+        }
+
+        condtion_part_time_1_input = [False]
+        assert (await run_automation(file_path, [], condtion_part_time_1_input)) == {
+            "condition_passed": False,
+        }
+
+        condtion_part_time_1_input = [None]
+        assert (await run_automation(file_path, [], condtion_part_time_1_input)) == {
+            "ValueError": "Condition values cannot be None"
+        }
+
+        assert real_pos == 1
+
         # Test case 27: Time condition after a specific time
         condition_part_time_2 = {
             CONF_CONDITION: "time",
@@ -5257,6 +5454,23 @@ async def test_condition_entities():
         assert entities_time_2[0].entity_name is not None
         assert entities_time_2[0].expected_value == {"after": "12:00:00"}
         assert end_position == 1
+
+        condtion_part_time_2_input = [True]
+        assert (await run_automation(file_path, [], condtion_part_time_2_input)) == {
+            "condition_passed": True,
+        }
+
+        condtion_part_time_2_input = [False]
+        assert (await run_automation(file_path, [], condtion_part_time_2_input)) == {
+            "condition_passed": False,
+        }
+
+        condtion_part_time_2_input = [None]
+        assert (await run_automation(file_path, [], condtion_part_time_2_input)) == {
+            "ValueError": "Condition values cannot be None"
+        }
+
+        assert real_pos == 1
 
         # Test case 28: Time condition between two specific times on monday
         condition_part_time_3 = {
@@ -5285,6 +5499,23 @@ async def test_condition_entities():
             "weekday": "mon",
         }
         assert end_position == 1
+
+        condtion_part_time_3_input = [True]
+        assert (await run_automation(file_path, [], condtion_part_time_3_input)) == {
+            "condition_passed": True,
+        }
+
+        condtion_part_time_3_input = [False]
+        assert (await run_automation(file_path, [], condtion_part_time_3_input)) == {
+            "condition_passed": False,
+        }
+
+        condtion_part_time_3_input = [None]
+        assert (await run_automation(file_path, [], condtion_part_time_3_input)) == {
+            "ValueError": "Condition values cannot be None"
+        }
+
+        assert real_pos == 1
 
         # Test case 29: Time condition between two specific times on friday at a specific position
         condition_part_time_4 = {
@@ -5318,11 +5549,28 @@ async def test_condition_entities():
         }
         assert end_position == 12
 
+        condtion_part_time_4_input = [True]
+        assert (await run_automation(file_path, [], condtion_part_time_4_input)) == {
+            "condition_passed": True,
+        }
+
+        condtion_part_time_4_input = [False]
+        assert (await run_automation(file_path, [], condtion_part_time_4_input)) == {
+            "condition_passed": False,
+        }
+
+        condtion_part_time_4_input = [None]
+        assert (await run_automation(file_path, [], condtion_part_time_4_input)) == {
+            "ValueError": "Condition values cannot be None"
+        }
+
+        assert real_pos == 1
+
     async def test_condition_trigger():
-        # Test case 30: Trigger condition with a trigger that has an string id
-        condition_part_trigger_1 = {CONF_CONDITION: "trigger", CONF_ID: "trigger_1"}
+        # Test case 1: Trigger condition with a trigger that has an string id
+        condition_part_trigger_1 = {CONF_CONDITION: CONF_TRIGGER, CONF_ID: "trigger_1"}
         file_path = init_automation_script("condition_part_trigger_1", CONDITION_DIR)
-        test_trigger_fill(file_path)
+        test_trigger_fill(file_path, "trigger_1")
         results = _condition_entities(
             condition_part_trigger_1, position=1, real_position=0, script_path=file_path
         )
@@ -5338,10 +5586,17 @@ async def test_condition_entities():
         assert entities_trigger_1[0].expected_value == {CONF_ID: "trigger_1"}
         assert end_position == 1
 
-        # Test case 31: Trigger condition with a trigger that has an integer id
-        condition_part_trigger_2 = {CONF_CONDITION: "trigger", CONF_ID: 1}
+        # # The automation was triggered by a trigger with id trigger_1 so the result is True
+        assert (await run_automation(file_path, [], [])) == {
+            "condition_passed": True,
+        }
+
+        assert real_pos == 0
+
+        # Test case 2: Trigger condition with a trigger that has an integer id
+        condition_part_trigger_2 = {CONF_CONDITION: CONF_TRIGGER, CONF_ID: 1}
         file_path = init_automation_script("condition_part_trigger_2", CONDITION_DIR)
-        test_trigger_fill(file_path)
+        test_trigger_fill(file_path, "trigger_1")
         results = _condition_entities(
             condition_part_trigger_2, position=1, real_position=0, script_path=file_path
         )
@@ -5354,10 +5609,17 @@ async def test_condition_entities():
         assert entities_trigger_2[0].parameter_role == INPUT
         assert entities_trigger_2[0].integration == "trigger"
         assert entities_trigger_2[0].entity_name is not None
-        assert entities_trigger_2[0].expected_value == {CONF_ID: 1}
+        assert entities_trigger_2[0].expected_value == {CONF_ID: "1"}
         assert end_position == 1
 
-        # Test case 32: Trigger condition with a trigger that has an string id at a specific position
+        # The automation was triggered by a trigger with the id trigger_1 and not id = 1 so the result is False
+        assert (await run_automation(file_path, [], [])) == {
+            "condition_passed": False,
+        }
+
+        assert real_pos == 0
+
+        # Test case 3: Trigger condition with a trigger that has an string id at a specific position
         condition_part_trigger_3 = {CONF_CONDITION: "trigger", CONF_ID: "trigger_1"}
         file_path = init_automation_script("condition_part_trigger_3", CONDITION_DIR)
         test_trigger_fill(file_path)
@@ -5380,8 +5642,53 @@ async def test_condition_entities():
         assert entities_trigger_3[0].expected_value == {CONF_ID: "trigger_1"}
         assert end_position == 4
 
+        # The automation was triggered by a trigger with no id and not trigger_1 so the result is False
+        assert (await run_automation(file_path, [], [])) == {
+            "condition_passed": False,
+        }
+
+        assert real_pos == 0
+
+        # Test case 4: Trigger condition with a list of possible trigger ids at a specific position
+        condition_part_trigger_4 = {
+            CONF_CONDITION: "trigger",
+            CONF_ID: ["trigger_1", "trigger_2"],
+        }
+        file_path = init_automation_script("condition_part_trigger_4", CONDITION_DIR)
+        test_trigger_fill(file_path, "trigger_2")
+        results = _condition_entities(
+            condition_part_trigger_4,
+            position=4,
+            parent=2,
+            real_position=0,
+            script_path=file_path,
+        )
+        test_condition_return(file_path)
+
+        entities_trigger_4, end_position, real_pos = results
+        assert len(entities_trigger_4) == 2
+        assert entities_trigger_4[0].parent == 4
+        assert entities_trigger_4[0].position == 5
+        assert entities_trigger_4[0].parameter_role == INPUT
+        assert entities_trigger_4[0].integration == "trigger"
+        assert entities_trigger_4[0].entity_name is not None
+        assert entities_trigger_4[0].expected_value == {CONF_ID: "trigger_1"}
+        assert entities_trigger_4[1].parent == 4
+        assert entities_trigger_4[1].position == 6
+        assert entities_trigger_4[1].parameter_role == INPUT
+        assert entities_trigger_4[1].integration == "trigger"
+        assert entities_trigger_4[1].entity_name is not None
+        assert entities_trigger_4[1].expected_value == {CONF_ID: "trigger_2"}
+        assert end_position == 6
+
+        # The automation was triggered by a trigger with id trigger_2 so the result is True
+        assert (await run_automation(file_path, [], [])) == {
+            "condition_passed": True,
+        }
+        assert real_pos == 0
+
     async def test_condition_zone():
-        # Test case 33: Zone condition with one entity
+        # Test case 1: Zone condition with one entity
         condition_part_zone_1 = {
             CONF_CONDITION: "zone",
             CONF_ENTITY_ID: "device_tracker.paulus",
@@ -5395,18 +5702,41 @@ async def test_condition_entities():
         test_condition_return(file_path)
 
         entities_zone_1, end_position, real_pos = results
-        assert len(entities_zone_1) == 1
-        assert entities_zone_1[0].parent is None
-        assert entities_zone_1[0].position == 1
+        assert len(entities_zone_1) == 2
+        assert entities_zone_1[0].parent == 1
+        assert entities_zone_1[0].position == 2
         assert entities_zone_1[0].parameter_role == INPUT
-        assert entities_zone_1[0].integration == "zone"
-        assert entities_zone_1[0].entity_name == "zone.home"
-        assert entities_zone_1[0].expected_value == {
+        assert entities_zone_1[0].integration == "device_tracker"
+        assert entities_zone_1[0].entity_name == "device_tracker.paulus"
+        assert entities_zone_1[0].expected_value == {"zone": "zone.home"}
+        assert entities_zone_1[1].parent == 1
+        assert entities_zone_1[1].position == 3
+        assert entities_zone_1[1].parameter_role == INPUT
+        assert entities_zone_1[1].integration == "zone"
+        assert entities_zone_1[1].entity_name == "zone.home"
+        assert entities_zone_1[1].expected_value == {
             "entity_id": "device_tracker.paulus"
         }
-        assert end_position == 1
+        assert end_position == 3
 
-        # Test case 34: Zone condition with one entity in a list
+        condition_part_zone_1_input = ["device_tracker.paulus"]
+        assert (await run_automation(file_path, [], condition_part_zone_1_input)) == {
+            "condition_passed": True,
+        }
+
+        condition_part_zone_1_input = ["device_tracker.anne_therese"]
+        assert (await run_automation(file_path, [], condition_part_zone_1_input)) == {
+            "condition_passed": False,
+        }
+
+        condition_part_zone_1_input = [None]
+        assert (await run_automation(file_path, [], condition_part_zone_1_input)) == {
+            "ValueError": "Condition values cannot be None"
+        }
+
+        assert real_pos == 1
+
+        # Test case 2: Zone condition with one entity in a list
         condition_part_zone_2 = {
             CONF_CONDITION: "zone",
             CONF_ENTITY_ID: ["device_tracker.paulus"],
@@ -5420,18 +5750,41 @@ async def test_condition_entities():
         test_condition_return(file_path)
 
         entities_zone_2, end_position, real_pos = results
-        assert len(entities_zone_2) == 1
-        assert entities_zone_2[0].parent is None
-        assert entities_zone_2[0].position == 1
+        assert len(entities_zone_2) == 2
+        assert entities_zone_2[0].parent == 1
+        assert entities_zone_2[0].position == 2
         assert entities_zone_2[0].parameter_role == INPUT
-        assert entities_zone_2[0].integration == "zone"
-        assert entities_zone_2[0].entity_name == "zone.home"
-        assert entities_zone_2[0].expected_value == {
-            "entity_id": ["device_tracker.paulus"]
+        assert entities_zone_2[0].integration == "device_tracker"
+        assert entities_zone_2[0].entity_name == "device_tracker.paulus"
+        assert entities_zone_2[0].expected_value == {"zone": "zone.home"}
+        assert entities_zone_2[1].parent == 1
+        assert entities_zone_2[1].position == 3
+        assert entities_zone_2[1].parameter_role == INPUT
+        assert entities_zone_2[1].integration == "zone"
+        assert entities_zone_2[1].entity_name == "zone.home"
+        assert entities_zone_2[1].expected_value == {
+            "entity_id": "device_tracker.paulus"
         }
-        assert end_position == 1
+        assert end_position == 3
 
-        # Test case 35: Zone condition with two entities
+        condition_part_zone_2_input = ["device_tracker.paulus"]
+        assert (await run_automation(file_path, [], condition_part_zone_2_input)) == {
+            "condition_passed": True,
+        }
+
+        condition_part_zone_2_input = ["device_tracker.anne_therese"]
+        assert (await run_automation(file_path, [], condition_part_zone_2_input)) == {
+            "condition_passed": False,
+        }
+
+        condition_part_zone_2_input = [None]
+        assert (await run_automation(file_path, [], condition_part_zone_2_input)) == {
+            "ValueError": "Condition values cannot be None"
+        }
+
+        assert real_pos == 1
+
+        # Test case 3: Zone condition with two entities
         condition_part_zone_3 = {
             CONF_CONDITION: "zone",
             CONF_ENTITY_ID: ["device_tracker.paulus", "device_tracker.anne_therese"],
@@ -5445,22 +5798,81 @@ async def test_condition_entities():
         test_condition_return(file_path)
 
         entities_zone_3, end_position, real_pos = results
-        assert len(entities_zone_3) == 1
-        assert entities_zone_3[0].parent is None
-        assert entities_zone_3[0].position == 1
+        assert len(entities_zone_3) == 3
+        assert entities_zone_3[0].parent == 2
+        assert entities_zone_3[0].position == 3
         assert entities_zone_3[0].parameter_role == INPUT
-        assert entities_zone_3[0].integration == "zone"
-        assert entities_zone_3[0].entity_name == "zone.home"
-        assert entities_zone_3[0].expected_value == {
-            "entity_id": ["device_tracker.paulus", "device_tracker.anne_therese"]
+        assert entities_zone_3[0].integration == "device_tracker"
+        assert entities_zone_3[0].entity_name == "device_tracker.paulus"
+        assert entities_zone_3[0].expected_value == {"zone": "zone.home"}
+        assert entities_zone_3[1].parent == 2
+        assert entities_zone_3[1].position == 4
+        assert entities_zone_3[1].parameter_role == INPUT
+        assert entities_zone_3[1].integration == "device_tracker"
+        assert entities_zone_3[1].entity_name == "device_tracker.anne_therese"
+        assert entities_zone_3[1].expected_value == {"zone": "zone.home"}
+        assert entities_zone_3[2].parent == 1
+        assert entities_zone_3[2].position == 5
+        assert entities_zone_3[2].parameter_role == INPUT
+        assert entities_zone_3[2].integration == "zone"
+        assert entities_zone_3[2].entity_name == "zone.home"
+        assert entities_zone_3[2].expected_value == {
+            CONF_ENTITY_ID: ["device_tracker.paulus", "device_tracker.anne_therese"]
         }
-        assert end_position == 1
+        assert end_position == 5
+
+        # not enough input
+        condition_part_zone_3_input = ["device_tracker.paulus", ""]
+        assert (await run_automation(file_path, [], condition_part_zone_3_input)) == {
+            "condition_passed": False,
+        }
+
+        # not enough input
+        condition_part_zone_3_input = ["", "device_tracker.anne_therese"]
+        assert (await run_automation(file_path, [], condition_part_zone_3_input)) == {
+            "condition_passed": False,
+        }
+
+        # right input order
+        condition_part_zone_3_input = [
+            "device_tracker.paulus",
+            "device_tracker.anne_therese",
+        ]
+        assert (await run_automation(file_path, [], condition_part_zone_3_input)) == {
+            "condition_passed": True,
+        }
+
+        # wrong input order
+        condition_part_zone_3_input = [
+            "device_tracker.anne_therese",
+            "device_tracker.paulus",
+        ]
+        assert (await run_automation(file_path, [], condition_part_zone_3_input)) == {
+            "condition_passed": False,
+        }
+
+        # wrong inputs
+        condition_part_zone_3_input = [
+            "device_tracker.perter_walt",
+            "device_tracker.anne_therese",
+        ]
+        assert (await run_automation(file_path, [], condition_part_zone_3_input)) == {
+            "condition_passed": False,
+        }
+
+        # None inputs arent allowed
+        condition_part_zone_3_input = [None, None]
+        assert (await run_automation(file_path, [], condition_part_zone_3_input)) == {
+            "ValueError": "Condition values cannot be None"
+        }
+
+        assert real_pos == 2
 
         # Test case 36: Zone condition with two entities and at a specific position
         condition_part_zone_4 = {
             CONF_CONDITION: "zone",
             CONF_ENTITY_ID: ["device_tracker.paulus", "device_tracker.anne_therese"],
-            CONF_ZONE: "zone.home",
+            CONF_ZONE: "zone.kitchen",
         }
         file_path = init_automation_script("condition_part_zone_4", CONDITION_DIR)
         test_trigger_fill(file_path)
@@ -5474,19 +5886,78 @@ async def test_condition_entities():
         test_condition_return(file_path)
 
         entities_zone_4, end_position, real_pos = results
-        assert len(entities_zone_4) == 1
-        assert entities_zone_4[0].parent == 2
-        assert entities_zone_4[0].position == 4
+        assert len(entities_zone_4) == 3
+        assert entities_zone_4[0].parent == 5
+        assert entities_zone_4[0].position == 6
         assert entities_zone_4[0].parameter_role == INPUT
-        assert entities_zone_4[0].integration == "zone"
-        assert entities_zone_4[0].entity_name == "zone.home"
-        assert entities_zone_4[0].expected_value == {
+        assert entities_zone_4[0].integration == "device_tracker"
+        assert entities_zone_4[0].entity_name == "device_tracker.paulus"
+        assert entities_zone_4[0].expected_value == {"zone": "zone.kitchen"}
+        assert entities_zone_4[1].parent == 5
+        assert entities_zone_4[1].position == 7
+        assert entities_zone_4[1].parameter_role == INPUT
+        assert entities_zone_4[1].integration == "device_tracker"
+        assert entities_zone_4[1].entity_name == "device_tracker.anne_therese"
+        assert entities_zone_4[1].expected_value == {"zone": "zone.kitchen"}
+        assert entities_zone_4[2].parent == 4
+        assert entities_zone_4[2].position == 8
+        assert entities_zone_4[2].parameter_role == INPUT
+        assert entities_zone_4[2].integration == "zone"
+        assert entities_zone_4[2].entity_name == "zone.kitchen"
+        assert entities_zone_4[2].expected_value == {
             "entity_id": ["device_tracker.paulus", "device_tracker.anne_therese"]
         }
-        assert end_position == 4
+        assert end_position == 8
+
+        # not enough input
+        condition_part_zone_4_input = ["device_tracker.paulus", ""]
+        assert (await run_automation(file_path, [], condition_part_zone_4_input)) == {
+            "condition_passed": False,
+        }
+
+        # not enough input
+        condition_part_zone_4_input = ["", "device_tracker.anne_therese"]
+        assert (await run_automation(file_path, [], condition_part_zone_4_input)) == {
+            "condition_passed": False,
+        }
+
+        # right input order
+        condition_part_zone_4_input = [
+            "device_tracker.paulus",
+            "device_tracker.anne_therese",
+        ]
+        assert (await run_automation(file_path, [], condition_part_zone_4_input)) == {
+            "condition_passed": True,
+        }
+
+        # wrong input order
+        condition_part_zone_4_input = [
+            "device_tracker.anne_therese",
+            "device_tracker.paulus",
+        ]
+        assert (await run_automation(file_path, [], condition_part_zone_4_input)) == {
+            "condition_passed": False,
+        }
+
+        # wrong inputs
+        condition_part_zone_4_input = [
+            "device_tracker.perter_walt",
+            "device_tracker.anne_therese",
+        ]
+        assert (await run_automation(file_path, [], condition_part_zone_4_input)) == {
+            "condition_passed": False,
+        }
+
+        # None inputs arent allowed
+        condition_part_zone_4_input = [None, None]
+        assert (await run_automation(file_path, [], condition_part_zone_4_input)) == {
+            "ValueError": "Condition values cannot be None"
+        }
+
+        assert real_pos == 2
 
     async def test_condition_unsupported():
-        # Test case 37: unknown condition
+        # Test case 1: unknown condition
         condition_part_x = {
             CONF_CONDITION: "x",
             CONF_SERVICE_DATA: {"entity_id": "light.kitchen"},
@@ -5500,9 +5971,11 @@ async def test_condition_entities():
 
         entities_x, end_position, real_pos = results
         assert len(entities_x) == 0
+        assert end_position == 1
+        assert real_pos == 0
 
     async def test_condition_disabled():
-        # Test case 38: disabled condition
+        # Test case 1: disabled condition
         condition_part_x2 = {
             CONF_CONDITION: "state",
             CONF_ENTITY_ID: "sensor.temperature",
@@ -5518,6 +5991,8 @@ async def test_condition_entities():
 
         entities_x2, end_position, real_pos = results
         assert len(entities_x2) == 0
+        assert end_position == 1
+        assert real_pos == 0
 
     async def test_condition_all():
         await test_condition_num_state()
@@ -7109,7 +7584,7 @@ if __name__ == "__main__":
     if not path.exists(TEST_DIR):
         mkdir(TEST_DIR)
 
-    # async_run(test_trigger_entities())
+    async_run(test_trigger_entities())
     async_run(test_condition_entities())
     # async_run(test_action_entities())
 
