@@ -220,7 +220,7 @@ VALUES
         https://github.com/home-assistant/core/blob/dev/homeassistant/components/device_tracker
 */
         (122,       'main',                             'home'),                                -- The device is home.
-        (123,       'main',                             'not_home'),                            -- The cover is not home.
+        (123,       'main',                             'not_home'),                            -- The device is not home.
         (124,       'source_type',                      'gps'),                                 -- The source of the device connection.
         (125,       'source_type',                      'router'),                              -- The source of the device connection.
         (126,       'source_type',                      'bluetooth'),                           -- The source of the device connection.
@@ -1333,7 +1333,8 @@ VALUES
 INSERT INTO integration(i_id, i_name)
 VALUES  (50,    'trigger'),
         (51,    'automation'),
-        (52,    'script');
+        (52,    'script'),
+        (53,    'person');
 
 -- POSSIBLE VALUES --
 /* import the values from condition integrations */
@@ -1361,7 +1362,13 @@ VALUES
         (427,       'mode',                             'queued'),                              -- The automation is queued up if repeated.
         (428,       'mode',                             'parallel'),                            -- The automation is called parallel if repeated.
         (429,       'current',                          'int');                                 -- The current state (not running 0 / running 1) of the automation
-
+/* person
+        states(main) / attributes extracted from:
+        https://www.home-assistant.io/integrations/person/
+*/
+        (430,       'device_trackers',                  'list[string]'),                        -- The list of device trackers for the person.
+        (431,       'user_id',                          'string'),                              -- The user id of the person.
+        (432,       'source',                           'string');                              -- The source of the tracking information
 
 INSERT INTO integration_values(i_id, pv_id)
 VALUES 
@@ -1399,4 +1406,14 @@ VALUES
         (52,     426),      --The script will restart up if repeated.
         (52,     427),      --The script is queued up if repeated.
         (52,     428),      --The script is called parallel if repeated.
-        (52,     429);      --The current state (not running 0 / running 1) of the script
+        (52,     429),      --The current state (not running 0 / running 1) of the script
+        -- person
+        (53,     122),      -- The person is home.
+        (53,     123),      -- The person is not home.
+        (53,     251),      -- The id of the person.
+        (53,     430),      -- The list of device trackers for the person.
+        (53,     431),      -- The user id of the person. 
+        (53,     128),      -- The coordinates of the person.
+        (53,     129),      -- The coordinates of the person.     
+        (53,     130),      -- The coordinate accuracy of the device.
+        (53,     432);      -- The source of the tracking information

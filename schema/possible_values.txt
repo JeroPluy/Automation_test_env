@@ -618,3 +618,10 @@
 (427,       'mode',                             'queued'),                              -- The automation is queued up if repeated.
 (428,       'mode',                             'parallel'),                            -- The automation is called parallel if repeated.
 (429,       'current',                          'int'),                                 -- The current state (not running 0 / running 1) of the automation
+/* person
+        states(main) / attributes extracted from:
+        https://www.home-assistant.io/integrations/person/
+*/
+(430,       'device_trackers',                  'list[string]'),                        -- The list of device trackers for the person.
+(431,       'user_id',                          'string'),                              -- The user id of the person.
+(432,       'source',                           'string'),                              -- The source of the tracking information

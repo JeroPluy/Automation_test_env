@@ -676,4 +676,14 @@
 (52,     426),      --The script will restart up if repeated.
 (52,     427),      --The script is queued up if repeated.
 (52,     428),      --The script is called parallel if repeated.
-(52,     429);      --The current state (not running 0 / running 1) of the script
+(52,     429),      --The current state (not running 0 / running 1) of the script
+-- person
+(53,     122),      -- The person is home.
+(53,     123),      -- The person is not home.
+(53,     251),      -- The id of the person.
+(53,     430),      -- The list of device trackers for the person.
+(53,     431),      -- The user id of the person. 
+(53,     128),      -- The coordinates of the person.
+(53,     129),      -- The coordinates of the person.     
+(53,     130),      -- The coordinate accuracy of the device.
+(53,     432),      -- The source of the tracking information

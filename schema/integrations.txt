@@ -58,3 +58,4 @@
 (50,    'trigger'),
 (51,    'automation'),
 (52,    'script'),
+(53,    'person'),
