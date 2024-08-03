@@ -142,7 +142,9 @@ condition:
       - mon
       - sun
   - condition: zone
-    entity_id: device_tracker.demo_paulus
+    entity_id: 
+      - device_tracker.demo_paulus
+      - device_tracker.demo_anne_therese
     zone: zone.home
   - condition: not
     conditions:

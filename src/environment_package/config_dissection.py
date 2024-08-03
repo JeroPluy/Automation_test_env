@@ -1991,6 +1991,7 @@ def _extract_all_conditions(
     conditions = automation_config[CONF_CONDITION]
     position = 0
     real_position = 0
+    num_condition_entities = 0
     for condition in conditions:
         if position != 0:
             first_element = False
@@ -2002,7 +2003,13 @@ def _extract_all_conditions(
         condition_entities += return_list[0]
         position = return_list[1] + 1
         real_position = return_list[2]
-    if len(condition_entities) != real_position:
+        
+        num_condition_entities += len(return_list[0])
+        if return_list[0] != []:
+            if return_list[0][-1].integration == "zone" or return_list[0][-1].integration == "trigger":
+                num_condition_entities -= 1
+
+    if num_condition_entities != real_position:
         raise vol.Invalid("The amount of entities and the real position do not match")
     close_condition_section(script_path)
     return condition_entities
