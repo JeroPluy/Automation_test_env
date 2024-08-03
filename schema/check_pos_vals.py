@@ -428,7 +428,10 @@ all_added = [
 (426,       'mode',                             'restart'),                             
 (427,       'mode',                             'queued'),                              
 (428,       'mode',                             'parallel'),                            
-(429,       'current',                          'int'),                                                                                                                                                                                                                                                      
+(429,       'current',                          'int'),
+(430,       'device_trackers',                  'list[string]'),      
+(431,       'user_id',                          'string'),            
+(432,       'source',                           'string'),                                                                                                                                                                                                                                                                  
 ]   
 
 possible_values = dict()    
