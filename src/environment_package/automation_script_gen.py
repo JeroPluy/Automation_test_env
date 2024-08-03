@@ -14,6 +14,8 @@ from environment_package.ha_automation.home_assistant_const import (
     CONF_AND,
     CONF_BELOW,
     CONF_DEVICE,
+    CONF_ENTITY_ID,
+    CONF_ID,
     CONF_NOT,
     CONF_NOT_TO,
     CONF_NUMERIC_STATE,
@@ -21,8 +23,10 @@ from environment_package.ha_automation.home_assistant_const import (
     CONF_PERS_NOTIFICATION,
     CONF_STATE,
     CONF_TO,
+    CONF_TRIGGER,
     CONF_TYPE,
     CONF_UPDATE_TYPE,
+    CONF_ZONE,
 )
 
 
@@ -110,24 +114,24 @@ def _get_trigger_conditional_expression(
             operator = None
 
             if CONF_TO in entity.expected_value:
-                value = entity.expected_value[CONF_TO]
+                exp_value = entity.expected_value[CONF_TO]
                 operator = "=="
             elif CONF_NOT_TO in entity.expected_value:
-                value = entity.expected_value[CONF_NOT_TO]
+                exp_value = entity.expected_value[CONF_NOT_TO]
                 operator = "!="
 
-            if isinstance(value, list):
+            if isinstance(exp_value, list):
                 if above_position is None:
-                    for value in entity.expected_value[CONF_TO]:
+                    above_position = trigger_pos
+                    for value in exp_value:
                         if valid_entity_id(str(value)):
-                            above_position = trigger_pos
                             trigger_pos += 1
-                # create the condition expression that the main entity could not be None            
-                comparison_str =  f"trigger[{trigger_pos}] is not None and ("
+                # create the condition expression that the main entity could not be None
+                comparison_str = f"trigger[{trigger_pos}] is not None and ("
 
-                current_com_entity_pos = 0
+                current_com_entity_pos = above_position
                 start_val = True
-                for value in entity.expected_value[CONF_TO]:
+                for value in exp_value:
                     # set an or before the next comparison
                     if start_val:
                         start_val = False
@@ -153,26 +157,26 @@ def _get_trigger_conditional_expression(
 
             else:
                 if above_position is None:
-                    if valid_entity_id(str(value)):
+                    if valid_entity_id(str(exp_value)):
                         above_position = trigger_pos
                         trigger_pos += 1
-                # create the condition expression that the main entity could not be None        
+                # create the condition expression that the main entity could not be None
                 comparison_str = f"trigger[{trigger_pos}] is not None and ("
-                
-                if valid_entity_id(str(value)):
+
+                if valid_entity_id(str(exp_value)):
                     comparison_str += (
                         f"trigger[{trigger_pos}] {operator} trigger[{above_position}])"
                     )
                 else:
-                    if isinstance(value, str):
+                    if isinstance(exp_value, str):
                         # replace double quotes with single quotes using str.replace()
-                        value = value.replace('"', "'")
+                        exp_value = exp_value.replace('"', "'")
                         comparison_str += (
-                            f'trigger[{trigger_pos}] {operator} "{value}")'
+                            f'trigger[{trigger_pos}] {operator} "{exp_value}")'
                         )
                     # float or int value
                     else:
-                        comparison_str += f"trigger[{trigger_pos}] {operator} {value})"
+                        comparison_str += f"trigger[{trigger_pos}] {operator} {exp_value})"
 
             return [comparison_str, trigger_pos, above_position]
         # if no expected state value is given, just return the trigger entity as a condition
@@ -311,10 +315,12 @@ def create_combination_trigger_script(
                 script_context += "(" + trigger_expression[0] + ")\n"
             else:
                 # add the trigger expression to the script with the combinator
-                script_context += f"{identation}\t{combinator} (" + trigger_expression[0] + ")\n"
+                script_context += (
+                    f"{identation}\t{combinator} (" + trigger_expression[0] + ")\n"
+                )
 
             # set the trigger_pos for the next trigger expression
-            if trigger_type == CONF_NUMERIC_STATE:
+            if trigger_type == CONF_NUMERIC_STATE or trigger_type == CONF_STATE:
                 trigger_pos = trigger_expression[1]
                 above_position = trigger_expression[2]
             trigger_pos += 1
@@ -390,7 +396,9 @@ def create_trigger_script(
 
     # add the trigger_id to the script and the triggered flag
     if trigger_id is None:
-        script_context += f"{identation}\ttrigger_id = None\n{identation}\ttriggered = True\n\n"
+        script_context += (
+            f"{identation}\ttrigger_id = None\n{identation}\ttriggered = True\n\n"
+        )
     else:
         script_context += f"{identation}\ttrigger_id = '{trigger_id}' \n{identation}\ttriggered = True\n\n"
     _append_script_context_to_script(filepath, script_context)
@@ -405,7 +413,7 @@ def close_trigger_section(filepath: str) -> None:
     Args:
         filepath (str): The path to the automation script file.
     """
-    script_context = "\t# The end of the trigger section\n\treturn {'triggered': triggered, 'trigger_id' : trigger_id}\n\n"
+    script_context = "\t# The end of the trigger section\n\treturn triggered\n\n"
     _append_script_context_to_script(filepath, script_context)
 
 
@@ -444,22 +452,22 @@ def _get_condition_expression(
     Returns:
         str: The conditional expression for the condition.
     """
-    
+
     if condition_type == CONF_STATE:
-        comparison_str = "("
+        comparison_str = ""
         # In contrast to the trigger expression, the condition expression can't be None
-        value = entity.expected_value[CONF_STATE]
-        
-        if isinstance(value, list):
+        exp_value = entity.expected_value[CONF_STATE]
+
+        if isinstance(exp_value, list):
             # start position for the condition entities
             current_comparing_entity_pos = condition_pos
             if above_position is None:
-                    for value in entity.expected_value[CONF_STATE]:
-                        if valid_entity_id(str(value)):
-                            above_position = condition_pos
-                            condition_pos += 1
+                for value in exp_value:
+                    if valid_entity_id(str(value)):
+                        above_position = condition_pos
+                        condition_pos += 1
             start_val = True
-            for value in entity.expected_value[CONF_STATE]:
+            for value in exp_value:
                 # set an or before the next comparison
                 if start_val:
                     start_val = False
@@ -476,27 +484,26 @@ def _get_condition_expression(
                         comparison_str += f'condition[{condition_pos}] == "{value}"'
                     else:
                         comparison_str += f"condition[{condition_pos}] == {value}"
-                    
-            comparison_str += ")"
-        
+
         else:
             if above_position is None:
-                if valid_entity_id(str(value)):
+                if valid_entity_id(str(exp_value)):
                     above_position = condition_pos
                     condition_pos += 1
-            
-            if valid_entity_id(str(value)):
-                comparison_str += f"condition[{condition_pos}] == condition[{above_position}])"
+
+            if valid_entity_id(str(exp_value)):
+                comparison_str += (
+                    f"condition[{condition_pos}] == condition[{above_position}]"
+                )
             else:
-                if isinstance(value, str):
+                if isinstance(exp_value, str):
                     # replace double quotes with single quotes using str.replace()
-                    value = value.replace('"', "'")
-                    comparison_str += f'condition[{condition_pos}] == "{value}")'
+                    exp_value = exp_value.replace('"', "'")
+                    comparison_str += f'condition[{condition_pos}] == "{exp_value}"'
                 else:
-                    comparison_str += f"condition[{condition_pos}] == {value})"
-    
+                    comparison_str += f"condition[{condition_pos}] == {exp_value}"
+
         return [comparison_str, condition_pos]
-            
 
     elif condition_type == CONF_NUMERIC_STATE:
         comparison_str = None
@@ -546,19 +553,56 @@ def _get_condition_expression(
         # add the none exception for the entity values to the condition
         if above_condition_str is None and below_condition_str is None:
             return [
-                f"({comparison_str})",
+                f"{comparison_str}",
                 condition_pos,
                 above_position,
             ]
         else:
             # create the if statement for the condition entities and handle the None exception
-            if_statement = f"({comparison_str})"
-            
+            if_statement = f"{comparison_str}"
+
             return [if_statement, condition_pos, above_position]
 
-    # template, sun
+    elif condition_type == CONF_DEVICE:
+        value = entity.expected_value[CONF_TYPE]
+
+        # replace double quotes with single quotes using str.replace()
+        value = value.replace('"', "'")
+        return [f'condition[{condition_pos}] == "{value}"']
+
+    elif condition_type == CONF_TRIGGER:
+        value = entity.expected_value[CONF_ID]
+        return [f'trigger_id == "{value}"']
+
+    elif condition_type == CONF_ZONE:
+        values = entity
+        if isinstance(values, list) and len(values) > 1:
+            comparison_str = ""
+            for person in range(0, len(values)):
+                if person == 0:
+                    comparison_str += (
+                        f'condition[{condition_pos}] == "{values[person].entity_name}"'
+                    )
+                else:
+                    condition_pos += 1
+                    comparison_str += f' and condition[{condition_pos}] == "{values[person].entity_name}"'
+
+            return [comparison_str, condition_pos]
+        else:
+            # single element list
+            if isinstance(values, list):
+                person = value[0]
+            else:
+                person = values
+            return [
+                f'condition[{condition_pos}] == "{person.entity_name}"',
+                condition_pos,
+            ]
+
+    # template, sun, time
     else:
         return [f"condition[{condition_pos}]"]
+
 
 def create_combination_condition_script(
     condition_type: str,
@@ -566,6 +610,7 @@ def create_combination_condition_script(
     condition_pos: int,
     filepath: str,
     identation_lvl: int = 1,
+    first_element: bool = True,
 ) -> int:
     """
     Create the condition of multiple condition entities in the automation script.
@@ -586,14 +631,17 @@ def create_combination_condition_script(
 
     # create the if statement for the condition list
     if len(entity_list) > 1:
-        
-        # if its not part of an logic block
-        if identation_lvl == 1:
-            script_context += identation + IF_TEMPLATE
-        else:
+        # normal condition identation
+        if not first_element and identation_lvl < 3:
+            script_context +=  identation + combinator + "(\n"
+        elif first_element:
+            script_context += identation + "(\n"
+        # logical block identation
+        else: 
             script_context += "(\n"
-            # identation = "\t" * (identation_lvl + 1)
-        # cache for the condition_pos of the above condition
+
+        identation += "\t"
+        # cache for the condition_pos of the above condition        
         above_position = None
 
         for x in range(0, len(entity_list)):
@@ -603,56 +651,44 @@ def create_combination_condition_script(
             )
 
             if x == 0:
-                # if its not part of an logic block
-                if identation_lvl == 1:
-                    # add the trigger expression to the script without the combinator
-                    script_context +=  condition_expression[0] + "\n"
-                else:
-                    script_context += identation + condition_expression[0] + "\n"
+                script_context += identation + "(" + condition_expression[0] + ")\n"
             else:
+                if condition_type == CONF_TRIGGER:
+                    combinator = CONF_OR
                 # add the trigger expression to the script with the combinator
-                script_context += f"{identation}{combinator} (" + condition_expression[0] + ")\n"
+                script_context += (
+                    f"{identation}{combinator} (" + condition_expression[0] + ")\n"
+                )
 
             # set the condition_pos for the next trigger expression
             if condition_type == CONF_NUMERIC_STATE:
                 condition_pos = condition_expression[1]
                 above_position = condition_expression[2]
-            condition_pos += 1
-    
+            if condition_type != CONF_TRIGGER:
+                condition_pos += 1
+
     elif len(entity_list) == 1:
         # create the trigger expression for the entities
         condition_expression = _get_condition_expression(
             condition_type, entity_list[0], condition_pos
         )
-        
-        # if its not part of an logic block
-        if identation_lvl == 1:
-            # add the first trigger expression to the script
-            script_context = identation + IF_TEMPLATE + condition_expression[0]
-        else:
-            script_context = identation + condition_expression[0]
+
+        script_context = identation + "(" + condition_expression[0] + ")"
 
         # set the condition_pos for the next trigger expression
         if condition_type == CONF_NUMERIC_STATE or condition_type == CONF_STATE:
             condition_pos = condition_expression[1]
-        condition_pos += 1
+        if condition_type != CONF_TRIGGER:
+            condition_pos += 1
 
-    # if its not part of an logic block
-    if identation_lvl == 1:
-        # close the if statement
-        script_context += identation + END_IF_TEMPLATE
-    else:
-        script_context += identation + ")\n"
+    identation = identation_lvl * "\t"
+    script_context += identation + ")\n"
 
     if condition_type == CONF_NUMERIC_STATE:
         if "XXXX" in script_context:
             script_context = script_context.replace("XXXX", str((condition_pos)))
             condition_pos += 1
-    
-    # if its not part of an logic block
-    if identation_lvl == 1:
-        # add the trigger_id to the script and the triggered flag
-        script_context += f"{identation}\tcondition_passed = True\n\n"
+
     _append_script_context_to_script(filepath, script_context)
 
     return condition_pos
@@ -664,6 +700,7 @@ def create_condition_script(
     condition_pos: int,
     filepath: str,
     identation_lvl: int = 1,
+    first_element: bool = True,
 ) -> int:
     """
     Create the condition of one ondition entity in the automation script.
@@ -678,44 +715,52 @@ def create_condition_script(
         int: The new condition_pos for the next condition entity (is the next condition_pos in the automation script).
     """
     identation = "\t" * identation_lvl
-    
+    combinator = CONF_AND
+    script_context = ""
+
     # create the trigger expression for the entity
     condition_expression = _get_condition_expression(
         condition_type, entity, condition_pos
     )
-    
-    # if its not part of an logic block
-    if identation_lvl == 1:
-        # complete the condition expression for the entity
-        script_context = identation + IF_TEMPLATE + condition_expression[0] + "):\n"
+
+    # normal condition identation
+    if not first_element and identation_lvl < 3:
+        script_context = identation + combinator + " (" + condition_expression[0] + ")\n"
+    elif first_element:
+        script_context = identation + "(" + condition_expression[0] + ")\n"
+    # logical block identation
     else:
-        script_context = condition_expression[0] + "\n"
+        script_context = "(" + condition_expression[0] + ")\n"
+
 
     # set the condition_pos for the next condition expression
-    if condition_type == CONF_NUMERIC_STATE or condition_type == CONF_STATE:
+    if (
+        condition_type == CONF_NUMERIC_STATE
+        or condition_type == CONF_STATE
+        or condition_type == CONF_ZONE
+    ):
         condition_pos = condition_expression[1]
 
         if condition_type == CONF_NUMERIC_STATE and "XXXX" in script_context:
             condition_pos += 1
             script_context = script_context.replace("XXXX", str((condition_pos)))
-
     
-    # if its not part of an logic block
-    if identation_lvl == 1:
-        # add the condition_id to the script and the condition_passed flag
-        script_context += f"{identation}\tcondition_passed = True\n\n"
+    
+
     _append_script_context_to_script(filepath, script_context)
 
-    return condition_pos + 1
+    if condition_type == CONF_TRIGGER:
+        return condition_pos
+    else:
+        return condition_pos + 1
 
 
 def start_logic_function_block(
-    condition_type: str,
-    filepath: str,
-    identation_lvl: int = 1) -> None:
+    condition_type: str, filepath: str, identation_lvl: int = 1, first_element: bool = False,
+) -> int:
     """
     start the function block for the logic connection of condition in the automation script.
-    
+
     Args:
         condition_type (str): The type of the condition (CONF_OR, CONF_AND, CONF_NOT).
         condition_pos (int): The position of the condition in the automation script based on former conditions.
@@ -723,36 +768,51 @@ def start_logic_function_block(
         identation_lvl (int, optional): The identation level of the function block. Defaults to 1.
     """
     identation = "\t" * identation_lvl
-    
-    script_context = f"{identation}if (\n\t{identation}"
-    if condition_type == CONF_NOT:
-        script_context += "not "
-    _append_script_context_to_script(filepath, script_context)
 
-def create_next_logic_condition_part(condition_type: str, filepath: str, identation_lvl: int = 2) -> None:
+    if first_element:
+        script_context = f"{identation}(\n"
+    else:
+        script_context = f"{identation}and ("
+        
+    if condition_type == CONF_NOT:
+        script_context += f"{identation}\tnot (\n"
+
+    
+
+    _append_script_context_to_script(filepath, script_context)
+    return identation_lvl + 1
+
+
+def create_next_logic_condition_part(
+    condition_type: str, filepath: str, identation_lvl: int = 2, first_element: bool = True,
+) -> None:
     """
     Create the next logic condition part in the automation script.
     """
-    identation = "\t" * (identation_lvl + 1) 
+    identation = "\t" * (identation_lvl)
 
-    # TODO make it look better with the identation 
+    # TODO make it look better with the identation
     if condition_type == CONF_OR:
         script_context = f"{identation}or "
     elif condition_type == CONF_AND:
         script_context = f"{identation}and "
     elif condition_type == CONF_NOT:
-        script_context = f"{identation}and not "
+        script_context = f"{identation})\n{identation}and not ("
     _append_script_context_to_script(filepath, script_context)
 
-def close_logic_function_block(filepath, identation_lvl: int = 2)-> None:
+
+def close_logic_function_block(filepath, condition_type, identation_lvl: int = 2) -> None:
     """
     close the function block for the logic connection of condition in the automation script.
     """
     identation = "\t" * identation_lvl
+    script_context = ""
     
-    script_context = f"{identation}):\n{identation}\tcondition_passed = True\n\n"
-    _append_script_context_to_script(filepath, script_context)
+    if condition_type == CONF_NOT:
+        script_context += f"{identation}\t)\n"
 
+    script_context += f"{identation})\n"
+    _append_script_context_to_script(filepath, script_context)
 
 
 def close_condition_section(filepath: str) -> None:
@@ -762,7 +822,7 @@ def close_condition_section(filepath: str) -> None:
     Args:
         filepath (str): The path to the automation script file.
     """
-    script_context = "\t# The end of the condition section\n\treturn {'condition_passed': condition_passed}\n\n"
+    script_context = "\t\tcondition_passed = True\n\t# The end of the condition section\n\treturn condition_passed\n\n"
     _append_script_context_to_script(filepath, script_context)
 
 

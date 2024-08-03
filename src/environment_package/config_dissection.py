@@ -918,7 +918,8 @@ def _condition_entities(
     real_position: int,
     script_path: str,
     parent: int = None,
-    identation_level: int = 1,
+    identation_level: int = 2,
+    first_element: bool = True,
 ) -> list:
     """The function creates a list of entities for one condition list element.
 
@@ -957,20 +958,25 @@ def _condition_entities(
     # processes a combination of multiple conditions
     if condition == CONF_OR or condition == CONF_AND or condition == CONF_NOT:
         if CONF_CONDITIONS in condition_part:
-            start_logic_function_block(
+            identation_level = start_logic_function_block(
                 condition_type=condition,
                 filepath=script_path,
                 identation_lvl=identation_level,
+                first_element=first_element,
             )
             new_parent = position
             num_of_conditions = len(condition_part[CONF_CONDITIONS])
             for x in range(0, num_of_conditions):
+                if x == 0: 
+                    first_element = True
+                else:
+                    first_element = False
                 sub_condition = condition_part[CONF_CONDITIONS][x]
                 if x > 0:
                     create_next_logic_condition_part(
-                        condition, script_path, identation_lvl=identation_level
-                    )
-
+                        condition, script_path, identation_lvl=identation_level, first_element=False
+                    )                   
+                    
                 position += 1
                 result_list = _condition_entities(
                     sub_condition,
@@ -978,12 +984,13 @@ def _condition_entities(
                     parent=new_parent,
                     script_path=script_path,
                     real_position=real_position,
-                    identation_level=identation_level + 1,
+                    identation_level=identation_level,
+                    first_element=first_element,
                 )
                 entity_list += result_list[0]
                 position = result_list[1]
                 real_position = result_list[2]
-            close_logic_function_block(script_path, identation_lvl=identation_level)
+            close_logic_function_block(script_path, condition, identation_lvl=identation_level-1)
 
     # processes a numeric state condition
     elif condition == CONF_NUMERIC_STATE:
@@ -1102,6 +1109,7 @@ def _condition_entities(
                 real_position,
                 script_path,
                 identation_lvl=identation_level,
+                first_element=first_element,
             )
         else:
             entity_names = new_entity_list[0].entity_name
@@ -1111,6 +1119,7 @@ def _condition_entities(
                 real_position,
                 script_path,
                 identation_lvl=identation_level,
+                first_element=first_element,
             )
         # add the names of the entities to the expected value of the comparing entities
         for entity in exp_value_entity_list:
@@ -1211,6 +1220,7 @@ def _condition_entities(
                 real_position,
                 script_path,
                 identation_lvl=identation_level,
+                first_element=first_element,
             )
         else:
             if isinstance(condition_part[CONF_ENTITY_ID], list):
@@ -1240,6 +1250,7 @@ def _condition_entities(
                 real_position,
                 script_path,
                 identation_lvl=identation_level,
+                first_element=first_element,
             )
 
             new_entity_list.append(entity)
@@ -1262,15 +1273,24 @@ def _condition_entities(
         exp_value[CONF_DOMAIN] = condition_part[CONF_DOMAIN]
 
         # create the device entity
-        entity_list.append(
-            Entity(
-                parent=parent,
-                position=position,
-                param_role=param_role,
-                integration=CONF_DEVICE,
-                entity_name=condition_part[CONF_DEVICE_ID],
-                expected_value=exp_value,
-            )
+
+        entity = Entity(
+            parent=parent,
+            position=position,
+            param_role=param_role,
+            integration=CONF_DEVICE,
+            entity_name=condition_part[CONF_DEVICE_ID],
+            expected_value=exp_value,
+        )
+        entity_list.append(entity)
+
+        real_position = create_condition_script(
+            CONF_DEVICE,
+            entity,
+            real_position,
+            script_path,
+            identation_lvl=identation_level,
+            first_element=first_element,
         )
 
     # processes a sun condition
@@ -1295,7 +1315,7 @@ def _condition_entities(
             expected_value=exp_value,
         )
         real_position = create_condition_script(
-            "sun", entity, real_position, script_path, identation_lvl=identation_level
+            "sun", entity, real_position, script_path, identation_lvl=identation_level, first_element=first_element
         )
         entity_list.append(entity)
 
@@ -1342,6 +1362,7 @@ def _condition_entities(
                     real_position,
                     script_path,
                     identation_lvl=identation_level,
+                    first_element=first_element,
                 )
                 entity_list += new_entity_list
             else:
@@ -1367,6 +1388,7 @@ def _condition_entities(
                     real_position,
                     script_path,
                     identation_lvl=identation_level,
+                    first_element=first_element,
                 )
 
     # processes a time condition
@@ -1382,15 +1404,23 @@ def _condition_entities(
             exp_value[CONF_WEEKDAY] = condition_part[CONF_WEEKDAY]
 
         # create the time entity
-        entity_list.append(
-            Entity(
-                parent=parent,
-                position=position,
-                param_role=param_role,
-                integration=CONF_DATETIME,
-                entity_name=str(uuid.uuid4()),
-                expected_value=exp_value,
-            )
+
+        entity = Entity(
+            parent=parent,
+            position=position,
+            param_role=param_role,
+            integration=CONF_DATETIME,
+            entity_name=str(uuid.uuid4()),
+            expected_value=exp_value,
+        )
+        entity_list.append(entity)
+        real_position = create_condition_script(
+            CONF_TIME,
+            entity,
+            real_position,
+            script_path,
+            identation_lvl=identation_level,
+            first_element=first_element,
         )
 
     # processes a trigger based condition
@@ -1401,12 +1431,12 @@ def _condition_entities(
             and len(condition_part[CONF_ID]) > 1
         ):
             new_parent = position
+            new_trigger_entity_list = []
             for trigger_id in condition_part[CONF_ID]:
                 position += 1
                 # add the trigger id of the trigger as the expected value
-                exp_value = {CONF_ID: trigger_id}
-                # create the trigger entity
-                entity_list.append(
+                exp_value = {CONF_ID: str(trigger_id)}
+                new_trigger_entity_list.append(
                     Entity(
                         parent=new_parent,
                         position=position,
@@ -1416,50 +1446,133 @@ def _condition_entities(
                         expected_value=exp_value,
                     )
                 )
+            real_position = create_combination_condition_script(
+                CONF_TRIGGER,
+                new_trigger_entity_list,
+                real_position,
+                script_path,
+                identation_lvl=identation_level,
+                first_element=first_element,
+            )
+            entity_list += new_trigger_entity_list
+
         else:
             # create the single trigger entity
             if isinstance(condition_part[CONF_ID], list):
-                exp_value = {CONF_ID: condition_part[CONF_ID][0]}
+                exp_value = {CONF_ID: str(condition_part[CONF_ID][0])}
             else:
-                exp_value = {CONF_ID: condition_part[CONF_ID]}
+                exp_value = {CONF_ID: str(condition_part[CONF_ID])}
+
             # create the trigger entity
-            entity_list.append(
-                Entity(
-                    parent=parent,
-                    position=position,
-                    param_role=param_role,
-                    integration=CONF_TRIGGER,
-                    entity_name=str(uuid.uuid4()),
-                    expected_value=exp_value,
-                )
+            entity = Entity(
+                parent=parent,
+                position=position,
+                param_role=param_role,
+                integration=CONF_TRIGGER,
+                entity_name=str(uuid.uuid4()),
+                expected_value=exp_value,
+            )
+            entity_list.append(entity)
+            real_position = create_condition_script(
+                CONF_TRIGGER,
+                entity,
+                real_position,
+                script_path,
+                identation_lvl=identation_level,
+                first_element= first_element,
             )
 
     # processes a zone condition
     elif condition == CONF_ZONE:
         exp_value = {}
         if CONF_ZONE in condition_part:
+            parent = position
+            position += 1
             # add the entity id of the person/s as the possible value
-            if CONF_ENTITY_ID in condition_part:
-                if isinstance(condition_part[CONF_ENTITY_ID], list):
-                    exp_value = {CONF_ENTITY_ID: []}
-                    for entity in condition_part[CONF_ENTITY_ID]:
-                        exp_value[CONF_ENTITY_ID].append(entity)
-                else:
-                    exp_value = {CONF_ENTITY_ID: condition_part[CONF_ENTITY_ID]}
-            else:
-                exp_value = {CONF_ENTITY_ID: None}
+            if (
+                isinstance(condition_part[CONF_ENTITY_ID], list)
+                and len(condition_part[CONF_ENTITY_ID]) > 1
+            ):
+                new_exp_entity_list = []
+                new_parent = position
+                # create all the person entities in the condition part
+                for person in condition_part[CONF_ENTITY_ID]:
+                    position += 1
+                    if valid_entity_id(str(person)):
+                        entity = Entity(
+                            parent=new_parent,
+                            position=position,
+                            param_role=param_role,
+                            integration=person.split(".")[0],
+                            entity_name=person.split(".")[1],
+                            expected_value={CONF_ZONE: condition_part[CONF_ZONE]},
+                        )
+                    else:
+                        entity = Entity(
+                            parent=new_parent,
+                            position=position,
+                            param_role=param_role,
+                            integration="person",
+                            entity_name=person,
+                            expected_value={CONF_ZONE: condition_part[CONF_ZONE]},
+                        )
+                    new_exp_entity_list.append(entity)
 
-            # create the zone entity
-            entity_list.append(
-                Entity(
+                exp_value = {CONF_ENTITY_ID: condition_part[CONF_ENTITY_ID]}
+
+                real_position = create_condition_script(
+                    CONF_ZONE,
+                    new_exp_entity_list,
+                    real_position,
+                    script_path,
+                    identation_lvl=identation_level,
+                    first_element=first_element,
+                )
+                entity_list += new_exp_entity_list
+            else:
+                if isinstance(condition_part[CONF_ENTITY_ID], list):
+                    person = condition_part[CONF_ENTITY_ID][0]
+                else:
+                    person = condition_part[CONF_ENTITY_ID]
+                    
+                # create a single person entity
+                exp_value = {CONF_ENTITY_ID: person}
+                if valid_entity_id(str(person)):
+                    integration = person.split(".")[0]
+                    entity_name = person.split(".")[1]
+                else:
+                    integration = "person"
+                    entity_name = person
+                entity = Entity(
                     parent=parent,
                     position=position,
                     param_role=param_role,
-                    integration=CONF_ZONE,
-                    entity_name=condition_part[CONF_ZONE].split(".")[1],
-                    expected_value=exp_value,
+                    integration=integration,
+                    entity_name=entity_name,
+                    expected_value={CONF_ZONE: condition_part[CONF_ZONE]},
                 )
+                entity_list.append(entity)
+                real_position = create_condition_script(
+                    CONF_ZONE,
+                    entity,
+                    real_position,
+                    script_path,
+                    identation_lvl=identation_level,
+                    first_element=first_element,
+                )
+                
+            position += 1
+            # create the zone entity
+            entity = Entity(
+                parent=parent,
+                position=position,
+                param_role=param_role,
+                integration=CONF_ZONE,
+                entity_name=condition_part[CONF_ZONE].split(".")[1],
+                expected_value=exp_value,
             )
+            entity_list.append(entity)
+
         # This part is still in the documentation but is not validated anymore by the config schema
         # https://github.com/home-assistant/home-assistant.io/issues/33993
         # else:
@@ -1879,12 +1992,16 @@ def _extract_all_conditions(
     position = 0
     real_position = 0
     for condition in conditions:
+        if position != 0:
+            first_element = False
+        else:
+            first_element = True
         return_list = _condition_entities(
-            condition, position, real_position, script_path
+            condition, position, real_position, script_path, first_element=first_element
         )
         condition_entities += return_list[0]
         position = return_list[1] + 1
-        real_position = return_list[2] + 1
+        real_position = return_list[2]
     if len(condition_entities) != real_position:
         raise vol.Invalid("The amount of entities and the real position do not match")
     close_condition_section(script_path)

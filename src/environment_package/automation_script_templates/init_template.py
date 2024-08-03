@@ -13,8 +13,10 @@ serialized_inputs = sys.argv[1]
 
 input_vals = json.loads(serialized_inputs)
 
-def trigger(input_vals) -> dict:
+trigger_id: str = None
+
+
+def trigger(input_vals) -> bool:
     triggered = False
-    trigger_id = None
     trigger = input_vals[0]
-    
+    global trigger_id

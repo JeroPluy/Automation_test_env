@@ -1,7 +1,8 @@
-def condition(input_vals, trigger_id = None) -> dict:
+def condition(input_vals) -> dict:
     condition = input_vals[1]
-    if None in condition:
-        return {'ValueError': "Condition values cannot be None"}
-    
+    if condition != [] and None in condition:
+        return {"ValueError": "Condition values cannot be None"}
+
     condition_passed = False
 
+    if (
