@@ -40,6 +40,7 @@ from .ha_automation.home_assistant_const import (
     CONF_COMMAND,
     CONF_CONDITION,
     CONF_CONDITIONS,
+    CONF_CONTINUE_ON_TIMEOUT,
     CONF_CONVERSATION,
     CONF_DATETIME,
     CONF_DEFAULT,
@@ -83,6 +84,7 @@ from .ha_automation.home_assistant_const import (
     CONF_THEN,
     CONF_TIME,
     CONF_TIME_PATTERN,
+    CONF_TIMEOUT,
     CONF_TO,
     CONF_TRIGGER,
     CONF_TYPE,
@@ -105,17 +107,25 @@ from .ha_automation.home_assistant_const import (
     test_leading_zero,
 )
 from environment_package.automation_script_gen import (
+    close_action_condition_block,
+    create_else_action_section,
+    create_empty_action_section,
+    create_stopping_action,
+    close_action_section,
     close_condition_section,
     close_logic_function_block,
     close_script,
     close_trigger_section,
+    create_action_script,
     create_combination_condition_script,
     create_combination_trigger_script,
     create_condition_script,
     create_next_logic_condition_part,
     create_trigger_script,
+    init_action_part,
     init_automation_script,
     init_condition_part,
+    start_action_condition_block,
     start_logic_function_block,
 )
 import re
@@ -129,6 +139,9 @@ def _trigger_entities(
     real_position: int,
     script_path: str,
     parent: int = None,
+    identation_level: int = 1,
+    first_element: bool = False,
+    source: str = "trigger",
 ) -> list:
     """The function creates a list of entities for one trigger list element.
 
@@ -200,11 +213,14 @@ def _trigger_entities(
                 )
             # create the script for the combination of the event trigger
             real_position = create_combination_trigger_script(
-                CONF_EVENT,
-                new_entity_list,
-                real_position,
-                trigger_id,
-                script_path,
+                trigger_type=CONF_EVENT,
+                entity_list=new_entity_list,
+                trigger_pos=real_position,
+                trigger_id=trigger_id,
+                filepath=script_path,
+                identation_lvl=identation_level,
+                first_element=first_element,
+                source=source,
             )
             # add the new entities to the entity list
             entity_list += new_entity_list
@@ -221,7 +237,14 @@ def _trigger_entities(
                 expected_value=exp_value,
             )
             real_position = create_trigger_script(
-                CONF_EVENT, entity, real_position, trigger_id, script_path
+                trigger_type=CONF_EVENT,
+                entity=entity,
+                trigger_pos=real_position,
+                trigger_id=trigger_id,
+                filepath=script_path,
+                identation_lvl=identation_level,
+                first_element=first_element,
+                source=source,
             )
             entity_list.append(entity)
 
@@ -238,7 +261,14 @@ def _trigger_entities(
         )
         entity_list.append(entity)
         real_position = create_trigger_script(
-            "homeassistant", entity, real_position, trigger_id, script_path
+            trigger_type="homeassistant",
+            entity=entity,
+            trigger_pos=real_position,
+            trigger_id=trigger_id,
+            filepath=script_path,
+            identation_lvl=identation_level,
+            first_element=first_element,
+            source=source,
         )
 
     # if the trigger is a mqtt message
@@ -267,7 +297,14 @@ def _trigger_entities(
         )
         entity_list.append(entity)
         real_position = create_trigger_script(
-            "mqtt", entity, real_position, trigger_id, script_path
+            trigger_type="mqtt",
+            entity=entity,
+            trigger_pos=real_position,
+            trigger_id=trigger_id,
+            filepath=script_path,
+            identation_lvl=identation_level,
+            first_element=first_element,
+            source=source,
         )
 
     # if the trigger is a numerical state change
@@ -381,20 +418,26 @@ def _trigger_entities(
             for entity in new_entity_list:
                 entity_names.append(entity.entity_name)
             real_position = create_combination_trigger_script(
-                CONF_NUMERIC_STATE,
-                new_entity_list,
-                real_position,
-                trigger_id,
-                script_path,
+                trigger_type=CONF_NUMERIC_STATE,
+                entity_list=new_entity_list,
+                trigger_pos=real_position,
+                trigger_id=trigger_id,
+                filepath=script_path,
+                identation_lvl=identation_level,
+                first_element=first_element,
+                source=source,
             )
         else:
             entity_names = new_entity_list[0].entity_name
             real_position = create_trigger_script(
-                CONF_NUMERIC_STATE,
-                new_entity_list[0],
-                real_position,
-                trigger_id,
-                script_path,
+                trigger_type=CONF_NUMERIC_STATE,
+                entity=new_entity_list[0],
+                trigger_pos=real_position,
+                trigger_id=trigger_id,
+                filepath=script_path,
+                identation_lvl=identation_level,
+                first_element=first_element,
+                source=source,
             )
         # add the names of the entities to the expected value of the comparing entities
         for entity in exp_value_entity_list:
@@ -508,11 +551,14 @@ def _trigger_entities(
                 )
             # create the script for the combination of the state trigger
             real_position = create_combination_trigger_script(
-                CONF_STATE,
-                new_entity_list,
-                real_position,
-                trigger_id,
-                script_path,
+                trigger_type=CONF_STATE,
+                entity_list=new_entity_list,
+                trigger_pos=real_position,
+                trigger_id=trigger_id,
+                filepath=script_path,
+                identation_lvl=identation_level,
+                first_element=first_element,
+                source=source,
             )
 
         else:
@@ -537,7 +583,14 @@ def _trigger_entities(
             )
 
             real_position = create_trigger_script(
-                CONF_STATE, entity, real_position, trigger_id, script_path
+                trigger_type=CONF_STATE,
+                entity=entity,
+                trigger_pos=real_position,
+                trigger_id=trigger_id,
+                filepath=script_path,
+                identation_lvl=identation_level,
+                first_element=first_element,
+                source=source,
             )
 
             new_entity_list.append(entity)
@@ -569,7 +622,14 @@ def _trigger_entities(
         )
         entity_list.append(entity)
         real_position = create_trigger_script(
-            "sun", entity, real_position, trigger_id, script_path
+            trigger_type="sun",
+            entity=entity,
+            trigger_pos=real_position,
+            trigger_id=trigger_id,
+            filepath=script_path,
+            identation_lvl=identation_level,
+            first_element=first_element,
+            source=source,
         )
 
     # if the trigger is tag scan
@@ -607,7 +667,14 @@ def _trigger_entities(
                 )
             # create the script for the combination of the tag trigger
             real_position = create_combination_trigger_script(
-                "tag", new_entity_list, real_position, trigger_id, script_path
+                trigger_type="tag",
+                entity_list=new_entity_list,
+                trigger_pos=real_position,
+                trigger_id=trigger_id,
+                filepath=script_path,
+                identation_lvl=identation_level,
+                first_element=first_element,
+                source=source,
             )
             entity_list += new_entity_list
 
@@ -621,7 +688,14 @@ def _trigger_entities(
                 expected_value=exp_value,
             )
             real_position = create_trigger_script(
-                "tag", entity, real_position, trigger_id, script_path
+                trigger_type="tag",
+                entity=entity,
+                trigger_pos=real_position,
+                trigger_id=trigger_id,
+                filepath=script_path,
+                identation_lvl=identation_level,
+                first_element=first_element,
+                source=source,
             )
             entity_list.append(entity)
 
@@ -664,11 +738,14 @@ def _trigger_entities(
                     )
                 # create the script for the combination of the template trigger
                 real_position = create_combination_trigger_script(
-                    CONF_TEMPLATE,
-                    new_entity_list,
-                    real_position,
-                    trigger_id,
-                    script_path,
+                    trigger_type=CONF_TEMPLATE,
+                    entity_list=new_entity_list,
+                    trigger_pos=real_position,
+                    trigger_id=trigger_id,
+                    filepath=script_path,
+                    identation_lvl=identation_level,
+                    first_element=first_element,
+                    source=source,
                 )
                 entity_list += new_entity_list
 
@@ -694,12 +771,16 @@ def _trigger_entities(
                 )
             # create the script for the combination of the time trigger
             real_position = create_combination_trigger_script(
-                CONF_TIME,
-                new_entity_list,
-                real_position,
-                trigger_id,
-                script_path,
+                trigger_type=CONF_TIME,
+                entity_list=new_entity_list,
+                trigger_pos=real_position,
+                trigger_id=trigger_id,
+                filepath=script_path,
+                identation_lvl=identation_level,
+                first_element=first_element,
+                source=source,
             )
+
             entity_list += new_entity_list
         else:
             # create the single time entity
@@ -711,7 +792,14 @@ def _trigger_entities(
                 expected_value={CONF_AT: trigger_part[CONF_AT]},
             )
             real_position = create_trigger_script(
-                CONF_TIME, entity, real_position, trigger_id, script_path
+                trigger_type=CONF_TIME,
+                entity=entity,
+                trigger_pos=real_position,
+                trigger_id=trigger_id,
+                filepath=script_path,
+                identation_lvl=identation_level,
+                first_element=first_element,
+                source=source,
             )
             entity_list.append(entity)
 
@@ -740,7 +828,14 @@ def _trigger_entities(
             expected_value=exp_value,
         )
         real_position = create_trigger_script(
-            CONF_TIME_PATTERN, entity, real_position, trigger_id, script_path
+            trigger_type=CONF_TIME_PATTERN,
+            entity=entity,
+            trigger_pos=real_position,
+            trigger_id=trigger_id,
+            filepath=script_path,
+            identation_lvl=identation_level,
+            first_element=first_element,
+            source=source,
         )
         entity_list.append(entity)
 
@@ -764,7 +859,14 @@ def _trigger_entities(
             expected_value=exp_value,
         )
         real_position = create_trigger_script(
-            CONF_PERS_NOTIFICATION, entity, real_position, trigger_id, script_path
+            trigger_type=CONF_PERS_NOTIFICATION,
+            entity=entity,
+            trigger_pos=real_position,
+            trigger_id=trigger_id,
+            filepath=script_path,
+            identation_lvl=identation_level,
+            first_element=first_element,
+            source=source,
         )
         entity_list.append(entity)
 
@@ -784,7 +886,14 @@ def _trigger_entities(
             expected_value=exp_value,
         )
         real_position = create_trigger_script(
-            CONF_WEBHOOK, entity, real_position, trigger_id, script_path
+            trigger_type=CONF_WEBHOOK,
+            entity=entity,
+            trigger_pos=real_position,
+            trigger_id=trigger_id,
+            filepath=script_path,
+            identation_lvl=identation_level,
+            first_element=first_element,
+            source=source,
         )
         entity_list.append(entity)
 
@@ -803,7 +912,14 @@ def _trigger_entities(
             expected_value=exp_value,
         )
         real_position = create_trigger_script(
-            CONF_ZONE, entity, real_position, trigger_id, script_path
+            trigger_type=CONF_ZONE,
+            entity=entity,
+            trigger_pos=real_position,
+            trigger_id=trigger_id,
+            filepath=script_path,
+            identation_lvl=identation_level,
+            first_element=first_element,
+            source=source,
         )
         entity_list.append(entity)
 
@@ -822,7 +938,14 @@ def _trigger_entities(
             expected_value=exp_value,
         )
         real_position = create_trigger_script(
-            CONF_GEO_LOCATION, entity, real_position, trigger_id, script_path
+            trigger_type=CONF_GEO_LOCATION,
+            entity=entity,
+            trigger_pos=real_position,
+            trigger_id=trigger_id,
+            filepath=script_path,
+            identation_lvl=identation_level,
+            first_element=first_element,
+            source=source,
         )
         entity_list.append(entity)
 
@@ -842,7 +965,14 @@ def _trigger_entities(
             expected_value=exp_value,
         )
         real_position = create_trigger_script(
-            CONF_DEVICE, entity, real_position, trigger_id, script_path
+            trigger_type=CONF_DEVICE,
+            entity=entity,
+            trigger_pos=real_position,
+            trigger_id=trigger_id,
+            filepath=script_path,
+            identation_lvl=identation_level,
+            first_element=first_element,
+            source=source,
         )
         entity_list.append(entity)
 
@@ -862,7 +992,14 @@ def _trigger_entities(
             expected_value=exp_value,
         )
         real_position = create_trigger_script(
-            CONF_CALENDAR, entity, real_position, trigger_id, script_path
+            trigger_type=CONF_CALENDAR,
+            entity=entity,
+            trigger_pos=real_position,
+            trigger_id=trigger_id,
+            filepath=script_path,
+            identation_lvl=identation_level,
+            first_element=first_element,
+            source=source,
         )
         entity_list.append(entity)
 
@@ -887,12 +1024,16 @@ def _trigger_entities(
                 )
             # create the script for the combination of the conversation trigger
             real_position = create_combination_trigger_script(
-                CONF_CONVERSATION,
-                new_entity_list,
-                real_position,
-                trigger_id,
-                script_path,
+                trigger_type=CONF_CONVERSATION,
+                entity_list=new_entity_list,
+                trigger_pos=real_position,
+                trigger_id=trigger_id,
+                filepath=script_path,
+                identation_lvl=identation_level,
+                first_element=first_element,
+                source=source,
             )
+
             entity_list += new_entity_list
 
         else:
@@ -905,7 +1046,14 @@ def _trigger_entities(
                 expected_value={CONF_COMMAND: trigger_part[CONF_COMMAND]},
             )
             real_position = create_trigger_script(
-                CONF_CONVERSATION, entity, real_position, trigger_id, script_path
+                trigger_type=CONF_CONVERSATION,
+                entity=entity,
+                trigger_pos=real_position,
+                trigger_id=trigger_id,
+                filepath=script_path,
+                identation_lvl=identation_level,
+                first_element=first_element,
+                source=source,
             )
             entity_list.append(entity)
 
@@ -920,6 +1068,7 @@ def _condition_entities(
     parent: int = None,
     identation_level: int = 2,
     first_element: bool = True,
+    source: str = CONF_CONDITION,
 ) -> list:
     """The function creates a list of entities for one condition list element.
 
@@ -967,30 +1116,36 @@ def _condition_entities(
             new_parent = position
             num_of_conditions = len(condition_part[CONF_CONDITIONS])
             for x in range(0, num_of_conditions):
-                if x == 0: 
+                if x == 0:
                     first_element = True
                 else:
                     first_element = False
                 sub_condition = condition_part[CONF_CONDITIONS][x]
                 if x > 0:
                     create_next_logic_condition_part(
-                        condition, script_path, identation_lvl=identation_level, first_element=False
-                    )                   
-                    
+                        condition,
+                        script_path,
+                        identation_lvl=identation_level,
+                        first_element=False,
+                    )
+
                 position += 1
                 result_list = _condition_entities(
-                    sub_condition,
-                    position,
+                    condition_part=sub_condition,
+                    position=position,
                     parent=new_parent,
                     script_path=script_path,
                     real_position=real_position,
                     identation_level=identation_level,
                     first_element=first_element,
+                    source=source,
                 )
                 entity_list += result_list[0]
                 position = result_list[1]
                 real_position = result_list[2]
-            close_logic_function_block(script_path, condition, identation_lvl=identation_level-1)
+            close_logic_function_block(
+                script_path, condition, identation_lvl=identation_level - 1
+            )
 
     # processes a numeric state condition
     elif condition == CONF_NUMERIC_STATE:
@@ -1110,6 +1265,7 @@ def _condition_entities(
                 script_path,
                 identation_lvl=identation_level,
                 first_element=first_element,
+                source=source,
             )
         else:
             entity_names = new_entity_list[0].entity_name
@@ -1120,6 +1276,7 @@ def _condition_entities(
                 script_path,
                 identation_lvl=identation_level,
                 first_element=first_element,
+                source=source,
             )
         # add the names of the entities to the expected value of the comparing entities
         for entity in exp_value_entity_list:
@@ -1221,6 +1378,7 @@ def _condition_entities(
                 script_path,
                 identation_lvl=identation_level,
                 first_element=first_element,
+                source=source,
             )
         else:
             if isinstance(condition_part[CONF_ENTITY_ID], list):
@@ -1251,6 +1409,7 @@ def _condition_entities(
                 script_path,
                 identation_lvl=identation_level,
                 first_element=first_element,
+                source=source,
             )
 
             new_entity_list.append(entity)
@@ -1291,6 +1450,7 @@ def _condition_entities(
             script_path,
             identation_lvl=identation_level,
             first_element=first_element,
+            source=source,
         )
 
     # processes a sun condition
@@ -1315,7 +1475,13 @@ def _condition_entities(
             expected_value=exp_value,
         )
         real_position = create_condition_script(
-            "sun", entity, real_position, script_path, identation_lvl=identation_level, first_element=first_element
+            "sun",
+            entity,
+            real_position,
+            script_path,
+            identation_lvl=identation_level,
+            first_element=first_element,
+            source=source,
         )
         entity_list.append(entity)
 
@@ -1363,6 +1529,7 @@ def _condition_entities(
                     script_path,
                     identation_lvl=identation_level,
                     first_element=first_element,
+                    source=source,
                 )
                 entity_list += new_entity_list
             else:
@@ -1389,6 +1556,7 @@ def _condition_entities(
                     script_path,
                     identation_lvl=identation_level,
                     first_element=first_element,
+                    source=source,
                 )
 
     # processes a time condition
@@ -1421,6 +1589,7 @@ def _condition_entities(
             script_path,
             identation_lvl=identation_level,
             first_element=first_element,
+            source=source,
         )
 
     # processes a trigger based condition
@@ -1453,6 +1622,7 @@ def _condition_entities(
                 script_path,
                 identation_lvl=identation_level,
                 first_element=first_element,
+                source=source,
             )
             entity_list += new_trigger_entity_list
 
@@ -1479,7 +1649,8 @@ def _condition_entities(
                 real_position,
                 script_path,
                 identation_lvl=identation_level,
-                first_element= first_element,
+                first_element=first_element,
+                source=source,
             )
 
     # processes a zone condition
@@ -1527,6 +1698,7 @@ def _condition_entities(
                     script_path,
                     identation_lvl=identation_level,
                     first_element=first_element,
+                    source=source,
                 )
                 entity_list += new_exp_entity_list
             else:
@@ -1534,7 +1706,7 @@ def _condition_entities(
                     person = condition_part[CONF_ENTITY_ID][0]
                 else:
                     person = condition_part[CONF_ENTITY_ID]
-                    
+
                 # create a single person entity
                 exp_value = {CONF_ENTITY_ID: person}
                 if valid_entity_id(str(person)):
@@ -1559,8 +1731,9 @@ def _condition_entities(
                     script_path,
                     identation_lvl=identation_level,
                     first_element=first_element,
+                    source=source,
                 )
-                
+
             position += 1
             # create the zone entity
             entity = Entity(
@@ -1612,6 +1785,8 @@ def _action_entities(
     real_position: int,
     script_path: str,
     parent: int = None,
+    identation_level: int = 1,
+    first_element: bool = True,
 ) -> list:
     """The function creates a list of entities for one action list element.
 
@@ -1640,49 +1815,166 @@ def _action_entities(
 
     # processes a conditional action
     if SCRIPT_ACTION_IF in action_part:
-        conditions = action_part[SCRIPT_ACTION_IF]
-        if len(conditions) > 1:
-            has_cons = True
-            new_parent = position
-            # create all condition entities which are needed for the action
-            for condition in conditions:
-                position += 1
-                results = _condition_entities(
-                    condition, position, new_parent, real_position, script_path
-                )
-                entity_list += results[0]
-                position = results[1]
-        else:
-            has_cons = True
-            results = _condition_entities(
-                conditions[0], position, real_position, script_path
-            )
-            entity_list += results[0]
-            position = results[1]
+        identation_level = start_action_condition_block(
+            filepath=script_path,
+            identation_lvl=identation_level,
+            first_element=first_element,
+            not_condition=False,
+        )
 
+        if_entities = []
+        # make it a list if it is not
+        if not isinstance(action_part[SCRIPT_ACTION_IF], list):
+            conditions = [action_part]
+        else:
+            conditions = action_part[SCRIPT_ACTION_IF]
+
+        # group the conditions together if there are multiple
+        if len(conditions) > 1:
+            new_parent = position
+            position += 1
+        else:
+            new_parent = parent
+
+        first_element = True
+        has_cons = False
+
+        # create all condition entities which are needed for the action
+        for condition in conditions:
+            if_results = _condition_entities(
+                condition_part=condition,
+                position=position,
+                parent=new_parent,
+                real_position=real_position,
+                script_path=script_path,
+                identation_level=identation_level,
+                first_element=first_element,
+                source=CONF_ACTION,
+            )
+
+            if first_element:
+                first_element = False
+
+            if_entities += if_results[0]
+            # set the position for the next condition
+            position = if_results[1] + 1
+            real_position = if_results[2]
+
+        if len(if_entities) > 0:
+            has_cons = True
+
+        # reset the position back to the last entity
+        position -= 1
+        entity_list += if_entities
+
+        # close the condition block
+        identation_level -= 1
+        close_action_condition_block(
+            filepath=script_path, identation_lvl=identation_level
+        )
+
+        # processes the then action of the conditional action
         if CONF_THEN in action_part:
             if has_cons:
                 position += 1
-            actions = action_part[CONF_THEN]
+
+            then_entities = []
+            # make it a list if it is not
+            if not isinstance(action_part[CONF_THEN], list):
+                actions = [action_part[CONF_THEN]]
+            else:
+                actions = action_part[CONF_THEN]
+
+            # group the actions together if there are multiple
+            if len(actions) > 1:
+                new_parent = position
+                position += 1
+            else:
+                new_parent = parent
+
+            first_element = True
+
             for action in actions:
-                results = _action_entities(action, position, real_position, script_path)
-                entity_list += results[0]
+                then_results = _action_entities(
+                    action_part=action,
+                    position=position,
+                    parent=new_parent,
+                    real_position=real_position,
+                    script_path=script_path,
+                    identation_level=identation_level,
+                    first_element=first_element,
+                )
+
+                if first_element:
+                    first_element = False
+
+                then_entities += then_results[0]
                 # set the position for the next action
-                position = results[1] + 1
+                position = then_results[1] + 1
+                real_position = then_results[2]
+
             # set the position back to the last entity
             position -= 1
+            entity_list += then_entities
+
+            if len(then_entities) == 0:
+                create_empty_action_section(
+                    filepath=script_path, identation_lvl=identation_level
+                )
 
         if CONF_ELSE in action_part:
+            create_else_action_section(
+                filepath=script_path, identation_lvl=identation_level
+            )
+
             if has_cons:
                 position += 1
-            actions = action_part[CONF_ELSE]
+
+            else_entities = []
+            # make it a list if it is not
+            if not isinstance(action_part[CONF_ELSE], list):
+                actions = [action_part[CONF_ELSE]]
+            else:
+                actions = action_part[CONF_ELSE]
+
+            # group the actions together if there are multiple
+            if len(actions) > 1:
+                new_parent = position
+                position += 1
+            else:
+                new_parent = parent
+
+            first_element = True
+
             for action in actions:
-                results = _action_entities(action, position, real_position, script_path)
-                entity_list += results[0]
+                else_results = _action_entities(
+                    action_part=action,
+                    position=position,
+                    parent=new_parent,
+                    real_position=real_position,
+                    script_path=script_path,
+                    identation_level=identation_level,
+                    first_element=first_element,
+                )
+
+                if first_element:
+                    first_element = False
+
+                else_entities += else_results[0]
                 # set the position for the next action
-                position = results[1] + 1
+                position = else_results[1] + 1
+                real_position = else_results[2]
+
             # set the position back to the last entity
             position -= 1
+            entity_list += else_entities
+
+            if len(else_entities) == 0:
+                create_empty_action_section(
+                    filepath=script_path, identation_lvl=identation_level
+                )
+
+            identation_level -= 1
 
     # processes a conditional action with multiple options
     elif CONF_CHOOSE in action_part:
@@ -1692,8 +1984,14 @@ def _action_entities(
             if CONF_CONDITIONS in option:
                 has_cons = True
                 new_parent = position
+                condition_len = 0
                 # create all condition entities which are needed for the following action
                 for condition in option[CONF_CONDITIONS]:
+                    if condition_len == 0:
+                        first_element = True
+                    else:
+                        first_element = False
+
                     position += 1
                     results = _condition_entities(
                         condition_part=condition,
@@ -1701,6 +1999,9 @@ def _action_entities(
                         parent=new_parent,
                         script_path=script_path,
                         real_position=real_position,
+                        identation_level=identation_level,
+                        first_element=first_element,
+                        source=CONF_ACTION,
                     )
                     entity_list += results[0]
                     position = results[1]
@@ -1708,7 +2009,14 @@ def _action_entities(
             elif CONF_CONDITION in option:
                 has_cons = True
                 results = _condition_entities(
-                    option, position, real_position, script_path
+                    condition_part=option,
+                    position=position,
+                    parent=parent,
+                    script_path=script_path,
+                    real_position=real_position,
+                    identation_level=identation_level,
+                    first_element=True,
+                    source=CONF_ACTION,
                 )
                 entity_list += results[0]
                 position = results[1]
@@ -1770,15 +2078,30 @@ def _action_entities(
                 for condition in conditions:
                     position += 1
                     results = _condition_entities(
-                        condition, position, new_parent, real_position, script_path
+                        condition_part=condition,
+                        position=position,
+                        parent=new_parent,
+                        script_path=script_path,
+                        real_position=real_position,
+                        identation_level=identation_level,
+                        first_element=first_element,
+                        source=CONF_ACTION,
                     )
                     entity_list += results[0]
                     position = results[1]
             elif len(conditions) == 1:
                 has_cons = True
                 results = _condition_entities(
-                    conditions[0], position, real_position, script_path
+                    condition_part=conditions[0],
+                    position=position,
+                    parent=parent,
+                    script_path=script_path,
+                    real_position=real_position,
+                    identation_level=identation_level,
+                    first_element=first_element,
+                    source=CONF_ACTION,
                 )
+
                 entity_list += results[0]
                 position = results[1]
 
@@ -1809,11 +2132,59 @@ def _action_entities(
 
     # processes a condition in the action part
     elif CONF_CONDITION in action_part:
-        results = _condition_entities(
-            action_part, position, parent, real_position, script_path
+        identation_level = start_action_condition_block(
+            filepath=script_path,
+            identation_lvl=identation_level,
+            first_element=first_element,
+            not_condition=True,
         )
-        entity_list += results[0]
-        position = results[1]
+
+        new_entity_list = []
+        # make it a list if it is not
+        if not isinstance(action_part[CONF_CONDITION], list):
+            conditions = [action_part]
+        else:
+            conditions = action_part[CONF_CONDITION]
+
+        # group all condition entities in a new parent if there are more than one
+        if len(conditions) > 1:
+            new_parent = position
+            has_cons = True
+            position += 1
+        else:
+            new_parent = parent
+
+        first_element = True
+
+        for condition in conditions:
+            results = _condition_entities(
+                condition_part=condition,
+                position=position,
+                parent=new_parent,
+                script_path=script_path,
+                real_position=real_position,
+                identation_level=identation_level,
+                first_element=first_element,
+                source=CONF_ACTION,
+            )
+            if first_element:
+                first_element = False
+
+            new_entity_list += results[0]
+            # set the position for the next condition
+            position = results[1] + 1
+            real_position = results[2]
+
+        # reset the position back to the last entity
+        position -= 1
+
+        entity_list += new_entity_list
+
+        # close the condition block
+        identation_level -= 1
+        create_stopping_action(
+            filepath=script_path, identation_lvl=identation_level, timeout=False
+        )
 
     # processes a event action
     elif CONF_EVENT in action_part:
@@ -1827,15 +2198,21 @@ def _action_entities(
         # prohibit the use of 'context' in action events
 
         # create the entity
-        entity_list.append(
-            Entity(
-                parent=parent,
-                position=position,
-                param_role=param_role,
-                integration=action_part[CONF_EVENT],
-                entity_name=str(uuid.uuid4()),
-                expected_value=exp_value,
-            )
+
+        entity = Entity(
+            parent=parent,
+            position=position,
+            param_role=param_role,
+            integration=action_part[CONF_EVENT],
+            entity_name=str(uuid.uuid4()),
+            expected_value=exp_value,
+        )
+        entity_list.append(entity)
+        create_action_script(
+            action_type=CONF_EVENT,
+            entity=entity,
+            filepath=script_path,
+            identation_lvl=identation_level,
         )
 
     # processes a service action
@@ -1880,40 +2257,98 @@ def _action_entities(
                 exp_value[data_key] = service_data[data_key]
 
         # create the entity
-        entity_list.append(
-            Entity(
-                parent=parent,
-                position=position,
-                param_role=param_role,
-                integration=integration,
-                entity_name=entity_name,
-                expected_value=exp_value,
-            )
+        entity = Entity(
+            parent=parent,
+            position=position,
+            param_role=param_role,
+            integration=integration,
+            entity_name=entity_name,
+            expected_value=exp_value,
+        )
+        entity_list.append(entity)
+        create_action_script(
+            action_type=CONF_SERVICE,
+            entity=entity,
+            filepath=script_path,
+            identation_lvl=identation_level,
         )
 
     # processes a wait for a trigger action
     elif SCRIPT_ACTION_WAIT_FOR_TRIGGER in action_part:
-        # just one of the triggers has to be true to continue (or-block)
-        if isinstance(action_part[SCRIPT_ACTION_WAIT_FOR_TRIGGER], list):
-            trigger_list = action_part[SCRIPT_ACTION_WAIT_FOR_TRIGGER]
-            for trigger in trigger_list:
-                results = _trigger_entities(
-                    trigger, position, real_position, script_path
-                )
-                for entity in results[0]:
-                    entity.parameter_role = INPUT
-                entity_list += results[0]
-                # set the position for the next trigger
-                position = results[1] + 1
-            # set the position back to the last entity
-            position -= 1
+        identation_level = start_action_condition_block(
+            filepath=script_path,
+            identation_lvl=identation_level,
+            first_element=first_element,
+            not_condition=True,
+        )
+
+        new_entity_list = []
+        # make it a list if it is not
+        if not isinstance(action_part[SCRIPT_ACTION_WAIT_FOR_TRIGGER], list):
+            trigger_list = [action_part[SCRIPT_ACTION_WAIT_FOR_TRIGGER]]
         else:
-            trigger = action_part[SCRIPT_ACTION_WAIT_FOR_TRIGGER]
-            results = _trigger_entities(trigger, position, real_position, script_path)
+            trigger_list = action_part[SCRIPT_ACTION_WAIT_FOR_TRIGGER]
+
+        # group all trigger entities in a new parent if there are more than one
+        if len(trigger_list) > 1:
+            new_parent = position
+            position += 1
+        else:
+            new_parent = parent
+
+        first_element = True
+
+        # create all trigger entities which are needed for the action
+        for trigger in trigger_list:
+            
+            if not first_element:
+                create_next_logic_condition_part(
+                    condition_type=CONF_OR,
+                    filepath=script_path,
+                    identation_lvl=identation_level,
+                    first_element=first_element,
+                )
+
+            results = _trigger_entities(
+                trigger_part=trigger,
+                position=position,
+                real_position=real_position,
+                script_path=script_path,
+                parent=new_parent,
+                identation_level=identation_level,
+                first_element=first_element,
+                source=CONF_ACTION,
+            )
+
+            if first_element:
+                first_element = False
+
+            # set the parameter role to input
             for entity in results[0]:
                 entity.parameter_role = INPUT
-            entity_list += results[0]
-            position = results[1]
+
+            new_entity_list += results[0]
+            real_position = results[2]
+            # set the position for the next trigger
+            position = results[1] + 1
+
+        # set the position back to the last entity
+        position -= 1
+        # add the new entities to the entity list
+        entity_list += new_entity_list
+
+        # close the section if a enitiy is given
+        identation_level -= 1
+        if len(results[0]) > 0:
+            if CONF_TIMEOUT in action_part:
+                if CONF_CONTINUE_ON_TIMEOUT in action_part:
+                    continue_action = action_part[CONF_CONTINUE_ON_TIMEOUT]
+                else:
+                    continue_action = True
+            else:
+                continue_action = False
+
+            create_stopping_action(script_path, identation_level, continue_action)
 
     # processes a device action
     elif CONF_DEVICE_ID in action_part:
@@ -1925,15 +2360,21 @@ def _action_entities(
         exp_value[CONF_SERVICE] = action_part[CONF_TYPE]
 
         # create the entity
-        entity_list.append(
-            Entity(
-                parent=parent,
-                position=position,
-                param_role=param_role,
-                integration=integration,
-                entity_name=entity_name,
-                expected_value=exp_value,
-            )
+        entity = Entity(
+            parent=parent,
+            position=position,
+            param_role=param_role,
+            integration=integration,
+            entity_name=entity_name,
+            expected_value=exp_value,
+        )
+        entity_list.append(entity)
+
+        create_action_script(
+            action_type=CONF_DEVICE,
+            entity=entity,
+            filepath=script_path,
+            identation_lvl=identation_level,
         )
 
     # TODO add variables for more detailed template actionss
@@ -1992,21 +2433,26 @@ def _extract_all_conditions(
     position = 0
     real_position = 0
     num_condition_entities = 0
+
     for condition in conditions:
         if position != 0:
             first_element = False
         else:
             first_element = True
+
         return_list = _condition_entities(
             condition, position, real_position, script_path, first_element=first_element
         )
         condition_entities += return_list[0]
         position = return_list[1] + 1
         real_position = return_list[2]
-        
+
         num_condition_entities += len(return_list[0])
         if return_list[0] != []:
-            if return_list[0][-1].integration == "zone" or return_list[0][-1].integration == "trigger":
+            if (
+                return_list[0][-1].integration == "zone"
+                or return_list[0][-1].integration == "trigger"
+            ):
                 num_condition_entities -= 1
 
     if num_condition_entities != real_position:
@@ -2029,11 +2475,25 @@ def _extract_all_actions(automation_config: AutomationConfig, script_path: str) 
     actions = automation_config[CONF_ACTION]
     position = 0
     real_position = 0
+    num_action_entities = 0
+
+    init_action_part(script_path)
+
     for action in actions:
-        return_list = _action_entities(action, position, real_position, script_path)
+        if position != 0:
+            first_element = False
+        else:
+            first_element = True
+
+        return_list = _action_entities(
+            action, position, real_position, script_path, first_element=first_element
+        )
+
         action_entities += return_list[0]
         position = return_list[1] + 1
         real_position = return_list[2] + 1
+
+    close_action_section(script_path)
     return action_entities
 
 

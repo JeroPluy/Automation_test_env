@@ -1,7 +1,7 @@
-def action_execution(input_vals) -> dict:
-    action_inputs = input_vals[0]
+def action_execution(input_vals) -> None:
+    action_inputs = input_vals[2]
     action_results = []
         
     if action_inputs != [] and None in action_inputs:
-        return {"ValueError": "Action values cannot be None"}
+        return print(json.dumps({"ValueError": "Action input values cannot be None"}))
 
