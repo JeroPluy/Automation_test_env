@@ -7,10 +7,10 @@ import asyncio
 import copy
 import os
 
-from environment_package.ha_automation import (
+from environment_package.ha_automation_utils import (
     home_assistant_automation_validation as ha_automation_config,
 )
-from environment_package.ha_automation.home_assistant_const import (
+from environment_package.ha_automation_utils.home_assistant_const import (
     CONF_ACTION,
     CONF_ALIAS,
     CONF_CONDITION,
@@ -27,7 +27,7 @@ from environment_package.ha_automation.home_assistant_const import (
     LOGSEVERITY_STRING,
     SCRIPT_MODE_CHOICES,
 )
-from environment_package.ha_automation.home_assistant_yaml_loader import load_yaml_dict
+from environment_package.ha_automation_utils.home_assistant_yaml_loader import load_yaml_dict
 
 
 def change_param(
@@ -142,7 +142,7 @@ def test_main_automation_params() -> None:
     # print(basis_file + " : \t" + validation_result.automation_name + " : \t" + validation_result.validation_status + " : \t" + str(validation_result.validation_error))
     assert validation_result.automation_name == automation_name
     assert validation_result.validation_status == "ok"
-    assert validation_result.validation_error == None
+    assert validation_result.validation_error is None
     print("--- Test basis automation passed ---")
 
     # Test changes to single basis parameters

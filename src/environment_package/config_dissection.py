@@ -11,41 +11,16 @@ The information about the action functions are from:
 https://www.home-assistant.io/docs/scripts
 """
 
-from environment_package.automation_script_gen.action_script_gen import (
-    close_action_condition_block,
-    close_action_loop_block,
-    close_action_section,
-    create_action_loop_stop,
-    create_action_script,
-    create_else_action_section,
-    create_empty_action_section,
-    create_stopping_action,
-    init_action_part,
-    start_action_condition_block,
-    start_action_loop_block,
-)
-from environment_package.automation_script_gen.condition_script_gen import (
-    close_condition_section,
-    close_logic_function_block,
-    create_combination_condition_script,
-    create_condition_script,
-    create_next_logic_condition_part,
-    init_condition_part,
-    start_logic_function_block,
-)
-from environment_package.automation_script_gen.trigger_script_gen import (
-    close_trigger_section,
-    create_combination_trigger_script,
-    create_trigger_script,
-)
-from environment_package.env_const import (
+import automation_script_gen as asg
+
+from .utils.env_const import (
     INPUT,
     OUTPUT,
     SINGLE,
     START,
 )
-from environment_package.env_helper import Automation, Entity, is_jinja_template
-from environment_package.ha_automation.home_assistant_config_validation import (
+from .utils.env_helper import Automation, Entity, is_jinja_template
+from .ha_automation.home_assistant_config_validation import (
     valid_entity_id,
 )
 from .ha_automation.home_assistant_automation_validation import AutomationConfig
@@ -136,9 +111,6 @@ from .ha_automation.home_assistant_const import (
     TAG_ID,
     test_leading_zero,
 )
-from environment_package.automation_script_gen.automation_script_gen import (
-    init_automation_script,
-)
 
 
 import re
@@ -153,7 +125,6 @@ def _trigger_entities(
     script_path: str,
     parent: int = None,
     indentation_level: int = 1,
-    first_element: bool = False,
     source: str = "trigger",
 ) -> list:
     """The function creates a list of entities for one trigger list element.
@@ -164,6 +135,8 @@ def _trigger_entities(
         real_position (int): The real position of the entity for the input value into the script
         script_path (str): The path to the script
         parent (int): The parent entity of the entity
+        indentation_level (int): The indentation level of the entity in the script
+        source (str): The source of the entity
 
     Returns:
         list: A list of entities as Entity objects
@@ -225,7 +198,7 @@ def _trigger_entities(
                     )
                 )
             # create the script for the combination of the event trigger
-            real_position = create_combination_trigger_script(
+            real_position = asg.asg.create_combination_trigger_script(
                 trigger_type=CONF_EVENT,
                 entity_list=new_entity_list,
                 trigger_pos=real_position,
@@ -248,7 +221,7 @@ def _trigger_entities(
                 entity_name=str(uuid.uuid4()),
                 expected_value=exp_value,
             )
-            real_position = create_trigger_script(
+            real_position = asg.create_trigger_script(
                 trigger_type=CONF_EVENT,
                 entity=entity,
                 trigger_pos=real_position,
@@ -271,7 +244,7 @@ def _trigger_entities(
             expected_value=exp_value,
         )
         entity_list.append(entity)
-        real_position = create_trigger_script(
+        real_position = asg.create_trigger_script(
             trigger_type="homeassistant",
             entity=entity,
             trigger_pos=real_position,
@@ -306,7 +279,7 @@ def _trigger_entities(
             expected_value=exp_value,
         )
         entity_list.append(entity)
-        real_position = create_trigger_script(
+        real_position = asg.create_trigger_script(
             trigger_type="mqtt",
             entity=entity,
             trigger_pos=real_position,
@@ -426,7 +399,7 @@ def _trigger_entities(
             entity_names = []
             for entity in new_entity_list:
                 entity_names.append(entity.entity_name)
-            real_position = create_combination_trigger_script(
+            real_position = asg.create_combination_trigger_script(
                 trigger_type=CONF_NUMERIC_STATE,
                 entity_list=new_entity_list,
                 trigger_pos=real_position,
@@ -437,7 +410,7 @@ def _trigger_entities(
             )
         else:
             entity_names = new_entity_list[0].entity_name
-            real_position = create_trigger_script(
+            real_position = asg.create_trigger_script(
                 trigger_type=CONF_NUMERIC_STATE,
                 entity=new_entity_list[0],
                 trigger_pos=real_position,
@@ -557,7 +530,7 @@ def _trigger_entities(
                     )
                 )
             # create the script for the combination of the state trigger
-            real_position = create_combination_trigger_script(
+            real_position = asg.create_combination_trigger_script(
                 trigger_type=CONF_STATE,
                 entity_list=new_entity_list,
                 trigger_pos=real_position,
@@ -588,7 +561,7 @@ def _trigger_entities(
                 expected_value=exp_value,
             )
 
-            real_position = create_trigger_script(
+            real_position = asg.create_trigger_script(
                 trigger_type=CONF_STATE,
                 entity=entity,
                 trigger_pos=real_position,
@@ -626,7 +599,7 @@ def _trigger_entities(
             expected_value=exp_value,
         )
         entity_list.append(entity)
-        real_position = create_trigger_script(
+        real_position = asg.create_trigger_script(
             trigger_type="sun",
             entity=entity,
             trigger_pos=real_position,
@@ -670,7 +643,7 @@ def _trigger_entities(
                     )
                 )
             # create the script for the combination of the tag trigger
-            real_position = create_combination_trigger_script(
+            real_position = asg.create_combination_trigger_script(
                 trigger_type="tag",
                 entity_list=new_entity_list,
                 trigger_pos=real_position,
@@ -690,7 +663,7 @@ def _trigger_entities(
                 entity_name=trigger_part[TAG_ID],
                 expected_value=exp_value,
             )
-            real_position = create_trigger_script(
+            real_position = asg.create_trigger_script(
                 trigger_type="tag",
                 entity=entity,
                 trigger_pos=real_position,
@@ -739,7 +712,7 @@ def _trigger_entities(
                         )
                     )
                 # create the script for the combination of the template trigger
-                real_position = create_combination_trigger_script(
+                real_position = asg.create_combination_trigger_script(
                     trigger_type=CONF_TEMPLATE,
                     entity_list=new_entity_list,
                     trigger_pos=real_position,
@@ -771,7 +744,7 @@ def _trigger_entities(
                     )
                 )
             # create the script for the combination of the time trigger
-            real_position = create_combination_trigger_script(
+            real_position = asg.create_combination_trigger_script(
                 trigger_type=CONF_TIME,
                 entity_list=new_entity_list,
                 trigger_pos=real_position,
@@ -791,7 +764,7 @@ def _trigger_entities(
                 entity_name=CONF_TIME,
                 expected_value={CONF_AT: trigger_part[CONF_AT]},
             )
-            real_position = create_trigger_script(
+            real_position = asg.create_trigger_script(
                 trigger_type=CONF_TIME,
                 entity=entity,
                 trigger_pos=real_position,
@@ -826,7 +799,7 @@ def _trigger_entities(
             entity_name=str(uuid.uuid4()),
             expected_value=exp_value,
         )
-        real_position = create_trigger_script(
+        real_position = asg.create_trigger_script(
             trigger_type=CONF_TIME_PATTERN,
             entity=entity,
             trigger_pos=real_position,
@@ -856,7 +829,7 @@ def _trigger_entities(
             entity_name=entity_name,
             expected_value=exp_value,
         )
-        real_position = create_trigger_script(
+        real_position = asg.create_trigger_script(
             trigger_type=CONF_PERS_NOTIFICATION,
             entity=entity,
             trigger_pos=real_position,
@@ -882,7 +855,7 @@ def _trigger_entities(
             entity_name=trigger_part[CONF_WEBHOOK_ID],
             expected_value=exp_value,
         )
-        real_position = create_trigger_script(
+        real_position = asg.create_trigger_script(
             trigger_type=CONF_WEBHOOK,
             entity=entity,
             trigger_pos=real_position,
@@ -907,7 +880,7 @@ def _trigger_entities(
             entity_name=trigger_part[CONF_ZONE].split(".")[1],
             expected_value=exp_value,
         )
-        real_position = create_trigger_script(
+        real_position = asg.create_trigger_script(
             trigger_type=CONF_ZONE,
             entity=entity,
             trigger_pos=real_position,
@@ -932,7 +905,7 @@ def _trigger_entities(
             entity_name=trigger_part[CONF_ZONE].split(".")[1],
             expected_value=exp_value,
         )
-        real_position = create_trigger_script(
+        real_position = asg.create_trigger_script(
             trigger_type=CONF_GEO_LOCATION,
             entity=entity,
             trigger_pos=real_position,
@@ -958,7 +931,7 @@ def _trigger_entities(
             entity_name=trigger_part[CONF_DEVICE_ID],
             expected_value=exp_value,
         )
-        real_position = create_trigger_script(
+        real_position = asg.create_trigger_script(
             trigger_type=CONF_DEVICE,
             entity=entity,
             trigger_pos=real_position,
@@ -984,7 +957,7 @@ def _trigger_entities(
             entity_name=trigger_part[CONF_ENTITY_ID].split(".")[1],
             expected_value=exp_value,
         )
-        real_position = create_trigger_script(
+        real_position = asg.create_trigger_script(
             trigger_type=CONF_CALENDAR,
             entity=entity,
             trigger_pos=real_position,
@@ -1015,7 +988,7 @@ def _trigger_entities(
                     )
                 )
             # create the script for the combination of the conversation trigger
-            real_position = create_combination_trigger_script(
+            real_position = asg.create_combination_trigger_script(
                 trigger_type=CONF_CONVERSATION,
                 entity_list=new_entity_list,
                 trigger_pos=real_position,
@@ -1036,7 +1009,7 @@ def _trigger_entities(
                 entity_name=str(uuid.uuid4()),
                 expected_value={CONF_COMMAND: trigger_part[CONF_COMMAND]},
             )
-            real_position = create_trigger_script(
+            real_position = asg.create_trigger_script(
                 trigger_type=CONF_CONVERSATION,
                 entity=entity,
                 trigger_pos=real_position,
@@ -1098,7 +1071,7 @@ def _condition_entities(
     # processes a combination of multiple conditions
     if condition == CONF_OR or condition == CONF_AND or condition == CONF_NOT:
         if CONF_CONDITIONS in condition_part:
-            indentation_level = start_logic_function_block(
+            indentation_level = asg.start_logic_function_block(
                 condition_type=condition,
                 filepath=script_path,
                 indentation_lvl=indentation_level,
@@ -1128,7 +1101,7 @@ def _condition_entities(
                 entity_list += result_list[0]
                 position = result_list[1]
                 real_position = result_list[2]
-            close_logic_function_block(
+            asg.close_logic_function_block(
                 filepath=script_path, indentation_lvl=(indentation_level - 1)
             )
 
@@ -1243,7 +1216,7 @@ def _condition_entities(
             entity_names = []
             for entity in new_entity_list:
                 entity_names.append(entity.entity_name)
-            real_position = create_combination_condition_script(
+            real_position = asg.create_combination_condition_script(
                 CONF_NUMERIC_STATE,
                 new_entity_list,
                 real_position,
@@ -1255,7 +1228,7 @@ def _condition_entities(
             )
         else:
             entity_names = new_entity_list[0].entity_name
-            real_position = create_condition_script(
+            real_position = asg.create_condition_script(
                 CONF_NUMERIC_STATE,
                 new_entity_list[0],
                 real_position,
@@ -1358,7 +1331,7 @@ def _condition_entities(
                     )
                 )
             # create the script for the combination of the state trigger
-            real_position = create_combination_condition_script(
+            real_position = asg.create_combination_condition_script(
                 CONF_STATE,
                 new_entity_list,
                 real_position,
@@ -1390,7 +1363,7 @@ def _condition_entities(
                 expected_value=exp_value,
             )
 
-            real_position = create_condition_script(
+            real_position = asg.create_condition_script(
                 CONF_STATE,
                 entity,
                 real_position,
@@ -1432,7 +1405,7 @@ def _condition_entities(
         )
         entity_list.append(entity)
 
-        real_position = create_condition_script(
+        real_position = asg.create_condition_script(
             CONF_DEVICE,
             entity,
             real_position,
@@ -1464,7 +1437,7 @@ def _condition_entities(
             entity_name="sun",
             expected_value=exp_value,
         )
-        real_position = create_condition_script(
+        real_position = asg.create_condition_script(
             "sun",
             entity,
             real_position,
@@ -1513,7 +1486,7 @@ def _condition_entities(
                         )
                     )
                 # create the script for the combination of the template condition
-                real_position = create_combination_condition_script(
+                real_position = asg.create_combination_condition_script(
                     CONF_TEMPLATE,
                     new_entity_list,
                     real_position,
@@ -1541,7 +1514,7 @@ def _condition_entities(
                 )
                 entity_list.append(entity)
                 # create the script for the template condition
-                real_position = create_condition_script(
+                real_position = asg.create_condition_script(
                     CONF_TEMPLATE,
                     entity,
                     real_position,
@@ -1575,7 +1548,7 @@ def _condition_entities(
             expected_value=exp_value,
         )
         entity_list.append(entity)
-        real_position = create_condition_script(
+        real_position = asg.create_condition_script(
             CONF_TIME,
             entity,
             real_position,
@@ -1609,7 +1582,7 @@ def _condition_entities(
                         expected_value=exp_value,
                     )
                 )
-            real_position = create_combination_condition_script(
+            real_position = asg.create_combination_condition_script(
                 CONF_TRIGGER,
                 new_trigger_entity_list,
                 real_position,
@@ -1638,7 +1611,7 @@ def _condition_entities(
                 expected_value=exp_value,
             )
             entity_list.append(entity)
-            real_position = create_condition_script(
+            real_position = asg.create_condition_script(
                 CONF_TRIGGER,
                 entity,
                 real_position,
@@ -1687,7 +1660,7 @@ def _condition_entities(
 
                 exp_value = {CONF_ENTITY_ID: condition_part[CONF_ENTITY_ID]}
 
-                real_position = create_condition_script(
+                real_position = asg.create_condition_script(
                     CONF_ZONE,
                     new_exp_entity_list,
                     real_position,
@@ -1721,7 +1694,7 @@ def _condition_entities(
                     expected_value={CONF_ZONE: condition_part[CONF_ZONE]},
                 )
                 entity_list.append(entity)
-                real_position = create_condition_script(
+                real_position = asg.create_condition_script(
                     CONF_ZONE,
                     entity,
                     real_position,
@@ -1814,7 +1787,7 @@ def _action_entities(
 
     # processes a conditional action
     if SCRIPT_ACTION_IF in action_part:
-        indentation_level = start_action_condition_block(
+        indentation_level = asg.start_action_condition_block(
             filepath=script_path,
             indentation_lvl=indentation_level,
             first_element=first_element,
@@ -1867,7 +1840,7 @@ def _action_entities(
             no_entities = True
 
         # close the condition block
-        close_action_condition_block(
+        asg.close_action_condition_block(
             filepath=script_path,
             indentation_lvl=indentation_level,
             no_condition=no_entities,
@@ -1919,11 +1892,11 @@ def _action_entities(
             entity_list += then_entities
 
             if len(then_entities) == 0:
-                create_empty_action_section(
+                asg.create_empty_action_section(
                     filepath=script_path, indentation_lvl=indentation_level
                 )
         else:
-            create_empty_action_section(
+            asg.create_empty_action_section(
                 filepath=script_path, indentation_lvl=indentation_level
             )
 
@@ -1931,7 +1904,7 @@ def _action_entities(
             if then_block:
                 position += 1
 
-            create_else_action_section(
+            asg.create_else_action_section(
                 filepath=script_path, indentation_lvl=indentation_level
             )
 
@@ -1977,7 +1950,7 @@ def _action_entities(
             entity_list += else_entities
 
             if len(else_entities) == 0:
-                create_empty_action_section(
+                asg.create_empty_action_section(
                     filepath=script_path, indentation_lvl=indentation_level
                 )
 
@@ -1999,7 +1972,7 @@ def _action_entities(
                 else:
                     first_element = False
 
-                indentation_level = start_action_condition_block(
+                indentation_level = asg.start_action_condition_block(
                     filepath=script_path,
                     indentation_lvl=indentation_level,
                     first_element=first_element,
@@ -2051,7 +2024,7 @@ def _action_entities(
                     no_entities = True
 
                 # close the condition block
-                close_action_condition_block(
+                asg.close_action_condition_block(
                     filepath=script_path,
                     indentation_lvl=indentation_level,
                     no_condition=no_entities,
@@ -2093,11 +2066,11 @@ def _action_entities(
 
                 entity_list += action_list
                 if len(action_list) == 0:
-                    create_empty_action_section(
+                    asg.create_empty_action_section(
                         filepath=script_path, indentation_lvl=indentation_level
                     )
             else:
-                create_empty_action_section(
+                asg.create_empty_action_section(
                     filepath=script_path, indentation_lvl=indentation_level
                 )
             indentation_level -= 1
@@ -2106,7 +2079,7 @@ def _action_entities(
         if CONF_DEFAULT in action_part:
             indentation_level += 1
 
-            create_else_action_section(
+            asg.create_else_action_section(
                 filepath=script_path, indentation_lvl=indentation_level
             )
 
@@ -2199,7 +2172,7 @@ def _action_entities(
             loop_setting = [0, repeat_part[CONF_COUNT]]
             loop_tpye = CONF_FOR
 
-        indentation_level = start_action_loop_block(
+        indentation_level = asg.start_action_loop_block(
             loop_type=loop_tpye,
             filepath=script_path,
             indentation_lvl=indentation_level,
@@ -2212,7 +2185,7 @@ def _action_entities(
             else:
                 not_condition = True
 
-            indentation_level = start_action_condition_block(
+            indentation_level = asg.start_action_condition_block(
                 filepath=script_path,
                 indentation_lvl=indentation_level,
                 first_element=True,
@@ -2264,7 +2237,7 @@ def _action_entities(
                 no_entities = True
 
             # close the condition block
-            close_action_condition_block(
+            asg.close_action_condition_block(
                 filepath=script_path,
                 indentation_lvl=indentation_level,
                 no_condition=no_entities,
@@ -2274,7 +2247,7 @@ def _action_entities(
             indentation_level -= 1
 
             # set the loop_is_running varible to false
-            create_action_loop_stop(
+            asg.create_action_loop_stop(
                 filepath=script_path,
                 indentation_lvl=indentation_level,
                 loop_type=loop_tpye,
@@ -2302,7 +2275,7 @@ def _action_entities(
                 position -= 1
 
             # close the loop block
-            indentation_level = close_action_loop_block(
+            indentation_level = asg.close_action_loop_block(
                 filepath=script_path,
                 indentation_lvl=indentation_level,
                 is_infinite=is_infinite,
@@ -2331,7 +2304,7 @@ def _action_entities(
 
     # processes a condition in the action part
     elif CONF_CONDITION in action_part:
-        indentation_level = start_action_condition_block(
+        indentation_level = asg.start_action_condition_block(
             filepath=script_path,
             indentation_lvl=indentation_level,
             first_element=first_element,
@@ -2380,7 +2353,7 @@ def _action_entities(
         entity_list += new_entity_list
 
         # close the condition block
-        close_action_condition_block(
+        asg.close_action_condition_block(
             filepath=script_path, indentation_lvl=indentation_level, timeout=False
         )
 
@@ -2406,7 +2379,7 @@ def _action_entities(
             expected_value=exp_value,
         )
         entity_list.append(entity)
-        create_action_script(
+        asg.create_action_script(
             action_type=CONF_EVENT,
             entity=entity,
             filepath=script_path,
@@ -2465,7 +2438,7 @@ def _action_entities(
             expected_value=exp_value,
         )
         entity_list.append(entity)
-        create_action_script(
+        asg.create_action_script(
             action_type=CONF_SERVICE,
             entity=entity,
             filepath=script_path,
@@ -2475,7 +2448,7 @@ def _action_entities(
 
     # processes a wait for a trigger action
     elif SCRIPT_ACTION_WAIT_FOR_TRIGGER in action_part:
-        indentation_level = start_action_condition_block(
+        indentation_level = asg.start_action_condition_block(
             filepath=script_path,
             indentation_lvl=indentation_level,
             first_element=True,
@@ -2501,7 +2474,7 @@ def _action_entities(
         # create all trigger entities which are needed for the action
         for trigger in trigger_list:
             if not first_element:
-                create_next_logic_condition_part(
+                asg.create_next_logic_condition_part(
                     condition_type=CONF_OR,
                     filepath=script_path,
                     indentation_lvl=indentation_level,
@@ -2514,7 +2487,6 @@ def _action_entities(
                 script_path=script_path,
                 parent=new_parent,
                 indentation_level=indentation_level,
-                first_element=first_element,
                 source=CONF_ACTION,
             )
 
@@ -2545,7 +2517,7 @@ def _action_entities(
             else:
                 continue_action = False
 
-            close_action_condition_block(
+            asg.close_action_condition_block(
                 script_path, indentation_level, timeout=continue_action
             )
 
@@ -2569,7 +2541,7 @@ def _action_entities(
         )
         entity_list.append(entity)
 
-        create_action_script(
+        asg.create_action_script(
             action_type=CONF_DEVICE,
             entity=entity,
             filepath=script_path,
@@ -2578,7 +2550,7 @@ def _action_entities(
         )
 
     elif CONF_STOP in action_part:
-        create_stopping_action(script_path, indentation_level, False)
+        asg.create_stopping_action(script_path, indentation_level, False)
 
     # TODO add variables for more detailed template actionss
     # processes variables in the action part
@@ -2614,7 +2586,7 @@ def _extract_all_trigger(automation_config: AutomationConfig, script_path: str) 
         real_position = return_list[2]
     if len(trigger_entities) != real_position:
         raise vol.Invalid("The amount of entities and the real position do not match")
-    close_trigger_section(script_path)
+    asg.close_trigger_section(script_path)
     return trigger_entities
 
 
@@ -2630,7 +2602,7 @@ def _extract_all_conditions(
     Returns:
         list: A list of condition entities extracted from the data.
     """
-    init_condition_part(script_path)
+    asg.init_condition_part(script_path)
     condition_entities = []
     conditions = automation_config[CONF_CONDITION]
     position = 0
@@ -2660,7 +2632,7 @@ def _extract_all_conditions(
 
     if num_condition_entities != real_position:
         raise vol.Invalid("The amount of entities and the real position do not match")
-    close_condition_section(script_path)
+    asg.close_condition_section(script_path)
     return condition_entities
 
 
@@ -2680,7 +2652,7 @@ def _extract_all_actions(automation_config: AutomationConfig, script_path: str) 
     real_position = 0
     num_action_entities = 0
 
-    init_action_part(script_path)
+    asg.init_action_part(script_path)
 
     for action in actions:
         return_list = _action_entities(
@@ -2707,7 +2679,7 @@ def _extract_all_actions(automation_config: AutomationConfig, script_path: str) 
     if num_action_entities != real_position:
         raise vol.Invalid("The amount of entities and the real position do not match")
 
-    close_action_section(script_path)
+    asg.close_action_section(script_path)
     return action_entities
 
 

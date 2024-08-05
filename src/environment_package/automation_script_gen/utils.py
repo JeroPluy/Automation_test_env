@@ -5,9 +5,9 @@ provides basic functions for the other specialized parts.
 """
 
 from os import path
-from environment_package.env_const import AUTOMATION_SCRIPT
+from environment_package.utils.env_const import AUTOMATION_SCRIPT
 
-TEMPLATE_PATH = path.join("src", "environment_package", "automation_script_gen", "automation_script_templates")
+TEMPLATE_PATH = path.join("src", "environment_package", "automation_script_gen", "templates")
 
 
 def init_automation_script(automation_name: str, dir_path: str = None) -> str:
@@ -46,7 +46,7 @@ def init_automation_script(automation_name: str, dir_path: str = None) -> str:
     return filepath
 
 
-def _append_script_context_to_script(filepath: str, script_context: str) -> None:
+def append_script_context_to_script(filepath: str, script_context: str) -> None:
     """
     Append the script context to the automation script file.
 
@@ -81,7 +81,7 @@ def close_script(filepath: str) -> None:
     # ! tabs aren't taken into account and are converted to 4 spaces
     script_content = script_content.replace("    ", "\t")
 
-    _append_script_context_to_script(filepath, script_content)
+    append_script_context_to_script(filepath, script_content)
 
 
 def create_locked_message(filepath: str) -> None:

@@ -4,9 +4,10 @@ This module is used to generate the action part for the automation script.
 
 from os import path
 
-from environment_package.automation_script_gen.automation_script_gen import TEMPLATE_PATH, _append_script_context_to_script, close_script
-from environment_package.env_helper import Entity
+from environment_package.automation_script_gen.utils import TEMPLATE_PATH, append_script_context_to_script, close_script
 from environment_package.ha_automation.home_assistant_const import CONF_DEVICE, CONF_EVENT, CONF_FOR, CONF_FOR_EACH, CONF_SERVICE, CONF_UNTIL, CONF_WHILE
+
+from environment_package.utils.env_helper import Entity
 
 END_IF_TEMPLATE = "):\n"
 
@@ -26,7 +27,7 @@ def init_action_part(filepath: str) -> None:
     # ! tabs aren't taken into account and are converted to 4 spaces
     script_content = script_content.replace("    ", "\t")
 
-    _append_script_context_to_script(filepath, script_content)
+    append_script_context_to_script(filepath, script_content)
 
 
 def start_action_condition_block(
@@ -53,7 +54,7 @@ def start_action_condition_block(
         script_context = f"{indentation}{if_level} not (\n"
     else:
         script_context = f"{indentation}{if_level} (\n"
-    _append_script_context_to_script(filepath, script_context)
+    append_script_context_to_script(filepath, script_context)
 
     return indentation_lvl + 1
 
@@ -85,7 +86,7 @@ def close_action_condition_block(
     else:
         script_context += f"{indentation}{END_IF_TEMPLATE}"
 
-    _append_script_context_to_script(filepath, script_context)
+    append_script_context_to_script(filepath, script_context)
 
     if timeout is not None:
         create_stopping_action(filepath, (indentation_lvl-1), timeout)
@@ -107,7 +108,7 @@ def create_stopping_action(
         f"{indentation}\tprint(json.dumps(action_results))\n{indentation}\treturn\n\n"
     )
 
-    _append_script_context_to_script(filepath, script_context)
+    append_script_context_to_script(filepath, script_context)
 
 
 def create_empty_action_section(filepath: str, indentation_lvl: int) -> None:
@@ -121,7 +122,7 @@ def create_empty_action_section(filepath: str, indentation_lvl: int) -> None:
     indentation = "\t" * indentation_lvl
 
     script_context = f"{indentation}pass\n"
-    _append_script_context_to_script(filepath, script_context)
+    append_script_context_to_script(filepath, script_context)
 
 
 def create_else_action_section(filepath: str, indentation_lvl: int) -> None:
@@ -135,7 +136,7 @@ def create_else_action_section(filepath: str, indentation_lvl: int) -> None:
     indentation = "\t" * (indentation_lvl - 1)
 
     script_context = f"{indentation}else:\n"
-    _append_script_context_to_script(filepath, script_context)
+    append_script_context_to_script(filepath, script_context)
 
 
 def start_action_loop_block(
@@ -171,7 +172,7 @@ def start_action_loop_block(
     elif loop_type == CONF_FOR:
         script_context += f"{indentation}for x in range({loop_settings[0]},{loop_settings[1]}):\n{indentation}\toutput = 0\n"
 
-    _append_script_context_to_script(filepath, script_context)
+    append_script_context_to_script(filepath, script_context)
 
     return indentation_lvl + 1
 
@@ -196,7 +197,7 @@ def create_action_loop_stop(
     # make space to the starting loop block
     script_context += "\n"
 
-    _append_script_context_to_script(filepath, script_context)
+    append_script_context_to_script(filepath, script_context)
 
 
 def close_action_loop_block(
@@ -238,7 +239,7 @@ def close_action_loop_block(
         f"{indentation}\t\taction_results[x]['count'] = output_counter[x]\n\n"
     )
 
-    _append_script_context_to_script(filepath, script_context)
+    append_script_context_to_script(filepath, script_context)
 
     return indentation_lvl - 1
 
@@ -292,7 +293,7 @@ def create_action_script(
     else:
         script_context = f"{indentation}action_results.append({result})\n\n"
 
-    _append_script_context_to_script(filepath, script_context)
+    append_script_context_to_script(filepath, script_context)
 
 
 def close_action_section(filepath: str) -> None:
@@ -306,6 +307,6 @@ def close_action_section(filepath: str) -> None:
     script_context = (
         "\n\t# The end of the action section\n\tprint(json.dumps(action_results))\n\n"
     )
-    _append_script_context_to_script(filepath, script_context)
+    append_script_context_to_script(filepath, script_context)
 
     close_script(filepath)
