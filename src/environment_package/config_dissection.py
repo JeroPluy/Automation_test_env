@@ -11,6 +11,9 @@ The information about the action functions are from:
 https://www.home-assistant.io/docs/scripts
 """
 
+from environment_package.automation_script_gen.action_script_gen import close_action_condition_block, close_action_loop_block, close_action_section, create_action_loop_stop, create_action_script, create_else_action_section, create_empty_action_section, create_stopping_action, init_action_part, start_action_condition_block, start_action_loop_block
+from environment_package.automation_script_gen.condition_script_gen import close_condition_section, close_logic_function_block, create_combination_condition_script, create_condition_script, create_next_logic_condition_part, init_condition_part, start_logic_function_block
+from environment_package.automation_script_gen.trigger_script_gen import close_trigger_section, create_combination_trigger_script, create_trigger_script
 from environment_package.env_const import (
     INPUT,
     OUTPUT,
@@ -42,6 +45,7 @@ from .ha_automation.home_assistant_const import (
     CONF_CONDITIONS,
     CONF_CONTINUE_ON_TIMEOUT,
     CONF_CONVERSATION,
+    CONF_COUNT,
     CONF_DATETIME,
     CONF_DEFAULT,
     CONF_DEVICE,
@@ -55,6 +59,7 @@ from .ha_automation.home_assistant_const import (
     CONF_EVENT_DATA,
     CONF_EVENT_TYPE,
     CONF_FOR,
+    CONF_FOR_EACH,
     CONF_FROM,
     CONF_GEO_LOCATION,
     CONF_ID,
@@ -79,6 +84,7 @@ from .ha_automation.home_assistant_const import (
     CONF_SERVICE_DATA,
     CONF_SOURCE,
     CONF_STATE,
+    CONF_STOP,
     CONF_TARGET,
     CONF_TEMPLATE,
     CONF_THEN,
@@ -106,28 +112,11 @@ from .ha_automation.home_assistant_const import (
     TAG_ID,
     test_leading_zero,
 )
-from environment_package.automation_script_gen import (
-    close_action_condition_block,
-    create_else_action_section,
-    create_empty_action_section,
-    create_stopping_action,
-    close_action_section,
-    close_condition_section,
-    close_logic_function_block,
-    close_script,
-    close_trigger_section,
-    create_action_script,
-    create_combination_condition_script,
-    create_combination_trigger_script,
-    create_condition_script,
-    create_next_logic_condition_part,
-    create_trigger_script,
-    init_action_part,
+from environment_package.automation_script_gen.automation_script_gen import (
     init_automation_script,
-    init_condition_part,
-    start_action_condition_block,
-    start_logic_function_block,
 )
+
+
 import re
 import voluptuous as vol
 import uuid
@@ -139,7 +128,7 @@ def _trigger_entities(
     real_position: int,
     script_path: str,
     parent: int = None,
-    identation_level: int = 1,
+    indentation_level: int = 1,
     first_element: bool = False,
     source: str = "trigger",
 ) -> list:
@@ -218,8 +207,7 @@ def _trigger_entities(
                 trigger_pos=real_position,
                 trigger_id=trigger_id,
                 filepath=script_path,
-                identation_lvl=identation_level,
-                first_element=first_element,
+                indentation_lvl=indentation_level,
                 source=source,
             )
             # add the new entities to the entity list
@@ -242,8 +230,7 @@ def _trigger_entities(
                 trigger_pos=real_position,
                 trigger_id=trigger_id,
                 filepath=script_path,
-                identation_lvl=identation_level,
-                first_element=first_element,
+                indentation_lvl=indentation_level,
                 source=source,
             )
             entity_list.append(entity)
@@ -266,8 +253,7 @@ def _trigger_entities(
             trigger_pos=real_position,
             trigger_id=trigger_id,
             filepath=script_path,
-            identation_lvl=identation_level,
-            first_element=first_element,
+            indentation_lvl=indentation_level,
             source=source,
         )
 
@@ -302,8 +288,7 @@ def _trigger_entities(
             trigger_pos=real_position,
             trigger_id=trigger_id,
             filepath=script_path,
-            identation_lvl=identation_level,
-            first_element=first_element,
+            indentation_lvl=indentation_level,
             source=source,
         )
 
@@ -423,8 +408,7 @@ def _trigger_entities(
                 trigger_pos=real_position,
                 trigger_id=trigger_id,
                 filepath=script_path,
-                identation_lvl=identation_level,
-                first_element=first_element,
+                indentation_lvl=indentation_level,
                 source=source,
             )
         else:
@@ -435,8 +419,7 @@ def _trigger_entities(
                 trigger_pos=real_position,
                 trigger_id=trigger_id,
                 filepath=script_path,
-                identation_lvl=identation_level,
-                first_element=first_element,
+                indentation_lvl=indentation_level,
                 source=source,
             )
         # add the names of the entities to the expected value of the comparing entities
@@ -556,8 +539,7 @@ def _trigger_entities(
                 trigger_pos=real_position,
                 trigger_id=trigger_id,
                 filepath=script_path,
-                identation_lvl=identation_level,
-                first_element=first_element,
+                indentation_lvl=indentation_level,
                 source=source,
             )
 
@@ -588,8 +570,7 @@ def _trigger_entities(
                 trigger_pos=real_position,
                 trigger_id=trigger_id,
                 filepath=script_path,
-                identation_lvl=identation_level,
-                first_element=first_element,
+                indentation_lvl=indentation_level,
                 source=source,
             )
 
@@ -627,8 +608,7 @@ def _trigger_entities(
             trigger_pos=real_position,
             trigger_id=trigger_id,
             filepath=script_path,
-            identation_lvl=identation_level,
-            first_element=first_element,
+            indentation_lvl=indentation_level,
             source=source,
         )
 
@@ -672,8 +652,7 @@ def _trigger_entities(
                 trigger_pos=real_position,
                 trigger_id=trigger_id,
                 filepath=script_path,
-                identation_lvl=identation_level,
-                first_element=first_element,
+                indentation_lvl=indentation_level,
                 source=source,
             )
             entity_list += new_entity_list
@@ -693,8 +672,7 @@ def _trigger_entities(
                 trigger_pos=real_position,
                 trigger_id=trigger_id,
                 filepath=script_path,
-                identation_lvl=identation_level,
-                first_element=first_element,
+                indentation_lvl=indentation_level,
                 source=source,
             )
             entity_list.append(entity)
@@ -743,8 +721,7 @@ def _trigger_entities(
                     trigger_pos=real_position,
                     trigger_id=trigger_id,
                     filepath=script_path,
-                    identation_lvl=identation_level,
-                    first_element=first_element,
+                    indentation_lvl=indentation_level,
                     source=source,
                 )
                 entity_list += new_entity_list
@@ -776,8 +753,7 @@ def _trigger_entities(
                 trigger_pos=real_position,
                 trigger_id=trigger_id,
                 filepath=script_path,
-                identation_lvl=identation_level,
-                first_element=first_element,
+                indentation_lvl=indentation_level,
                 source=source,
             )
 
@@ -797,8 +773,7 @@ def _trigger_entities(
                 trigger_pos=real_position,
                 trigger_id=trigger_id,
                 filepath=script_path,
-                identation_lvl=identation_level,
-                first_element=first_element,
+                indentation_lvl=indentation_level,
                 source=source,
             )
             entity_list.append(entity)
@@ -833,8 +808,7 @@ def _trigger_entities(
             trigger_pos=real_position,
             trigger_id=trigger_id,
             filepath=script_path,
-            identation_lvl=identation_level,
-            first_element=first_element,
+            indentation_lvl=indentation_level,
             source=source,
         )
         entity_list.append(entity)
@@ -864,8 +838,7 @@ def _trigger_entities(
             trigger_pos=real_position,
             trigger_id=trigger_id,
             filepath=script_path,
-            identation_lvl=identation_level,
-            first_element=first_element,
+            indentation_lvl=indentation_level,
             source=source,
         )
         entity_list.append(entity)
@@ -891,8 +864,7 @@ def _trigger_entities(
             trigger_pos=real_position,
             trigger_id=trigger_id,
             filepath=script_path,
-            identation_lvl=identation_level,
-            first_element=first_element,
+            indentation_lvl=indentation_level,
             source=source,
         )
         entity_list.append(entity)
@@ -917,8 +889,7 @@ def _trigger_entities(
             trigger_pos=real_position,
             trigger_id=trigger_id,
             filepath=script_path,
-            identation_lvl=identation_level,
-            first_element=first_element,
+            indentation_lvl=indentation_level,
             source=source,
         )
         entity_list.append(entity)
@@ -943,8 +914,7 @@ def _trigger_entities(
             trigger_pos=real_position,
             trigger_id=trigger_id,
             filepath=script_path,
-            identation_lvl=identation_level,
-            first_element=first_element,
+            indentation_lvl=indentation_level,
             source=source,
         )
         entity_list.append(entity)
@@ -970,8 +940,7 @@ def _trigger_entities(
             trigger_pos=real_position,
             trigger_id=trigger_id,
             filepath=script_path,
-            identation_lvl=identation_level,
-            first_element=first_element,
+            indentation_lvl=indentation_level,
             source=source,
         )
         entity_list.append(entity)
@@ -997,8 +966,7 @@ def _trigger_entities(
             trigger_pos=real_position,
             trigger_id=trigger_id,
             filepath=script_path,
-            identation_lvl=identation_level,
-            first_element=first_element,
+            indentation_lvl=indentation_level,
             source=source,
         )
         entity_list.append(entity)
@@ -1029,8 +997,7 @@ def _trigger_entities(
                 trigger_pos=real_position,
                 trigger_id=trigger_id,
                 filepath=script_path,
-                identation_lvl=identation_level,
-                first_element=first_element,
+                indentation_lvl=indentation_level,
                 source=source,
             )
 
@@ -1051,8 +1018,7 @@ def _trigger_entities(
                 trigger_pos=real_position,
                 trigger_id=trigger_id,
                 filepath=script_path,
-                identation_lvl=identation_level,
-                first_element=first_element,
+                indentation_lvl=indentation_level,
                 source=source,
             )
             entity_list.append(entity)
@@ -1066,9 +1032,10 @@ def _condition_entities(
     real_position: int,
     script_path: str,
     parent: int = None,
-    identation_level: int = 2,
+    indentation_level: int = 2,
     first_element: bool = True,
     source: str = CONF_CONDITION,
+    combinator: str = CONF_AND,
 ) -> list:
     """The function creates a list of entities for one condition list element.
 
@@ -1107,10 +1074,10 @@ def _condition_entities(
     # processes a combination of multiple conditions
     if condition == CONF_OR or condition == CONF_AND or condition == CONF_NOT:
         if CONF_CONDITIONS in condition_part:
-            identation_level = start_logic_function_block(
+            indentation_level = start_logic_function_block(
                 condition_type=condition,
                 filepath=script_path,
-                identation_lvl=identation_level,
+                indentation_lvl=indentation_level,
                 first_element=first_element,
             )
             new_parent = position
@@ -1121,13 +1088,6 @@ def _condition_entities(
                 else:
                     first_element = False
                 sub_condition = condition_part[CONF_CONDITIONS][x]
-                if x > 0:
-                    create_next_logic_condition_part(
-                        condition,
-                        script_path,
-                        identation_lvl=identation_level,
-                        first_element=False,
-                    )
 
                 position += 1
                 result_list = _condition_entities(
@@ -1136,15 +1096,16 @@ def _condition_entities(
                     parent=new_parent,
                     script_path=script_path,
                     real_position=real_position,
-                    identation_level=identation_level,
+                    indentation_level=indentation_level,
                     first_element=first_element,
                     source=source,
+                    combinator=condition,
                 )
                 entity_list += result_list[0]
                 position = result_list[1]
                 real_position = result_list[2]
             close_logic_function_block(
-                script_path, condition, identation_lvl=identation_level - 1
+                filepath=script_path, indentation_lvl=(indentation_level - 1)
             )
 
     # processes a numeric state condition
@@ -1263,9 +1224,10 @@ def _condition_entities(
                 new_entity_list,
                 real_position,
                 script_path,
-                identation_lvl=identation_level,
+                indentation_lvl=indentation_level,
                 first_element=first_element,
                 source=source,
+                combinator=combinator,
             )
         else:
             entity_names = new_entity_list[0].entity_name
@@ -1274,9 +1236,10 @@ def _condition_entities(
                 new_entity_list[0],
                 real_position,
                 script_path,
-                identation_lvl=identation_level,
+                indentation_lvl=indentation_level,
                 first_element=first_element,
                 source=source,
+                combinator=combinator,
             )
         # add the names of the entities to the expected value of the comparing entities
         for entity in exp_value_entity_list:
@@ -1376,9 +1339,10 @@ def _condition_entities(
                 new_entity_list,
                 real_position,
                 script_path,
-                identation_lvl=identation_level,
+                indentation_lvl=indentation_level,
                 first_element=first_element,
                 source=source,
+                combinator=combinator,
             )
         else:
             if isinstance(condition_part[CONF_ENTITY_ID], list):
@@ -1407,9 +1371,10 @@ def _condition_entities(
                 entity,
                 real_position,
                 script_path,
-                identation_lvl=identation_level,
+                indentation_lvl=indentation_level,
                 first_element=first_element,
                 source=source,
+                combinator=combinator,
             )
 
             new_entity_list.append(entity)
@@ -1448,9 +1413,10 @@ def _condition_entities(
             entity,
             real_position,
             script_path,
-            identation_lvl=identation_level,
+            indentation_lvl=indentation_level,
             first_element=first_element,
             source=source,
+            combinator=combinator,
         )
 
     # processes a sun condition
@@ -1479,9 +1445,10 @@ def _condition_entities(
             entity,
             real_position,
             script_path,
-            identation_lvl=identation_level,
+            indentation_lvl=indentation_level,
             first_element=first_element,
             source=source,
+            combinator=combinator,
         )
         entity_list.append(entity)
 
@@ -1527,9 +1494,10 @@ def _condition_entities(
                     new_entity_list,
                     real_position,
                     script_path,
-                    identation_lvl=identation_level,
+                    indentation_lvl=indentation_level,
                     first_element=first_element,
                     source=source,
+                    combinator=combinator,
                 )
                 entity_list += new_entity_list
             else:
@@ -1554,9 +1522,10 @@ def _condition_entities(
                     entity,
                     real_position,
                     script_path,
-                    identation_lvl=identation_level,
+                    indentation_lvl=indentation_level,
                     first_element=first_element,
                     source=source,
+                    combinator=combinator,
                 )
 
     # processes a time condition
@@ -1587,9 +1556,10 @@ def _condition_entities(
             entity,
             real_position,
             script_path,
-            identation_lvl=identation_level,
+            indentation_lvl=indentation_level,
             first_element=first_element,
             source=source,
+            combinator=combinator,
         )
 
     # processes a trigger based condition
@@ -1620,9 +1590,10 @@ def _condition_entities(
                 new_trigger_entity_list,
                 real_position,
                 script_path,
-                identation_lvl=identation_level,
+                indentation_lvl=indentation_level,
                 first_element=first_element,
                 source=source,
+                combinator=combinator,
             )
             entity_list += new_trigger_entity_list
 
@@ -1648,9 +1619,10 @@ def _condition_entities(
                 entity,
                 real_position,
                 script_path,
-                identation_lvl=identation_level,
+                indentation_lvl=indentation_level,
                 first_element=first_element,
                 source=source,
+                combinator=combinator,
             )
 
     # processes a zone condition
@@ -1696,9 +1668,10 @@ def _condition_entities(
                     new_exp_entity_list,
                     real_position,
                     script_path,
-                    identation_lvl=identation_level,
+                    indentation_lvl=indentation_level,
                     first_element=first_element,
                     source=source,
+                    combinator=combinator,
                 )
                 entity_list += new_exp_entity_list
             else:
@@ -1729,9 +1702,10 @@ def _condition_entities(
                     entity,
                     real_position,
                     script_path,
-                    identation_lvl=identation_level,
+                    indentation_lvl=indentation_level,
                     first_element=first_element,
                     source=source,
+                    combinator=combinator,
                 )
 
             position += 1
@@ -1785,8 +1759,9 @@ def _action_entities(
     real_position: int,
     script_path: str,
     parent: int = None,
-    identation_level: int = 1,
+    indentation_level: int = 1,
     first_element: bool = True,
+    loop_action: bool = False,
 ) -> list:
     """The function creates a list of entities for one action list element.
 
@@ -1815,9 +1790,9 @@ def _action_entities(
 
     # processes a conditional action
     if SCRIPT_ACTION_IF in action_part:
-        identation_level = start_action_condition_block(
+        indentation_level = start_action_condition_block(
             filepath=script_path,
-            identation_lvl=identation_level,
+            indentation_lvl=indentation_level,
             first_element=first_element,
             not_condition=False,
         )
@@ -1837,7 +1812,8 @@ def _action_entities(
             new_parent = parent
 
         first_element = True
-        has_cons = False
+        no_entities = False
+        then_block = False
 
         # create all condition entities which are needed for the action
         for condition in conditions:
@@ -1847,7 +1823,7 @@ def _action_entities(
                 parent=new_parent,
                 real_position=real_position,
                 script_path=script_path,
-                identation_level=identation_level,
+                indentation_level=indentation_level,
                 first_element=first_element,
                 source=CONF_ACTION,
             )
@@ -1861,22 +1837,20 @@ def _action_entities(
             real_position = if_results[2]
 
         if len(if_entities) > 0:
-            has_cons = True
-
-        # reset the position back to the last entity
-        position -= 1
-        entity_list += if_entities
+            entity_list += if_entities
+        else:
+            no_entities = True
 
         # close the condition block
-        identation_level -= 1
         close_action_condition_block(
-            filepath=script_path, identation_lvl=identation_level
+            filepath=script_path,
+            indentation_lvl=indentation_level,
+            no_condition=no_entities,
         )
 
         # processes the then action of the conditional action
         if CONF_THEN in action_part:
-            if has_cons:
-                position += 1
+            then_block = True
 
             then_entities = []
             # make it a list if it is not
@@ -1901,8 +1875,9 @@ def _action_entities(
                     parent=new_parent,
                     real_position=real_position,
                     script_path=script_path,
-                    identation_level=identation_level,
+                    indentation_level=indentation_level,
                     first_element=first_element,
+                    loop_action=loop_action,
                 )
 
                 if first_element:
@@ -1919,16 +1894,20 @@ def _action_entities(
 
             if len(then_entities) == 0:
                 create_empty_action_section(
-                    filepath=script_path, identation_lvl=identation_level
+                    filepath=script_path, indentation_lvl=indentation_level
                 )
-
-        if CONF_ELSE in action_part:
-            create_else_action_section(
-                filepath=script_path, identation_lvl=identation_level
+        else:
+            create_empty_action_section(
+                filepath=script_path, indentation_lvl=indentation_level
             )
 
-            if has_cons:
+        if CONF_ELSE in action_part:
+            if then_block:
                 position += 1
+
+            create_else_action_section(
+                filepath=script_path, indentation_lvl=indentation_level
+            )
 
             else_entities = []
             # make it a list if it is not
@@ -1953,8 +1932,9 @@ def _action_entities(
                     parent=new_parent,
                     real_position=real_position,
                     script_path=script_path,
-                    identation_level=identation_level,
+                    indentation_level=indentation_level,
                     first_element=first_element,
+                    loop_action=loop_action,
                 )
 
                 if first_element:
@@ -1971,147 +1951,316 @@ def _action_entities(
 
             if len(else_entities) == 0:
                 create_empty_action_section(
-                    filepath=script_path, identation_lvl=identation_level
+                    filepath=script_path, indentation_lvl=indentation_level
                 )
 
-            identation_level -= 1
+            indentation_level -= 1
 
     # processes a conditional action with multiple options
     elif CONF_CHOOSE in action_part:
         choose = action_part[CONF_CHOOSE]
-        has_cons = False
+        first_entity = True
         for option in choose:
-            if CONF_CONDITIONS in option:
-                has_cons = True
-                new_parent = position
-                condition_len = 0
-                # create all condition entities which are needed for the following action
-                for condition in option[CONF_CONDITIONS]:
-                    if condition_len == 0:
-                        first_element = True
-                    else:
-                        first_element = False
+            if CONF_CONDITIONS in option or CONF_CONDITION in option:
+                if first_entity:
+                    first_element = True
+                else:
+                    first_element = False
 
+                indentation_level = start_action_condition_block(
+                    filepath=script_path,
+                    indentation_lvl=indentation_level,
+                    first_element=first_element,
+                    not_condition=False,
+                )
+
+                new_entity_list = []
+                # make it a list if it is not
+                if CONF_CONDITIONS in option:
+                    conditions = option[CONF_CONDITIONS]
+                else:
+                    conditions = [option]
+
+                # group the conditions together if there are multiple
+                if len(conditions) > 1:
+                    new_parent = position
                     position += 1
+                else:
+                    new_parent = parent
+
+                first_element = True
+                no_entities = False
+
+                for condition in conditions:
                     results = _condition_entities(
                         condition_part=condition,
                         position=position,
                         parent=new_parent,
                         script_path=script_path,
                         real_position=real_position,
-                        identation_level=identation_level,
+                        indentation_level=indentation_level,
                         first_element=first_element,
                         source=CONF_ACTION,
                     )
-                    entity_list += results[0]
-                    position = results[1]
+                    if first_element:
+                        first_element = False
+                        first_entity = False
 
-            elif CONF_CONDITION in option:
-                has_cons = True
-                results = _condition_entities(
-                    condition_part=option,
-                    position=position,
-                    parent=parent,
-                    script_path=script_path,
-                    real_position=real_position,
-                    identation_level=identation_level,
-                    first_element=True,
-                    source=CONF_ACTION,
+                    new_entity_list += results[0]
+                    # set the position for the next condition
+                    position = results[1] + 1
+                    real_position = results[2]
+
+                if len(new_entity_list) > 0:
+                    entity_list += new_entity_list
+                else:
+                    no_entities = True
+
+                # close the condition block
+                close_action_condition_block(
+                    filepath=script_path,
+                    indentation_lvl=indentation_level,
+                    no_condition=no_entities,
                 )
-                entity_list += results[0]
-                position = results[1]
 
             if CONF_SEQUENCE in option:
-                if isinstance(option[CONF_SEQUENCE], list):
-                    # increase because the sequence has condition/s
-                    if has_cons:
-                        position += 1
-                    for action in option[CONF_SEQUENCE]:
-                        results = _action_entities(
-                            action, position, real_position, script_path
-                        )
-                        entity_list += results[0]
-                        # set the position for the next action
-                        position = results[1] + 1
-                    has_cons = False
+                if first_entity:
+                    position += 1
+                    first_entity = False
+
+                action_list = []
+                # make it a list if it is not
+                if not isinstance(option[CONF_SEQUENCE], list):
+                    actions = [option[CONF_SEQUENCE]]
+                else:
+                    actions = option[CONF_SEQUENCE]
+
+                if len(actions) > 1:
+                    new_parent = position
+                    position += 1
+                else:
+                    new_parent = parent
+
+                for action in actions:
+                    results = _action_entities(
+                        action_part=action,
+                        position=position,
+                        real_position=real_position,
+                        script_path=script_path,
+                        parent=new_parent,
+                        indentation_level=indentation_level,
+                        first_element=first_element,
+                        loop_action=loop_action,
+                    )
+                    action_list += results[0]
+                    # set the position for the next action
+                    position = results[1] + 1
+                    real_position = results[2]
+
+                entity_list += action_list
+                if len(action_list) == 0:
+                    create_empty_action_section(
+                        filepath=script_path, indentation_lvl=indentation_level
+                    )
+            else:
+                create_empty_action_section(
+                    filepath=script_path, indentation_lvl=indentation_level
+                )
+            indentation_level -= 1
+
         # set the position back to the last entity
         position -= 1
 
     # processes the default action/s of the choose action with multiple options
     elif CONF_DEFAULT in action_part:
-        default_actions = action_part[CONF_DEFAULT]
+        indentation_level += 1
+
+        create_else_action_section(
+            filepath=script_path, indentation_lvl=indentation_level
+        )
+
+        action_list = []
+
+        # make it a list if it is not
+        if not isinstance(action_part[CONF_DEFAULT], list):
+            default_actions = [action_part[CONF_DEFAULT]]
+        else:
+            default_actions = action_part[CONF_DEFAULT]
+
+        if len(default_actions) > 1:
+            new_parent = position
+            position += 1
+        else:
+            new_parent = parent
+
+        first_element = True
+
         for action in default_actions:
-            results = _action_entities(action, position, real_position, script_path)
+            results = _action_entities(
+                action_part=action,
+                position=position,
+                real_position=real_position,
+                script_path=script_path,
+                parent=new_parent,
+                indentation_level=indentation_level,
+                first_element=first_element,
+                loop_action=loop_action,
+            )
+            action_list += results[0]
+            # set the position for the next action
+            position = results[1] + 1
+            real_position = results[2]
+
+        # set the position back to the last entity
+        position -= 1
+        entity_list += action_list
+
+    # processes a parallel grouping action
+    elif CONF_PARALLEL in action_part:
+        # make it a list if it is not
+        if isinstance(action_part[CONF_PARALLEL], list):
+            action_list = action_part[CONF_PARALLEL]
+        else:
+            action_list = [action_part[CONF_PARALLEL]]
+
+        if len(action_list) > 1:
+            new_parent = position
+            position += 1
+        else:
+            new_parent = parent
+
+        for action in action_list:
+            results = _action_entities(
+                action_part=action,
+                position=position,
+                real_position=real_position,
+                script_path=script_path,
+                parent=new_parent,
+                indentation_level=indentation_level,
+                first_element=first_element,
+                loop_action=loop_action,
+            )
             entity_list += results[0]
             # set the position for the next action
             position = results[1] + 1
         # set the position back to the last entity
         position -= 1
 
-    # processes a parallel grouping action
-    elif CONF_PARALLEL in action_part:
-        if isinstance(action_part[CONF_PARALLEL], list):
-            for action in action_part[CONF_PARALLEL]:
-                results = _action_entities(action, position, real_position, script_path)
-                entity_list += results[0]
-                # set the position for the next action
-                position = results[1] + 1
-            # set the position back to the last entity
-            position -= 1
-
     # processes a repeat grouping action
     elif CONF_REPEAT in action_part:
         repeat_part = action_part[CONF_REPEAT]
-        has_cons = False
         conditions = []
+        loop_tpye = None
+        loop_setting = []
+        is_infinite = False
 
         if CONF_WHILE in repeat_part:
             conditions = repeat_part[CONF_WHILE]
+            loop_tpye = CONF_WHILE
         elif CONF_UNTIL in repeat_part:
             conditions = repeat_part[CONF_UNTIL]
+            loop_tpye = CONF_UNTIL
+        elif CONF_FOR_EACH in repeat_part:
+            loop_setting = repeat_part[CONF_FOR_EACH]
+            loop_tpye = CONF_FOR_EACH
+        elif CONF_COUNT in repeat_part:
+            loop_setting = [0, repeat_part[CONF_COUNT]]
+            loop_tpye = CONF_FOR
 
-        if isinstance(conditions, list):
+        indentation_level = start_action_loop_block(
+            loop_type=loop_tpye,
+            filepath=script_path,
+            indentation_lvl=indentation_level,
+            loop_settings=loop_setting,
+        )
+
+        if loop_tpye == CONF_WHILE or loop_tpye == CONF_UNTIL:
+            if loop_tpye == CONF_UNTIL:
+                not_condition = False
+            else:
+                not_condition = True
+
+            indentation_level = start_action_condition_block(
+                filepath=script_path,
+                indentation_lvl=indentation_level,
+                first_element=first_element,
+                not_condition=not_condition,
+            )
+
+            condition_entities = []
+            # make it a list if it is not
+            if not isinstance(conditions, list):
+                conditions = [conditions]
+
+            # group all condition entities in a new parent if there are more than one
             if len(conditions) > 1:
-                has_cons = True
                 new_parent = position
-                # create all condition entities which are needed for the repeated action/s
-                for condition in conditions:
-                    position += 1
-                    results = _condition_entities(
-                        condition_part=condition,
-                        position=position,
-                        parent=new_parent,
-                        script_path=script_path,
-                        real_position=real_position,
-                        identation_level=identation_level,
-                        first_element=first_element,
-                        source=CONF_ACTION,
-                    )
-                    entity_list += results[0]
-                    position = results[1]
-            elif len(conditions) == 1:
-                has_cons = True
+                position += 1
+            else:
+                new_parent = parent
+
+            first_element = True
+            no_entities = False
+
+            # create all condition entities which are needed for the repeated action/s
+            for condition in conditions:
                 results = _condition_entities(
-                    condition_part=conditions[0],
+                    condition_part=condition,
                     position=position,
-                    parent=parent,
+                    parent=new_parent,
                     script_path=script_path,
                     real_position=real_position,
-                    identation_level=identation_level,
+                    indentation_level=indentation_level,
                     first_element=first_element,
                     source=CONF_ACTION,
                 )
+                if first_element:
+                    first_element = False
 
-                entity_list += results[0]
-                position = results[1]
+                condition_entities += results[0]
+                # set the position for the next condition
+                position = results[1] + 1
+                real_position = results[2]
+
+            if len(condition_entities) > 0:
+                entity_list += condition_entities
+
+            else:
+                if loop_tpye == CONF_UNTIL:
+                    is_infinite = True
+                no_entities = True
+
+            # close the condition block
+            close_action_condition_block(
+                filepath=script_path,
+                indentation_lvl=indentation_level,
+                no_condition=no_entities,
+            )
+
+            # reset the indentation level back to the last entity
+            indentation_level -= 1
+
+            # set the loop_is_running varible to false
+            create_action_loop_stop(
+                filepath=script_path,
+                indentation_lvl=indentation_level,
+                loop_type=loop_tpye,
+            )
 
         if CONF_SEQUENCE in repeat_part:
-            if has_cons:
-                position += 1
+            loop_action = True
+
             if isinstance(repeat_part[CONF_SEQUENCE], list):
                 for action in repeat_part[CONF_SEQUENCE]:
                     results = _action_entities(
-                        action, position, real_position, script_path
+                        action_part=action,
+                        position=position,
+                        real_position=real_position,
+                        script_path=script_path,
+                        parent=parent,
+                        indentation_level=indentation_level,
+                        first_element=first_element,
+                        loop_action=loop_action,
                     )
                     entity_list += results[0]
                     # set the position for the next action
@@ -2119,11 +2268,28 @@ def _action_entities(
                 # set the position back to the last entity
                 position -= 1
 
+            # close the loop block
+            indentation_level = close_action_loop_block(
+                filepath=script_path,
+                indentation_lvl=indentation_level,
+                is_infinite=is_infinite,
+                loop_tpye=loop_tpye,
+            )
+
     # processes a sequencal grouping action
     elif CONF_SEQUENCE in action_part:
         if isinstance(action_part[CONF_SEQUENCE], list):
             for action in action_part[CONF_SEQUENCE]:
-                results = _action_entities(action, position, real_position, script_path)
+                results = _action_entities(
+                    action_part=action,
+                    position=position,
+                    real_position=real_position,
+                    script_path=script_path,
+                    parent=parent,
+                    indentation_level=indentation_level,
+                    first_element=first_element,
+                    loop_action=loop_action,
+                )
                 entity_list += results[0]
                 # set the position for the next action
                 position = results[1] + 1
@@ -2132,9 +2298,9 @@ def _action_entities(
 
     # processes a condition in the action part
     elif CONF_CONDITION in action_part:
-        identation_level = start_action_condition_block(
+        indentation_level = start_action_condition_block(
             filepath=script_path,
-            identation_lvl=identation_level,
+            indentation_lvl=indentation_level,
             first_element=first_element,
             not_condition=True,
         )
@@ -2149,7 +2315,6 @@ def _action_entities(
         # group all condition entities in a new parent if there are more than one
         if len(conditions) > 1:
             new_parent = position
-            has_cons = True
             position += 1
         else:
             new_parent = parent
@@ -2163,7 +2328,7 @@ def _action_entities(
                 parent=new_parent,
                 script_path=script_path,
                 real_position=real_position,
-                identation_level=identation_level,
+                indentation_level=indentation_level,
                 first_element=first_element,
                 source=CONF_ACTION,
             )
@@ -2181,9 +2346,9 @@ def _action_entities(
         entity_list += new_entity_list
 
         # close the condition block
-        identation_level -= 1
-        create_stopping_action(
-            filepath=script_path, identation_lvl=identation_level, timeout=False
+        indentation_level -= 1
+        close_action_condition_block(
+            filepath=script_path, indentation_lvl=indentation_level, timeout=False
         )
 
     # processes a event action
@@ -2212,7 +2377,8 @@ def _action_entities(
             action_type=CONF_EVENT,
             entity=entity,
             filepath=script_path,
-            identation_lvl=identation_level,
+            indentation_lvl=indentation_level,
+            loop_action=loop_action,
         )
 
     # processes a service action
@@ -2270,14 +2436,15 @@ def _action_entities(
             action_type=CONF_SERVICE,
             entity=entity,
             filepath=script_path,
-            identation_lvl=identation_level,
+            indentation_lvl=indentation_level,
+            loop_action=loop_action,
         )
 
     # processes a wait for a trigger action
     elif SCRIPT_ACTION_WAIT_FOR_TRIGGER in action_part:
-        identation_level = start_action_condition_block(
+        indentation_level = start_action_condition_block(
             filepath=script_path,
-            identation_lvl=identation_level,
+            indentation_lvl=indentation_level,
             first_element=first_element,
             not_condition=True,
         )
@@ -2300,13 +2467,11 @@ def _action_entities(
 
         # create all trigger entities which are needed for the action
         for trigger in trigger_list:
-            
             if not first_element:
                 create_next_logic_condition_part(
                     condition_type=CONF_OR,
                     filepath=script_path,
-                    identation_lvl=identation_level,
-                    first_element=first_element,
+                    indentation_lvl=indentation_level,
                 )
 
             results = _trigger_entities(
@@ -2315,7 +2480,7 @@ def _action_entities(
                 real_position=real_position,
                 script_path=script_path,
                 parent=new_parent,
-                identation_level=identation_level,
+                indentation_level=indentation_level,
                 first_element=first_element,
                 source=CONF_ACTION,
             )
@@ -2338,7 +2503,7 @@ def _action_entities(
         entity_list += new_entity_list
 
         # close the section if a enitiy is given
-        identation_level -= 1
+        indentation_level -= 1
         if len(results[0]) > 0:
             if CONF_TIMEOUT in action_part:
                 if CONF_CONTINUE_ON_TIMEOUT in action_part:
@@ -2348,7 +2513,9 @@ def _action_entities(
             else:
                 continue_action = False
 
-            create_stopping_action(script_path, identation_level, continue_action)
+            close_action_condition_block(
+                script_path, indentation_level, timeout=continue_action
+            )
 
     # processes a device action
     elif CONF_DEVICE_ID in action_part:
@@ -2374,8 +2541,12 @@ def _action_entities(
             action_type=CONF_DEVICE,
             entity=entity,
             filepath=script_path,
-            identation_lvl=identation_level,
+            indentation_lvl=indentation_level,
+            loop_action=loop_action,
         )
+
+    elif CONF_STOP in action_part:
+        create_stopping_action(script_path, indentation_level, False)
 
     # TODO add variables for more detailed template actionss
     # processes variables in the action part
@@ -2479,19 +2650,30 @@ def _extract_all_actions(automation_config: AutomationConfig, script_path: str) 
 
     init_action_part(script_path)
 
-    for action in actions:
-        if position != 0:
-            first_element = False
-        else:
-            first_element = True
+    first_element = True
 
+    for action in actions:
         return_list = _action_entities(
-            action, position, real_position, script_path, first_element=first_element
+            action_part=action,
+            position=position,
+            real_position=real_position,
+            script_path=script_path,
+            first_element=first_element,
+            parent=None,
+            loop_action=False,
         )
+
+        if first_element:
+            first_element = False
 
         action_entities += return_list[0]
         position = return_list[1] + 1
         real_position = return_list[2] + 1
+
+        num_action_entities += len(return_list[0])
+
+    if num_action_entities != real_position:
+        raise vol.Invalid("The amount of entities and the real position do not match")
 
     close_action_section(script_path)
     return action_entities
@@ -2507,7 +2689,6 @@ def create_procedure_list(
     entity_list += _extract_all_trigger(automation_config, script_path)
     entity_list += _extract_all_conditions(automation_config, script_path)
     entity_list += _extract_all_actions(automation_config, script_path)
-    close_script(script_path)
     return entity_list
 
 
