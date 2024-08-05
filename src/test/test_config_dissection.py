@@ -6667,25 +6667,25 @@ async def test_action_entities():
 
         entities_choose_1, end_position, real_pos = results
         assert len(entities_choose_1) == 3
-        assert entities_choose_1[0].parent is None
-        assert entities_choose_1[0].position == 1
+        assert entities_choose_1[0].parent == 1
+        assert entities_choose_1[0].position == 2
         assert entities_choose_1[0].parameter_role == INPUT
         assert entities_choose_1[0].integration == "sensor"
         assert entities_choose_1[0].entity_name == "sensor.temperature"
         assert entities_choose_1[0].expected_value == {"state": "on"}
-        assert entities_choose_1[1].parent == 2
-        assert entities_choose_1[1].position == 3
+        assert entities_choose_1[1].parent == 3
+        assert entities_choose_1[1].position == 4
         assert entities_choose_1[1].parameter_role == OUTPUT
         assert entities_choose_1[1].integration == "light"
         assert entities_choose_1[1].entity_name == "light.kitchen"
         assert entities_choose_1[1].expected_value == {CONF_SERVICE: "turn_on"}
-        assert entities_choose_1[2].parent == 2
-        assert entities_choose_1[2].position == 4
+        assert entities_choose_1[2].parent == 3
+        assert entities_choose_1[2].position == 5
         assert entities_choose_1[2].parameter_role == OUTPUT
         assert entities_choose_1[2].integration == "light"
         assert entities_choose_1[2].entity_name == "light.living_room"
         assert entities_choose_1[2].expected_value == {CONF_SERVICE: "turn_off"}
-        assert end_position == 4
+        assert end_position == 5
 
         action_part_choose_1_input = ["on"]
         assert (
@@ -6745,31 +6745,31 @@ async def test_action_entities():
 
         entities_choose_2, end_position, real_pos = results
         assert len(entities_choose_2) == 4
-        assert entities_choose_2[0].parent == 1
-        assert entities_choose_2[0].position == 2
+        assert entities_choose_2[0].parent == 2
+        assert entities_choose_2[0].position == 3
         assert entities_choose_2[0].parameter_role == INPUT
         assert entities_choose_2[0].integration == "sensor"
         assert entities_choose_2[0].entity_name == "sensor.temperature"
         assert entities_choose_2[0].expected_value == {"state": "on"}
-        assert entities_choose_2[1].parent == 1
-        assert entities_choose_2[1].position == 3
+        assert entities_choose_2[1].parent == 2
+        assert entities_choose_2[1].position == 4
         assert entities_choose_2[1].parameter_role == INPUT
         assert entities_choose_2[1].integration == "sensor"
         assert entities_choose_2[1].entity_name == "sensor.humidity"
         assert entities_choose_2[1].expected_value == {"state": "off"}
-        assert entities_choose_2[2].parent == 4
-        assert entities_choose_2[2].position == 5
+        assert entities_choose_2[2].parent == 5
+        assert entities_choose_2[2].position == 6
         assert entities_choose_2[2].parameter_role == OUTPUT
         assert entities_choose_2[2].integration == "light"
         assert entities_choose_2[2].entity_name == "light.kitchen"
         assert entities_choose_2[2].expected_value == {CONF_SERVICE: "turn_on"}
-        assert entities_choose_2[3].parent == 4
-        assert entities_choose_2[3].position == 6
+        assert entities_choose_2[3].parent == 5
+        assert entities_choose_2[3].position == 7
         assert entities_choose_2[3].parameter_role == OUTPUT
         assert entities_choose_2[3].integration == "light"
         assert entities_choose_2[3].entity_name == "light.living_room"
         assert entities_choose_2[3].expected_value == {CONF_SERVICE: "turn_off"}
-        assert end_position == 6
+        assert end_position == 7
 
         action_part_choose_2_input = ["on", "off"]
         assert (
@@ -6853,55 +6853,55 @@ async def test_action_entities():
 
         entities_choose_3, end_position, real_pos = results
         assert len(entities_choose_3) == 8
-        assert entities_choose_3[0].parent == 1
-        assert entities_choose_3[0].position == 2
+        assert entities_choose_3[0].parent == 2
+        assert entities_choose_3[0].position == 3
         assert entities_choose_3[0].parameter_role == INPUT
         assert entities_choose_3[0].integration == "sensor"
         assert entities_choose_3[0].entity_name == "sensor.temperature"
         assert entities_choose_3[0].expected_value == {"state": "on"}
-        assert entities_choose_3[1].parent == 1
-        assert entities_choose_3[1].position == 3
+        assert entities_choose_3[1].parent == 2
+        assert entities_choose_3[1].position == 4
         assert entities_choose_3[1].parameter_role == INPUT
         assert entities_choose_3[1].integration == "sensor"
         assert entities_choose_3[1].entity_name == "sensor.humidity"
         assert entities_choose_3[1].expected_value == {"state": "off"}
-        assert entities_choose_3[2].parent == 4
-        assert entities_choose_3[2].position == 5
+        assert entities_choose_3[2].parent == 5
+        assert entities_choose_3[2].position == 6
         assert entities_choose_3[2].parameter_role == OUTPUT
         assert entities_choose_3[2].integration == "light"
         assert entities_choose_3[2].entity_name == "light.kitchen"
         assert entities_choose_3[2].expected_value == {CONF_SERVICE: "turn_on"}
-        assert entities_choose_3[3].parent == 4
-        assert entities_choose_3[3].position == 6
+        assert entities_choose_3[3].parent == 5
+        assert entities_choose_3[3].position == 7
         assert entities_choose_3[3].parameter_role == OUTPUT
         assert entities_choose_3[3].integration == "light"
         assert entities_choose_3[3].entity_name == "light.living_room"
         assert entities_choose_3[3].expected_value == {CONF_SERVICE: "turn_off"}
-        assert entities_choose_3[4].parent == 7
-        assert entities_choose_3[4].position == 8
+        assert entities_choose_3[4].parent == 8
+        assert entities_choose_3[4].position == 9
         assert entities_choose_3[4].parameter_role == INPUT
         assert entities_choose_3[4].integration == "sensor"
         assert entities_choose_3[4].entity_name == "sensor.temperature"
         assert entities_choose_3[4].expected_value == {"state": "off"}
-        assert entities_choose_3[5].parent == 7
-        assert entities_choose_3[5].position == 9
+        assert entities_choose_3[5].parent == 8
+        assert entities_choose_3[5].position == 10
         assert entities_choose_3[5].parameter_role == INPUT
         assert entities_choose_3[5].integration == "sensor"
         assert entities_choose_3[5].entity_name == "sensor.humidity"
         assert entities_choose_3[5].expected_value == {"state": "on"}
-        assert entities_choose_3[6].parent == 10
-        assert entities_choose_3[6].position == 11
+        assert entities_choose_3[6].parent == 11
+        assert entities_choose_3[6].position == 12
         assert entities_choose_3[6].parameter_role == OUTPUT
         assert entities_choose_3[6].integration == "light"
         assert entities_choose_3[6].entity_name == "light.kitchen"
         assert entities_choose_3[6].expected_value == {CONF_SERVICE: "turn_off"}
-        assert entities_choose_3[7].parent == 10
-        assert entities_choose_3[7].position == 12
+        assert entities_choose_3[7].parent == 11
+        assert entities_choose_3[7].position == 13
         assert entities_choose_3[7].parameter_role == OUTPUT
         assert entities_choose_3[7].integration == "light"
         assert entities_choose_3[7].entity_name == "light.living_room"
         assert entities_choose_3[7].expected_value == {CONF_SERVICE: "turn_on"}
-        assert end_position == 12
+        assert end_position == 13
 
         # both conditions pairs are met so only the first sequence is executed
         action_part_choose_3_input = ["on", "off", "off", "on"]
@@ -6960,8 +6960,6 @@ async def test_action_entities():
                     ],
                 },
             ],
-        }
-        action_part_choose_5 = {
             CONF_DEFAULT: [
                 {
                     CONF_SERVICE: "light.toggle",
@@ -6969,56 +6967,47 @@ async def test_action_entities():
                 }
             ],
         }
+            
         file_path = init_automation_script("action_part_choose_4", ACTION_DIR)
         test_condition_fill(file_path)
         results = _action_entities(
             action_part_choose_4, position=1, real_position=0, script_path=file_path
         )
-        entities_choose_4, end_position, real_pos = results
-        default_results = _action_entities(
-            action_part_choose_5,
-            position=end_position + 1,
-            real_position=real_pos,
-            script_path=file_path,
-        )
-        entities_choose_4 += default_results[0]
-        end_position = default_results[1]
-        real_pos = default_results[2]
-
         close_action_section(file_path)
 
+        entities_choose_4, end_position, real_pos = results
         assert len(entities_choose_4) == 5
-        assert entities_choose_4[0].parent is None
-        assert entities_choose_4[0].position == 1
+        assert entities_choose_4[0].parent == 1
+        assert entities_choose_4[0].position == 2
         assert entities_choose_4[0].parameter_role == INPUT
         assert entities_choose_4[0].integration == "sensor"
         assert entities_choose_4[0].entity_name == "sensor.temperature"
         assert entities_choose_4[0].expected_value == {"state": "on"}
-        assert entities_choose_4[1].parent is None
-        assert entities_choose_4[1].position == 2
+        assert entities_choose_4[1].parent == 1
+        assert entities_choose_4[1].position == 3
         assert entities_choose_4[1].parameter_role == OUTPUT
         assert entities_choose_4[1].integration == "light"
         assert entities_choose_4[1].entity_name == "light.kitchen"
         assert entities_choose_4[1].expected_value == {CONF_SERVICE: "turn_on"}
-        assert entities_choose_4[2].parent is None
-        assert entities_choose_4[2].position == 3
+        assert entities_choose_4[2].parent == 1
+        assert entities_choose_4[2].position == 4
         assert entities_choose_4[2].parameter_role == INPUT
         assert entities_choose_4[2].integration == "sensor"
         assert entities_choose_4[2].entity_name == "sensor.temperature"
         assert entities_choose_4[2].expected_value == {"state": "off"}
-        assert entities_choose_4[3].parent is None
-        assert entities_choose_4[3].position == 4
+        assert entities_choose_4[3].parent == 1
+        assert entities_choose_4[3].position == 5
         assert entities_choose_4[3].parameter_role == OUTPUT
         assert entities_choose_4[3].integration == "light"
         assert entities_choose_4[3].entity_name == "light.kitchen"
         assert entities_choose_4[3].expected_value == {CONF_SERVICE: "turn_off"}
-        assert entities_choose_4[4].parent is None
-        assert entities_choose_4[4].position == 5
+        assert entities_choose_4[4].parent == 1
+        assert entities_choose_4[4].position == 6
         assert entities_choose_4[4].parameter_role == OUTPUT
         assert entities_choose_4[4].integration == "light"
         assert entities_choose_4[4].entity_name == "light.living_room"
         assert entities_choose_4[4].expected_value == {CONF_SERVICE: "toggle"}
-        assert end_position == 5
+        assert end_position == 6
 
         # both conditions are met so only the first sequence is executed
         action_part_choose_4_input = ["on", "off"]
@@ -7081,31 +7070,31 @@ async def test_action_entities():
 
         entities_choose_6, end_position, real_pos = results
         assert len(entities_choose_6) == 4
-        assert entities_choose_6[0].parent is None
-        assert entities_choose_6[0].position == 18
+        assert entities_choose_6[0].parent == 18
+        assert entities_choose_6[0].position == 19
         assert entities_choose_6[0].parameter_role == INPUT
         assert entities_choose_6[0].integration == "sensor"
         assert entities_choose_6[0].entity_name == "sensor.temperature"
         assert entities_choose_6[0].expected_value == {"state": "on"}
-        assert entities_choose_6[1].parent is None
-        assert entities_choose_6[1].position == 19
+        assert entities_choose_6[1].parent == 18
+        assert entities_choose_6[1].position == 20
         assert entities_choose_6[1].parameter_role == OUTPUT
         assert entities_choose_6[1].integration == "light"
         assert entities_choose_6[1].entity_name == "light.kitchen"
         assert entities_choose_6[1].expected_value == {CONF_SERVICE: "turn_on"}
-        assert entities_choose_6[2].parent is None
-        assert entities_choose_6[2].position == 20
+        assert entities_choose_6[2].parent == 18
+        assert entities_choose_6[2].position == 21
         assert entities_choose_6[2].parameter_role == INPUT
         assert entities_choose_6[2].integration == "sensor"
         assert entities_choose_6[2].entity_name == "sensor.temperature"
         assert entities_choose_6[2].expected_value == {"state": "off"}
-        assert entities_choose_6[3].parent is None
-        assert entities_choose_6[3].position == 21
+        assert entities_choose_6[3].parent == 18
+        assert entities_choose_6[3].position == 22
         assert entities_choose_6[3].parameter_role == OUTPUT
         assert entities_choose_6[3].integration == "light"
         assert entities_choose_6[3].entity_name == "light.kitchen"
         assert entities_choose_6[3].expected_value == {CONF_SERVICE: "turn_off"}
-        assert end_position == 21
+        assert end_position == 22
 
         # both conditions are met so only the first sequence is executed
         action_part_choose_6_input = ["filler", "filler", "on", "off"]

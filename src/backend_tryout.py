@@ -9,7 +9,7 @@ from environment_package.config_dissection import (
     _extract_all_trigger,
     create_procedure_list,
 )
-from environment_package.automation_script_gen import create_locked_message, init_automation_script
+from environment_package.automation_script_gen.automation_script_gen import create_locked_message, init_automation_script
 import environment_package.db as db
 from environment_package.ha_automation import home_assistant_yaml_loader as yaml_loader
 from environment_package.ha_automation import (

@@ -437,7 +437,7 @@ def close_logic_function_block(
         filepath (str): The path to the automation script file.
         indentation_lvl (int, optional): The indentation level of the function block. Defaults to 2.
     """
-    indentation = "\t" * indentation_lvl
+    indentation = "\t" * (indentation_lvl)
     script_context = ""
 
     script_context += f"{indentation})\n"
@@ -451,6 +451,6 @@ def close_condition_section(filepath: str) -> None:
     Args:
         filepath (str): The path to the automation script file.
     """
-    script_context = f"\t\t{END_IF_TEMPLATE}\t\tcondition_passed = True\n\t# The end of the condition section\n\treturn condition_passed\n\n"
+    script_context = f"\t{END_IF_TEMPLATE}\t\tcondition_passed = True\n\t# The end of the condition section\n\treturn condition_passed\n\n"
     
     _append_script_context_to_script(filepath, script_context)

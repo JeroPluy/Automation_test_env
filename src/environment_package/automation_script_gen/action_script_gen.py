@@ -74,7 +74,7 @@ def close_action_condition_block(
         no_condition (bool, optional): If no entity is given to the condition.
         timeout (bool): Is a timeout for the wait for trigger section in the automation.
     """
-    indentation = "\t" * (indentation_lvl)
+    indentation = "\t" * (indentation_lvl-1)
     script_context = ""
 
     if no_condition:
@@ -88,7 +88,7 @@ def close_action_condition_block(
     _append_script_context_to_script(filepath, script_context)
 
     if timeout is not None:
-        create_stopping_action(filepath, indentation_lvl, timeout)
+        create_stopping_action(filepath, (indentation_lvl-1), timeout)
 
 
 def create_stopping_action(
@@ -220,7 +220,8 @@ def close_action_loop_block(
 
     # if the loop is infinite, the loop is running to be stopped by the condition
     if is_infinite or loop_tpye == CONF_UNTIL or loop_tpye == CONF_WHILE:
-        script_context += f"{indentation}\t# The loop would continue infinitly. Thats why its stopped after one iteration\n"
+        script_context += f"{indentation}\t# The loop could continue infinitly.\n" 
+        script_context += f"{indentation}\t# Since no detection is built in, it stops after one iteration.\n"
         script_context += f"{indentation}\tif loop_is_running:\n"
         script_context += (
             f"{indentation}\t\tinfinite_loop = True\n{indentation}\t\tbreak\n\n"

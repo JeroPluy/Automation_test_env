@@ -11,9 +11,33 @@ The information about the action functions are from:
 https://www.home-assistant.io/docs/scripts
 """
 
-from environment_package.automation_script_gen.action_script_gen import close_action_condition_block, close_action_loop_block, close_action_section, create_action_loop_stop, create_action_script, create_else_action_section, create_empty_action_section, create_stopping_action, init_action_part, start_action_condition_block, start_action_loop_block
-from environment_package.automation_script_gen.condition_script_gen import close_condition_section, close_logic_function_block, create_combination_condition_script, create_condition_script, create_next_logic_condition_part, init_condition_part, start_logic_function_block
-from environment_package.automation_script_gen.trigger_script_gen import close_trigger_section, create_combination_trigger_script, create_trigger_script
+from environment_package.automation_script_gen.action_script_gen import (
+    close_action_condition_block,
+    close_action_loop_block,
+    close_action_section,
+    create_action_loop_stop,
+    create_action_script,
+    create_else_action_section,
+    create_empty_action_section,
+    create_stopping_action,
+    init_action_part,
+    start_action_condition_block,
+    start_action_loop_block,
+)
+from environment_package.automation_script_gen.condition_script_gen import (
+    close_condition_section,
+    close_logic_function_block,
+    create_combination_condition_script,
+    create_condition_script,
+    create_next_logic_condition_part,
+    init_condition_part,
+    start_logic_function_block,
+)
+from environment_package.automation_script_gen.trigger_script_gen import (
+    close_trigger_section,
+    create_combination_trigger_script,
+    create_trigger_script,
+)
 from environment_package.env_const import (
     INPUT,
     OUTPUT,
@@ -1828,8 +1852,9 @@ def _action_entities(
                 source=CONF_ACTION,
             )
 
-            if first_element:
-                first_element = False
+            if len(if_results[0]) > 0:
+                if first_element:
+                    first_element = False
 
             if_entities += if_results[0]
             # set the position for the next condition
@@ -1880,8 +1905,9 @@ def _action_entities(
                     loop_action=loop_action,
                 )
 
-                if first_element:
-                    first_element = False
+                if len(then_results[0]) > 0:
+                    if first_element:
+                        first_element = False
 
                 then_entities += then_results[0]
                 # set the position for the next action
@@ -1937,8 +1963,9 @@ def _action_entities(
                     loop_action=loop_action,
                 )
 
-                if first_element:
-                    first_element = False
+                if len(else_results[0]) > 0:
+                    if first_element:
+                        first_element = False
 
                 else_entities += else_results[0]
                 # set the position for the next action
@@ -1960,6 +1987,11 @@ def _action_entities(
     elif CONF_CHOOSE in action_part:
         choose = action_part[CONF_CHOOSE]
         first_entity = True
+
+        # create the parent entity for all entities in the choose block
+        parent = position
+        position += 1
+
         for option in choose:
             if CONF_CONDITIONS in option or CONF_CONDITION in option:
                 if first_entity:
@@ -2002,9 +2034,11 @@ def _action_entities(
                         first_element=first_element,
                         source=CONF_ACTION,
                     )
-                    if first_element:
-                        first_element = False
-                        first_entity = False
+
+                    if len(results[0]) > 0:
+                        if first_element:
+                            first_element = False
+                            first_entity = False
 
                     new_entity_list += results[0]
                     # set the position for the next condition
@@ -2068,52 +2102,50 @@ def _action_entities(
                 )
             indentation_level -= 1
 
-        # set the position back to the last entity
-        position -= 1
+        # processes the default action/s of the choose action with multiple options
+        if CONF_DEFAULT in action_part:
+            indentation_level += 1
 
-    # processes the default action/s of the choose action with multiple options
-    elif CONF_DEFAULT in action_part:
-        indentation_level += 1
-
-        create_else_action_section(
-            filepath=script_path, indentation_lvl=indentation_level
-        )
-
-        action_list = []
-
-        # make it a list if it is not
-        if not isinstance(action_part[CONF_DEFAULT], list):
-            default_actions = [action_part[CONF_DEFAULT]]
-        else:
-            default_actions = action_part[CONF_DEFAULT]
-
-        if len(default_actions) > 1:
-            new_parent = position
-            position += 1
-        else:
-            new_parent = parent
-
-        first_element = True
-
-        for action in default_actions:
-            results = _action_entities(
-                action_part=action,
-                position=position,
-                real_position=real_position,
-                script_path=script_path,
-                parent=new_parent,
-                indentation_level=indentation_level,
-                first_element=first_element,
-                loop_action=loop_action,
+            create_else_action_section(
+                filepath=script_path, indentation_lvl=indentation_level
             )
-            action_list += results[0]
-            # set the position for the next action
-            position = results[1] + 1
-            real_position = results[2]
+
+            action_list = []
+
+            # make it a list if it is not
+            if not isinstance(action_part[CONF_DEFAULT], list):
+                default_actions = [action_part[CONF_DEFAULT]]
+            else:
+                default_actions = action_part[CONF_DEFAULT]
+
+            if len(default_actions) > 1:
+                new_parent = position
+                position += 1
+            else:
+                new_parent = parent
+
+            first_element = True
+
+            for action in default_actions:
+                results = _action_entities(
+                    action_part=action,
+                    position=position,
+                    real_position=real_position,
+                    script_path=script_path,
+                    parent=new_parent,
+                    indentation_level=indentation_level,
+                    first_element=first_element,
+                    loop_action=loop_action,
+                )
+                action_list += results[0]
+                # set the position for the next action
+                position = results[1] + 1
+                real_position = results[2]
+
+            entity_list += action_list
 
         # set the position back to the last entity
         position -= 1
-        entity_list += action_list
 
     # processes a parallel grouping action
     elif CONF_PARALLEL in action_part:
@@ -2183,7 +2215,7 @@ def _action_entities(
             indentation_level = start_action_condition_block(
                 filepath=script_path,
                 indentation_lvl=indentation_level,
-                first_element=first_element,
+                first_element=True,
                 not_condition=not_condition,
             )
 
@@ -2214,8 +2246,9 @@ def _action_entities(
                     first_element=first_element,
                     source=CONF_ACTION,
                 )
-                if first_element:
-                    first_element = False
+                if len(results[0]) > 0:
+                    if first_element:
+                        first_element = False
 
                 condition_entities += results[0]
                 # set the position for the next condition
@@ -2332,8 +2365,9 @@ def _action_entities(
                 first_element=first_element,
                 source=CONF_ACTION,
             )
-            if first_element:
-                first_element = False
+            if len(results[0]) > 0:
+                if first_element:
+                    first_element = False
 
             new_entity_list += results[0]
             # set the position for the next condition
@@ -2346,7 +2380,6 @@ def _action_entities(
         entity_list += new_entity_list
 
         # close the condition block
-        indentation_level -= 1
         close_action_condition_block(
             filepath=script_path, indentation_lvl=indentation_level, timeout=False
         )
@@ -2445,7 +2478,7 @@ def _action_entities(
         indentation_level = start_action_condition_block(
             filepath=script_path,
             indentation_lvl=indentation_level,
-            first_element=first_element,
+            first_element=True,
             not_condition=True,
         )
 
@@ -2485,25 +2518,24 @@ def _action_entities(
                 source=CONF_ACTION,
             )
 
-            if first_element:
-                first_element = False
+            if len(results[0]) > 0:
+                if first_element:
+                    first_element = False
 
-            # set the parameter role to input
-            for entity in results[0]:
-                entity.parameter_role = INPUT
+                # set the parameter role to input
+                for entity in results[0]:
+                    entity.parameter_role = INPUT
 
-            new_entity_list += results[0]
-            real_position = results[2]
-            # set the position for the next trigger
-            position = results[1] + 1
+                new_entity_list += results[0]
+                real_position = results[2]
+                # set the position for the next trigger
+                position = results[1] + 1
 
         # set the position back to the last entity
         position -= 1
         # add the new entities to the entity list
         entity_list += new_entity_list
 
-        # close the section if a enitiy is given
-        indentation_level -= 1
         if len(results[0]) > 0:
             if CONF_TIMEOUT in action_part:
                 if CONF_CONTINUE_ON_TIMEOUT in action_part:
@@ -2650,27 +2682,27 @@ def _extract_all_actions(automation_config: AutomationConfig, script_path: str) 
 
     init_action_part(script_path)
 
-    first_element = True
-
     for action in actions:
         return_list = _action_entities(
             action_part=action,
             position=position,
             real_position=real_position,
             script_path=script_path,
-            first_element=first_element,
+            first_element=True,
             parent=None,
             loop_action=False,
         )
 
-        if first_element:
-            first_element = False
-
         action_entities += return_list[0]
         position = return_list[1] + 1
-        real_position = return_list[2] + 1
+        real_position = return_list[2]
 
-        num_action_entities += len(return_list[0])
+        for action_enitiy in return_list[0]:
+            if (
+                action_enitiy.parameter_role == INPUT
+                and not action_enitiy.integration == CONF_ZONE
+            ):
+                num_action_entities += 1
 
     if num_action_entities != real_position:
         raise vol.Invalid("The amount of entities and the real position do not match")
