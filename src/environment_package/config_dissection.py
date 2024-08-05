@@ -11,7 +11,7 @@ The information about the action functions are from:
 https://www.home-assistant.io/docs/scripts
 """
 
-import automation_script_gen as asg
+import environment_package.automation_script_gen as asg
 
 from .utils.env_const import (
     INPUT,
@@ -20,11 +20,11 @@ from .utils.env_const import (
     START,
 )
 from .utils.env_helper import Automation, Entity, is_jinja_template
-from .ha_automation.home_assistant_config_validation import (
+from .ha_automation_utils.home_assistant_config_validation import (
     valid_entity_id,
 )
-from .ha_automation.home_assistant_automation_validation import AutomationConfig
-from .ha_automation.home_assistant_const import (
+from .ha_automation_utils.home_assistant_automation_validation import AutomationConfig
+from .ha_automation_utils.home_assistant_const import (
     ATTR_AREA_ID,
     CONF_ABOVE,
     CONF_ACTION,
@@ -198,7 +198,7 @@ def _trigger_entities(
                     )
                 )
             # create the script for the combination of the event trigger
-            real_position = asg.asg.create_combination_trigger_script(
+            real_position = asg.create_combination_trigger_script(
                 trigger_type=CONF_EVENT,
                 entity_list=new_entity_list,
                 trigger_pos=real_position,
@@ -2047,6 +2047,8 @@ def _action_entities(
                     position += 1
                 else:
                     new_parent = parent
+                    
+                first_element = True
 
                 for action in actions:
                     results = _action_entities(
@@ -2059,6 +2061,11 @@ def _action_entities(
                         first_element=first_element,
                         loop_action=loop_action,
                     )
+                    
+                    if len(results[0]) > 0:
+                        if first_element:
+                            first_element = False
+                    
                     action_list += results[0]
                     # set the position for the next action
                     position = results[1] + 1
@@ -2604,7 +2611,10 @@ def _extract_all_conditions(
     """
     asg.init_condition_part(script_path)
     condition_entities = []
-    conditions = automation_config[CONF_CONDITION]
+    if CONF_CONDITION in automation_config:
+        conditions = automation_config[CONF_CONDITION]
+    else:
+        conditions = []
     position = 0
     real_position = 0
     num_condition_entities = 0
@@ -2703,7 +2713,7 @@ def create_automation(automation_config: AutomationConfig) -> dict:
     automation_data = {}
 
     automation_name = automation_config.automation_name
-    automation_script = init_automation_script(automation_name)
+    automation_script = asg.init_automation_script(automation_name)
 
     if CONF_MODE in automation_config:
         mode = automation_config[CONF_MODE]

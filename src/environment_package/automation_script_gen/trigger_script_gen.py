@@ -2,10 +2,10 @@
 This module is used to generate the trigger section of the automation script.
 """
 
-from environment_package.automation_script_gen.automation_script_gen import _append_script_context_to_script
-from environment_package.env_helper import Entity, is_jinja_template
-from environment_package.ha_automation.home_assistant_config_validation import valid_entity_id
-from environment_package.ha_automation.home_assistant_const import CONF_ABOVE, CONF_BELOW, CONF_DEVICE, CONF_NOT_TO, CONF_NUMERIC_STATE, CONF_OR, CONF_PERS_NOTIFICATION, CONF_STATE, CONF_TO, CONF_TYPE, CONF_UPDATE_TYPE
+from environment_package.automation_script_gen.utils import append_script_context_to_script
+from environment_package.utils.env_helper import Entity, is_jinja_template
+from environment_package.ha_automation_utils.home_assistant_config_validation import valid_entity_id
+from environment_package.ha_automation_utils.home_assistant_const import CONF_ABOVE, CONF_BELOW, CONF_DEVICE, CONF_NOT_TO, CONF_NUMERIC_STATE, CONF_OR, CONF_PERS_NOTIFICATION, CONF_STATE, CONF_TO, CONF_TYPE, CONF_UPDATE_TYPE
 
 
 IF_TEMPLATE = "if ("
@@ -288,7 +288,7 @@ def create_combination_trigger_script(
         else:
             script_context += f"{indentation}\ttrigger_id = '{trigger_id}' \n{indentation}\ttriggered = True\n\n"
 
-    _append_script_context_to_script(filepath, script_context)
+    append_script_context_to_script(filepath, script_context)
 
     return trigger_pos
 
@@ -348,7 +348,7 @@ def create_trigger_script(
         else:
             script_context += f"{indentation}\ttrigger_id = '{trigger_id}' \n{indentation}\ttriggered = True\n\n"
 
-    _append_script_context_to_script(filepath, script_context)
+    append_script_context_to_script(filepath, script_context)
 
     return trigger_pos + 1
 
@@ -362,4 +362,4 @@ def close_trigger_section(filepath: str) -> None:
     """
     script_context = "\t# The end of the trigger section\n\treturn triggered\n\n"
     
-    _append_script_context_to_script(filepath, script_context)
+    append_script_context_to_script(filepath, script_context)

@@ -2,7 +2,7 @@ import os.path
 import sqlite3 as sqlite
 
 from environment_package.config_dissection import Entity
-from environment_package.env_const import standard_integrations
+from environment_package.utils.env_const import standard_integrations
 
 DATABASE = os.path.join("data", "automation_test_env.sqlite")
 INIT_FILE = os.path.join("schema", "database_creation.sql")

@@ -4,10 +4,10 @@ This module generates the condition part of the automation script.
 
 from os import path
 
-from environment_package.automation_script_gen.automation_script_gen import TEMPLATE_PATH, _append_script_context_to_script
-from environment_package.env_helper import Entity, is_jinja_template
-from environment_package.ha_automation.home_assistant_config_validation import valid_entity_id
-from environment_package.ha_automation.home_assistant_const import CONF_ABOVE, CONF_AND, CONF_BELOW, CONF_DEVICE, CONF_ID, CONF_NOT, CONF_NUMERIC_STATE, CONF_OR, CONF_STATE, CONF_TRIGGER, CONF_TYPE, CONF_ZONE
+from environment_package.automation_script_gen.utils import TEMPLATE_PATH, append_script_context_to_script
+from environment_package.utils.env_helper import Entity, is_jinja_template
+from environment_package.ha_automation_utils.home_assistant_config_validation import valid_entity_id
+from environment_package.ha_automation_utils.home_assistant_const import CONF_ABOVE, CONF_AND, CONF_BELOW, CONF_DEVICE, CONF_ID, CONF_NOT, CONF_NUMERIC_STATE, CONF_OR, CONF_STATE, CONF_TRIGGER, CONF_TYPE, CONF_ZONE
 
 IF_TEMPLATE = "if ("
 END_IF_TEMPLATE = "):\n"
@@ -30,7 +30,7 @@ def init_condition_part(filepath: str) -> None:
     # ! tabs aren't taken into account and are converted to 4 spaces
     script_content = script_content.replace("    ", "\t")
 
-    _append_script_context_to_script(filepath, script_content)
+    append_script_context_to_script(filepath, script_content)
 
 
 def _get_condition_expression(
@@ -301,7 +301,7 @@ def create_combination_condition_script(
             script_context = script_context.replace("XXXX", str((condition_pos)))
             condition_pos += 1
 
-    _append_script_context_to_script(filepath, script_context)
+    append_script_context_to_script(filepath, script_context)
 
     return condition_pos
 
@@ -367,7 +367,7 @@ def create_condition_script(
             condition_pos += 1
             script_context = script_context.replace("XXXX", str((condition_pos)))
 
-    _append_script_context_to_script(filepath, script_context)
+    append_script_context_to_script(filepath, script_context)
 
     if condition_type == CONF_TRIGGER:
         return condition_pos
@@ -400,7 +400,7 @@ def start_logic_function_block(
     if condition_type == CONF_NOT:
         script_context += f"{indentation}\tnot\n"
 
-    _append_script_context_to_script(filepath, script_context)
+    append_script_context_to_script(filepath, script_context)
     return indentation_lvl + 1
 
 
@@ -424,7 +424,7 @@ def create_next_logic_condition_part(
     if condition_type == CONF_OR:
         script_context = indentation + "or "
         
-    _append_script_context_to_script(filepath, script_context)
+    append_script_context_to_script(filepath, script_context)
 
 
 def close_logic_function_block(
@@ -441,7 +441,7 @@ def close_logic_function_block(
     script_context = ""
 
     script_context += f"{indentation})\n"
-    _append_script_context_to_script(filepath, script_context)
+    append_script_context_to_script(filepath, script_context)
 
 
 def close_condition_section(filepath: str) -> None:
@@ -453,4 +453,4 @@ def close_condition_section(filepath: str) -> None:
     """
     script_context = f"\t{END_IF_TEMPLATE}\t\tcondition_passed = True\n\t# The end of the condition section\n\treturn condition_passed\n\n"
     
-    _append_script_context_to_script(filepath, script_context)
+    append_script_context_to_script(filepath, script_context)

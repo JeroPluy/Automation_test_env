@@ -1,5 +1,9 @@
 """
-Test cases for config dissection module.
+Test cases for every config module in the config_dissection.py
+
+The tests validate the correct extraction of the entities from the configuration 
+and the correct implementation of the entities in the automation script
+
 The python_path needs to be set to the src directory: (for venv)
 $env:PYTHONPATH = "D:\\Workspace\\Python\\custom_Tkinker_tryout\\src"
 
@@ -14,20 +18,21 @@ from environment_package.automation_script_gen.action_script_gen import (
     close_action_section,
     init_action_part,
 )
-from environment_package.automation_script_gen.automation_script_gen import (
-    _append_script_context_to_script,
+from environment_package.automation_script_gen.utils import (
+    append_script_context_to_script,
     init_automation_script,
 )
 from environment_package.automation_script_gen.condition_script_gen import (
     init_condition_part,
 )
+
 from environment_package.config_dissection import (
     _action_entities,
     _condition_entities,
     _trigger_entities,
 )
-from environment_package.env_const import INPUT, OUTPUT, START
-from environment_package.ha_automation.home_assistant_const import (
+from environment_package.utils.env_const import INPUT, OUTPUT, START
+from environment_package.ha_automation_utils.home_assistant_const import (
     ATTR_AREA_ID,
     CONF_ABOVE,
     CONF_AFTER,
@@ -158,7 +163,7 @@ def test_trigger_return(filepath: str) -> None:
         filepath (str): the path to the script file
     """
     script_context = "\n\toutput = triggered\n\treturn output\n\nprint(json.dumps(trigger_check(input_vals)))"
-    _append_script_context_to_script(filepath, script_context)
+    append_script_context_to_script(filepath, script_context)
 
 
 def test_trigger_fill(filepath: str, trigger_id: str = None) -> None:
@@ -173,7 +178,7 @@ def test_trigger_fill(filepath: str, trigger_id: str = None) -> None:
     script_context = (
         f"\n# just test inputs\n\ttrigger_id = '{trigger_id}'\n\treturn True\n\n"
     )
-    _append_script_context_to_script(filepath, script_context)
+    append_script_context_to_script(filepath, script_context)
 
     # insert condition definition
     init_condition_part(filepath)
@@ -190,7 +195,7 @@ def test_condition_return(filepath: str) -> None:
     script_context += "\n\nif trigger_check(input_vals):"
     script_context += "\n\tif isinstance(condition_evaluation(input_vals), dict):"
     script_context += "\n\t\tprint(json.dumps(condition_evaluation(input_vals)))"
-    _append_script_context_to_script(filepath, script_context)
+    append_script_context_to_script(filepath, script_context)
 
 
 def test_condition_fill(filepath: str) -> None:
@@ -205,7 +210,7 @@ def test_condition_fill(filepath: str) -> None:
 
     # create a condition evaluation filler
     script_context = "\t\tTrue\n\t):\n\t\tcondition_passed = True\n\n\treturn True\n\n"
-    _append_script_context_to_script(filepath, script_context)
+    append_script_context_to_script(filepath, script_context)
 
     init_action_part(filepath)
 
@@ -219,7 +224,7 @@ def create_dummy_action_return(filepath: str) -> None:
     """
 
     script_context = "\taction_results.append({'dummy.target':'doSomething'})\n"
-    _append_script_context_to_script(filepath, script_context)
+    append_script_context_to_script(filepath, script_context)
 
 
 # test funcitons

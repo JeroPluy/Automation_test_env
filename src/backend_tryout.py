@@ -9,10 +9,10 @@ from environment_package.config_dissection import (
     _extract_all_trigger,
     create_procedure_list,
 )
-from environment_package.automation_script_gen.automation_script_gen import create_locked_message, init_automation_script
-import environment_package.db as db
-from environment_package.ha_automation import home_assistant_yaml_loader as yaml_loader
-from environment_package.ha_automation import (
+from environment_package.automation_script_gen.utils import create_locked_message, init_automation_script
+import environment_package.db.db as db
+from environment_package.ha_automation_utils import home_assistant_yaml_loader as yaml_loader
+from environment_package.ha_automation_utils import (
     home_assistant_automation_validation as ha_automation_config,
 )
 
@@ -188,8 +188,10 @@ def test_action_entities():
             + str(entity.expected_value)
         )
 
-def test_entity_list():
-    basis_file = path.join("test_data", "yaml_files", "test_yaml", "entity_extraction_test.yaml")
+def test_entity_list(basis_file: str = None):
+    if basis_file is None:
+        basis_file = path.join("test_data", "yaml_files", "test_yaml", "entity_extraction_test.yaml")
+        
     script_file = script_file = test_script_init(basis_file)
     automation_yaml = yaml_loader.load_yaml_dict(basis_file)
     automation_config = asyncio.run(
@@ -220,16 +222,16 @@ def test_entity_list():
 
 if __name__ == "__main__":
     # Automation to test basis parameters
-    basis_file = path.join(
-        "test_data", "yaml_files", "turn_off_living_room_main_light_event.yaml"
-    )
-    # basis_file = os.path.join('test_data','yaml_files', 'test_yaml', 'basis_automation.yaml')
+    # basis_file = path.join(
+    #     "test_data", "yaml_files", "turn_off_living_room_main_light_event.yaml"
+    # )
+    basis_file = path.join('test_data','yaml_files', 'living_room_tv_lighting.yaml')
 
     # test_trigger_entities()
     # test_condition_entities()
     # test_action_entities()
     
-    test_entity_list()
+    test_entity_list(basis_file=basis_file)
 
     # file_path = test_script_generation(basis_file)
     
