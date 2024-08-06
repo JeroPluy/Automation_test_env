@@ -1,9 +1,11 @@
-"""This script implements helpers for the config validation using voluptuous schemes.
-    It can be run with the following command: python -m ha_automation.home_assistant_config_validation
-
+"""
+This script implements helpers for the config validation using voluptuous schemes.
 
 This code is partly extracted from:
-TODO: Add the original source
+    - core/homeassistant/core.py : https://github.com/home-assistant/core/blob/dev/homeassistant/core.py
+        (VERSION: 04.07.2024 - parent ad1ba1a commit d126465)
+    - core/homeassistant/helpers/config_validation.py : https://github.com/home-assistant/core/blob/dev/homeassistant/helpers/config_validation.py
+        (VERSION: 26.06.2024 - parent fcfb580 commit 6bceb8e)
 """
 
 from __future__ import annotations

@@ -1,8 +1,9 @@
-"""Home Assistant exception modules for handling errors in a Home Assistant context.
-    It can be run with the following command: python -m ha_automation.home_assistant_exception
+"""
+Home Assistant exception modules for handling errors in a Home Assistant context.
 
 This code is partly extracted from:
-TODO: Add link to the source code
+    core/homeassistant/exceptions.py : https://github.com/home-assistant/core/blob/dev/homeassistant/exceptions.py
+        (Version: 01.07.2024 parent aa5ebaf commit ca55986)
 """
 
 from typing import TYPE_CHECKING, Callable

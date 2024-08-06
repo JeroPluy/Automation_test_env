@@ -1,9 +1,9 @@
-"""The script applies different schema to the configuration directory to validate the configuration of automations in Home Assistant.
-It can be run with the following command: python -m ha_automation.home_assistant_automation_config
+"""
+The script applies different schema to the configuration directory to validate the configuration of automations in Home Assistant.
 
 This code is partly extracted from:
     - core/homeassistant/components/trace/__init__.py : https://github.com/home-assistant/core/blob/dev/homeassistant/components/trace/__init__.py
-        (VERSION: 02.07.2024 - parent
+        (VERSION: 17.05.2024 - parent 4edee94 commit 87bb7ce)
     - core/homeassistant/components/automation/config.py : https://github.com/home-assistant/core/blob/dev/homeassistant/components/automation/config.py
         (VERSION: 17.05.2024 - parent 4edee94 commit 87bb7ce)
 
@@ -101,6 +101,7 @@ class ValidationStatus(StrEnum):
     FAILED_CONDITIONS = "failed_conditions"
     FAILED_SCHEMA = "failed_schema"
     FAILED_TRIGGERS = "failed_triggers"
+    UNKNOWN_TEMPLATE = "unknown_template"
     OK = "ok"
 
 
@@ -190,6 +191,8 @@ async def _async_validate_config_item(config: ConfigType) -> AutomationConfig:
         validated_config = PLATFORM_SCHEMA(config)
     except (vol.Invalid, vol.MultipleInvalid) as err:
         # print(err, "could not be validated", config)
+        if err.error_message == "template (type: <class 'jinja2.exceptions.TemplateError'>) could not be validated ":
+            return _minimal_config(ValidationStatus.UNKNOWN_TEMPLATE, err, config)
         return _minimal_config(ValidationStatus.FAILED_SCHEMA, err, config)
 
     automation_config = AutomationConfig(validated_config)
@@ -208,78 +211,3 @@ async def async_validate_config_item(
     """
     return await _async_validate_config_item(config)
 
-
-# TODO: check if the following methods are needed for the enviroment or delete them
-
-# async def _try_async_validate_config_item(
-#     config: dict[str, Any],
-# ) -> AutomationConfig | None:
-#     """Validate config item."""
-#     try:
-#         return await _async_validate_config_item(config)
-#     except (vol.MultipleInvalid):
-#         return None
-
-# def extract_domain_configs(config: ConfigType, domain: str) -> Sequence[str]:
-#     """Extract keys from config for given domain name.
-
-#     Async friendly.
-#     """
-#     domain_configs = []
-#     for key in config:
-#         with suppress(vol.Invalid):
-#             if domain_key(key) != domain:
-#                 continue
-#             domain_configs.append(key)
-#     return domain_configs
-
-# def config_per_platform(
-#     config: ConfigType, domain: str
-# ) -> Iterable[tuple[str | None, ConfigType]]:
-#     """Break a component config into different platforms.
-
-#     For example, will find 'switch', 'switch 2', 'switch 3', .. etc
-#     Async friendly.
-#     """
-#     for config_key in extract_domain_configs(config, domain):
-#         if not (platform_config := config[config_key]):
-#             continue
-
-#         if not isinstance(platform_config, list):
-#             platform_config = [platform_config]
-
-#         item: ConfigType
-#         platform: str | None
-#         for item in platform_config:
-#             try:
-#                 platform = item.get(CONF_PLATFORM)
-#             except AttributeError:
-#                 platform = None
-
-#             yield platform, item
-
-# def config_without_domain(config: ConfigType, domain: str) -> ConfigType:
-#     """Return a config with all configuration for a domain removed."""
-#     filter_keys = extract_domain_configs(config, domain)
-#     return {key: value for key, value in config.items() if key not in filter_keys}
-
-# async def async_validate_config(config: ConfigType) -> ConfigType:
-#     """Validate config."""
-#     # No gather here since _try_async_validate_config_item is unlikely to suspend
-#     # and the cost of creating many tasks is not worth the benefit.
-#     automations = list(
-#         filter(
-#             lambda x: x is not None,
-#             [
-#                 await _try_async_validate_config_item(p_config)
-#                 for _, p_config in config_per_platform(config, DOMAIN)
-#             ],
-#         )
-#     )
-
-#     # Create a copy of the configuration with all config for current
-#     # component removed and add validated config back in.
-#     config = config_without_domain(config, DOMAIN)
-#     config[DOMAIN] = automations
-
-#     return config

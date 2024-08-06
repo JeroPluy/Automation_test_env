@@ -1,5 +1,5 @@
-"""This module provides constants and types for the yaml import and the validation of the Home Assistant configuration files.
-It can be run with the following command: python -m ha_automation.home_assistant_const
+"""
+This module provides constants and types for the yaml import and the validation of the Home Assistant configuration files.
 
 This code is partly extracted from:
     - core/homeassistant/const.py : https://github.com/home-assistant/core/blob/dev/homeassistant/const.py
