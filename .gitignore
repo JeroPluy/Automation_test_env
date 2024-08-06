@@ -122,6 +122,6 @@ dmypy.json
 
 # project specific files or directories
 test_data/basis_automation.info
-src/environment_package/automation_script_templates/test_script.py
+old_requirements.txt
 # old database schema files and related files
 src/backend/db/schema/old_schema/
