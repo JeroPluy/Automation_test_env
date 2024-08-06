@@ -1,5 +1,8 @@
 """
 This test script is used to test the functionality of the backend functions.
+
+The python_path needs to be set to the src directory: (for venv)
+$env:PYTHONPATH = "..\\src"
 """
 
 from os import listdir, path

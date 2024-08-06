@@ -1,3 +1,10 @@
+"""
+This is a test file to try out the custom tkinter widgets and the custom tkinter package.
+
+The python_path needs to be set to the src directory: (for venv)
+$env:PYTHONPATH = "..\\src"
+"""
+
 from os import path
 import json
 import tkinter
