@@ -2594,7 +2594,7 @@ def _extract_all_trigger(automation_config: AutomationConfig, script_path: str) 
         return_list = _trigger_entities(trigger, position, real_position, script_path)
         trigger_entities += return_list[0]
         position = return_list[1] + 1
-        real_position = return_list[2]
+        real_position = return_list[2]       
     if len(trigger_entities) != real_position:
         raise vol.Invalid("The amount of entities and the real position do not match")
     asg.close_trigger_section(script_path)

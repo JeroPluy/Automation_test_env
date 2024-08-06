@@ -17,18 +17,22 @@ To get to know more about each and every part of this repository, corresponding 
 This project uses publicly available third party libraries for Python, called "modules". These modules must be installed in order to provide all needed funccionality, for example from [PyPI](https://pypi.org/) using pip. In addition, the listed packages of the project must be installed so that the main script can access them. How that can be done specifically for this project is described in this part.
 
 Firstly, setup a virtual environment and activate it:
+
 ```shell
 python -m venv .venv
 source .venv/bin/activate
 ```
 
 The next step contains the installation of the `setup.py`. This file downloads and installs all necessary packages and modules in the virtual environment.
+
 ```shell
 pip install -e .
 ```
+
 ---
 
 To uninstall all modules, simply uninstall the modules from the requirements.txt file
+
 ```shell
 pip uninstall -y -r requirements.txt
 ```
@@ -42,4 +46,5 @@ python ./src/main.py
 ```
 
 ## Author
+
 This project was implemented by Jerome Albert. The use of code from other sources is documented at the beginning of the relevant program scripts by means of links and call details.
