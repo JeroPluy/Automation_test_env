@@ -32,10 +32,10 @@ def init_db():
                 con.commit()
 
             # load base data for the data base
-            load_data_foundation()
+            _load_data_foundation()
 
 
-def load_data_foundation():
+def _load_data_foundation():
     """load the standard integration names and their possible values into the database
 
     needed sql-Files:

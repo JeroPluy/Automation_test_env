@@ -16,7 +16,7 @@ PARALLEL = 3
 
 # automation script path
 # Load the settings.json file
-SETTINGS_FILE = os.path.join('settings', 'settings.json')
+SETTINGS_FILE = os.path.join('src','frontend','settings', 'settings.json')
 with open(SETTINGS_FILE) as f:
     settings = json.load(f)
 
@@ -75,5 +75,9 @@ standard_integrations = {
     "webhook": 47,
     "zone": 48,
     "device": 49,
+    'trigger':50,
+    'automation':51,
+    'script':52,
+    'person':53,
 }
 

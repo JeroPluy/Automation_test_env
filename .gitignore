@@ -124,4 +124,4 @@ dmypy.json
 test_data/basis_automation.info
 old_requirements.txt
 # old database schema files and related files
-src/backend/db/schema/old_schema/
+src/backend/database/schema/old_schema/
