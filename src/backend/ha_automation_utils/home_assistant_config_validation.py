@@ -16,7 +16,6 @@ from datetime import date as date_sys
 from datetime import datetime as datetime_sys
 from datetime import time as time_sys
 from datetime import timedelta
-from datetime import datetime as dt
 from enum import Enum
 from numbers import Number
 from typing import Any, cast, overload
@@ -434,7 +433,7 @@ def color_hex(value: Any) -> str:
     return str_value
 
 
-def parse_time(time_str: str) -> dt.time | None:
+def parse_time(time_str: str) -> time_sys | None:
     """Parse a time string (00:20:00) into Time object.
 
     Return None if invalid.
@@ -446,7 +445,7 @@ def parse_time(time_str: str) -> dt.time | None:
         hour = int(parts[0])
         minute = int(parts[1])
         second = int(parts[2]) if len(parts) > 2 else 0
-        return dt.time(hour, minute, second)
+        return time_sys(hour=hour, minute=minute, second=second)
     except ValueError:
         # ValueError if value cannot be converted to an int or not in range
         return None

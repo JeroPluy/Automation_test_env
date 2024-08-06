@@ -14,25 +14,25 @@ import json
 from os import path, mkdir
 import voluptuous as vol
 
-from environment_package.automation_script_gen.action_script_gen import (
+from backend.automation_script_gen.src.action_script_gen import (
     close_action_section,
     init_action_part,
 )
-from environment_package.automation_script_gen.utils import (
+from backend.automation_script_gen.src.utils import (
     append_script_context_to_script,
     init_automation_script,
 )
-from environment_package.automation_script_gen.condition_script_gen import (
+from backend.automation_script_gen.src.condition_script_gen import (
     init_condition_part,
 )
 
-from environment_package.config_dissection import (
+from backend.config_dissection import (
     _action_entities,
     _condition_entities,
     _trigger_entities,
 )
-from environment_package.utils.env_const import INPUT, OUTPUT, START
-from environment_package.ha_automation_utils.home_assistant_const import (
+from backend.utils.env_const import INPUT, OUTPUT, START
+from backend.ha_automation_utils.home_assistant_const import (
     ATTR_AREA_ID,
     CONF_ABOVE,
     CONF_AFTER,

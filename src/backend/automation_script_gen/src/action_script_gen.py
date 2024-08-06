@@ -4,10 +4,10 @@ This module is used to generate the action part for the automation script.
 
 from os import path
 
-from environment_package.automation_script_gen.utils import TEMPLATE_PATH, append_script_context_to_script, close_script
-from environment_package.ha_automation_utils.home_assistant_const import CONF_DEVICE, CONF_EVENT, CONF_FOR, CONF_FOR_EACH, CONF_SERVICE, CONF_UNTIL, CONF_WHILE
+from .utils import TEMPLATE_PATH, append_script_context_to_script, close_script
+from backend.ha_automation_utils.home_assistant_const import CONF_DEVICE, CONF_EVENT, CONF_FOR, CONF_FOR_EACH, CONF_SERVICE, CONF_UNTIL, CONF_WHILE
 
-from environment_package.utils.env_helper import Entity
+from backend.utils.env_helper import Entity
 
 END_IF_TEMPLATE = "):\n"
 

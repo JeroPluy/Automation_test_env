@@ -1,4 +1,4 @@
-from environment_package.utils.env_const import SINGLE
+from .env_const import SINGLE
 
 
 class Automation:

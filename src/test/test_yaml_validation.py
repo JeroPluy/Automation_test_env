@@ -1,16 +1,17 @@
-"""This module is used to test the YAML files for preconfigured automations and parameter behavior.
+"""
+This module is used to test the YAML files for preconfigured automations and parameter behavior.
 
-The python_path needs to be set to the src directory: (for venv) $env:PYTHONPATH = "D:\Workspace\Python\custom_Tkinker_tryout\src"
+The python_path needs to be set to the src directory: (for venv) $env:PYTHONPATH = "D:\\Workspace\\Python\\custom_Tkinker_tryout\\src"
 """
 
 import asyncio
 import copy
 import os
 
-from environment_package.ha_automation_utils import (
+from backend.ha_automation_utils import (
     home_assistant_automation_validation as ha_automation_config,
 )
-from environment_package.ha_automation_utils.home_assistant_const import (
+from backend.ha_automation_utils.home_assistant_const import (
     CONF_ACTION,
     CONF_ALIAS,
     CONF_CONDITION,
@@ -27,7 +28,7 @@ from environment_package.ha_automation_utils.home_assistant_const import (
     LOGSEVERITY_STRING,
     SCRIPT_MODE_CHOICES,
 )
-from environment_package.ha_automation_utils.home_assistant_yaml_loader import load_yaml_dict
+from backend.ha_automation_utils.home_assistant_yaml_loader import load_yaml_dict
 
 
 def change_param(
@@ -127,7 +128,7 @@ def test_main_automation_params() -> None:
     basis_file = os.path.join(
         "test_data", "yaml_files", "test_yaml", "basis_automation.yaml"
     )
-    automation_name = "ALIAS: 'Wohnzimmerlampe einschalten'"
+    automation_name = 'id_1600000000000'
 
     # Load basis automation yaml file
     yaml_dict = load_yaml_dict(basis_file)
@@ -139,7 +140,7 @@ def test_main_automation_params() -> None:
     validation_result = asyncio.run(
         ha_automation_config.async_validate_config_item(yaml_dict)
     )
-    # print(basis_file + " : \t" + validation_result.automation_name + " : \t" + validation_result.validation_status + " : \t" + str(validation_result.validation_error))
+    print("\t" + basis_file + " : \t" + validation_result.automation_name + " : \t" + validation_result.validation_status + " : \t" + str(validation_result.validation_error))
     assert validation_result.automation_name == automation_name
     assert validation_result.validation_status == "ok"
     assert validation_result.validation_error is None
@@ -148,7 +149,7 @@ def test_main_automation_params() -> None:
     # Test changes to single basis parameters
     print("--- Test handling of changes to single basis parameters ---")
     for param in BASIS_PARAMS:
-        print(f" Testing {param} parameter")
+        print(f"\t Testing {param} parameter")
         if isinstance(param, list):
             if param[0] == CONF_TRACE:
                 # Test changes to stored trace parameters only
@@ -229,7 +230,7 @@ def test_main_automation_params() -> None:
                 # invalid value for str
                 assert change_param(yaml_dict, param, 11054710) == [
                     param,
-                    "Invalid automation",
+                    "!invalid_automation",
                     "failed_schema",
                     "expected str for dictionary value @ data['id']. Got 11054710",
                 ]
@@ -238,14 +239,14 @@ def test_main_automation_params() -> None:
                 if CONF_ALIAS == param:
                     assert change_param(yaml_dict, param, None) == [
                         param,
-                        "Invalid automation",
-                        "failed_schema",
+                        '!invalid_automation',
+                        'failed_schema',
                         "string value is None for dictionary value @ data['alias']. Got None",
                     ]
                 else:
                     assert change_param(yaml_dict, param, None) == [
                         param,
-                        "Invalid automation",
+                        "!invalid_automation",
                         "failed_schema",
                         "string value is None for dictionary value @ data['description']. Got None",
                     ]
@@ -261,10 +262,10 @@ def test_main_automation_params() -> None:
                     + " : "
                     + result[3]
                 )
-            if CONF_ALIAS == param:
+            if CONF_ID == param:
                 assert remove_param(yaml_dict, param) == [
                     param,
-                    "ID: '1600000000000'",
+                    'Wohnzimmerlampe_einschalten',
                     "ok",
                     "None",
                 ]
@@ -320,6 +321,7 @@ def test_preconfigured_yaml_files() -> None:
                 + validation_result.validation_status
                 + " : \t"
                 + str(validation_result.validation_error)
+                + "\n"
             )
 
 

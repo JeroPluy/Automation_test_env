@@ -1,3 +1,8 @@
+"""
+This script is used to check if all the possible values are unique and if the ids are consecutive.
+If they are not, to print them out.
+
+"""
 
 all_added = [               
 (1  ,       'main',                             'None'),	                        

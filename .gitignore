@@ -119,5 +119,10 @@ dmypy.json
 
 # vscode settings
 .vscode/
+
+# project specific files or directories
 test_data/basis_automation.info
 src/environment_package/automation_script_templates/test_script.py
+# old database schema files and related files
+src/backend/db/mapping_pos_vals.py
+src/backend/db/schema/old_schema/

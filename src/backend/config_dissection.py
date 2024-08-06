@@ -11,7 +11,7 @@ The information about the action functions are from:
 https://www.home-assistant.io/docs/scripts
 """
 
-import environment_package.automation_script_gen as asg
+import backend.automation_script_gen as asg
 
 from .utils.env_const import (
     INPUT,
@@ -302,7 +302,7 @@ def _trigger_entities(
         if CONF_ABOVE in trigger_part:
             exp_value[CONF_ABOVE] = trigger_part[CONF_ABOVE]
             # create the comparing entities for the numerical state trigger
-            if valid_entity_id(str(exp_value[CONF_ABOVE])):
+            if  not isinstance(exp_value[CONF_ABOVE], float) and valid_entity_id(str(exp_value[CONF_ABOVE])):
                 parent = position
                 position += 1
 
@@ -322,7 +322,7 @@ def _trigger_entities(
         if CONF_BELOW in trigger_part:
             exp_value[CONF_BELOW] = trigger_part[CONF_BELOW]
             # create the comparing entities for the numerical state trigger
-            if valid_entity_id(str(exp_value[CONF_BELOW])):
+            if  not isinstance(exp_value[CONF_ABOVE], float) and valid_entity_id(str(exp_value[CONF_BELOW])):
                 # set the parent entity for the comparing entity/ies if no above entity exists
                 if parent is None:
                     parent = position
@@ -1118,7 +1118,9 @@ def _condition_entities(
         if CONF_ABOVE in condition_part:
             exp_value[CONF_ABOVE] = condition_part[CONF_ABOVE]
             # create the comparing entities for the numerical state trigger
-            if valid_entity_id(str(exp_value[CONF_ABOVE])):
+            if not isinstance(exp_value[CONF_ABOVE], float) and valid_entity_id(
+                str(exp_value[CONF_ABOVE])
+            ):
                 new_parent = position
                 position += 1
 
@@ -1138,7 +1140,9 @@ def _condition_entities(
         if CONF_BELOW in condition_part:
             exp_value[CONF_BELOW] = condition_part[CONF_BELOW]
             # create the comparing entities for the numerical state trigger
-            if valid_entity_id(str(exp_value[CONF_BELOW])):
+            if not isinstance(exp_value[CONF_ABOVE], float) and valid_entity_id(
+                str(exp_value[CONF_BELOW])
+            ):
                 # set the parent entity for the comparing entity/ies if no above entity exists
                 if new_parent is None:
                     new_parent = position
@@ -2047,7 +2051,7 @@ def _action_entities(
                     position += 1
                 else:
                     new_parent = parent
-                    
+
                 first_element = True
 
                 for action in actions:
@@ -2061,11 +2065,11 @@ def _action_entities(
                         first_element=first_element,
                         loop_action=loop_action,
                     )
-                    
+
                     if len(results[0]) > 0:
                         if first_element:
                             first_element = False
-                    
+
                     action_list += results[0]
                     # set the position for the next action
                     position = results[1] + 1
