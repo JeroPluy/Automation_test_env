@@ -1,43 +1,47 @@
-alias: Wohnzimmerlampe einschalten
+alias: test automation alias
 id: "1600000000000"
-description: "Basis description"
+description: "Basic description"
 initial_state: true
-variables: {}
 trace:
   stored_traces: 6
+variables: 
+  testVar: "test"
 trigger_variables:
   testVar: "test"
 trigger:
-  - alias: Wenn eine Bewegung erkannt wird
+  - alias: moving object
     platform: state
     entity_id:
       - binary_sensor.moving_living_room
     from: "off"
     to: "on"
+    id: "trigger_1"
   - platform: state
     entity_id:
       - binary_sensor.person_living_room
     from: "off"
     to: "on"
-    alias: Wenn eine Person erkannt wird
+    alias: person dectected
     enabled: false
+    variables:
+      testVar2: "test_2"
 condition:
-  - alias: Ist die Sonne untergegangen
+  - alias: sun is not shining
     condition: sun
     after: sunrise
   - condition: state
     entity_id: light.main_light_living_room
     state: "on"
-    alias: Ist das Wohnzimmerlicht angeschaltet
+    alias: light is off
 action:
-  - alias: Wohnzimmerlicht einschalten
+  - alias: turn on light
     service: input_boolean.turn_on
     data: {}
-  - alias: Ist Person Krista im Wohnzimmer
+  - alias: is Krista in the room
     condition: state
     entity_id: sensor.whos_in_living_room
     state: Krista
-  - alias: Musikanlage einschalten
+  - alias: turn on music
     service: media_player.media_play
     target:
       entity_id: media_player.living_room

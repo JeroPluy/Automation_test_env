@@ -6,7 +6,7 @@ The python_path needs to be set to the src directory: (for venv) $env:PYTHONPATH
 
 import asyncio
 import copy
-import os
+from os import listdir, path
 
 from backend.ha_automation_utils import (
     home_assistant_automation_validation as ha_automation_config,
@@ -28,7 +28,7 @@ from backend.ha_automation_utils.home_assistant_const import (
     LOGSEVERITY_STRING,
     SCRIPT_MODE_CHOICES,
 )
-from backend.ha_automation_utils.home_assistant_yaml_loader import load_yaml_dict
+from backend.ha_automation_utils import home_assistant_yaml_loader as yaml_loader
 
 
 def change_param(
@@ -97,16 +97,12 @@ def remove_param(yaml_dict, param, nested=False, nested_param=None):
 
 
 def test_main_automation_params() -> None:
-    """Test all main automation parameters.
+    """
+    Test all main automation parameters.
 
-    This function tests the main automation parameters by performing various changes to the YAML dictionary
-    and validating the changes. It also tests the handling of changes to nested parameters.
+    This function tests the validation of main automation parameters by performing various changes to the YAML configuration file
+    of basis_automation.yaml and validating the changes. It also tests the handling of changes to nested parameters.
 
-    Args:
-        None
-
-    Returns:
-        None
     """
 
     BASIS_PARAMS = [
@@ -125,13 +121,13 @@ def test_main_automation_params() -> None:
     ]
 
     # Automation to test basis parameters
-    basis_file = os.path.join(
+    basis_file = path.join(
         "test_data", "yaml_files", "test_yaml", "basis_automation.yaml"
     )
-    automation_name = 'id_1600000000000'
+    automation_name = "id_1600000000000"
 
     # Load basis automation yaml file
-    yaml_dict = load_yaml_dict(basis_file)
+    yaml_dict = yaml_loader.load_yaml_dict(basis_file)
 
     # Make a copy of the original yaml dictionary and all of its nested dictionaries or lists
     reset_dict = copy.deepcopy(yaml_dict)
@@ -140,7 +136,16 @@ def test_main_automation_params() -> None:
     validation_result = asyncio.run(
         ha_automation_config.async_validate_config_item(yaml_dict)
     )
-    print("\t" + basis_file + " : \t" + validation_result.automation_name + " : \t" + validation_result.validation_status + " : \t" + str(validation_result.validation_error))
+    print(
+        "\t"
+        + basis_file
+        + " : \t"
+        + validation_result.automation_name
+        + " : \t"
+        + validation_result.validation_status
+        + " : \t"
+        + str(validation_result.validation_error)
+    )
     assert validation_result.automation_name == automation_name
     assert validation_result.validation_status == "ok"
     assert validation_result.validation_error is None
@@ -239,8 +244,8 @@ def test_main_automation_params() -> None:
                 if CONF_ALIAS == param:
                     assert change_param(yaml_dict, param, None) == [
                         param,
-                        '!invalid_automation',
-                        'failed_schema',
+                        "!invalid_automation",
+                        "failed_schema",
                         "string value is None for dictionary value @ data['alias']. Got None",
                     ]
                 else:
@@ -265,7 +270,7 @@ def test_main_automation_params() -> None:
             if CONF_ID == param:
                 assert remove_param(yaml_dict, param) == [
                     param,
-                    'Wohnzimmerlampe_einschalten',
+                    "test_automation_alias",
                     "ok",
                     "None",
                 ]
@@ -292,25 +297,70 @@ def test_main_automation_params() -> None:
         yaml_dict = copy.deepcopy(reset_dict)
 
 
-def test_preconfigured_yaml_files() -> None:
-    """Test all preconfigured automations.
+def test_test_yaml_files() -> None:
+    """
+    This function is used to test the YAML files in the 'test_data/yaml_files/test_yaml' directory.
+    It loads each YAML file as a dictionary using the 'yaml_loader.load_yaml_dict' function,
+    and performs validation on the loaded YAML dictionary using the 'config_validation.async_validate_config_item' function.
+    
+    Raises:
+        Exception: If a file is not included in the test.
+    """
 
+    dir_path = path.join("test_data", "yaml_files", "test_yaml")
+    for file in listdir(dir_path):
+        if file.endswith(".yaml"):
+            yaml_dict = yaml_loader.load_yaml_dict(path.join(dir_path, file))
+            print("Test " + file)
+            validation_result = asyncio.run(
+                ha_automation_config.async_validate_config_item(yaml_dict)
+            )
+            if file == "basis_automation.yaml":
+                assert validation_result.automation_name == "id_1600000000000"
+                assert validation_result.validation_status == "ok"
+                assert validation_result.validation_error is None
+
+            elif file == "bare_min.yaml":
+                assert validation_result.automation_name == 'unnamed_automation'
+                assert validation_result.validation_status == "ok"
+                assert validation_result.validation_error is None
+
+            elif file == "empty.yaml":
+                assert validation_result.automation_name == "unnamed_automation"
+                assert validation_result.validation_status == "failed_schema"
+                assert (
+                    validation_result.validation_error
+                    == "required key not provided @ data['action']. Got None\nrequired key not provided @ data['trigger']. Got None"
+                )
+            elif file == "entity_extraction_test.yaml":
+                assert validation_result.automation_name == "entity_extraction_test"
+                assert validation_result.validation_status == "unknown_template"
+                assert (
+                    validation_result.validation_error
+                    == "template (type: <class 'jinja2.exceptions.TemplateError'>) could not be validated  for dictionary value @ data['condition'][9]['value_template']. Got '{{ TRUE }}'"
+                )
+
+            elif file == "huge_automation.yaml":
+                assert validation_result.automation_name == "unnamed_automation"
+                assert validation_result.validation_status == "unknown_template"
+                assert validation_result.validation_error is not None
+            
+            else:
+                raise Exception("Unknown file: " + file)
+
+
+def test_preconfigured_yaml_files() -> None:
+    """
     This function iterates through all the YAML files in the 'test_data/yaml_files' directory,
     loads each YAML file as a dictionary using the 'yaml_loader.load_yaml_dict' function,
     and performs validation on the loaded YAML dictionary using the 'config_validation.async_validate_config_item' function.
     The validation result is then printed to the console.
-
-    Args:
-        None
-
-    Returns:
-        None
     """
 
-    dir_path = os.path.join("test_data", "yaml_files")
-    for file in os.listdir(dir_path):
+    dir_path = path.join("test_data", "yaml_files")
+    for file in listdir(dir_path):
         if file.endswith(".yaml"):
-            yaml_dict = load_yaml_dict(os.path.join(dir_path, file))
+            yaml_dict = yaml_loader.load_yaml_dict(path.join(dir_path, file))
             print("Test " + file)
             validation_result = asyncio.run(
                 ha_automation_config.async_validate_config_item(yaml_dict)
@@ -330,12 +380,15 @@ def test_yaml_configs():
     This function is used to test the YAML files for preconfigured automations and parameter behavior.
     It prints the start and completion messages for each test.
     """
-    print("--- Preconfigured automations test started ---")
-    test_preconfigured_yaml_files()
-    print("--- Preconfigured automations test completed --- \n")
     print("--- Parameter behavior test  started ---")
     test_main_automation_params()
     print("--- Parameter behavior test completed ---")
+    print("--- Test test_yaml files test started ---")
+    test_test_yaml_files()
+    print("--- Test test_yaml files test completed ---")
+    print("--- Preconfigured automations test started ---")
+    test_preconfigured_yaml_files()
+    print("--- Preconfigured automations test completed --- \n")
 
 
 if __name__ == "__main__":

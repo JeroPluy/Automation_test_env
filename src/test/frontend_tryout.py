@@ -14,10 +14,10 @@ import customtkinter
 from PIL import Image
 
 
-from frontend_package.customWidgets import customWidgets as cW
+from frontend.customWidgets import customWidgets as cW
 
-from frontend_package.customWidgets import CTkTable
-from frontend_package.customWidgets import CTkXYFrame
+from frontend.customWidgets import CTkTable
+from frontend.customWidgets import CTkXYFrame
 
 
 # ctkmessagebox
