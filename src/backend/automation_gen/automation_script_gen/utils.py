@@ -7,7 +7,7 @@ provides basic functions for the other specialized parts.
 from os import path
 from backend.utils.env_const import AUTOMATION_SCRIPT
 
-TEMPLATE_PATH = path.join("src", "backend", "automation_script_gen", "templates")
+TEMPLATE_PATH = path.join("src", "backend", "automation_gen", "automation_script_gen", "templates")
 
 
 def init_automation_script(automation_name: str, dir_path: str = None) -> str:

@@ -1,24 +1,27 @@
 # automation_script_gen/__init__.py
+# Path: src/backend/automation_gen/automation_script_gen/__init__.py
 
-# The `automation_script_gen` package is responsible for generating automation script parts.
+
+# The `automation_script_gen` package is responsible for managing the generating automation script parts.
 # It consists of multiple scripts, each contributing to a specific part of the automation process. 
 
 # The `util.py` script is used to initialize the main script and provides a general function for writing to the created script.
 # This function can be used by other scripts in the package to write their respective automation code to the automation script.
-from .src.utils import (
+
+from .utils import (
     init_automation_script,
     create_locked_message,
 )
 
 # This module is used to generate the trigger section of the automation script.
-from .src.trigger_script_gen import (
+from .trigger_script_gen import (
     close_trigger_section,
     create_combination_trigger_script,
     create_trigger_script,
 )
 
 # This module generates the condition part of the automation script.
-from .src.condition_script_gen import (
+from .condition_script_gen import (
     close_condition_section,
     close_logic_function_block,
     create_combination_condition_script,
@@ -29,7 +32,7 @@ from .src.condition_script_gen import (
 )
 
 # This module is used to generate the action part for the automation script.
-from .src.action_script_gen import (
+from .action_script_gen import (
     close_action_condition_block,
     close_action_loop_block,
     close_action_section,

@@ -1,11 +1,8 @@
 """
 Test cases for every config module in the config_dissection.py
 
-The tests validate the correct extraction of the entities from the configuration 
+The tests validate the correct extraction of the entities from the configuration
 and the correct implementation of the entities in the automation script
-
-The python_path needs to be set to the src directory: (for venv)
-$env:PYTHONPATH = "D:\\Workspace\\Python\\custom_Tkinker_tryout\\src"
 
 """
 
@@ -14,23 +11,28 @@ import json
 from os import path, mkdir
 import voluptuous as vol
 
-from backend.automation_script_gen.src.action_script_gen import (
+from backend.automation_gen.trigger_dissection import _trigger_entities
+from backend.automation_gen.condtion_dissection import _condition_entities
+from backend.automation_gen.action_dissection import _action_entities
+
+from backend.automation_gen.automation_script_gen.action_script_gen import (
     close_action_section,
     init_action_part,
 )
-from backend.automation_script_gen.src.utils import (
+from backend.automation_gen.automation_script_gen.utils import (
     append_script_context_to_script,
     init_automation_script,
 )
-from backend.automation_script_gen.src.condition_script_gen import (
+from backend.automation_gen.automation_script_gen.condition_script_gen import (
     init_condition_part,
 )
 
-from backend.config_dissection import (
-    _action_entities,
-    _condition_entities,
-    _trigger_entities,
+from backend.automation_gen.config_dissection import (
+    create_procedure_list,
 )
+
+from backend.ha_automation_utils import home_assistant_yaml_loader as yaml_loader
+
 from backend.utils.env_const import INPUT, OUTPUT, START
 from backend.ha_automation_utils.home_assistant_const import (
     ATTR_AREA_ID,
@@ -102,6 +104,7 @@ from backend.ha_automation_utils.home_assistant_const import (
     SECONDS,
     TAG_ID,
 )
+
 
 TEST_DIR = path.join("src", "test", "test_scripts")
 
@@ -3961,6 +3964,7 @@ async def test_condition_entities():
 
         real_pos == 4
 
+        # Test case 10: State condition with multiple entity ids and conditional entity states and at a specific position
         condition_part_state_10 = {
             "condition": "state",
             "entity_id": ["humidifier.hygrostat"],
@@ -6972,7 +6976,7 @@ async def test_action_entities():
                 }
             ],
         }
-            
+
         file_path = init_automation_script("action_part_choose_4", ACTION_DIR)
         test_condition_fill(file_path)
         results = _action_entities(
@@ -8548,9 +8552,41 @@ async def test_action_entities():
     print("All action test cases passed!")
 
 
+async def test_empty_config():
+    """
+    Test that an empty configuration raises a KeyError
+    """
+    empty_file = path.join("test_data", "yaml_files", "test_yaml", "empty.yaml")
+    yaml_dict = yaml_loader.load_yaml(empty_file)
+    file_path = init_automation_script("empty_script", TEST_DIR)
+    try:
+        results = create_procedure_list(yaml_dict, file_path)
+    except TypeError as e:
+        assert str(e) == "'NoneType' object is not subscriptable"
+
+    print("Empty configuration test passed!")
+
+
+async def test_bare_minimum_config():
+    """
+    Test a configuration with only an empty trigger and action list
+    """
+    bare_min_file = path.join("test_data", "yaml_files", "test_yaml", "bare_min.yaml")
+    yaml_dict = yaml_loader.load_yaml(bare_min_file)
+    file_path = init_automation_script("bare_min_script", TEST_DIR)
+    results = create_procedure_list(yaml_dict, file_path)
+
+    assert results == []
+
+    print("Bare minimum configuration test passed!")
+
+
 if __name__ == "__main__":
     if not path.exists(TEST_DIR):
         mkdir(TEST_DIR)
+
+    async_run(test_empty_config())
+    async_run(test_bare_minimum_config())
 
     async_run(test_trigger_entities())
     async_run(test_condition_entities())

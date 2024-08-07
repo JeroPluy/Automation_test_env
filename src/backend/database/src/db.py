@@ -1,7 +1,7 @@
 import os.path
 import sqlite3 as sqlite
 
-from backend.config_dissection import Entity
+from backend.automation_gen.config_dissection import Entity
 from backend.utils.env_const import standard_integrations
 
 DATABASE = os.path.join("data", "automation_test_env.sqlite")

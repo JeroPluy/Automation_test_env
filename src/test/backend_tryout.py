@@ -8,15 +8,18 @@ $env:PYTHONPATH = "..\\src"
 from os import listdir, path
 import asyncio
 import json
-from backend.config_dissection import (
+
+from backend.automation_gen.condtion_dissection import extract_all_conditions
+from backend.automation_gen.trigger_dissection import extract_all_trigger
+
+from backend.automation_gen.config_dissection import (
     Automation,
-    Entity,
     create_automation,
-    _extract_all_conditions,
-    _extract_all_trigger,
     create_procedure_list,
 )
-from backend.automation_script_gen import create_locked_message, init_automation_script
+
+
+from backend.automation_gen.automation_script_gen import create_locked_message, init_automation_script
 import backend.database
 from backend.ha_automation_utils import home_assistant_yaml_loader as yaml_loader
 from backend.ha_automation_utils import (
@@ -25,6 +28,9 @@ from backend.ha_automation_utils import (
 
 import sqlite3 as sqlite
 import subprocess
+
+from backend.utils.env_helper import Entity
+
 
 DATABASE = path.join("data", "automation_test_env.sqlite")
 
@@ -161,7 +167,7 @@ def test_trigger_entities():
         ha_automation_config.async_validate_config_item(automation_yaml)
     )
     print(" --- " + automation_config.automation_name + " --- ")
-    extracted_entities = _extract_all_trigger(automation_config, script_file)
+    extracted_entities = extract_all_trigger(automation_config, script_file)
     entity: Entity = None
     for entity in extracted_entities:
         role = (
@@ -198,7 +204,7 @@ def test_condition_entities():
         ha_automation_config.async_validate_config_item(automation_yaml)
     )
     print(" --- " + automation_config.automation_name + " --- ")
-    extracted_entities = _extract_all_conditions(automation_config, script_file)
+    extracted_entities = extract_all_conditions(automation_config, script_file)
     entity: Entity = None
     for entity in extracted_entities:
         role = (

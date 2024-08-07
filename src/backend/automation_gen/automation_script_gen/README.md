@@ -16,6 +16,12 @@ A generated automation script consists of 5 sections:
 - `action_execution` function
 - `run_if_main` funciton
 
+The input value list for using the generated script should look like this:
+
+```python
+input_vals = [[trigger_inputs],[condition_inputs],[action_inputs]]
+```
+
 ---
 
 ### Templates
@@ -182,14 +188,14 @@ real_position = asg.create_combination_condition_script(
 
 # create a single condition 
 real_position = asg.create_condition_script(
-                CONF_NUMERIC_STATE,
-                new_entity_list[0],
-                real_position,
-                script_path,
-                indentation_lvl=indentation_level,
-                first_element=first_element,
-                source=source,
-                combinator=combinator,
+    CONF_NUMERIC_STATE,
+    new_entity_list[0],
+    real_position,
+    script_path,
+    indentation_lvl=indentation_level,
+    first_element=first_element,
+    source=source,
+    combinator=combinator,
 )
 ```
 
@@ -204,9 +210,9 @@ When all conditions have been inserted, the script is closed with the `close_con
 
 ```python
     ):
-      condition_passed = True
-     # The end of the condition section
-     return condition_passed
+        condition_passed = True
+    # The end of the condition section
+    return condition_passed
 ```
 
 ### Actions
