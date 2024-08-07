@@ -11,7 +11,9 @@ from . import automation_script_gen as asg
 
 from ..utils.env_const import INPUT
 
-from ..utils.env_helper import Entity, is_jinja_template
+from ..utils.env_helper_classes import Entity
+from ..utils.env_helper import is_jinja_template
+
 from ..ha_automation_utils.home_assistant_config_validation import (
     valid_entity_id,
 )

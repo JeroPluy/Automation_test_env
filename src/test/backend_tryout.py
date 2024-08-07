@@ -29,7 +29,7 @@ from backend.ha_automation_utils import (
 import sqlite3 as sqlite
 import subprocess
 
-from backend.utils.env_helper import Entity
+from backend.utils.env_helper_classes import Entity
 
 
 DATABASE = path.join("data", "automation_test_env.sqlite")
@@ -43,7 +43,7 @@ def test_all_yaml_files() -> list:
         list: list of automations with their extracted entities and information
     """
     automations = []
-    yaml_dir = path.join("test_data", "yaml_files")
+    yaml_dir = path.join("test_data", "yaml_files", "example_automations")
     for file in listdir(yaml_dir):
         if file.endswith(".yaml"):
             basis_file = path.join(yaml_dir, file)
@@ -229,10 +229,10 @@ def test_condition_entities():
 
 def test_action_entities():
     """
-    Test the ectraction of all action entities in basis_file
+    Test the exctraction of all action entities in basis_file
     """
     
-    basis_file = path.join("test_data", "yaml_files", "watering_the_garden.yaml")
+    basis_file = path.join("test_data", "yaml_files", "example_automations", "watering_the_garden.yaml")
     script_file = test_script_init(basis_file)
     automation_yaml = yaml_loader.load_yaml_dict(basis_file)
     automation_config = asyncio.run(

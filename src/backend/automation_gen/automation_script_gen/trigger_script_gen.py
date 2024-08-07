@@ -3,9 +3,11 @@ This module is used to generate the trigger section of the automation script.
 """
 
 from .utils import append_script_context_to_script
-from backend.utils.env_helper import Entity, is_jinja_template
-from backend.ha_automation_utils.home_assistant_config_validation import valid_entity_id
-from backend.ha_automation_utils.home_assistant_const import CONF_ABOVE, CONF_BELOW, CONF_DEVICE, CONF_NOT_TO, CONF_NUMERIC_STATE, CONF_OR, CONF_PERS_NOTIFICATION, CONF_STATE, CONF_TO, CONF_TYPE, CONF_UPDATE_TYPE
+from ...utils.env_helper_classes import Entity
+from ...utils.env_helper import is_jinja_template 
+
+from ...ha_automation_utils.home_assistant_config_validation import valid_entity_id
+from ...ha_automation_utils.home_assistant_const import CONF_ABOVE, CONF_BELOW, CONF_DEVICE, CONF_NOT_TO, CONF_NUMERIC_STATE, CONF_OR, CONF_PERS_NOTIFICATION, CONF_STATE, CONF_TO, CONF_TYPE, CONF_UPDATE_TYPE
 
 
 IF_TEMPLATE = "if ("

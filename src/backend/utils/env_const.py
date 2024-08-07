@@ -1,7 +1,9 @@
-import json
-import os
+"""
+This module contains the constants used in the test environment beside the constants provided by Home Assistant.
+"""
 
-"""This constants are used to define different parts in the test enviroment."""
+import json
+from os import path
 
 # parameter roles
 START = 0
@@ -16,12 +18,14 @@ PARALLEL = 3
 
 # automation script path
 # Load the settings.json file
-SETTINGS_FILE = os.path.join('src','frontend','settings', 'settings.json')
+SETTINGS_FILE = path.join('src','frontend','settings', 'settings.json')
 with open(SETTINGS_FILE) as f:
     settings = json.load(f)
 
 # Extract the automation_script_path
-AUTOMATION_SCRIPT = os.path.join(*settings['automation_script_path'])
+AUTOMATION_SCRIPT = path.join(*settings['automation_script_path'])
+
+TEMPLATE_PATH = path.join("src", "backend", "automation_gen", "automation_script_gen", "templates")
 
 # standard integrations
 standard_integrations = {

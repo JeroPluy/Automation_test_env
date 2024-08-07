@@ -11,7 +11,7 @@ from .action_dissection import extract_all_actions
 
 from ..utils.env_const import SINGLE
 
-from ..utils.env_helper import Automation
+from ..utils.env_helper_classes import Automation
 
 from ..ha_automation_utils.home_assistant_automation_validation import AutomationConfig
 from ..ha_automation_utils.home_assistant_const import (

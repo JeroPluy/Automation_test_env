@@ -15,7 +15,8 @@ from ..utils.env_const import (
     INPUT,
     OUTPUT,
 )
-from ..utils.env_helper import Entity, is_jinja_template
+from ..utils.env_helper_classes import Entity
+from ..utils.env_helper import is_jinja_template
 
 from ..ha_automation_utils.home_assistant_automation_validation import AutomationConfig
 from ..ha_automation_utils.home_assistant_const import (

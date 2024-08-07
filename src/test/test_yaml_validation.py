@@ -357,7 +357,7 @@ def test_preconfigured_yaml_files() -> None:
     The validation result is then printed to the console.
     """
 
-    dir_path = path.join("test_data", "yaml_files")
+    dir_path = path.join("test_data", "yaml_files", "example_automations")
     for file in listdir(dir_path):
         if file.endswith(".yaml"):
             yaml_dict = yaml_loader.load_yaml_dict(path.join(dir_path, file))
@@ -382,10 +382,10 @@ def test_yaml_configs():
     """
     print("--- Parameter behavior test  started ---")
     test_main_automation_params()
-    print("--- Parameter behavior test completed ---")
+    print("--- Parameter behavior test completed ---\n")
     print("--- Test test_yaml files test started ---")
     test_test_yaml_files()
-    print("--- Test test_yaml files test completed ---")
+    print("--- Test test_yaml files test completed ---\n")
     print("--- Preconfigured automations test started ---")
     test_preconfigured_yaml_files()
     print("--- Preconfigured automations test completed --- \n")

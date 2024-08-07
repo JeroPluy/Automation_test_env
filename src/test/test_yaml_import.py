@@ -8,8 +8,7 @@ import json
 from os import listdir, path
 from backend.ha_automation_utils import home_assistant_yaml_loader as yaml_loader
 
-
-def check_test_yaml_files(test_files: list = None):
+def check_test_yaml_dir(test_files: list = None):
     """
     This function checks if all the test yaml files of the test_data/yaml_files/test_yaml directory are included into the test.
 
@@ -37,7 +36,7 @@ def test_import_test_automations():
         "huge_automation.yaml",
     ]
 
-    check_test_yaml_files(test_files=test_files)
+    check_test_yaml_dir(test_files=test_files)
 
     # Test loading an empty yaml file
     config_file = path.join("test_data", "yaml_files", "test_yaml", "empty.yaml")
@@ -472,7 +471,7 @@ def test_import_test_automations():
         automation_dict = json.load(json_file)
     assert automation_yaml is not None and automation_yaml == automation_dict
 
-    print("Test load_yaml_dict passed\n\n")
+    print("Test load_yaml_dict passed")
 
 
 def test_all_preconfigured_automations():
@@ -481,7 +480,7 @@ def test_all_preconfigured_automations():
     validate the imported dictionaries by printing them to the console.
     """
 
-    dir_path = path.join("test_data", "yaml_files")
+    dir_path = path.join("test_data", "yaml_files", "example_automations")
     for file in listdir(dir_path):
         if file.endswith(".yaml"):
             automation_yaml = yaml_loader.load_yaml_dict(path.join(dir_path, file))
