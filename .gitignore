@@ -47,7 +47,7 @@ coverage.xml
 *.cover
 .hypothesis/
 .pytest_cache/
-src/test/test_scripts/*
+src/test/test_automation_gen/test_scripts/*
 
 # Translations
 *.mo

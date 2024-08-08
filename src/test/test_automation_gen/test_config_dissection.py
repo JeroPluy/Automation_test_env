@@ -106,7 +106,7 @@ from backend.ha_automation_utils.home_assistant_const import (
 )
 
 
-TEST_DIR = path.join("src", "test", "test_scripts")
+TEST_DIR = path.join("src", "test", "test_automation_gen", "test_scripts")
 
 # additional functions for testing
 

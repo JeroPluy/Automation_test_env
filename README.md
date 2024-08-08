@@ -1,4 +1,4 @@
-# Automation Test Environment for Home Assistant automation
+# Automation Test Environment for Home Assistant
 
 ## Introduction
 

@@ -8,3 +8,9 @@
 # The `config_dissection.py` script is the bundling of all sections and enables the holistic creation of an automation
 # with its entities as well as an executable automation script.
 
+
+# The import of the automation_gen package gives access to the `create_automation` main function, which is the entry point
+# for the automation generation process.
+from .config_dissection import create_automation
+
+__all__ = ["create_automation"]
