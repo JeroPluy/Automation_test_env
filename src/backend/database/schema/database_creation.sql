@@ -56,7 +56,8 @@ CREATE TABLE automation_entity (
     e_id INTEGER NOT NULL,
     p_role INTEGER NOT NULL,
     position INTEGER NOT NULL,
-    exp_val NUMERIC NOT NULL,
+    exp_val NUMERIC,
+    parent INTEGER,
     PRIMARY KEY (a_id, e_id, p_role, position),
     FOREIGN KEY (a_id) REFERENCES automation (a_id),
     FOREIGN KEY (e_id) REFERENCES entity (e_id)

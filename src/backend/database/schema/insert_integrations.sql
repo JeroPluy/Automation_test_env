@@ -1361,7 +1361,7 @@ VALUES
         (426,       'mode',                             'restart'),                             -- The automation will restart up if repeated.
         (427,       'mode',                             'queued'),                              -- The automation is queued up if repeated.
         (428,       'mode',                             'parallel'),                            -- The automation is called parallel if repeated.
-        (429,       'current',                          'int');                                 -- The current state (not running 0 / running 1) of the automation
+        (429,       'current',                          'int'),                                 -- The current state (not running 0 / running 1) of the automation
 /* person
         states(main) / attributes extracted from:
         https://www.home-assistant.io/integrations/person/

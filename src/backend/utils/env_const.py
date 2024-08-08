@@ -22,10 +22,19 @@ SETTINGS_FILE = path.join('src','frontend','settings', 'settings.json')
 with open(SETTINGS_FILE) as f:
     settings = json.load(f)
 
-# Extract the automation_script_path
+# path to the generated automation scripts
+# extracted from the settings
 AUTOMATION_SCRIPT = path.join(*settings['automation_script_path'])
 
+# path to the database of the automation test environment
+DATABASE = path.join("data", "automation_test_env.sqlite")
+
+# path to the templates for the automation script generation
 TEMPLATE_PATH = path.join("src", "backend", "automation_gen", "automation_script_gen", "templates")
+
+# needed sql-Files
+INIT_FILE = path.join("src", "backend", "database", "schema", "database_creation.sql")
+INTEG_DATA = path.join("src", "backend", "database", "schema", "insert_integrations.sql")
 
 # standard integrations
 standard_integrations = {
