@@ -1,0 +1,42 @@
+Dark Theme:
+background 1: 		#18181B - white
+background window: 	#212226 - white
+backgrond top_window:	#343446 - white
+text standard:		#F7F8F8 
+text subtext:		#D9DADE
+text disabled:		#7c7c7c
+primary: 			#1D91DA - white
+accept:			#3A9284 - white
+delete:			#ED4B46 - white
+
+Light Theme:
+background 1: 		#EFEFEF - black
+background window:	#f5f5f5 - black
+backgront top_window:	#FCFCFC - black
+text standard:		#292929
+text subtext:		#3d3d3d
+text disabled:		#BDBDBD
+primary: 			#1D91DA - white
+accept:			#3A9284 - white
+delete:			#ED4B46 - white
+
+
+
+fontSize: {
+  sm: '0.667rem',
+  base: '1rem',
+  xl: '1.500rem',
+  '2xl': '2.250rem',
+  '3xl': '3.375rem',
+  '4xl': '5.063rem',
+  '5xl': '7.595rem',
+},
+fontFamily: {
+  heading: 'Pragati Narrow',
+  body: 'Pragati Narrow',
+},
+fontWeight: {
+  normal: '400',
+  bold: '700',
+},
+

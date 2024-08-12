@@ -20,7 +20,7 @@ from backend.automation_gen.config_dissection import (
 
 
 from backend.automation_gen.automation_script_gen import create_locked_message, init_automation_script
-import backend.database
+import backend.database.src
 from backend.ha_automation_utils import home_assistant_yaml_loader as yaml_loader
 from backend.ha_automation_utils import (
     home_assistant_automation_validation as ha_automation_config,

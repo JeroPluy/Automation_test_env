@@ -6,7 +6,7 @@ This repository contains the application and its individual components of the te
 
 ## Structure
 
-The structure of the repository consists of the actuall source code in [`./src`](https://github.com/JeroPluy/Automation_test_env/tree/main/src) and the test or example data in [`./test_data`](https://github.com/JeroPluy/Automation_test_env/tree/main/test_data). The source code is separated in different packages for the [frontend](https://github.com/JeroPluy/Automation_test_env/tree/main/src/backend), [backend](https://github.com/JeroPluy/Automation_test_env/tree/main/src/backend) and [tests](https://github.com/JeroPluy/Automation_test_env/tree/main/src/test) and the main application is run in the [`main.py`](https://github.com/JeroPluy/Automation_test_env/blob/main/src/main.py)
+The structure of the repository consists of the actuall source code in [`./src`](https://github.com/JeroPluy/Automation_test_env/tree/main/src), additional documentation to the application concept in [`./docs`](https://github.com/JeroPluy/Automation_test_env/tree/main/docs) and the test or example data in [`./test_data`](https://github.com/JeroPluy/Automation_test_env/tree/main/test_data). The source code is separated in different packages for the [frontend](https://github.com/JeroPluy/Automation_test_env/tree/main/src/backend), [backend](https://github.com/JeroPluy/Automation_test_env/tree/main/src/backend) and [tests](https://github.com/JeroPluy/Automation_test_env/tree/main/src/test) and the main application is run in the [`main.py`](https://github.com/JeroPluy/Automation_test_env/blob/main/src/main.py)
 
 To get to know more about each and every part of this repository, corresponding documentations can be used. Every file in this repository is documented right at the beginning (if possible) to make its purpose clear. Every folder is documented with either a `README.md` or an `__init__.py` (for python source code) or both, describing the content of the file/folder.
 
@@ -48,3 +48,8 @@ python ./src/main.py
 ## Author
 
 This project was implemented by Jerome Albert. The use of code from other sources is documented at the beginning of the relevant program scripts by means of links and call details.
+
+The coding process was supported by following AI-Tools:
+
+- [GitHub-Copilot](https://github.com/features/copilot) 
+- and [Phind](https://www.phind.com)
