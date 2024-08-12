@@ -8,7 +8,8 @@ from os import path
 # parameter roles
 START = 0
 INPUT = 1
-OUTPUT = 2
+ACTION_INPUT = 2
+OUTPUT = 3
 
 # autoamtion modes
 SINGLE = 0

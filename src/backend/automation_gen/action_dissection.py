@@ -12,7 +12,7 @@ from .condtion_dissection import _condition_entities
 from .trigger_dissection import _trigger_entities
 
 from ..utils.env_const import (
-    INPUT,
+    ACTION_INPUT,
     OUTPUT,
 )
 from ..utils.env_helper_classes import Entity
@@ -813,9 +813,9 @@ def _action_entities(
                 if first_element:
                     first_element = False
 
-                # set the parameter role to input
+                # set the parameter role to action input
                 for entity in results[0]:
-                    entity.parameter_role = INPUT
+                    entity.parameter_role = ACTION_INPUT
 
                 new_entity_list += results[0]
                 real_position = results[2]
@@ -919,7 +919,7 @@ def extract_all_actions(automation_config: AutomationConfig, script_path: str) -
 
         for action_enitiy in return_list[0]:
             if (
-                action_enitiy.parameter_role == INPUT
+                action_enitiy.parameter_role == ACTION_INPUT
                 and not action_enitiy.integration == CONF_ZONE
             ):
                 num_action_entities += 1

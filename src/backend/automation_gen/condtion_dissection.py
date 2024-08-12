@@ -9,7 +9,7 @@ https://www.home-assistant.io/docs/scripts/conditions
 
 from . import automation_script_gen as asg
 
-from ..utils.env_const import INPUT
+from ..utils.env_const import ACTION_INPUT, INPUT
 
 from ..utils.env_helper_classes import Entity
 from ..utils.env_helper import is_jinja_template
@@ -20,6 +20,7 @@ from ..ha_automation_utils.home_assistant_config_validation import (
 from ..ha_automation_utils.home_assistant_automation_validation import AutomationConfig
 from ..ha_automation_utils.home_assistant_const import (
     CONF_ABOVE,
+    CONF_ACTION,
     CONF_AFTER,
     CONF_AFTER_OFFSET,
     CONF_AND,
@@ -81,8 +82,13 @@ def _condition_entities(
 
     # list of entities in the trigger part
     entity_list = []
-    # entity parameter role is start
-    param_role = INPUT
+    
+    # entity parameter role is Input if the condition is in the condition part
+    if source == CONF_CONDITION:
+        param_role = INPUT
+    elif source == CONF_ACTION:
+        # entity parameter role is Action Input if the condition is in the action part
+        param_role = ACTION_INPUT
 
     # check if the condition is enabled
     if CONF_ENABLED in condition_part:

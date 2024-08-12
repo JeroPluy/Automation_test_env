@@ -33,7 +33,7 @@ from backend.automation_gen.config_dissection import (
 
 from backend.ha_automation_utils import home_assistant_yaml_loader as yaml_loader
 
-from backend.utils.env_const import INPUT, OUTPUT, START
+from backend.utils.env_const import INPUT, OUTPUT, START, ACTION_INPUT
 from backend.ha_automation_utils.home_assistant_const import (
     ATTR_AREA_ID,
     CONF_ABOVE,
@@ -6302,7 +6302,7 @@ async def test_action_entities():
         assert len(entities_if_1) == 2
         assert entities_if_1[0].parent is None
         assert entities_if_1[0].position == 1
-        assert entities_if_1[0].parameter_role == INPUT
+        assert entities_if_1[0].parameter_role == ACTION_INPUT
         assert entities_if_1[0].integration == "sensor"
         assert entities_if_1[0].entity_name == "sensor.temperature"
         assert entities_if_1[0].expected_value == {"state": "on"}
@@ -6362,7 +6362,7 @@ async def test_action_entities():
         assert len(entities_if_2) == 3
         assert entities_if_2[0].parent is None
         assert entities_if_2[0].position == 1
-        assert entities_if_2[0].parameter_role == INPUT
+        assert entities_if_2[0].parameter_role == ACTION_INPUT
         assert entities_if_2[0].integration == "sensor"
         assert entities_if_2[0].entity_name == "sensor.temperature"
         assert entities_if_2[0].expected_value == {"state": "on"}
@@ -6424,7 +6424,7 @@ async def test_action_entities():
         assert len(entities_if_3) == 2
         assert entities_if_3[0].parent is None
         assert entities_if_3[0].position == 1
-        assert entities_if_3[0].parameter_role == INPUT
+        assert entities_if_3[0].parameter_role == ACTION_INPUT
         assert entities_if_3[0].integration == "sensor"
         assert entities_if_3[0].entity_name == "sensor.temperature"
         assert entities_if_3[0].expected_value == {"state": "on"}
@@ -6483,13 +6483,13 @@ async def test_action_entities():
         assert len(entities_if_4) == 3
         assert entities_if_4[0].parent == 1
         assert entities_if_4[0].position == 2
-        assert entities_if_4[0].parameter_role == INPUT
+        assert entities_if_4[0].parameter_role == ACTION_INPUT
         assert entities_if_4[0].integration == "sensor"
         assert entities_if_4[0].entity_name == "sensor.temperature"
         assert entities_if_4[0].expected_value == {"state": "on"}
         assert entities_if_4[1].parent == 1
         assert entities_if_4[1].position == 3
-        assert entities_if_4[1].parameter_role == INPUT
+        assert entities_if_4[1].parameter_role == ACTION_INPUT
         assert entities_if_4[1].integration == "sensor"
         assert entities_if_4[1].entity_name == "sensor.humidity"
         assert entities_if_4[1].expected_value == {"state": "off"}
@@ -6560,13 +6560,13 @@ async def test_action_entities():
         assert len(entities_if_5) == 5
         assert entities_if_5[0].parent == 27
         assert entities_if_5[0].position == 28
-        assert entities_if_5[0].parameter_role == INPUT
+        assert entities_if_5[0].parameter_role == ACTION_INPUT
         assert entities_if_5[0].integration == "sensor"
         assert entities_if_5[0].entity_name == "sensor.temperature"
         assert entities_if_5[0].expected_value == {"state": "on"}
         assert entities_if_5[1].parent == 27
         assert entities_if_5[1].position == 29
-        assert entities_if_5[1].parameter_role == INPUT
+        assert entities_if_5[1].parameter_role == ACTION_INPUT
         assert entities_if_5[1].integration == "sensor"
         assert entities_if_5[1].entity_name == "sensor.humidity"
         assert entities_if_5[1].expected_value == {"state": "off"}
@@ -6678,7 +6678,7 @@ async def test_action_entities():
         assert len(entities_choose_1) == 3
         assert entities_choose_1[0].parent == 1
         assert entities_choose_1[0].position == 2
-        assert entities_choose_1[0].parameter_role == INPUT
+        assert entities_choose_1[0].parameter_role == ACTION_INPUT
         assert entities_choose_1[0].integration == "sensor"
         assert entities_choose_1[0].entity_name == "sensor.temperature"
         assert entities_choose_1[0].expected_value == {"state": "on"}
@@ -6756,13 +6756,13 @@ async def test_action_entities():
         assert len(entities_choose_2) == 4
         assert entities_choose_2[0].parent == 2
         assert entities_choose_2[0].position == 3
-        assert entities_choose_2[0].parameter_role == INPUT
+        assert entities_choose_2[0].parameter_role == ACTION_INPUT
         assert entities_choose_2[0].integration == "sensor"
         assert entities_choose_2[0].entity_name == "sensor.temperature"
         assert entities_choose_2[0].expected_value == {"state": "on"}
         assert entities_choose_2[1].parent == 2
         assert entities_choose_2[1].position == 4
-        assert entities_choose_2[1].parameter_role == INPUT
+        assert entities_choose_2[1].parameter_role == ACTION_INPUT
         assert entities_choose_2[1].integration == "sensor"
         assert entities_choose_2[1].entity_name == "sensor.humidity"
         assert entities_choose_2[1].expected_value == {"state": "off"}
@@ -6864,13 +6864,13 @@ async def test_action_entities():
         assert len(entities_choose_3) == 8
         assert entities_choose_3[0].parent == 2
         assert entities_choose_3[0].position == 3
-        assert entities_choose_3[0].parameter_role == INPUT
+        assert entities_choose_3[0].parameter_role == ACTION_INPUT
         assert entities_choose_3[0].integration == "sensor"
         assert entities_choose_3[0].entity_name == "sensor.temperature"
         assert entities_choose_3[0].expected_value == {"state": "on"}
         assert entities_choose_3[1].parent == 2
         assert entities_choose_3[1].position == 4
-        assert entities_choose_3[1].parameter_role == INPUT
+        assert entities_choose_3[1].parameter_role == ACTION_INPUT
         assert entities_choose_3[1].integration == "sensor"
         assert entities_choose_3[1].entity_name == "sensor.humidity"
         assert entities_choose_3[1].expected_value == {"state": "off"}
@@ -6888,13 +6888,13 @@ async def test_action_entities():
         assert entities_choose_3[3].expected_value == {CONF_SERVICE: "turn_off"}
         assert entities_choose_3[4].parent == 8
         assert entities_choose_3[4].position == 9
-        assert entities_choose_3[4].parameter_role == INPUT
+        assert entities_choose_3[4].parameter_role == ACTION_INPUT
         assert entities_choose_3[4].integration == "sensor"
         assert entities_choose_3[4].entity_name == "sensor.temperature"
         assert entities_choose_3[4].expected_value == {"state": "off"}
         assert entities_choose_3[5].parent == 8
         assert entities_choose_3[5].position == 10
-        assert entities_choose_3[5].parameter_role == INPUT
+        assert entities_choose_3[5].parameter_role == ACTION_INPUT
         assert entities_choose_3[5].integration == "sensor"
         assert entities_choose_3[5].entity_name == "sensor.humidity"
         assert entities_choose_3[5].expected_value == {"state": "on"}
@@ -6988,7 +6988,7 @@ async def test_action_entities():
         assert len(entities_choose_4) == 5
         assert entities_choose_4[0].parent == 1
         assert entities_choose_4[0].position == 2
-        assert entities_choose_4[0].parameter_role == INPUT
+        assert entities_choose_4[0].parameter_role == ACTION_INPUT
         assert entities_choose_4[0].integration == "sensor"
         assert entities_choose_4[0].entity_name == "sensor.temperature"
         assert entities_choose_4[0].expected_value == {"state": "on"}
@@ -7000,7 +7000,7 @@ async def test_action_entities():
         assert entities_choose_4[1].expected_value == {CONF_SERVICE: "turn_on"}
         assert entities_choose_4[2].parent == 1
         assert entities_choose_4[2].position == 4
-        assert entities_choose_4[2].parameter_role == INPUT
+        assert entities_choose_4[2].parameter_role == ACTION_INPUT
         assert entities_choose_4[2].integration == "sensor"
         assert entities_choose_4[2].entity_name == "sensor.temperature"
         assert entities_choose_4[2].expected_value == {"state": "off"}
@@ -7081,7 +7081,7 @@ async def test_action_entities():
         assert len(entities_choose_6) == 4
         assert entities_choose_6[0].parent == 18
         assert entities_choose_6[0].position == 19
-        assert entities_choose_6[0].parameter_role == INPUT
+        assert entities_choose_6[0].parameter_role == ACTION_INPUT
         assert entities_choose_6[0].integration == "sensor"
         assert entities_choose_6[0].entity_name == "sensor.temperature"
         assert entities_choose_6[0].expected_value == {"state": "on"}
@@ -7093,7 +7093,7 @@ async def test_action_entities():
         assert entities_choose_6[1].expected_value == {CONF_SERVICE: "turn_on"}
         assert entities_choose_6[2].parent == 18
         assert entities_choose_6[2].position == 21
-        assert entities_choose_6[2].parameter_role == INPUT
+        assert entities_choose_6[2].parameter_role == ACTION_INPUT
         assert entities_choose_6[2].integration == "sensor"
         assert entities_choose_6[2].entity_name == "sensor.temperature"
         assert entities_choose_6[2].expected_value == {"state": "off"}
@@ -7271,7 +7271,7 @@ async def test_action_entities():
         assert len(entities_repeat_2) == 2
         assert entities_repeat_2[0].parent is None
         assert entities_repeat_2[0].position == 1
-        assert entities_repeat_2[0].parameter_role == INPUT
+        assert entities_repeat_2[0].parameter_role == ACTION_INPUT
         assert entities_repeat_2[0].integration == "sensor"
         assert entities_repeat_2[0].entity_name == "sensor.temperature"
         assert entities_repeat_2[0].expected_value == {"state": "on"}
@@ -7330,7 +7330,7 @@ async def test_action_entities():
         assert len(entities_repeat_3) == 2
         assert entities_repeat_3[0].parent is None
         assert entities_repeat_3[0].position == 1
-        assert entities_repeat_3[0].parameter_role == INPUT
+        assert entities_repeat_3[0].parameter_role == ACTION_INPUT
         assert entities_repeat_3[0].integration == "sensor"
         assert entities_repeat_3[0].entity_name == "sensor.temperature"
         assert entities_repeat_3[0].expected_value == {"state": "on"}
@@ -7395,13 +7395,13 @@ async def test_action_entities():
         assert len(entities_repeat_4) == 3
         assert entities_repeat_4[0].parent == 1
         assert entities_repeat_4[0].position == 2
-        assert entities_repeat_4[0].parameter_role == INPUT
+        assert entities_repeat_4[0].parameter_role == ACTION_INPUT
         assert entities_repeat_4[0].integration == "sensor"
         assert entities_repeat_4[0].entity_name == "sensor.temperature"
         assert entities_repeat_4[0].expected_value == {"state": "on"}
         assert entities_repeat_4[1].parent == 1
         assert entities_repeat_4[1].position == 3
-        assert entities_repeat_4[1].parameter_role == INPUT
+        assert entities_repeat_4[1].parameter_role == ACTION_INPUT
         assert entities_repeat_4[1].integration == "sensor"
         assert entities_repeat_4[1].entity_name == "sensor.humidity"
         assert entities_repeat_4[1].expected_value == {"state": "off"}
@@ -7475,13 +7475,13 @@ async def test_action_entities():
         assert len(entities_repeat_5) == 3
         assert entities_repeat_5[0].parent == 1
         assert entities_repeat_5[0].position == 2
-        assert entities_repeat_5[0].parameter_role == INPUT
+        assert entities_repeat_5[0].parameter_role == ACTION_INPUT
         assert entities_repeat_5[0].integration == "sensor"
         assert entities_repeat_5[0].entity_name == "sensor.temperature"
         assert entities_repeat_5[0].expected_value == {"state": "on"}
         assert entities_repeat_5[1].parent == 1
         assert entities_repeat_5[1].position == 3
-        assert entities_repeat_5[1].parameter_role == INPUT
+        assert entities_repeat_5[1].parameter_role == ACTION_INPUT
         assert entities_repeat_5[1].integration == "sensor"
         assert entities_repeat_5[1].entity_name == "sensor.humidity"
         assert entities_repeat_5[1].expected_value == {"state": "off"}
@@ -7601,13 +7601,13 @@ async def test_action_entities():
         assert len(entities_repeat_7) == 4
         assert entities_repeat_7[0].parent == 18
         assert entities_repeat_7[0].position == 19
-        assert entities_repeat_7[0].parameter_role == INPUT
+        assert entities_repeat_7[0].parameter_role == ACTION_INPUT
         assert entities_repeat_7[0].integration == "sensor"
         assert entities_repeat_7[0].entity_name == "sensor.temperature"
         assert entities_repeat_7[0].expected_value == {"state": "on"}
         assert entities_repeat_7[1].parent == 18
         assert entities_repeat_7[1].position == 20
-        assert entities_repeat_7[1].parameter_role == INPUT
+        assert entities_repeat_7[1].parameter_role == ACTION_INPUT
         assert entities_repeat_7[1].integration == "sensor"
         assert entities_repeat_7[1].entity_name == "sensor.humidity"
         assert entities_repeat_7[1].expected_value == {"state": "off"}
@@ -7790,7 +7790,7 @@ async def test_action_entities():
         assert len(entities_condition_1) == 1
         assert entities_condition_1[0].parent is None
         assert entities_condition_1[0].position == 1
-        assert entities_condition_1[0].parameter_role == INPUT
+        assert entities_condition_1[0].parameter_role == ACTION_INPUT
         assert entities_condition_1[0].integration == "sensor"
         assert entities_condition_1[0].entity_name == "sensor.temperature"
         assert entities_condition_1[0].expected_value == {"state": "on"}
@@ -7835,7 +7835,7 @@ async def test_action_entities():
         assert len(entities_condition_2) == 1
         assert entities_condition_2[0].parent == 1
         assert entities_condition_2[0].position == 10
-        assert entities_condition_2[0].parameter_role == INPUT
+        assert entities_condition_2[0].parameter_role == ACTION_INPUT
         assert entities_condition_2[0].integration == "sensor"
         assert entities_condition_2[0].entity_name == "sensor.temperature"
         assert entities_condition_2[0].expected_value == {"state": "on"}
@@ -7885,13 +7885,13 @@ async def test_action_entities():
         assert len(entities_condition_3) == 2
         assert entities_condition_3[0].parent == 1
         assert entities_condition_3[0].position == 2
-        assert entities_condition_3[0].parameter_role == INPUT
+        assert entities_condition_3[0].parameter_role == ACTION_INPUT
         assert entities_condition_3[0].integration == "sensor"
         assert entities_condition_3[0].entity_name == "sensor.temperature"
         assert entities_condition_3[0].expected_value == {"state": "on"}
         assert entities_condition_3[1].parent == 1
         assert entities_condition_3[1].position == 3
-        assert entities_condition_3[1].parameter_role == INPUT
+        assert entities_condition_3[1].parameter_role == ACTION_INPUT
         assert entities_condition_3[1].integration == "sensor"
         assert entities_condition_3[1].entity_name == "sensor.humidity"
         assert entities_condition_3[1].expected_value == {"state": "off"}
@@ -7955,13 +7955,13 @@ async def test_action_entities():
         assert len(entities_condition_4) == 2
         assert entities_condition_4[0].parent == 10
         assert entities_condition_4[0].position == 11
-        assert entities_condition_4[0].parameter_role == INPUT
+        assert entities_condition_4[0].parameter_role == ACTION_INPUT
         assert entities_condition_4[0].integration == "sensor"
         assert entities_condition_4[0].entity_name == "sensor.temperature"
         assert entities_condition_4[0].expected_value == {"state": "on"}
         assert entities_condition_4[1].parent == 10
         assert entities_condition_4[1].position == 12
-        assert entities_condition_4[1].parameter_role == INPUT
+        assert entities_condition_4[1].parameter_role == ACTION_INPUT
         assert entities_condition_4[1].integration == "sensor"
         assert entities_condition_4[1].entity_name == "sensor.humidity"
         assert entities_condition_4[1].expected_value == {"state": "off"}
@@ -8095,7 +8095,7 @@ async def test_action_entities():
         assert len(entities_wait_for_trigger_1) == 1
         assert entities_wait_for_trigger_1[0].parent is None
         assert entities_wait_for_trigger_1[0].position == 1
-        assert entities_wait_for_trigger_1[0].parameter_role == INPUT
+        assert entities_wait_for_trigger_1[0].parameter_role == ACTION_INPUT
         assert entities_wait_for_trigger_1[0].integration == "sensor"
         assert entities_wait_for_trigger_1[0].entity_name == "sensor.temperature"
         assert entities_wait_for_trigger_1[0].expected_value == {"to": "on"}
@@ -8146,7 +8146,7 @@ async def test_action_entities():
         assert len(entities_wait_for_trigger_2) == 1
         assert entities_wait_for_trigger_2[0].parent is None
         assert entities_wait_for_trigger_2[0].position == 1
-        assert entities_wait_for_trigger_2[0].parameter_role == INPUT
+        assert entities_wait_for_trigger_2[0].parameter_role == ACTION_INPUT
         assert entities_wait_for_trigger_2[0].integration == "sensor"
         assert entities_wait_for_trigger_2[0].entity_name == "sensor.temperature"
         assert entities_wait_for_trigger_2[0].expected_value == {"to": "on"}
@@ -8204,13 +8204,13 @@ async def test_action_entities():
         assert len(entities_wait_for_trigger_3) == 2
         assert entities_wait_for_trigger_3[0].parent == 1
         assert entities_wait_for_trigger_3[0].position == 2
-        assert entities_wait_for_trigger_3[0].parameter_role == INPUT
+        assert entities_wait_for_trigger_3[0].parameter_role == ACTION_INPUT
         assert entities_wait_for_trigger_3[0].integration == "sensor"
         assert entities_wait_for_trigger_3[0].entity_name == "sensor.temperature"
         assert entities_wait_for_trigger_3[0].expected_value == {"to": "on"}
         assert entities_wait_for_trigger_3[1].parent == 1
         assert entities_wait_for_trigger_3[1].position == 3
-        assert entities_wait_for_trigger_3[1].parameter_role == INPUT
+        assert entities_wait_for_trigger_3[1].parameter_role == ACTION_INPUT
         assert entities_wait_for_trigger_3[1].integration == "sensor"
         assert entities_wait_for_trigger_3[1].entity_name == "sensor.humidity"
         assert entities_wait_for_trigger_3[1].expected_value == {"to": "off"}
@@ -8276,13 +8276,13 @@ async def test_action_entities():
         assert len(entities_wait_for_trigger_4) == 2
         assert entities_wait_for_trigger_4[0].parent == 10
         assert entities_wait_for_trigger_4[0].position == 11
-        assert entities_wait_for_trigger_4[0].parameter_role == INPUT
+        assert entities_wait_for_trigger_4[0].parameter_role == ACTION_INPUT
         assert entities_wait_for_trigger_4[0].integration == "sensor"
         assert entities_wait_for_trigger_4[0].entity_name == "sensor.temperature"
         assert entities_wait_for_trigger_4[0].expected_value == {"to": "on"}
         assert entities_wait_for_trigger_4[1].parent == 10
         assert entities_wait_for_trigger_4[1].position == 12
-        assert entities_wait_for_trigger_4[1].parameter_role == INPUT
+        assert entities_wait_for_trigger_4[1].parameter_role == ACTION_INPUT
         assert entities_wait_for_trigger_4[1].integration == "sensor"
         assert entities_wait_for_trigger_4[1].entity_name == "sensor.humidity"
         assert entities_wait_for_trigger_4[1].expected_value == {"to": "off"}
@@ -8359,7 +8359,7 @@ async def test_action_entities():
         assert len(entities_wait_for_trigger_5) == 1
         assert entities_wait_for_trigger_5[0].parent is None
         assert entities_wait_for_trigger_5[0].position == 1
-        assert entities_wait_for_trigger_5[0].parameter_role == INPUT
+        assert entities_wait_for_trigger_5[0].parameter_role == ACTION_INPUT
         assert entities_wait_for_trigger_5[0].integration == "sensor"
         assert entities_wait_for_trigger_5[0].entity_name == "sensor.temperature"
         assert entities_wait_for_trigger_5[0].expected_value == {"to": "on"}
@@ -8412,7 +8412,7 @@ async def test_action_entities():
         assert len(entities_wait_for_trigger_6) == 1
         assert entities_wait_for_trigger_6[0].parent is None
         assert entities_wait_for_trigger_6[0].position == 1
-        assert entities_wait_for_trigger_6[0].parameter_role == INPUT
+        assert entities_wait_for_trigger_6[0].parameter_role == ACTION_INPUT
         assert entities_wait_for_trigger_6[0].integration == "sensor"
         assert entities_wait_for_trigger_6[0].entity_name == "sensor.temperature"
         assert entities_wait_for_trigger_6[0].expected_value == {"to": "on"}
