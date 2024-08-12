@@ -1,41 +1,11 @@
-import json
-from os import path
-from typing import Any, Tuple
+"""
+This frontend module is responsible for the automation insertion windows.
+"""
 
+from typing import Tuple
 import customtkinter
 
-import customWidgets.customWidgets as cW
-
-
-def load_settings():
-    #print(path.join(path.dirname(path.realpath(__file__))))
-    with open("settings/settings.json", "r") as json_settings:
-        return json.load(json_settings)
-    
-def load_language(lang):
-    with open("settings/appLang.json", "r", encoding="utf8") as json_lang:
-        langs = json.load(json_lang)
-        selected_lang = {}
-        for key in langs:
-            selected_lang[key] = langs.get(key)[lang]
-        return selected_lang 
-    
-class BlankWindow(customtkinter.CTk):
-    """
-        Basic Window for the application  
-
-    Args:
-        customtkinter (_type_): standard custom tkinter node for a ctk application
-    
-    """
-    def __init__(self, fg_color: str | Tuple[str] | None = None, **kwargs):
-        super().__init__(fg_color, **kwargs)
-        self.title("title of the App")
-        self.geometry("600x600")
-        self.settings = load_settings()
-        self.lang = load_language(self.settings["LANG"])
-        customtkinter.set_default_color_theme("settings/theme.json")
-        customtkinter.set_appearance_mode(self.settings["mode"])   
+from frontend.customWidgets import customWidgets as cW
 
 class BlankToplevelWindow(customtkinter.CTkToplevel):
     """
@@ -54,6 +24,9 @@ class BlankToplevelWindow(customtkinter.CTkToplevel):
 
 
 class customNavButtons(cW.NavigationButtons):
+    """
+    Custom navigation buttons for the automation insertion window
+    """
     def __init__(self, master, objects: int = 2, values: Tuple[str] = None):
         super().__init__(master, objects, values)
         self.version_option = customtkinter.CTkOptionMenu(self, values=master.settings["HA_VERSIONS"], width=130, height=30, command=self.version_select)
@@ -70,12 +43,19 @@ class customNavButtons(cW.NavigationButtons):
 
 
 class AutoamtionInsertionFrame(customtkinter.CTkFrame):
-    """_summary_
-
+    """
+    Frame for the automation insertion window with a entry for the name, textbox for the automation code and buttons to add and delete the code 
+    
     Args:
-        customtkinter (_type_): _description_
+        customtkinter.CTkFrame (class): extended custom tkinter node for a ctk frame
     """
     def __init__(self, master,**kwargs):
+        """
+        Initialization of the frame for the automation insertion window with a entry for the name, textbox for the automation code and buttons to add and delete the code
+
+        Args:
+            master (customtkinter.CTKFrame): the parent frame of the automation insertion frame
+        """
         super().__init__(master, fg_color = "transparent",**kwargs)
         self.grid_columnconfigure(0,weight=1)
 
@@ -90,21 +70,30 @@ class AutoamtionInsertionFrame(customtkinter.CTkFrame):
         
 
     def textbox_del(self):
+        """
+        Deletes the text in the textbox
+        """
         self.textbox.delete("0.0", "end")
 
     def textbox_add(self):
+        """
+        Adds text to the textbox
+        """
         self.textbox.insert("0.0", " Text ")
 
     def safe_text(self):
+        """
+        Saves the text in the textbox
+        """
         self.text = self.textbox.get("0.0", "end")  # get text from line 0 character 0 till the end
 
 
-
-class AutoamtionAdditon(BlankWindow):
-    """_summary_
+class AutomationAddition(cW.BlankWindow):
+    """
+    The base window for adding a new automation to the database with the insertion frame displayed first
 
     Args:
-        customtkinter (_type_): _description_
+        cW.BlankWindow (class): custom blank basic window for the application
     """
     def __init__(self, project):
         super().__init__()
@@ -123,8 +112,3 @@ class AutoamtionAdditon(BlankWindow):
 
         self.navigaton_buttons = customNavButtons(self, objects=2, values=[self.lang["BACK"], self.lang["NEXT"]])
         self.navigaton_buttons.grid(row=3, column=0, padx=(50,50),pady=(0,15), sticky="news")
-
-
-if __name__ == "__main__":
-    app = AutoamtionAdditon(project="project1")
-    app.mainloop()

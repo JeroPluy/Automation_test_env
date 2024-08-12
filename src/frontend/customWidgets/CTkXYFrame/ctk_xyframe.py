@@ -2,6 +2,7 @@
 Advanced scrollable frame for customtkinter
 Author: Akash Bora
 License: MIT
+Link: https://github.com/Akascape/CTkXYFrame
 """
 
 import customtkinter

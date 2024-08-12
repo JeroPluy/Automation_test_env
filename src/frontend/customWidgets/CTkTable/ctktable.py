@@ -1,6 +1,9 @@
-# CTkTable Widget by Akascape
-# License: MIT
-# Author: Akash Bora
+"""
+ CTkTable Widget by Akascape
+ License: MIT
+ Author: Akash Bora
+ Link: https://github.com/Akascape/CTkTable
+"""
 
 import customtkinter
 import copy

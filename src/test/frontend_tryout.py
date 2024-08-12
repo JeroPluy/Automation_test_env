@@ -1,12 +1,8 @@
 """
-This is a test file to try out the custom tkinter widgets and the custom tkinter package.
-
-The python_path needs to be set to the src directory: (for venv)
-$env:PYTHONPATH = "..\\src"
+This is a test file to try out the custom tkinter widgets and the custom tkinter package for the application frontend
 """
 
 from os import path
-import json
 import tkinter
 from typing import Tuple
 
@@ -16,36 +12,22 @@ from PIL import Image
 
 from frontend.customWidgets import customWidgets as cW
 
-from frontend.customWidgets import CTkTable
-from frontend.customWidgets import CTkXYFrame
+from frontend.customWidgets.CTkTable import CTkTable
+from frontend.customWidgets.CTkXYFrame import CTkXYFrame
 
+from frontend.utils import load_settings, load_language, THEME_PATH, ICON_PATH
 
+# untested widgets which could be useful in the future
 # ctkmessagebox
-
 # ctktooltip
 # ctkscrollabledropdown
-
 # ctklistbox
 # ctkrangeslider
 
 
-def load_settings():
-    # print(path.join(path.dirname(path.realpath(__file__))))
-    with open("settings/settings.json", "r") as json_settings:
-        return json.load(json_settings)
-
-
-def load_language(lang):
-    with open("settings/appLang.json", "r", encoding="utf8") as json_lang:
-        langs = json.load(json_lang)
-        selected_lang = {}
-        for key in langs:
-            selected_lang[key] = langs.get(key)[lang]
-        return selected_lang
-
-
 class BlankWindow(customtkinter.CTk):
-    """Basic Window for the application
+    """
+    Basic Window for the application
 
     Args:
         customtkinter (_type_): standard custom tkinter node for a ctk application
@@ -55,14 +37,22 @@ class BlankWindow(customtkinter.CTk):
     def __init__(self, fg_color: str | Tuple[str] | None = None, **kwargs):
         super().__init__(fg_color, **kwargs)
         self.title("title of the App")
-        self.geometry("800x800")
+        self.geometry("1200x1200")
         self.settings = load_settings()
         self.lang = load_language(self.settings["LANG"])
-        customtkinter.set_default_color_theme("settings/theme.json")
+        customtkinter.set_default_color_theme(THEME_PATH)
         customtkinter.set_appearance_mode(self.settings["mode"])
 
 
 class ToplevelWindow(customtkinter.CTkToplevel):
+    """
+    Basic Toplevel window for the application to be used as a popup 
+    for example for error messages
+
+    Args:
+        customtkinter (_type_): standard custom tkinter node for a ctk toplevel window
+    """
+    
     def __init__(self, root=customtkinter.CTk, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.title("Testwindow")
@@ -76,6 +66,9 @@ class ToplevelWindow(customtkinter.CTkToplevel):
 
 
 class CombinedRadioBtns:
+    """
+    Combine radio buttons to only select one at a time
+    """
     def __init__(self):
         # the same variable combines radio buttons so only one is selectable
         self.variable = customtkinter.StringVar(value="nothing")
@@ -102,9 +95,23 @@ class CombinedRadioBtns:
 
 
 class TestWindow(BlankWindow):
+    """
+    Test Window for the application to try out the custom tkinter widgets
+
+    Args:
+        BlankWindow (class): standard blank window class for the application
+    """
+    
     def __init__(self, fg_color: str | Tuple[str] | None = None, **kwargs):
+        """
+        Initialize the TestWindow
+
+        Args:
+            fg_color (str | Tuple[str] | None, optional): set the theme color of the window. Defaults to None.
+        """
+        
         super().__init__(fg_color, **kwargs)
-        self.scrollable_frame = CTkXYFrame(self, width=400, height=400)
+        self.scrollable_frame = CTkXYFrame(self, width=800, height=800)
         self.header_font = customtkinter.CTkFont(weight="bold")
         self.label = customtkinter.CTkLabel(
             self.scrollable_frame, text="Testlabe", font=self.header_font
@@ -180,7 +187,7 @@ class TestWindow(BlankWindow):
             rb.pack(pady=10)
             self.rb_list.add_radiobtns([rb])
         self.not_round_btn = customtkinter.CTkButton(
-            self, text="round btn", corner_radius=6, command=self.rb_list.radiobtn_event
+            self.scrollable_frame, text="round btn", corner_radius=6, command=self.rb_list.radiobtn_event
         )
         self.segment_btn = customtkinter.CTkSegmentedButton(
             self,
@@ -200,14 +207,14 @@ class TestWindow(BlankWindow):
         self.moving_img = customtkinter.CTkImage(
             light_image=Image.open(
                 path.join(
-                    path.dirname(path.realpath(__file__)),
-                    "customWidgets/icons/loading_up_b.png",
+                    ICON_PATH,
+                    "loading_up_b.png",
                 )
             ),
             dark_image=Image.open(
                 path.join(
-                    path.dirname(path.realpath(__file__)),
-                    "customWidgets/icons/loading_up_w.png",
+                    ICON_PATH,
+                    "loading_up_w.png",
                 )
             ),
             size=(40, 40),
@@ -236,8 +243,10 @@ class TestWindow(BlankWindow):
             self, values=[self.lang["BACK"], self.lang["NEXT"]]
         )
 
-        self.scrollable_frame.grid(row=0, column=0, rowspan=3)
-
+        # grid the widgets
+        
+        # first row of the grid
+        self.scrollable_frame.grid(row=0, column=0, rowspan=4)
         self.label.grid(row=0, column=0, sticky="w")
         self.button.grid(row=1, column=0, sticky="w")
         self.window_btn.grid(row=3, column=0, sticky="wn")
@@ -246,8 +255,6 @@ class TestWindow(BlankWindow):
         self.entry2.grid(row=5, column=0, sticky="wn")
         self.disabled_btn.grid(row=6, column=0, sticky="wn")
         self.not_round_btn.grid(row=7, column=0, sticky="wn")
-        self.checkbox.grid(row=8, column=1, sticky="wn")
-        self.checkbox2.grid(row=9, column=1, sticky="wn")
         self.switch.grid(row=10, column=0, sticky="wn")
         self.radiobtn.grid(row=11, column=0, sticky="wn")
         self.radiobtn2.grid(row=12, column=0, sticky="wn")
@@ -256,11 +263,14 @@ class TestWindow(BlankWindow):
         self.combo_box.grid(row=15)
         self.optionmenu.grid(row=16)
         self.table.grid(row=20, column=0)
+        
+        self.checkbox.grid(row=4, column=0, sticky="wn")
+        self.checkbox2.grid(row=5, column=0, sticky="wn")
 
-        self.frame.grid(row=2, column=0, sticky="w")
-        self.frame_into_frame.grid(
-            row=0, column=0, sticky="wn", padx=(10, 10), pady=(10, 10)
-        )
+        # self.frame.grid(row=2, column=3, sticky="w")
+        # self.frame_into_frame.grid(
+        #     row=0, column=0, sticky="wn", padx=(10, 10), pady=(10, 10)
+        # )
 
         self.text_box.grid(row=1, column=1, sticky="news")
         self.text_undo_btn.grid(row=2, column=1, sticky="news")
@@ -284,6 +294,9 @@ class TestWindow(BlankWindow):
         self.grid_columnconfigure(1, weight=1)
 
     def change_theme(self):
+        """
+        Change the theme of the application
+        """
         self.current_theme = self.settings["mode"]
         if self.current_theme == "light":
             self.settings["mode"] = "dark"
@@ -292,6 +305,9 @@ class TestWindow(BlankWindow):
         customtkinter.set_appearance_mode(self.settings["mode"])
 
     def create_window(self):
+        """
+        Create a new toplevel window and disable the main window
+        """
         if self.toplevel_window is None or not self.toplevel_window.winfo_exists():
             self.toplevel_window = ToplevelWindow(root=self)
             # disables other main window until its closed
@@ -300,44 +316,80 @@ class TestWindow(BlankWindow):
             self.toplevel_window.focus()
 
     def disable_it(self):
+        """
+        Disable the checkbox
+        """
         self.checkbox.configure(state="disabled")
 
     def toggle_all(self):
+        """
+        Toggle the state of the checkbox
+        """
         # weird interaction between the disable command and toggle, because its only in normal state available
         self.checkbox.deselect()
 
     def combobox_callback(self, choice):
+        """
+        Print the choice of the combobox if clicked
+
+        Args:
+            choice (_type_): the choice of the combobox
+        """
         print("combobox dropdown clicked:", choice)
 
     def optionmenu_callback(self, choice):
+        """
+        Print the choice of the optionmenu if clicked
+
+        Args:
+            choice (_type_): the choice of the optionmenu
+        """
         print("option box dropdown clicked:", choice)
 
-    def set_progressbar(self, value):
+    def set_progressbar(self, value: int | float):
+        """
+        Set the progress bar to a specific value
+
+        Args:
+            value (int | float): the value to set the progress bar to
+        """
         self.progress_bar.set(int(value) / 10)
 
     def undo_last_change(self):
+        """
+        Undo the last change in the textbox
+        """
         try:
             self.text_box.edit_undo()
         except tkinter.TclError:
             print("nothing to undo")
 
-    def remove_placeholder(self, event):
+    def remove_placeholder(self):
+        """
+        Remove the placeholder text if the textbox is clicked
+        """
         print(self.text_box.get("0.0", "1.0"))
         if self.text_box.get("0.0", "end") == self.placeholder_text + "\n":
             print(True)
             self.text_box.delete("0.0", "end")
 
-    def rotate_the_clock(self, angle):
+    def rotate_the_clock(self, angle: int):
+        """
+        Rotate the clock image by a specific angle to animate it spinning
+
+        Args:
+            angle (int): the angle to rotate the image to 0 - 360
+        """
         spinning_img_white = Image.open(
             path.join(
-                path.dirname(path.realpath(__file__)),
-                "customWidgets/icons/loading_up_w.png",
+                ICON_PATH,
+                "loading_up_w.png",
             )
         )
         spinning_img_black = Image.open(
             path.join(
-                path.dirname(path.realpath(__file__)),
-                "customWidgets/icons/loading_up_b.png",
+                ICON_PATH,
+                "loading_up_b.png",
             )
         )
         self.moving_img = customtkinter.CTkImage(
@@ -347,6 +399,9 @@ class TestWindow(BlankWindow):
         )
 
     def animate_the_clock(self):
+        """
+        Animate the clock image spinning by 5 degrees every 50ms
+        """
         if self.rotating:
             self.spin += 5
             self.rotate_the_clock(self.spin)
@@ -358,11 +413,21 @@ class TestWindow(BlankWindow):
             self.after(50, self.animate_the_clock)
 
     def toggle_clock(self):
+        """
+        Toggle the clock image spinning animation
+        """
         self.rotating = not self.rotating
         if self.rotating:
             self.animate_the_clock()
 
-    def select_row_and_data(self, data):
+    def select_row_and_data(self, data: dict):
+        """
+        Select a row in the table and get the data of the selected row to print
+
+        Args:
+            data (dict): the data of the selected row in the table as a dictionary 
+                        contains: {"row": i, "column" : j, "value" : value, "args": args}
+        """
         # self.data[i,j] = {"row": i, "column" : j, "value" : value, "args": args}
         if self.selected_tb_data is not None:
             self.table.deselect_row(self.selected_tb_data["row"])
