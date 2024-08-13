@@ -1,5 +1,11 @@
 """
 This is a test file to try out the custom tkinter widgets and the custom tkinter package for the application frontend
+
+If the dont work properly, because some modules are not found, please run the following commands in the terminal:
+
+$env:PYTHONPATH = "..\\src"
+
+In some environments, the PYTHONPATH needs to be set to the src directory.
 """
 
 from os import path

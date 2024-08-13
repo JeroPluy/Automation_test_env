@@ -8566,7 +8566,7 @@ async def test_empty_config():
     yaml_dict = yaml_loader.load_yaml(empty_file)
     file_path = init_automation_script("empty_script", TEST_DIR)
     try:
-        results = create_procedure_list(yaml_dict, file_path)
+        create_procedure_list(yaml_dict, file_path)
     except TypeError as e:
         assert str(e) == "'NoneType' object is not subscriptable"
 
