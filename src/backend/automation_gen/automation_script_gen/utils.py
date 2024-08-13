@@ -4,7 +4,7 @@ provides basic functions for the other specialized parts.
 
 """
 
-from os import path
+from os import listdir, path
 from ...utils.env_const import AUTOMATION_SCRIPT, TEMPLATE_PATH
 
 
@@ -22,12 +22,32 @@ def init_automation_script(automation_name: str, dir_path: str = None) -> str:
     Returns:
         str: The path to the created automation script file.
     """
-    file_name = automation_name + ".py"
+    file_name = automation_name + "_V_1.py"
+        
     if dir_path is None:
-        filepath = path.join(AUTOMATION_SCRIPT, file_name)
+        dir_path = AUTOMATION_SCRIPT
+        filepath = path.join(dir_path, file_name)
     else:
         # for testing purposes
         filepath = path.join(dir_path, file_name)
+    
+    # check if the file already exists
+    if path.exists(filepath):
+        latest_version = 0
+        
+        # itterate over all files in the directory look for the latest version of the automation
+        for file in listdir(dir_path):
+            if file.startswith(f"{automation_name}_"):
+                # get the version number 
+                file_version = int(file.split("_V_")[-1].split(".")[0])
+                # update the latest version
+                if file_version > latest_version:
+                    latest_version = file_version
+        
+        # increment the version number
+        file_name = f"{automation_name}_V_{latest_version + 1}.py"
+        filepath = path.join(dir_path, file_name)
+            
 
     init_template = path.join(TEMPLATE_PATH, "init_template.py")
     try:
