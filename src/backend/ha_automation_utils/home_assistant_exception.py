@@ -72,3 +72,7 @@ class TemplateError(HomeAssistantError):
             super().__init__(exception)
         else:
             super().__init__(f"{exception.__class__.__name__}: {exception}")
+
+
+class YamlTypeError(HomeAssistantError):
+    """Raised by load_yaml_dict if top level data is not a dict."""

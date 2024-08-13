@@ -13,7 +13,7 @@ from typing import Any, TextIO
 
 import yaml
 
-from .home_assistant_exception import HomeAssistantError
+from .home_assistant_exception import HomeAssistantError, YamlTypeError
 
 try:
     from yaml import CSafeLoader as FastestAvailableSafeLoader
@@ -26,10 +26,6 @@ except ImportError:
 JSON_TYPE = list | dict | str
 
 _LOGGER = logging.getLogger(__name__)
-
-
-class YamlTypeError(HomeAssistantError):
-    """Raised by load_yaml_dict if top level data is not a dict."""
 
 
 class FastSafeLoader(FastestAvailableSafeLoader):

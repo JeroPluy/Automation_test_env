@@ -44,6 +44,20 @@ class Automation:
         self.script = automation_script
         self.project = project
 
+    def serialize(self)->dict:
+        """
+        Serialize the automation into a dictionary.
+
+        Returns:
+            dict: The automation as a dictionary
+        """
+        return {
+            "automation_name": self.a_name,
+            "automation_mode": self.autom_mode,
+            "max_instances": self.max_instances,
+            "script": self.script,
+            "project": self.project,
+        }
 
 class Entity:
     """
@@ -88,7 +102,13 @@ class Entity:
         else:
             self.expected_value = expected_value.copy()
 
-    def serialize(self):
+    def serialize(self)->dict:
+        """
+        Serialize the entity into a dictionary
+
+        Returns:
+            dict: The entity as a dictionary
+        """
         return {
             "integration": self.integration,
             "entity_name": self.entity_name,

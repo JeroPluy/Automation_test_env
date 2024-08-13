@@ -108,8 +108,7 @@ class ValidationStatus(StrEnum):
 class AutomationConfig(dict):
     """
     Dummy class to allow adding attributes to the automation configuration.
-
-
+    
     """
 
     raw_config: dict[str, Any] | None = None
@@ -122,7 +121,9 @@ class AutomationConfig(dict):
 async def _async_validate_config_item(config: ConfigType) -> AutomationConfig:
     """
     Validate the different parts of automation configurations.
-
+    
+    Returns:
+        AutomationConfig: The automation configuration with the validation status and error.
     """
     raw_config = None
     raw_blueprint_inputs = None
@@ -208,6 +209,9 @@ async def async_validate_config_item(
 ) -> AutomationConfig:
     """
     Function to await the results of the validation function
+    
+    Returns:
+        AutomationConfig: The automation configuration with the validation status and error.
     """
     return await _async_validate_config_item(config)
 
