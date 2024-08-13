@@ -1,10 +1,10 @@
 """
-This test module is used to test the functionality of the create automation 
+This test module is used to test the functionality of the create automation
 function and its sub functions on complete automations.
 """
 
-import asyncio
-
+from backend.automation_gen import validate_automation_config
+ 
 from backend.automation_gen.automation_script_gen import init_automation_script
 
 from backend.automation_gen.action_dissection import extract_all_actions
@@ -23,7 +23,12 @@ from backend.ha_automation_utils import (
 
 from backend.utils.env_helper_classes import Automation, Entity
 
+
 from os import listdir, mkdir, path
+
+import asyncio
+
+TEST_SCRIPT_DIR = path.join("src", "test", "test_automation_gen", "test_scripts")
 
 
 def print_entity_data(entity: Entity):
@@ -45,9 +50,9 @@ def print_entity_data(entity: Entity):
         if entity.parameter_role == 3
         else "unknown"
     )
-    
-    indentation = ": \t" if entity.parameter_role == 2 else ": \t\t" 
-    
+
+    indentation = ": \t" if entity.parameter_role == 2 else ": \t\t"
+
     print(
         role
         + indentation
@@ -84,35 +89,6 @@ def print_automation_data(automation_data: dict):
         print_entity_data(entity)
 
 
-def validate_automation_config(automation_yaml: dict) -> bool:
-    """
-    Validate the automation configuration
-
-    Args:
-        automation_yaml (dict): the automation configuration
-
-    Returns:
-        bool: True if the validation was successful, False otherwise
-    """
-    automation_config = asyncio.run(
-        ha_automation_config.async_validate_config_item(automation_yaml)
-    )
-    if not (automation_config.validation_status == "ok") and not (
-        automation_config.validation_status == "unknown_template"
-    ):
-        print(
-            automation_config.automation_name
-            + " : \t "
-            + automation_config.validation_status
-            + " : \t"
-            + str(automation_config.validation_error)
-            + "\n"
-        )
-        return None
-    else:
-        return automation_config
-
-
 def test_script_init(basis_file: str = None) -> str:
     """
     Test the script initialization and return the path of the generated script
@@ -126,9 +102,6 @@ def test_script_init(basis_file: str = None) -> str:
 
     TEST_SCRIPT_DIR = path.join("src", "test", "test_automation_gen", "test_scripts")
 
-    if not path.exists(TEST_SCRIPT_DIR):
-        mkdir(TEST_SCRIPT_DIR)
-
     # init the basis file if not given
     if basis_file is None:
         basis_file = path.join(
@@ -141,7 +114,6 @@ def test_script_init(basis_file: str = None) -> str:
         script_path = init_automation_script(
             automation_config.automation_name, TEST_SCRIPT_DIR
         )
-        print("Script created at: " + script_path)
         return script_path
 
 
@@ -258,7 +230,6 @@ def test_create_all_example_automation() -> list:
     yaml_dir = path.join("test_data", "yaml_files", "example_automations")
     for file in listdir(yaml_dir):
         if file.endswith(".yaml"):
-            
             # get the yaml file path
             basis_file = path.join(yaml_dir, file)
             # load the yaml file as a dictionary
@@ -271,7 +242,7 @@ def test_create_all_example_automation() -> list:
             print(
                 f"{automation_config.automation_name} - validation status: {automation_config.validation_status}"
             )
-            
+
             # check if the validation was not successful
             if not (automation_config.validation_status == "ok") and not (
                 automation_config.validation_status == "unknown_template"
@@ -303,6 +274,10 @@ def test_create_all_example_automation() -> list:
 
 
 if __name__ == "__main__":
+    # create the test script directory if it does not exist
+    if not path.exists(TEST_SCRIPT_DIR):
+        mkdir(TEST_SCRIPT_DIR)
+
     # Automation path for the test (only needed if you want to test a specific automation)
     # basis_file = path.join("test_data", "yaml_files", "test_yaml", "entity_extraction_test.yaml")
     basis_file = None
@@ -311,10 +286,13 @@ if __name__ == "__main__":
 
     # 1. Test the script initialization
     if test_case == 1:
-        print(test_script_init(basis_file=basis_file))
+        print("Script created at: " + test_script_init(basis_file=basis_file))
+
+        # repeat the test with the same basis file to check if the versioning works
+        print("Script created at: " + test_script_init(basis_file=basis_file))
 
     # 2. Test the entity extraction function for specific parts of the automation
-    elif test_case == 2:  
+    elif test_case == 2:
         test_trigger_entities(basis_file=basis_file)
         test_condition_entities(basis_file=basis_file)
         test_action_entities(basis_file=basis_file)

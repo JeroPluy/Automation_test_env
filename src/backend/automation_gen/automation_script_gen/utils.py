@@ -22,6 +22,10 @@ def init_automation_script(automation_name: str, dir_path: str = None) -> str:
     Returns:
         str: The path to the created automation script file.
     """
+    
+    if automation_name is None:
+        raise ValueError("The automation name must be provided")
+    
     file_name = automation_name + "_V_1.py"
         
     if dir_path is None:

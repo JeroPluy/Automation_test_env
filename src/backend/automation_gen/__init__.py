@@ -11,6 +11,6 @@
 
 # The import of the automation_gen package gives access to the `create_automation` main function, which is the entry point
 # for the automation generation process.
-from .config_dissection import create_automation
+from .automation_creation import add_new_automation, load_new_automation_data, validate_automation_config
 
-__all__ = ["create_automation"]
+__all__ = ["add_new_automation", "load_new_automation_data", "validate_automation_config"]
