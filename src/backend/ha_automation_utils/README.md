@@ -2,6 +2,8 @@
 
 The functions of the programs in this package enable loading YAML configuration files for automations and validating their structure and layout. In addition, constants used in Home Assistant are initialized to enable the functions and the dissection of the configuration files.
 
+> Most of the Code is from the home assistant repository. It is **not** completly from me. Every source is linked at the beginning of the modules.  
+
 ## Usage
 
 To use the functions in this package, follow these steps:

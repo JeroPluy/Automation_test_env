@@ -285,7 +285,7 @@ def create_combination_trigger_script(
         # add the trigger_id to the script and the triggered flag
         if trigger_id is None:
             script_context += (
-                f"{indentation}\ttrigger_id = None\n\t\ttriggered = True\n\n"
+                f"{indentation}\ttrigger_id = None\n{indentation}\ttriggered = True\n\n"
             )
         else:
             script_context += f"{indentation}\ttrigger_id = '{trigger_id}' \n{indentation}\ttriggered = True\n\n"
