@@ -1,5 +1,5 @@
 """
-This module brings together all extraction modules and enables the extraction of all automation entities 
+This module brings together all extraction modules and enables the extraction of all automation entities
 as well as the creation of the complete automation script.
 """
 
@@ -9,7 +9,7 @@ from .trigger_dissection import extract_all_trigger
 from .condtion_dissection import extract_all_conditions
 from .action_dissection import extract_all_actions
 
-from ..utils.env_const import SINGLE
+from ..utils.env_const import PARALLEL, QUEUED, RESTART, SINGLE
 
 from ..utils.env_helper_classes import Automation
 
@@ -25,15 +25,15 @@ def create_procedure_list(
 ) -> list:
     """
     Create a list of entities from the automation configuration and adds them to the automation script.
-    
+
     Args:
         automation_config (AutomationConfig): The automation configuration.
         script_path (str): The path to the automation script.
-    
+
     Returns:
         list: A list of entities.
     """
-    
+
     entity_list = []
     entity_list += extract_all_trigger(automation_config, script_path)
     entity_list += extract_all_conditions(automation_config, script_path)
@@ -44,10 +44,10 @@ def create_procedure_list(
 def create_automation(automation_config: AutomationConfig) -> dict:
     """
     Create an automation with all its information from the automation configuration.
-    
+
     Args:
         automation_config (AutomationConfig): The automation configuration.
-        
+
     Returns:
         dict: The automation data with all its information for inserting into the database.
     """
@@ -57,7 +57,20 @@ def create_automation(automation_config: AutomationConfig) -> dict:
     automation_script = asg.init_automation_script(automation_name)
 
     if CONF_MODE in automation_config:
-        mode = automation_config[CONF_MODE]
+        mode_str = automation_config[CONF_MODE]
+        # change the mode to the corresponding integer value
+        mode = (
+            SINGLE
+            if mode_str.lower() == "single"
+            else RESTART
+            if mode_str.lower() == "restart"
+            else QUEUED
+            if mode_str.lower() == "queued"
+            else PARALLEL
+            if mode_str.lower() == "parallel"
+            # default mode is single
+            else SINGLE
+        )
     else:
         mode = SINGLE
 
