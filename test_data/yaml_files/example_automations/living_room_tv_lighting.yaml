@@ -1,4 +1,4 @@
-alias: Fernseh-Beleuchtung
+alias: TV-Lighting-Living-Room
 description: ""
 trigger:
   - platform: state

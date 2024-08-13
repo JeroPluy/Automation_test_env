@@ -45,9 +45,12 @@ def print_entity_data(entity: Entity):
         if entity.parameter_role == 3
         else "unknown"
     )
+    
+    indentation = ": \t" if entity.parameter_role == 2 else ": \t\t" 
+    
     print(
         role
-        + ": \t \t"
+        + indentation
         + str(entity.parent)
         + ": \t"
         + str(entity.position)

@@ -1,7 +1,12 @@
-alias: Wohnzimmerlampe einschalten
-description: ""
+alias: Turn on living room main light
+description: >-
+  This automation turns on the main light in the living room when a movement or a
+  person is detected in the living room. If the sun has set and the main light in
+  the living room is on, it will turn on the ceiling lights in the living room. If
+  Krista is in the living room and the media player is not playing, it will turn on
+  the media player in the living room.
 trigger:
-  - alias: Wenn eine Bewegung erkannt wird
+  - alias: If a movement is detected
     platform: state
     entity_id:
       - binary_sensor.moving_living_room
@@ -12,24 +17,24 @@ trigger:
       - binary_sensor.person_living_room
     from: "off"
     to: "on"
-    alias: Wenn eine Person erkannt wird
+    alias: If a person is detected
 condition:
-  - alias: Ist die Sonne untergegangen
+  - alias: If the sun has set
     condition: sun
     after: sunrise
   - condition: state
     entity_id: light.main_light_living_room
-    state: "on"
-    alias: Ist das Deckenlicht angeschaltet
+    state: "off"
+    alias: If the main light is on
 action:
-  - alias: Deckenlicht einschalten
+  - alias: Turn on the ceiling lights
     service: light.turn_on
     data: {}
     target:
       entity_id: light.ceiling_lights
   - choose:
       - conditions:
-          - alias: Ist Person Krista im Wohnzimmer
+          - alias: If Krista is in the living room
             condition: state
             entity_id: sensor.whos_in_living_room
             state: Krista
@@ -39,7 +44,7 @@ action:
                 entity_id: media_player.living_room
                 state: playing
         sequence:
-          - alias: Musikanlage einschalten
+          - alias: turn on the media player
             service: media_player.media_play
             target:
               entity_id: media_player.living_room

@@ -1,4 +1,4 @@
-alias: Wohnzimmer Sonnenverdunkelung
+alias: Sun depended cover controll in the living room
 description: ""
 trigger:
   - platform: state

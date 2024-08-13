@@ -1,5 +1,7 @@
 alias: entity extraction test
-description: ""
+description: >-
+  This automation is a bundle of different triggers, conditions and actions. It
+  is used to test the parameter extraction and the automation script generation.
 trigger:
   - platform: state
     entity_id:

@@ -1,7 +1,10 @@
-alias: Deckenlicht mit Schalter ausschalten
+alias: Turn off living room main light with a switch
 description: >-
-  Die anderen Aktionen beim Ausschalten der Deckenlampe werden auf das
-  Ausschalten per Schalter übertragen.
+  This automation turns off the main light in the living room when the switch is
+  turned off. If the media player is playing, it will pause the media player and
+  turn off the automation that turns on the main light in the living room. After
+  1 minute, it will turn on the automation that turns on the main light in the
+  living room.
 trigger:
   - platform: state
     entity_id:

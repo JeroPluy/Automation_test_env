@@ -1,4 +1,6 @@
-description: ""
+description: >-
+  This automation is a converted blueprint automation to setup a light dection automation.
+  Its is complex and has a lot of conditions and triggers to test on.
 trigger:
   - platform: state
     id: t0

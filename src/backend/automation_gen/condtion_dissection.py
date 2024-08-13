@@ -136,6 +136,8 @@ def _condition_entities(
                     source=source,
                     combinator=condition,
                 )
+                # TODO add a not_ to the expected value of the entity/ies if not condition like exp_val = {not_state: "on"}
+                
                 entity_list += result_list[0]
                 position = result_list[1]
                 real_position = result_list[2]

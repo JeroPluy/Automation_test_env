@@ -1,4 +1,4 @@
-alias: Haus abschließen
+alias: Lock the house
 description: ""
 trigger:
   - platform: homeassistant

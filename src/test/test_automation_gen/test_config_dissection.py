@@ -122,11 +122,17 @@ async def run_automation(
     The function calls the automation script and returns the result
 
     Args:
-        automation (Automation): the automation to run
-
+        srcript_path (str): the path to the automation script
+        trigger_inputs (list): the inputs for the trigger
+        condition_inputs (list): the inputs for the condition
+        action_inputs (list): the inputs for the action. Default is an empty list
+        combined_inputs (list, optional): the inputs for the automation inputs 
+        containing the trigger, condition and action inputs as lists
+        
     Returns:
         str: the result of the automation
     """
+    
     if combined_inputs is None:
         input_vals = [trigger_inputs, condition_inputs, action_inputs]
     else:
@@ -137,7 +143,7 @@ async def run_automation(
     command = ["python", script_path, serialized_inputs]
 
     # async implementation
-    # Starten Sie den Subprozess asynchron
+    # starts the process and waits for it to finish
     proc = await create_subprocess_exec(
         *command,
         stdout=subprocess.PIPE,  # get the standard output
