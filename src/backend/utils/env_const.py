@@ -37,6 +37,10 @@ TEMPLATE_PATH = path.join("src", "backend", "automation_gen", "automation_script
 INIT_FILE = path.join("src", "backend", "database", "schema", "database_creation.sql")
 INTEG_DATA = path.join("src", "backend", "database", "schema", "insert_integrations.sql")
 
+# example automation path
+EXAMPLE_AUTOMATION_PATH = path.join("test_data", "yaml_files", "example_automations")
+TEST_YAML_PATH = path.join("test_data", "yaml_files", "test_yaml")
+
 # standard integrations
 standard_integrations = {
     "None": 0,

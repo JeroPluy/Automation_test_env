@@ -1,8 +1,10 @@
 # Testing
 
 > **Usage Information:**
->To run the test scripts in the [`./src/test`](https://github.com/JeroPluy/Automation_test_env/tree/main/src/test) directory, you may need to change the Python virtual environment path for the terminal where the script is called.
->The following command can be used for this.
+>To run the test scripts in the [`./src/test`](https://github.com/JeroPluy/Automation_test_env/tree/main/src/test) directory, you must first follow the [installation instructions](https://github.com/JeroPluy/Automation_test_env/tree/main?tab=readme-ov-file#installation). After you set up your environment you can proceed with the testing.
+>
+> If you encounter any import issues when running the test scripts, you may need to change the Python virtual environment path for the terminal where the program is called .
+>The following command can be used for this, if your root directory is the automation_test_env directory.
 >
 > ```shell
 > $env:PYTHONPATH = "..\\src"
@@ -29,5 +31,3 @@ In the last part of the validation check, all automation configurations the `./t
 ## Test Configuration Dissection
 
 The `test_config_dissection.py` is a combined testing script in which the extraction of entities and the generation of the appropriate automation script aus  are tested.
-
-

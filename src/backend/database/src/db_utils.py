@@ -41,10 +41,10 @@ def get_integration_id(integration_name: str) -> int:
 
     # if the integration is not in the standard integrations, search for it in the database
     if integration_id is None:
-        SEARCH_INTEGRATION = "SELECT i_id FROM integration WHERE i_name = ?"
+        SEARCH_INTEGRATION = "SELECT i_id FROM integration WHERE i_name = (?)"
         with sqlite.connect(DATABASE) as con:
             cur = con.cursor()
-            cur.execute(SEARCH_INTEGRATION, (integration_name))
+            cur.execute(SEARCH_INTEGRATION, (integration_name,))
             if cur.fetchone() is not None:
                 integration_id = cur.fetchone()[0]
 
@@ -74,3 +74,7 @@ def delete_automation(automation_id: int = None):
             cur.execute(DELETE_AUTOMATION, (automation_id,))
             cur.execute(DELETE_AUTOMATION_ENTITIES, (automation_id,))
         con.commit()
+    
+    # remove the autoamtion script from the file system
+    # if path.exists(file):
+    #     remove(file)

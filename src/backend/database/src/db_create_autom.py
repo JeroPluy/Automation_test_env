@@ -33,10 +33,15 @@ def _create_automation_in_db(automation_info: Automation):
 
     with sqlite.connect(DATABASE) as con:
         cur = con.cursor()
-        SELECT_VERSION = "SELECT info FROM additional_information AS add_info JOIN automation AS autom ON add_info.a_id == autom.a_id WHERE autom.a_name = ? and info_type = 'version'"
-        for same_automation_id in same_automation_ids:
-            cur.execute(SELECT_VERSION, (same_automation_id))
+        
+        # search for autoamtion with same name and get the version
+        GET_VERSION = "SELECT add_info.info FROM additional_information AS add_info JOIN automation AS autom ON add_info.a_id == autom.a_id WHERE autom.a_id = ? AND info_type = 'version'"
+        autom_id: int  = None
+        for autom_id in same_automation_ids:
+            cur.execute(GET_VERSION, (str(autom_id),))
             version = cur.fetchone()[0]
+        
+        # insert the new automation
         cur.execute(INSERT_AUTOMATION, (a_name, autom_mode, max_instances, script_path))
         a_id = cur.lastrowid
         con.commit()
@@ -85,10 +90,11 @@ def _create_automation_entities_in_db(a_id, entities: list):
         with sqlite.connect(DATABASE) as con:
             cur = con.cursor()
             cur.execute(SELECT_ENTITY, (entity.entity_name,))
-            if cur.fetchone() is None:
+            result = cur.fetchone()
+            if result is None:
                 return None
             else:
-                return cur.fetchone()
+                return result[0]
 
     # go through all entities and add them to the database
     for entity in entities:
@@ -102,7 +108,7 @@ def _create_automation_entities_in_db(a_id, entities: list):
                 same_entity,
                 entity.parameter_role,
                 entity.position,
-                entity.expected_value,
+                str(entity.expected_value),
                 entity.parent,
             ))
         else:
@@ -129,7 +135,7 @@ def _create_automation_entities_in_db(a_id, entities: list):
                     e_id,
                     entity.parameter_role,
                     entity.position,
-                    entity.expected_value,
+                    str(entity.expected_value),
                     entity.parent,
                 ))
 
@@ -141,15 +147,22 @@ def _create_automation_entities_in_db(a_id, entities: list):
         con.commit()
 
 
-def add_automation(automation_data: dict):
+def add_automation(automation_data: dict) -> int:
     """
     add the whole automation config to the database
 
     Args:
         automation: dict - the automation config to be added to the database
+    
+    Returns:
+        int - the id of the new automation in the database
     """
     a_id = _create_automation_in_db(automation_data["infos"])
-    _create_automation_entities_in_db(a_id, automation_data["entities"])
+    try:
+        _create_automation_entities_in_db(a_id, automation_data["entities"])
+    except Exception as e:
+        raise e
+    return a_id
 
 
 def add_integration(
