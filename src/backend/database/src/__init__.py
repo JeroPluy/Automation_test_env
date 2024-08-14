@@ -8,12 +8,13 @@ from backend.utils.env_const import (
     INTEG_DATA,
     EXAMPLE_AUTOMATION_PATH,
 )
-from backend.automation_gen.automation_creation import load_new_automation_data
+# from backend.automation_gen.automation_creation import load_new_automation_data
 
 from os import path
 import sqlite3 as sqlite
 
 from .db_create_autom import add_automation
+from .db_utils import get_entities
 
 
 def _load_data_foundation():
@@ -40,12 +41,12 @@ def _load_data_foundation():
     except sqlite.IntegrityError as e:
         print(str(e) + " - data already loaded")
 
-    # add an example automation to the database
-    add_automation(
-        load_new_automation_data(
-            path.join(EXAMPLE_AUTOMATION_PATH, "turn_off_living_room_main_light.yaml")
-        )
-    )
+    # add an example automation to the database not possible because of circular import
+    # add_automation(
+    #     load_new_automation_data(
+    #         path.join(EXAMPLE_AUTOMATION_PATH, "turn_off_living_room_main_light.yaml")
+    #     )
+    # )
 
 
 def init_db():

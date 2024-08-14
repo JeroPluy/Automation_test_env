@@ -10,6 +10,16 @@
 > $env:PYTHONPATH = "..\\src"
 > ```
 
+## The Current Status
+
+### Backend Tryout
+
+The application is not finished yet, but some basic functions can already be tried out and the test scripts can be executed with manual input. In the [`backend_tryout.py`](https://github.com/JeroPluy/Automation_test_env/blob/main/src/test/backend_tryout.py), automations can be completely added into the environment/database and executed with manual input data into the lists `trigger_input_vals`, `condition_input_vals` and `action_input_vals`. The automations to be performed should be located in the test_data/yaml_files/example_automations directory and contain integrations stored in the database, otherwise the addition of the entities will not work completely. All test modules in the directory can also be executed to confirm the functions of the automation generation.
+
+### Frontend Tryout
+
+The frontend is currently still under construction. The various components and their implementation can already be examined in [`frontend_tryout.py`](https://github.com/JeroPluy/Automation_test_env/blob/main/src/test/frontend_tryout.py) The preliminary application can be found in [`frontend/test_environment_app.py`](https://github.com/JeroPluy/Automation_test_env/blob/main/src/frontend/test_environment_app.py)
+
 ## YAML Import Testing
 
 The `test_yaml_import.py` script can be used to test the import of test automations from `./test_data/yaml_files/test_yaml/` as well as all the automations from the `./test_data/yaml_files/` directory with a `.yaml` ending.

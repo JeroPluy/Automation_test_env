@@ -1,3 +1,6 @@
+"""
+This file contains the test cases for the db utility functions. (in the future, the test cases will be added)
+"""
 
 from os import path
 

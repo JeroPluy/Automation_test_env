@@ -78,3 +78,28 @@ def delete_automation(automation_id: int = None):
     # remove the autoamtion script from the file system
     # if path.exists(file):
     #     remove(file)
+
+
+def get_entities(automation_id: int = None, automation_name: str = None) -> list:
+    """
+    Get the entities of an automation
+
+    Args:
+        automation_id: int - the id of the automation
+
+    Returns:
+        list - the entities of the automation
+    """
+    if automation_id is not None:
+        SELECT_ENTITIES = "SELECT ae.p_role, ae.parent, ae.position, entity.e_name, ae.exp_val FROM automation_entity AS ae JOIN entity ON entity.e_id == ae.e_id WHERE a_id = ?"
+        search_param = (automation_id,)
+    else:
+        SELECT_ENTITIES = "SELECT ae.p_role, ae.parent, ae.position, entity.e_name, ae.exp_val FROM automation_entity AS ae JOIN automation ON automation.a_id = ae.a_id JOIN entity ON entity.e_id = ae.e_id WHERE automation.a_name = ?"
+        search_param = (automation_name,)
+        
+    with sqlite.connect(DATABASE) as con:
+        cur = con.cursor()
+        cur.execute(SELECT_ENTITIES, search_param)
+        result = cur.fetchall()
+
+    return result

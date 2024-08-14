@@ -59,7 +59,7 @@ def test_import_test_automations():
     assert automation_yaml is not None and automation_yaml == {
         "alias": "test automation alias",
         "id": "1600000000000",
-        "description": "Basic description",
+        "description": "This automation just a test automation to test the yaml file validation.",
         "initial_state": True,
         "trace": {"stored_traces": 6},
         "variables": {"testVar": "test"},
@@ -127,7 +127,7 @@ def test_import_test_automations():
     automation_yaml = yaml_loader.load_yaml_dict(config_file)
     assert automation_yaml is not None and automation_yaml == {
         "alias": "entity extraction test",
-        "description": "",
+        "description": 'This automation is a bundle of different triggers, conditions and actions. It is used to test the parameter extraction and the automation script generation.',
         "trigger": [
             {
                 "platform": "state",

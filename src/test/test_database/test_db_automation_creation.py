@@ -29,8 +29,18 @@ def test_create_automation(test_file: str = None):
             "test_data",
             "yaml_files",
             "example_automations",
-            "lock_the_house.yaml",
+            "living_room_tv_lighting.yaml",
         )
+    # currently the following example automations are available:
+    # - turn_off_living_room_main_light.yaml
+    # - turn_off_living_room_main_light_switch.yaml
+    # - lock_the_house.yaml
+    # - living_room_tv_lighting.yaml
+    
+    # the following example automations are not available:
+    # - turn_on_living_room_main_light.yaml - Integration sensor not found in the database
+    # - sun_depended_cover_controll.yaml - Integration cover_entity not found in the database (Template entitiy naming error)
+    
 
     # create the automation information
     automation_data: dict = load_new_automation_data(test_file_path)
@@ -41,7 +51,8 @@ def test_create_automation(test_file: str = None):
         automation_id = db_create_autom.add_automation(automation_data)
     except Exception as e:
         print(e)
-        print("Error creating automation, please change the integration name of the entity or add the integration to the database")
+        print("Error creating automation, please change/specify the integration name of the entity or add the integration to the database")
+        return None
 
     # check if the automation was created
     assert automation_id is not None

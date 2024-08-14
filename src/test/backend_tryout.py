@@ -17,13 +17,47 @@ import json
 from os import path
 import subprocess
 
-from backend.utils.env_helper_classes import Automation
+from backend.utils.env_helper_classes import Automation, Entity
 
-from backend.automation_gen import automation_creation
-
+from backend.automation_gen import add_new_automation
+from backend.database import src as db
 
 DATABASE = path.join("data", "automation_test_env.sqlite")
 TEST_SCRIPT_DIR = path.join("src", "test", "test_automation_gen", "test_scripts")
+
+def print_entity_data(entity):
+    """
+    This function prints the entity data
+
+    Args:
+        entity (): the entity to print out
+    """
+    # make the parameter role readable (0=start, 1=condition, 2=action-condition, 3=action)
+    role = (
+        "start"
+        if entity[0] == 0
+        else "con"
+        if entity[0] == 1
+        else "action-con"
+        if entity[0] == 2
+        else "out"
+        if entity[0] == 3
+        else "unknown"
+    )
+
+    indentation = ": \t" if entity[0] == 2 else ": \t\t"
+
+    print(
+        role
+        + indentation
+        + str(entity[1])
+        + ": \t"
+        + str(entity[2])
+        + ": \t"
+        + entity[3]
+        + " : \t"
+        + str(entity[4])
+    )
 
 
 def run_sync_automation(
@@ -89,17 +123,27 @@ async def run_async_automation(script_path, inputs: list):
 if __name__ == "__main__":
     
     # path to the automation script file which is to be tested
-    automation_name = "turn_off_living_room_main_light"
+    automation_name = "Turn_off_living_room_main_light"
+    
+    # please add the automation.yaml file to the test_data/yaml_files/example_automations folder
+    yaml_file = "turn_off_living_room_main_light.yaml"
+    
     autoamtion_file = path.join(
         "data", "automation_scripts", automation_name + "_V_1.py"
     )
 
-    # check if the file exists and raise an error if it does not
+    # check if the file exists and look for the yaml file if it does not
     if not path.isfile(autoamtion_file):
         print(f"File {autoamtion_file} does not exist")
-        automation_creation.add_new_automation(autoamtion_file)
         
+        yaml_path = path.join("test_data", "yaml_files", "example_automations", yaml_file)
         
+        # please add the automation.yaml file to the test_data/yaml_files/example_automations folder
+        add_new_automation(yaml_path)
+        
+    entity_list = db.get_entities(automation_name=automation_name)
+    for entity in entity_list:
+        print_entity_data(entity)
 
     # the inputs for the automation script turn_off_living_room_main_light
     # start:          None:   0:      binary_sensor.moving_living_room :      {'to': 'off', 'from': 'on', 'for': {'hours': 0, 'minutes': 7, 'seconds': 0}}
@@ -110,6 +154,7 @@ if __name__ == "__main__":
     trigger_input_vals = [None, "off"]
     condition_input_vals = ["on"]
     action_input_vals = ["paused"]
+    
 
     input_vals = [trigger_input_vals, condition_input_vals, action_input_vals]
 

@@ -53,5 +53,5 @@ This project was implemented by Jerome Albert. The use of code from other source
 
 The coding process was supported by following AI-Tools:
 
-- [GitHub-Copilot](https://github.com/features/copilot) 
+- [GitHub-Copilot](https://github.com/features/copilot)
 - and [Phind](https://www.phind.com)

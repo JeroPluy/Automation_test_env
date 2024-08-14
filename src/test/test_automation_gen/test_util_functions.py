@@ -2,7 +2,7 @@
 This module contains the tests for the utility functions of the automation script generator.
 """
 
-from os import path, remove
+from os import mkdir, path, remove
 
 from backend.automation_gen.automation_script_gen.utils import (
     init_automation_script,
@@ -90,5 +90,9 @@ def test_create_locked_message():
 
 
 if __name__ == "__main__":
+    
+    if not path.exists(TEST_DIR):
+        mkdir(TEST_DIR)
+    
     test_init_automation_script()
     print("All tests passed.")
