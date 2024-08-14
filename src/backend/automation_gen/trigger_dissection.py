@@ -265,12 +265,19 @@ def _trigger_entities(
                 parent = position
                 position += 1
 
+                # change the integration to sensor_float if the entity is a sensor
+                integration = trigger_part[CONF_ABOVE].split(".")[0]
+                if integration == "sensor":
+                    integration = "sensor_float"
+                    # rename the entity name in the expected value of the main entity
+                    exp_value[CONF_ABOVE] = integration + "." + trigger_part[CONF_ABOVE].split(".")[1]
+
                 exp_value_entity_list.append(
                     Entity(
                         parent=parent,
                         position=None,
                         param_role=param_role,
-                        integration=trigger_part[CONF_ABOVE].split(".")[0],
+                        integration=integration,
                         entity_name=trigger_part[CONF_ABOVE].split(".")[1],
                         expected_value={
                             CONF_BELOW: ""
@@ -289,12 +296,19 @@ def _trigger_entities(
                     parent = position
                     position += 1
 
+                # change the integration to sensor_float if the entity is a sensor
+                integration = trigger_part[CONF_BELOW].split(".")[0]
+                if integration == "sensor":
+                    integration = "sensor_float"
+                    # rename the entity name in the expected value of the main entity
+                    exp_value[CONF_BELOW] = integration + "." +  trigger_part[CONF_BELOW].split(".")[1]
+
                 exp_value_entity_list.append(
                     Entity(
                         parent=parent,
                         position=None,
                         param_role=param_role,
-                        integration=trigger_part[CONF_BELOW].split(".")[0],
+                        integration=integration,
                         entity_name=trigger_part[CONF_BELOW].split(".")[1],
                         expected_value={
                             CONF_ABOVE: ""
@@ -316,7 +330,12 @@ def _trigger_entities(
             for entity in trigger_part[CONF_ENTITY_ID]:
                 position += 1
                 entity_integration = entity.split(".")[0]
+                # change the integration to sensor_float if the entity is a sensor
+                if entity_integration == "sensor":
+                    entity_integration = "sensor_float"
+
                 entity_name = entity.split(".")[1]
+
                 if CONF_ATTRIBUTE in trigger_part:
                     entity_name = entity_name + "." + str(trigger_part[CONF_ATTRIBUTE])
                 new_entity_list.append(
@@ -338,6 +357,10 @@ def _trigger_entities(
             else:
                 entity_name = trigger_part[CONF_ENTITY_ID].split(".")[1]
                 integration = trigger_part[CONF_ENTITY_ID].split(".")[0]
+            
+            # change the integration to sensor_float if the entity is a sensor
+            if integration == "sensor":
+                integration = "sensor_float"
 
             if CONF_ATTRIBUTE in trigger_part:
                 entity_name = entity_name + "." + str(trigger_part[CONF_ATTRIBUTE])

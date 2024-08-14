@@ -270,7 +270,7 @@ def create_action_script(
     result = ""
 
     if action_type == CONF_EVENT:
-        result = "{" + f"'{entity.integration}': {entity.expected_value}" + "}"
+        result =  f"{entity.expected_value}"
     elif action_type == CONF_DEVICE:
         result = (
             "{"

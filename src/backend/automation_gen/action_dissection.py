@@ -681,7 +681,7 @@ def _action_entities(
         # if the event has a data part
         if CONF_EVENT_DATA in action_part:
             event_data = {}
-            exp_value = {}
+            exp_value = {CONF_EVENT: action_part[CONF_EVENT]}
             for data_key in action_part[CONF_EVENT_DATA]:
                 event_data[data_key] = action_part[CONF_EVENT_DATA][data_key]
             exp_value[CONF_EVENT_DATA] = event_data
@@ -693,7 +693,7 @@ def _action_entities(
             parent=parent,
             position=position,
             param_role=param_role,
-            integration=action_part[CONF_EVENT],
+            integration=CONF_EVENT,
             entity_name=str(uuid.uuid4()),
             expected_value=exp_value,
         )

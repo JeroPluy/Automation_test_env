@@ -163,13 +163,20 @@ def _condition_entities(
             ):
                 new_parent = position
                 position += 1
+                
+                # change the integration to sensor_float if the entity is a sensor
+                integration=condition_part[CONF_ABOVE].split(".")[0]
+                if integration == "sensor":
+                    integration = "sensor_float"
+                    # rename the entity name in the expected value of the main entity
+                    exp_value[CONF_ABOVE] = integration + "." +  condition_part[CONF_ABOVE].split(".")[1]
 
                 exp_value_entity_list.append(
                     Entity(
                         parent=new_parent,
                         position=None,
                         param_role=param_role,
-                        integration=condition_part[CONF_ABOVE].split(".")[0],
+                        integration=integration,
                         entity_name=condition_part[CONF_ABOVE].split(".")[1],
                         expected_value={
                             CONF_BELOW: ""
@@ -187,13 +194,20 @@ def _condition_entities(
                 if new_parent is None:
                     new_parent = position
                     position += 1
+                
+                # change the integration to sensor_float if the entity is a sensor
+                integration=condition_part[CONF_BELOW].split(".")[0]
+                if integration == "sensor":
+                    integration = "sensor_float"
+                    # rename the entity name in the expected value of the main entity
+                    exp_value[CONF_BELOW] = integration + "." +  condition_part[CONF_BELOW].split(".")[1]
 
                 exp_value_entity_list.append(
                     Entity(
                         parent=new_parent,
                         position=None,
                         param_role=param_role,
-                        integration=condition_part[CONF_BELOW].split(".")[0],
+                        integration=integration,
                         entity_name=condition_part[CONF_BELOW].split(".")[1],
                         expected_value={
                             CONF_ABOVE: ""
@@ -216,6 +230,9 @@ def _condition_entities(
             for entity in condition_part[CONF_ENTITY_ID]:
                 position += 1
                 entity_integration = entity.split(".")[0]
+                # change the integration to sensor_float if the entity is a sensor
+                if entity_integration == "sensor":
+                    entity_integration = "sensor_float"
                 entity_name = entity.split(".")[1]
                 if CONF_ATTRIBUTE in condition_part:
                     entity_name = (
@@ -240,6 +257,10 @@ def _condition_entities(
             else:
                 entity_name = condition_part[CONF_ENTITY_ID].split(".")[1]
                 integration = condition_part[CONF_ENTITY_ID].split(".")[0]
+            
+            # change the integration to sensor_float if the entity is a sensor
+            if integration == "sensor":
+                integration = "sensor_float"
             if CONF_ATTRIBUTE in condition_part:
                 entity_name = entity_name + "." + str(condition_part[CONF_ATTRIBUTE])
             # create a single entity in the condion part

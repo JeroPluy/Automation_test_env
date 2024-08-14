@@ -126,13 +126,13 @@ async def run_automation(
         trigger_inputs (list): the inputs for the trigger
         condition_inputs (list): the inputs for the condition
         action_inputs (list): the inputs for the action. Default is an empty list
-        combined_inputs (list, optional): the inputs for the automation inputs 
+        combined_inputs (list, optional): the inputs for the automation inputs
         containing the trigger, condition and action inputs as lists
-        
+
     Returns:
         str: the result of the automation
     """
-    
+
     if combined_inputs is None:
         input_vals = [trigger_inputs, condition_inputs, action_inputs]
     else:
@@ -564,8 +564,8 @@ async def test_trigger_entities():
         assert entities_num_state_1[0].parent is None
         assert entities_num_state_1[0].position == 1
         assert entities_num_state_1[0].parameter_role == START
-        assert entities_num_state_1[0].integration == "sensor"
-        assert entities_num_state_1[0].entity_name == "sensor.temperature"
+        assert entities_num_state_1[0].integration == "sensor_float"
+        assert entities_num_state_1[0].entity_name == "sensor_float.temperature"
         assert entities_num_state_1[0].expected_value == {"below": 30}
         assert end_position == 1
 
@@ -609,8 +609,8 @@ async def test_trigger_entities():
         assert entities_num_state_2[0].parent is None
         assert entities_num_state_2[0].position == 1
         assert entities_num_state_2[0].parameter_role == START
-        assert entities_num_state_2[0].integration == "sensor"
-        assert entities_num_state_2[0].entity_name == "sensor.temperature"
+        assert entities_num_state_2[0].integration == "sensor_float"
+        assert entities_num_state_2[0].entity_name == "sensor_float.temperature"
         assert entities_num_state_2[0].expected_value == {"above": 20}
         assert end_position == 1
 
@@ -655,8 +655,8 @@ async def test_trigger_entities():
         assert entities_num_state_3[0].parent is None
         assert entities_num_state_3[0].position == 1
         assert entities_num_state_3[0].parameter_role == START
-        assert entities_num_state_3[0].integration == "sensor"
-        assert entities_num_state_3[0].entity_name == "sensor.temperature"
+        assert entities_num_state_3[0].integration == "sensor_float"
+        assert entities_num_state_3[0].entity_name == "sensor_float.temperature"
         assert entities_num_state_3[0].expected_value == {
             CONF_ABOVE: 20,
             CONF_BELOW: 30,
@@ -715,8 +715,8 @@ async def test_trigger_entities():
         assert entities_num_state_4[0].parent is None
         assert entities_num_state_4[0].position == 1
         assert entities_num_state_4[0].parameter_role == START
-        assert entities_num_state_4[0].integration == "sensor"
-        assert entities_num_state_4[0].entity_name == "sensor.temperature"
+        assert entities_num_state_4[0].integration == "sensor_float"
+        assert entities_num_state_4[0].entity_name == "sensor_float.temperature"
         assert entities_num_state_4[0].expected_value == {
             CONF_ABOVE: 20,
             CONF_BELOW: 30,
@@ -775,8 +775,11 @@ async def test_trigger_entities():
         assert entities_num_state_5[0].parent is None
         assert entities_num_state_5[0].position == 1
         assert entities_num_state_5[0].parameter_role == START
-        assert entities_num_state_5[0].integration == "sensor"
-        assert entities_num_state_5[0].entity_name == "sensor.temperature.attribute_1"
+        assert entities_num_state_5[0].integration == "sensor_float"
+        assert (
+            entities_num_state_5[0].entity_name
+            == "sensor_float.temperature.attribute_1"
+        )
         assert entities_num_state_5[0].expected_value == {CONF_ABOVE: 20}
         assert end_position == 1
 
@@ -816,18 +819,18 @@ async def test_trigger_entities():
         assert entities_num_state_6[0].parent == 1
         assert entities_num_state_6[0].position == 2
         assert entities_num_state_6[0].parameter_role == START
-        assert entities_num_state_6[0].integration == "sensor"
-        assert entities_num_state_6[0].entity_name == "sensor.temperature"
+        assert entities_num_state_6[0].integration == "sensor_float"
+        assert entities_num_state_6[0].entity_name == "sensor_float.temperature"
         assert entities_num_state_6[0].expected_value == {
-            CONF_BELOW: "sensor.temperature3",
+            CONF_BELOW: "sensor_float.temperature3",
         }
         assert entities_num_state_6[1].parent == 1
         assert entities_num_state_6[1].position == 3
         assert entities_num_state_6[1].parameter_role == START
-        assert entities_num_state_6[1].integration == "sensor"
-        assert entities_num_state_6[1].entity_name == "sensor.temperature3"
+        assert entities_num_state_6[1].integration == "sensor_float"
+        assert entities_num_state_6[1].entity_name == "sensor_float.temperature3"
         assert entities_num_state_6[1].expected_value == {
-            CONF_ABOVE: "sensor.temperature"
+            CONF_ABOVE: "sensor_float.temperature"
         }
         assert end_position == 3
         # border test cases - the list build like this [CONF_ABOVE, CONF_ENTITY_ID/s, CONF_BELOW]
@@ -880,18 +883,18 @@ async def test_trigger_entities():
         assert entities_num_state_7[0].parent == 1
         assert entities_num_state_7[0].position == 2
         assert entities_num_state_7[0].parameter_role == START
-        assert entities_num_state_7[0].integration == "sensor"
-        assert entities_num_state_7[0].entity_name == "sensor.temperature"
+        assert entities_num_state_7[0].integration == "sensor_float"
+        assert entities_num_state_7[0].entity_name == "sensor_float.temperature"
         assert entities_num_state_7[0].expected_value == {
-            CONF_ABOVE: "sensor.temperature2",
+            CONF_ABOVE: "sensor_float.temperature2",
         }
         assert entities_num_state_7[1].parent == 1
         assert entities_num_state_7[1].position == 3
         assert entities_num_state_7[1].parameter_role == START
-        assert entities_num_state_7[1].integration == "sensor"
-        assert entities_num_state_7[1].entity_name == "sensor.temperature2"
+        assert entities_num_state_7[1].integration == "sensor_float"
+        assert entities_num_state_7[1].entity_name == "sensor_float.temperature2"
         assert entities_num_state_7[1].expected_value == {
-            CONF_BELOW: "sensor.temperature"
+            CONF_BELOW: "sensor_float.temperature"
         }
         assert end_position == 3
         # border test cases - the list build like this [CONF_ABOVE, CONF_ENTITY_ID/s, CONF_BELOW]
@@ -946,36 +949,36 @@ async def test_trigger_entities():
         assert entities_num_state_8[0].parent == 3
         assert entities_num_state_8[0].position == 4
         assert entities_num_state_8[0].parameter_role == START
-        assert entities_num_state_8[0].integration == "sensor"
-        assert entities_num_state_8[0].entity_name == "sensor.temperature"
+        assert entities_num_state_8[0].integration == "sensor_float"
+        assert entities_num_state_8[0].entity_name == "sensor_float.temperature"
         assert entities_num_state_8[0].expected_value == {
-            CONF_BELOW: "sensor.temperature2",
-            CONF_ABOVE: "sensor.temperature3",
+            CONF_BELOW: "sensor_float.temperature2",
+            CONF_ABOVE: "sensor_float.temperature3",
         }
         assert entities_num_state_8[1].parent == 3
         assert entities_num_state_8[1].position == 5
         assert entities_num_state_8[1].parameter_role == START
-        assert entities_num_state_8[1].integration == "sensor"
-        assert entities_num_state_8[1].entity_name == "sensor.temperature4"
+        assert entities_num_state_8[1].integration == "sensor_float"
+        assert entities_num_state_8[1].entity_name == "sensor_float.temperature4"
         assert entities_num_state_8[1].expected_value == {
-            CONF_BELOW: "sensor.temperature2",
-            CONF_ABOVE: "sensor.temperature3",
+            CONF_BELOW: "sensor_float.temperature2",
+            CONF_ABOVE: "sensor_float.temperature3",
         }
         assert entities_num_state_8[2].parent == 2
         assert entities_num_state_8[2].position == 6
         assert entities_num_state_8[2].parameter_role == START
-        assert entities_num_state_8[2].integration == "sensor"
-        assert entities_num_state_8[2].entity_name == "sensor.temperature3"
+        assert entities_num_state_8[2].integration == "sensor_float"
+        assert entities_num_state_8[2].entity_name == "sensor_float.temperature3"
         assert entities_num_state_8[2].expected_value == {
-            CONF_BELOW: ["sensor.temperature", "sensor.temperature4"]
+            CONF_BELOW: ["sensor_float.temperature", "sensor_float.temperature4"]
         }
         assert entities_num_state_8[3].parent == 2
         assert entities_num_state_8[3].position == 7
         assert entities_num_state_8[3].parameter_role == START
-        assert entities_num_state_8[3].integration == "sensor"
-        assert entities_num_state_8[3].entity_name == "sensor.temperature2"
+        assert entities_num_state_8[3].integration == "sensor_float"
+        assert entities_num_state_8[3].entity_name == "sensor_float.temperature2"
         assert entities_num_state_8[3].expected_value == {
-            CONF_ABOVE: ["sensor.temperature", "sensor.temperature4"]
+            CONF_ABOVE: ["sensor_float.temperature", "sensor_float.temperature4"]
         }
         assert end_position == 7
         # border test cases -  - the list build like this [CONF_ABOVE, CONF_ENTITY_ID/s, CONF_BELOW]
@@ -2811,8 +2814,8 @@ async def test_condition_entities():
         assert entities_num_state_1[0].parent is None
         assert entities_num_state_1[0].position == 1
         assert entities_num_state_1[0].parameter_role == INPUT
-        assert entities_num_state_1[0].integration == "sensor"
-        assert entities_num_state_1[0].entity_name == "sensor.temperature"
+        assert entities_num_state_1[0].integration == "sensor_float"
+        assert entities_num_state_1[0].entity_name == "sensor_float.temperature"
         assert entities_num_state_1[0].expected_value == {"below": 30}
         assert end_position == 1
 
@@ -2866,8 +2869,8 @@ async def test_condition_entities():
         assert entities_num_state_2[0].parent is None
         assert entities_num_state_2[0].position == 1
         assert entities_num_state_2[0].parameter_role == INPUT
-        assert entities_num_state_2[0].integration == "sensor"
-        assert entities_num_state_2[0].entity_name == "sensor.temperature"
+        assert entities_num_state_2[0].integration == "sensor_float"
+        assert entities_num_state_2[0].entity_name == "sensor_float.temperature"
         assert entities_num_state_2[0].expected_value == {"above": 20}
         assert end_position == 1
 
@@ -2922,8 +2925,8 @@ async def test_condition_entities():
         assert entities_num_state_3[0].parent is None
         assert entities_num_state_3[0].position == 1
         assert entities_num_state_3[0].parameter_role == INPUT
-        assert entities_num_state_3[0].integration == "sensor"
-        assert entities_num_state_3[0].entity_name == "sensor.temperature"
+        assert entities_num_state_3[0].integration == "sensor_float"
+        assert entities_num_state_3[0].entity_name == "sensor_float.temperature"
         assert entities_num_state_3[0].expected_value == {"above": 20, "below": 30}
         assert end_position == 1
 
@@ -2993,8 +2996,8 @@ async def test_condition_entities():
         assert entities_num_state_4[0].parent is None
         assert entities_num_state_4[0].position == 1
         assert entities_num_state_4[0].parameter_role == INPUT
-        assert entities_num_state_4[0].integration == "sensor"
-        assert entities_num_state_4[0].entity_name == "sensor.temperature"
+        assert entities_num_state_4[0].integration == "sensor_float"
+        assert entities_num_state_4[0].entity_name == "sensor_float.temperature"
         assert entities_num_state_4[0].expected_value == {
             CONF_ABOVE: 20,
             CONF_BELOW: 30,
@@ -3057,8 +3060,11 @@ async def test_condition_entities():
         assert entities_num_state_5[0].parent is None
         assert entities_num_state_5[0].position == 1
         assert entities_num_state_5[0].parameter_role == INPUT
-        assert entities_num_state_5[0].integration == "sensor"
-        assert entities_num_state_5[0].entity_name == "sensor.temperature.attribute_1"
+        assert entities_num_state_5[0].integration == "sensor_float"
+        assert (
+            entities_num_state_5[0].entity_name
+            == "sensor_float.temperature.attribute_1"
+        )
         assert entities_num_state_5[0].expected_value == {CONF_ABOVE: 20}
         assert end_position == 1
 
@@ -3105,13 +3111,13 @@ async def test_condition_entities():
         assert entities_num_state_6[0].parent == 1
         assert entities_num_state_6[0].position == 2
         assert entities_num_state_6[0].parameter_role == INPUT
-        assert entities_num_state_6[0].integration == "sensor"
-        assert entities_num_state_6[0].entity_name == "sensor.temperature"
+        assert entities_num_state_6[0].integration == "sensor_float"
+        assert entities_num_state_6[0].entity_name == "sensor_float.temperature"
         assert entities_num_state_6[0].expected_value == {"below": 50}
         assert entities_num_state_6[1].position == 3
         assert entities_num_state_6[1].parameter_role == INPUT
-        assert entities_num_state_6[1].integration == "sensor"
-        assert entities_num_state_6[1].entity_name == "sensor.humidity"
+        assert entities_num_state_6[1].integration == "sensor_float"
+        assert entities_num_state_6[1].entity_name == "sensor_float.humidity"
         assert entities_num_state_6[1].expected_value == {"below": 50}
         assert end_position == 3
 
@@ -3175,8 +3181,8 @@ async def test_condition_entities():
         assert entities_num_state_7[0].parent is None
         assert entities_num_state_7[0].position == 1
         assert entities_num_state_7[0].parameter_role == INPUT
-        assert entities_num_state_7[0].integration == "sensor"
-        assert entities_num_state_7[0].entity_name == "sensor.temperature"
+        assert entities_num_state_7[0].integration == "sensor_float"
+        assert entities_num_state_7[0].entity_name == "sensor_float.temperature"
         assert entities_num_state_7[0].expected_value == {"above": 20}
         assert end_position == 1
 
@@ -3230,8 +3236,8 @@ async def test_condition_entities():
         assert entities_num_state_8[0].parent == 2
         assert entities_num_state_8[0].position == 4
         assert entities_num_state_8[0].parameter_role == INPUT
-        assert entities_num_state_8[0].integration == "sensor"
-        assert entities_num_state_8[0].entity_name == "sensor.temperature"
+        assert entities_num_state_8[0].integration == "sensor_float"
+        assert entities_num_state_8[0].entity_name == "sensor_float.temperature"
         assert entities_num_state_8[0].expected_value == {"above": 20}
         assert end_position == 4
 
@@ -3277,18 +3283,18 @@ async def test_condition_entities():
         assert entities_num_state_9[0].parent == 1
         assert entities_num_state_9[0].position == 2
         assert entities_num_state_9[0].parameter_role == INPUT
-        assert entities_num_state_9[0].integration == "sensor"
-        assert entities_num_state_9[0].entity_name == "sensor.temperature"
+        assert entities_num_state_9[0].integration == "sensor_float"
+        assert entities_num_state_9[0].entity_name == "sensor_float.temperature"
         assert entities_num_state_9[0].expected_value == {
-            CONF_ABOVE: "sensor.temperature2",
+            CONF_ABOVE: "sensor_float.temperature2",
         }
         assert entities_num_state_9[1].parent == 1
         assert entities_num_state_9[1].position == 3
         assert entities_num_state_9[1].parameter_role == INPUT
-        assert entities_num_state_9[1].integration == "sensor"
-        assert entities_num_state_9[1].entity_name == "sensor.temperature2"
+        assert entities_num_state_9[1].integration == "sensor_float"
+        assert entities_num_state_9[1].entity_name == "sensor_float.temperature2"
         assert entities_num_state_9[1].expected_value == {
-            CONF_BELOW: "sensor.temperature"
+            CONF_BELOW: "sensor_float.temperature"
         }
         assert end_position == 3
         # border test cases - the list build like this [CONF_ABOVE, CONF_ENTITY_ID/s, CONF_BELOW]
@@ -3353,36 +3359,36 @@ async def test_condition_entities():
         assert entities_num_state_10[0].parent == 3
         assert entities_num_state_10[0].position == 4
         assert entities_num_state_10[0].parameter_role == INPUT
-        assert entities_num_state_10[0].integration == "sensor"
-        assert entities_num_state_10[0].entity_name == "sensor.temperature"
+        assert entities_num_state_10[0].integration == "sensor_float"
+        assert entities_num_state_10[0].entity_name == "sensor_float.temperature"
         assert entities_num_state_10[0].expected_value == {
-            CONF_BELOW: "sensor.temperature2",
-            CONF_ABOVE: "sensor.temperature3",
+            CONF_BELOW: "sensor_float.temperature2",
+            CONF_ABOVE: "sensor_float.temperature3",
         }
         assert entities_num_state_10[1].parent == 3
         assert entities_num_state_10[1].position == 5
         assert entities_num_state_10[1].parameter_role == INPUT
-        assert entities_num_state_10[1].integration == "sensor"
-        assert entities_num_state_10[1].entity_name == "sensor.temperature4"
+        assert entities_num_state_10[1].integration == "sensor_float"
+        assert entities_num_state_10[1].entity_name == "sensor_float.temperature4"
         assert entities_num_state_10[1].expected_value == {
-            CONF_BELOW: "sensor.temperature2",
-            CONF_ABOVE: "sensor.temperature3",
+            CONF_BELOW: "sensor_float.temperature2",
+            CONF_ABOVE: "sensor_float.temperature3",
         }
         assert entities_num_state_10[2].parent == 2
         assert entities_num_state_10[2].position == 6
         assert entities_num_state_10[2].parameter_role == INPUT
-        assert entities_num_state_10[2].integration == "sensor"
-        assert entities_num_state_10[2].entity_name == "sensor.temperature3"
+        assert entities_num_state_10[2].integration == "sensor_float"
+        assert entities_num_state_10[2].entity_name == "sensor_float.temperature3"
         assert entities_num_state_10[2].expected_value == {
-            CONF_BELOW: ["sensor.temperature", "sensor.temperature4"]
+            CONF_BELOW: ["sensor_float.temperature", "sensor_float.temperature4"]
         }
         assert entities_num_state_10[3].parent == 2
         assert entities_num_state_10[3].position == 7
         assert entities_num_state_10[3].parameter_role == INPUT
-        assert entities_num_state_10[3].integration == "sensor"
-        assert entities_num_state_10[3].entity_name == "sensor.temperature2"
+        assert entities_num_state_10[3].integration == "sensor_float"
+        assert entities_num_state_10[3].entity_name == "sensor_float.temperature2"
         assert entities_num_state_10[3].expected_value == {
-            CONF_ABOVE: ["sensor.temperature", "sensor.temperature4"]
+            CONF_ABOVE: ["sensor_float.temperature", "sensor_float.temperature4"]
         }
         assert end_position == 7
         # border test cases -  - the list build like this [CONF_ABOVE, CONF_ENTITY_ID/s, CONF_BELOW]
@@ -4223,7 +4229,7 @@ async def test_condition_entities():
             CONF_CONDITIONS: [
                 {
                     CONF_CONDITION: CONF_NUMERIC_STATE,
-                    CONF_ENTITY_ID: ["binary_sensor.motion"],
+                    CONF_ENTITY_ID: ["sensor.brightness"],
                     CONF_ABOVE: 10,
                 },
                 {
@@ -4248,8 +4254,8 @@ async def test_condition_entities():
         assert entities_or_2[0].parent == 1
         assert entities_or_2[0].position == 2
         assert entities_or_2[0].parameter_role == INPUT
-        assert entities_or_2[0].integration == "binary_sensor"
-        assert entities_or_2[0].entity_name == "binary_sensor.motion"
+        assert entities_or_2[0].integration == "sensor_float"
+        assert entities_or_2[0].entity_name == "sensor_float.brightness"
         assert entities_or_2[0].expected_value == {CONF_ABOVE: 10}
         assert entities_or_2[1].parent == 1
         assert entities_or_2[1].position == 3
@@ -4360,24 +4366,28 @@ async def test_condition_entities():
         assert entities_or_3[4].parent == 8
         assert entities_or_3[4].position == 9
         assert entities_or_3[4].parameter_role == INPUT
-        assert entities_or_3[4].integration == "sensor"
-        assert entities_or_3[4].entity_name == "sensor.temperature"
+        assert entities_or_3[4].integration == "sensor_float"
+        assert entities_or_3[4].entity_name == "sensor_float.temperature"
         assert entities_or_3[4].expected_value == {
-            CONF_BELOW: "sensor.temperature2",
-            CONF_ABOVE: "sensor.temperature3",
+            CONF_BELOW: "sensor_float.temperature2",
+            CONF_ABOVE: "sensor_float.temperature3",
         }
         assert entities_or_3[5].parent == 8
         assert entities_or_3[5].position == 10
         assert entities_or_3[5].parameter_role == INPUT
-        assert entities_or_3[5].integration == "sensor"
-        assert entities_or_3[5].entity_name == "sensor.temperature3"
-        assert entities_or_3[5].expected_value == {CONF_BELOW: "sensor.temperature"}
+        assert entities_or_3[5].integration == "sensor_float"
+        assert entities_or_3[5].entity_name == "sensor_float.temperature3"
+        assert entities_or_3[5].expected_value == {
+            CONF_BELOW: "sensor_float.temperature"
+        }
         assert entities_or_3[6].parent == 8
         assert entities_or_3[6].position == 11
         assert entities_or_3[6].parameter_role == INPUT
-        assert entities_or_3[6].integration == "sensor"
-        assert entities_or_3[6].entity_name == "sensor.temperature2"
-        assert entities_or_3[6].expected_value == {CONF_ABOVE: "sensor.temperature"}
+        assert entities_or_3[6].integration == "sensor_float"
+        assert entities_or_3[6].entity_name == "sensor_float.temperature2"
+        assert entities_or_3[6].expected_value == {
+            CONF_ABOVE: "sensor_float.temperature"
+        }
         assert end_position == 11
 
         # the structure of the input:
@@ -4473,7 +4483,7 @@ async def test_condition_entities():
             CONF_CONDITIONS: [
                 {
                     CONF_CONDITION: CONF_NUMERIC_STATE,
-                    CONF_ENTITY_ID: ["binary_sensor.motion"],
+                    CONF_ENTITY_ID: ["sensor.brightness"],
                     CONF_ABOVE: 10,
                 },
                 {
@@ -4498,8 +4508,8 @@ async def test_condition_entities():
         assert entities_and_2[0].parent == 1
         assert entities_and_2[0].position == 2
         assert entities_and_2[0].parameter_role == INPUT
-        assert entities_and_2[0].integration == "binary_sensor"
-        assert entities_and_2[0].entity_name == "binary_sensor.motion"
+        assert entities_and_2[0].integration == "sensor_float"
+        assert entities_and_2[0].entity_name == "sensor_float.brightness"
         assert entities_and_2[0].expected_value == {CONF_ABOVE: 10}
         assert entities_and_2[1].parent == 1
         assert entities_and_2[1].position == 3
@@ -4609,24 +4619,28 @@ async def test_condition_entities():
         assert entities_and_3[4].parent == 8
         assert entities_and_3[4].position == 9
         assert entities_and_3[4].parameter_role == INPUT
-        assert entities_and_3[4].integration == "sensor"
-        assert entities_and_3[4].entity_name == "sensor.temperature"
+        assert entities_and_3[4].integration == "sensor_float"
+        assert entities_and_3[4].entity_name == "sensor_float.temperature"
         assert entities_and_3[4].expected_value == {
-            CONF_BELOW: "sensor.temperature2",
-            CONF_ABOVE: "sensor.temperature3",
+            CONF_BELOW: "sensor_float.temperature2",
+            CONF_ABOVE: "sensor_float.temperature3",
         }
         assert entities_and_3[5].parent == 8
         assert entities_and_3[5].position == 10
         assert entities_and_3[5].parameter_role == INPUT
-        assert entities_and_3[5].integration == "sensor"
-        assert entities_and_3[5].entity_name == "sensor.temperature3"
-        assert entities_and_3[5].expected_value == {CONF_BELOW: "sensor.temperature"}
+        assert entities_and_3[5].integration == "sensor_float"
+        assert entities_and_3[5].entity_name == "sensor_float.temperature3"
+        assert entities_and_3[5].expected_value == {
+            CONF_BELOW: "sensor_float.temperature"
+        }
         assert entities_and_3[6].parent == 8
         assert entities_and_3[6].position == 11
         assert entities_and_3[6].parameter_role == INPUT
-        assert entities_and_3[6].integration == "sensor"
-        assert entities_and_3[6].entity_name == "sensor.temperature2"
-        assert entities_and_3[6].expected_value == {CONF_ABOVE: "sensor.temperature"}
+        assert entities_and_3[6].integration == "sensor_float"
+        assert entities_and_3[6].entity_name == "sensor_float.temperature2"
+        assert entities_and_3[6].expected_value == {
+            CONF_ABOVE: "sensor_float.temperature"
+        }
         assert end_position == 11
 
         # the structure of the input: ([(ENTITY_ID, ENTITY_ID), (EXP_ENTITY_STATE, ENTITY_ID), (BELOW, STATE, ABOVE)])
@@ -4726,7 +4740,7 @@ async def test_condition_entities():
             CONF_CONDITIONS: [
                 {
                     CONF_CONDITION: CONF_NUMERIC_STATE,
-                    CONF_ENTITY_ID: ["binary_sensor.motion"],
+                    CONF_ENTITY_ID: ["sensor.brighness"],
                     CONF_ABOVE: 10,
                 },
                 {
@@ -4751,8 +4765,8 @@ async def test_condition_entities():
         assert entities_not_2[0].parent == 1
         assert entities_not_2[0].position == 2
         assert entities_not_2[0].parameter_role == INPUT
-        assert entities_not_2[0].integration == "binary_sensor"
-        assert entities_not_2[0].entity_name == "binary_sensor.motion"
+        assert entities_not_2[0].integration == "sensor_float"
+        assert entities_not_2[0].entity_name == "sensor_float.brighness"
         assert entities_not_2[0].expected_value == {CONF_ABOVE: 10}
         assert entities_not_2[1].parent == 1
         assert entities_not_2[1].position == 3
@@ -4869,24 +4883,24 @@ async def test_condition_entities():
         assert entities_not_3[4].parent == 8
         assert entities_not_3[4].position == 9
         assert entities_not_3[4].parameter_role == INPUT
-        assert entities_not_3[4].integration == "sensor"
-        assert entities_not_3[4].entity_name == "sensor.temperature"
+        assert entities_not_3[4].integration == "sensor_float"
+        assert entities_not_3[4].entity_name == "sensor_float.temperature"
         assert entities_not_3[4].expected_value == {
-            CONF_BELOW: "sensor.temperature2",
-            CONF_ABOVE: "sensor.temperature3",
+            CONF_BELOW: "sensor_float.temperature2",
+            CONF_ABOVE: "sensor_float.temperature3",
         }
         assert entities_not_3[5].parent == 8
         assert entities_not_3[5].position == 10
         assert entities_not_3[5].parameter_role == INPUT
-        assert entities_not_3[5].integration == "sensor"
-        assert entities_not_3[5].entity_name == "sensor.temperature3"
-        assert entities_not_3[5].expected_value == {CONF_BELOW: "sensor.temperature"}
+        assert entities_not_3[5].integration == "sensor_float"
+        assert entities_not_3[5].entity_name == "sensor_float.temperature3"
+        assert entities_not_3[5].expected_value == {CONF_BELOW: "sensor_float.temperature"}
         assert entities_not_3[6].parent == 8
         assert entities_not_3[6].position == 11
         assert entities_not_3[6].parameter_role == INPUT
-        assert entities_not_3[6].integration == "sensor"
-        assert entities_not_3[6].entity_name == "sensor.temperature2"
-        assert entities_not_3[6].expected_value == {CONF_ABOVE: "sensor.temperature"}
+        assert entities_not_3[6].integration == "sensor_float"
+        assert entities_not_3[6].entity_name == "sensor_float.temperature2"
+        assert entities_not_3[6].expected_value == {CONF_ABOVE: "sensor_float.temperature"}
         assert end_position == 11
 
         # the structure of the input: ([(ENTITY_ID, ENTITY_ID), (EXP_ENTITY_STATE, ENTITY_ID), (BELOW, STATE, ABOVE)])
@@ -8020,16 +8034,17 @@ async def test_action_entities():
         assert entities_event_1[0].parent is None
         assert entities_event_1[0].position == 1
         assert entities_event_1[0].parameter_role == OUTPUT
-        assert entities_event_1[0].integration == "test_event"
+        assert entities_event_1[0].integration == CONF_EVENT
         assert entities_event_1[0].entity_name is not None
         assert entities_event_1[0].expected_value == {
-            CONF_EVENT_DATA: {"test_data": "event_data"}
+            CONF_EVENT: "test_event",
+            CONF_EVENT_DATA: {"test_data": "event_data"},
         }
         assert end_position == 1
 
         action_part_event_1_input = []
         assert (await run_automation(file_path, [], [], action_part_event_1_input)) == [
-            {"test_event": {"event_data": {"test_data": "event_data"}}}
+            {"event": "test_event", "event_data": {"test_data": "event_data"}}
         ]
 
         assert real_pos == 0
@@ -8054,22 +8069,22 @@ async def test_action_entities():
         assert entities_event_2[0].parent is None
         assert entities_event_2[0].position == 10
         assert entities_event_2[0].parameter_role == OUTPUT
-        assert entities_event_2[0].integration == "test_event"
+        assert entities_event_2[0].integration == CONF_EVENT
         assert entities_event_2[0].entity_name is not None
         assert entities_event_2[0].expected_value == {
-            CONF_EVENT_DATA: {"test_data": "event_data", "test_data_2": "event_data_2"}
+            CONF_EVENT: "test_event",
+            CONF_EVENT_DATA: {"test_data": "event_data", "test_data_2": "event_data_2"},
         }
         assert end_position == 10
 
         action_part_event_2_input = []
         assert (await run_automation(file_path, [], [], action_part_event_2_input)) == [
             {
-                "test_event": {
-                    "event_data": {
-                        "test_data": "event_data",
-                        "test_data_2": "event_data_2",
-                    }
-                }
+                "event": "test_event",
+                "event_data": {
+                    "test_data": "event_data",
+                    "test_data_2": "event_data_2",
+                },
             }
         ]
 
