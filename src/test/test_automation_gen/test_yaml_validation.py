@@ -357,22 +357,25 @@ def test_preconfigured_yaml_files() -> None:
     The validation result is then printed to the console.
     """
 
-    dir_path = path.join("test_data", "yaml_files", "example_automations", "2024.08.02")
-    for file in listdir(dir_path):
-        if file.endswith(".yaml"):
-            yaml_dict = yaml_loader.load_yaml_dict(path.join(dir_path, file))
-            print("Test " + file)
-            validation_result = asyncio.run(
-                ha_automation_config.async_validate_config_item(yaml_dict)
-            )
-            print(
-                validation_result.automation_name
-                + " : \t "
-                + validation_result.validation_status
-                + " : \t"
-                + str(validation_result.validation_error)
-                + "\n"
-            )
+    dir_path = path.join("test_data", "yaml_files", "example_automations")
+    for dir in listdir(dir_path):
+        automation_dir = path.join(dir_path, dir)
+        print("--- " + dir + " ---")
+        for file in listdir(automation_dir):
+            if file.endswith(".yaml"):
+                yaml_dict = yaml_loader.load_yaml_dict(path.join(automation_dir, file))
+                print("Test " + file)
+                validation_result = asyncio.run(
+                    ha_automation_config.async_validate_config_item(yaml_dict)
+                )
+                print(
+                    validation_result.automation_name
+                    + " : \t "
+                    + validation_result.validation_status
+                    + " : \t"
+                    + str(validation_result.validation_error)
+                    + "\n"
+                )
 
 
 def test_yaml_configs():
