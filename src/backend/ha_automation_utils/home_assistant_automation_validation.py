@@ -205,7 +205,7 @@ async def _async_validate_config_item(config: ConfigType) -> AutomationConfig:
 
 
 async def async_validate_config_item(
-    config: dict[str, Any],
+    config: dict[str, Any], version: str = "latest" 
 ) -> AutomationConfig:
     """
     Function to await the results of the validation function

@@ -35,6 +35,7 @@ from .home_assistant_const import (
     ATTR_FLOOR_ID,
     ATTR_LABEL_ID,
     CONF_ABOVE,
+    CONF_ACTION,
     CONF_ALIAS,
     CONF_ATTRIBUTE,
     CONF_BELOW,
@@ -1281,21 +1282,19 @@ TARGET_SERVICE_FIELDS = {
 _HAS_ENTITY_SERVICE_FIELD = has_at_least_one_key(*ENTITY_SERVICE_FIELDS)
 
 
-def _make_entity_service_schema(schema: dict, extra: int) -> vol.Schema:
+def _make_entity_service_schema(schema: dict, extra: int) -> VolSchemaType:
     """Create an entity service schema."""
-    return vol.Schema(
-        vol.All(
-            vol.Schema(
-                {
-                    # The frontend stores data here. Don't use in core.
-                    vol.Remove("metadata"): dict,
-                    **schema,
-                    **ENTITY_SERVICE_FIELDS,
-                },
-                extra=extra,
-            ),
-            _HAS_ENTITY_SERVICE_FIELD,
-        )
+    return vol.All(
+        vol.Schema(
+            {
+                # The frontend stores data here. Don't use in core.
+                vol.Remove("metadata"): dict,
+                **schema,
+                **ENTITY_SERVICE_FIELDS,
+            },
+            extra=extra,
+        ),
+        _HAS_ENTITY_SERVICE_FIELD,
     )
 
 
@@ -1303,15 +1302,15 @@ BASE_ENTITY_SCHEMA = _make_entity_service_schema({}, vol.PREVENT_EXTRA)
 
 
 def make_entity_service_schema(
-    schema: dict, *, extra: int = vol.PREVENT_EXTRA
-) -> vol.Schema:
+    schema: dict | None, *, extra: int = vol.PREVENT_EXTRA
+) -> VolSchemaType:
     """Create an entity service schema."""
     if not schema and extra == vol.PREVENT_EXTRA:
         # If the schema is empty and we don't allow extra keys, we can return
         # the base schema and avoid compiling a new schema which is the case
         # for ~50% of services.
         return BASE_ENTITY_SCHEMA
-    return _make_entity_service_schema(schema, extra)
+    return _make_entity_service_schema(schema or {}, extra)
 
 
 SCRIPT_CONVERSATION_RESPONSE_SCHEMA = vol.Any(template, None)
@@ -1352,10 +1351,26 @@ EVENT_SCHEMA = vol.Schema({
     vol.Optional(CONF_EVENT_DATA_TEMPLATE): vol.All(dict, template_complex),
 })
 
+
+def _backward_compat_service_schema(value: Any | None) -> Any:
+    """Backward compatibility for service schemas."""
+    if not isinstance(value, dict):
+        return value
+    # `service` has been renamed to `action`
+    if CONF_SERVICE in value:
+        if CONF_ACTION in value:
+            raise vol.Invalid(
+                "Cannot specify both 'service' and 'action'. Please use 'action' only."
+            )
+        value[CONF_ACTION] = value.pop(CONF_SERVICE)
+    return value
+
+
 SERVICE_SCHEMA = vol.All(
+    _backward_compat_service_schema,
     vol.Schema({
         **SCRIPT_ACTION_BASE_SCHEMA,
-        vol.Exclusive(CONF_SERVICE, "service name"): vol.Any(service, dynamic_template),
+        vol.Exclusive(CONF_ACTION, "service name"): vol.Any(service, dynamic_template),
         vol.Exclusive(CONF_SERVICE_TEMPLATE, "service name"): vol.Any(
             service, dynamic_template
         ),
@@ -1371,7 +1386,7 @@ SERVICE_SCHEMA = vol.All(
         # The frontend stores data here. Don't use in core.
         vol.Remove("metadata"): dict,
     }),
-    has_at_least_one_key(CONF_SERVICE, CONF_SERVICE_TEMPLATE),
+    has_at_least_one_key(CONF_ACTION, CONF_SERVICE_TEMPLATE),
 )
 
 NUMERIC_STATE_THRESHOLD_SCHEMA = vol.Any(
@@ -1789,6 +1804,7 @@ ACTIONS_MAP = {
     CONF_WAIT_FOR_TRIGGER: SCRIPT_ACTION_WAIT_FOR_TRIGGER,
     CONF_VARIABLES: SCRIPT_ACTION_VARIABLES,
     CONF_IF: SCRIPT_ACTION_IF,
+    CONF_ACTION: SCRIPT_ACTION_CALL_SERVICE,
     CONF_SERVICE: SCRIPT_ACTION_CALL_SERVICE,
     CONF_SERVICE_TEMPLATE: SCRIPT_ACTION_CALL_SERVICE,
     CONF_STOP: SCRIPT_ACTION_STOP,

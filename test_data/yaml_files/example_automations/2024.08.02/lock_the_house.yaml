@@ -1,0 +1,31 @@
+alias: Lock the house
+description: ""
+trigger:
+  - platform: homeassistant
+    event: shutdown
+  - platform: tag
+    tag_id: e8f49c73-5394-44e1-a6c1-9c6088840ce8
+  - platform: event
+    event_type: service_call
+    event_data:
+      service: button.press
+condition: []
+action:
+  - parallel:
+      - action: alarm_control_panel.alarm_arm_away
+        target:
+          entity_id:
+            - alarm_control_panel.security
+        data: {}
+      - sequence:
+          - action: lock.lock
+            metadata: {}
+            data: {}
+            target:
+              entity_id: lock.front_door
+          - action: lock.lock
+            metadata: {}
+            data: {}
+            target:
+              entity_id: lock.kitchen_door
+mode: single
