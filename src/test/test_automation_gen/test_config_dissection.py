@@ -37,6 +37,7 @@ from backend.utils.env_const import INPUT, OUTPUT, START, ACTION_INPUT
 from backend.ha_automation_utils.home_assistant_const import (
     ATTR_AREA_ID,
     CONF_ABOVE,
+    CONF_ACTION,
     CONF_AFTER,
     CONF_AFTER_OFFSET,
     CONF_ALLOWED_METHODS,
@@ -6112,7 +6113,7 @@ async def test_action_entities():
         assert entities_call_service_1[0].integration == "light"
         assert entities_call_service_1[0].entity_name == "light.kitchen"
         assert entities_call_service_1[0].expected_value == {
-            CONF_SERVICE: "doSomething"
+            CONF_ACTION: "doSomething"
         }
         assert end_position == 1
 
@@ -6145,7 +6146,7 @@ async def test_action_entities():
         assert entities_call_service_2[0].integration == "light"
         assert entities_call_service_2[0].entity_name == "light.target_group"
         assert entities_call_service_2[0].expected_value == {
-            CONF_SERVICE: "doSomething",
+            CONF_ACTION: "doSomething",
             CONF_ENTITY_ID: ["light.kitchen", "light.living_room"],
         }
         assert end_position == 1
@@ -6183,7 +6184,7 @@ async def test_action_entities():
         assert entities_call_service_3[0].integration == "light"
         assert entities_call_service_3[0].entity_name == "light.target_group"
         assert entities_call_service_3[0].expected_value == {
-            CONF_SERVICE: "doSomething",
+            CONF_ACTION: "doSomething",
             CONF_ENTITY_ID: ["light.kitchen", "light.living_room"],
             ATTR_AREA_ID: "area.living_room",
             CONF_DEVICE_ID: "device_id_1",
@@ -6219,7 +6220,7 @@ async def test_action_entities():
         assert entities_call_service_4[0].integration == "light"
         assert entities_call_service_4[0].entity_name is not None
         assert entities_call_service_4[0].expected_value == {
-            CONF_SERVICE: "doSomething",
+            CONF_ACTION: "doSomething",
             "entity_id": "light.kitchen",
         }
         assert end_position == 1
@@ -6284,7 +6285,7 @@ async def test_action_entities():
         assert entities_call_service_6[0].integration == "light"
         assert entities_call_service_6[0].entity_name is not None
         assert entities_call_service_6[0].expected_value == {
-            CONF_SERVICE: "doSomething"
+            CONF_ACTION: "doSomething"
         }
         assert end_position == 1
 
@@ -6293,6 +6294,40 @@ async def test_action_entities():
         assert result.values() is not None
 
         assert real_pos == 0
+        
+    # Test case 7: Call service action with CONF_ACTION instead of CONF_SERVICE (new format for actions)
+    action_part_call_service_7 = {
+        CONF_ACTION: "light.doSomething",
+        CONF_TARGET: {CONF_ENTITY_ID: "light.kitchen"},
+    }
+    file_path = init_automation_script("action_part_call_service_7", ACTION_DIR)
+    test_condition_fill(file_path)
+    results = _action_entities(
+        action_part_call_service_7,
+        position=1,
+        real_position=0,
+        script_path=file_path,
+    )
+    close_action_section(file_path)
+    
+    entities_call_service_7, end_position, real_pos = results
+    assert len(entities_call_service_7) == 1
+    assert entities_call_service_7[0].parent is None
+    assert entities_call_service_7[0].position == 1
+    assert entities_call_service_7[0].parameter_role == OUTPUT
+    assert entities_call_service_7[0].integration == "light"
+    assert entities_call_service_7[0].entity_name == "light.kitchen"
+    assert entities_call_service_7[0].expected_value == {
+        CONF_ACTION: "doSomething"
+    }
+    assert end_position == 1
+    
+    assert (await run_automation(file_path, [], [])) == [
+        {"light.kitchen": "doSomething"}
+    ]
+    
+    assert real_pos == 0
+    
 
     async def test_action_branching():
         # Test case 1: Test branching action based on one condition
@@ -6331,7 +6366,7 @@ async def test_action_entities():
         assert entities_if_1[1].parameter_role == OUTPUT
         assert entities_if_1[1].integration == "light"
         assert entities_if_1[1].entity_name == "light.kitchen"
-        assert entities_if_1[1].expected_value == {CONF_SERVICE: "turn_on"}
+        assert entities_if_1[1].expected_value == {CONF_ACTION: "turn_on"}
         assert end_position == 2
 
         action_part_if_1_input = ["on"]
@@ -6360,13 +6395,13 @@ async def test_action_entities():
             ],
             CONF_THEN: [
                 {
-                    CONF_SERVICE: "light.turn_on",
+                    CONF_ACTION: "light.turn_on",
                     CONF_TARGET: {CONF_ENTITY_ID: "light.kitchen"},
                 }
             ],
             CONF_ELSE: [
                 {
-                    CONF_SERVICE: "light.turn_off",
+                    CONF_ACTION: "light.turn_off",
                     CONF_TARGET: {CONF_ENTITY_ID: "light.kitchen"},
                 }
             ],
@@ -6391,13 +6426,13 @@ async def test_action_entities():
         assert entities_if_2[1].parameter_role == OUTPUT
         assert entities_if_2[1].integration == "light"
         assert entities_if_2[1].entity_name == "light.kitchen"
-        assert entities_if_2[1].expected_value == {CONF_SERVICE: "turn_on"}
+        assert entities_if_2[1].expected_value == {CONF_ACTION: "turn_on"}
         assert entities_if_2[2].parent is None
         assert entities_if_2[2].position == 3
         assert entities_if_2[2].parameter_role == OUTPUT
         assert entities_if_2[2].integration == "light"
         assert entities_if_2[2].entity_name == "light.kitchen"
-        assert entities_if_2[2].expected_value == {CONF_SERVICE: "turn_off"}
+        assert entities_if_2[2].expected_value == {CONF_ACTION: "turn_off"}
         assert end_position == 3
 
         action_part_if_2_input = ["on"]
@@ -6453,7 +6488,7 @@ async def test_action_entities():
         assert entities_if_3[1].parameter_role == OUTPUT
         assert entities_if_3[1].integration == "light"
         assert entities_if_3[1].entity_name == "light.kitchen"
-        assert entities_if_3[1].expected_value == {CONF_SERVICE: "turn_off"}
+        assert entities_if_3[1].expected_value == {CONF_ACTION: "turn_off"}
         assert end_position == 2
 
         action_part_if_3_input = ["on"]
@@ -6518,7 +6553,7 @@ async def test_action_entities():
         assert entities_if_4[2].parameter_role == OUTPUT
         assert entities_if_4[2].integration == "light"
         assert entities_if_4[2].entity_name == "light.kitchen"
-        assert entities_if_4[2].expected_value == {CONF_SERVICE: "turn_on"}
+        assert entities_if_4[2].expected_value == {CONF_ACTION: "turn_on"}
         assert end_position == 4
 
         action_part_if_4_input = ["on", "off"]
@@ -6595,14 +6630,14 @@ async def test_action_entities():
         assert entities_if_5[2].parameter_role == OUTPUT
         assert entities_if_5[2].integration == "light"
         assert entities_if_5[2].entity_name == "light.kitchen"
-        assert entities_if_5[2].expected_value == {CONF_SERVICE: "turn_on"}
+        assert entities_if_5[2].expected_value == {CONF_ACTION: "turn_on"}
         assert entities_if_5[3].parent == 30
         assert entities_if_5[3].position == 32
         assert entities_if_5[3].parameter_role == OUTPUT
         assert entities_if_5[3].integration == "light"
         assert entities_if_5[3].entity_name == "light.target_group"
         assert entities_if_5[3].expected_value == {
-            CONF_SERVICE: "turn_on",
+            CONF_ACTION: "turn_on",
             CONF_ENTITY_ID: ["light.hallway", "light.living_room"],
         }
         assert entities_if_5[4].parent is None
@@ -6611,7 +6646,7 @@ async def test_action_entities():
         assert entities_if_5[4].integration == "light"
         assert entities_if_5[4].entity_name == "light.target_group"
         assert entities_if_5[4].expected_value == {
-            CONF_SERVICE: "turn_off",
+            CONF_ACTION: "turn_off",
             ATTR_AREA_ID: "living_room",
         }
         assert end_position == 33
@@ -6657,7 +6692,7 @@ async def test_action_entities():
         assert entities_if_6[0].parameter_role == OUTPUT
         assert entities_if_6[0].integration == "light"
         assert entities_if_6[0].entity_name == "light.kitchen"
-        assert entities_if_6[0].expected_value == {CONF_SERVICE: "turn_off"}
+        assert entities_if_6[0].expected_value == {CONF_ACTION: "turn_off"}
         assert end_position == 1
 
         assert (await run_automation(file_path, [], [])) == [
@@ -6707,13 +6742,13 @@ async def test_action_entities():
         assert entities_choose_1[1].parameter_role == OUTPUT
         assert entities_choose_1[1].integration == "light"
         assert entities_choose_1[1].entity_name == "light.kitchen"
-        assert entities_choose_1[1].expected_value == {CONF_SERVICE: "turn_on"}
+        assert entities_choose_1[1].expected_value == {CONF_ACTION: "turn_on"}
         assert entities_choose_1[2].parent == 3
         assert entities_choose_1[2].position == 5
         assert entities_choose_1[2].parameter_role == OUTPUT
         assert entities_choose_1[2].integration == "light"
         assert entities_choose_1[2].entity_name == "light.living_room"
-        assert entities_choose_1[2].expected_value == {CONF_SERVICE: "turn_off"}
+        assert entities_choose_1[2].expected_value == {CONF_ACTION: "turn_off"}
         assert end_position == 5
 
         action_part_choose_1_input = ["on"]
@@ -6791,13 +6826,13 @@ async def test_action_entities():
         assert entities_choose_2[2].parameter_role == OUTPUT
         assert entities_choose_2[2].integration == "light"
         assert entities_choose_2[2].entity_name == "light.kitchen"
-        assert entities_choose_2[2].expected_value == {CONF_SERVICE: "turn_on"}
+        assert entities_choose_2[2].expected_value == {CONF_ACTION: "turn_on"}
         assert entities_choose_2[3].parent == 5
         assert entities_choose_2[3].position == 7
         assert entities_choose_2[3].parameter_role == OUTPUT
         assert entities_choose_2[3].integration == "light"
         assert entities_choose_2[3].entity_name == "light.living_room"
-        assert entities_choose_2[3].expected_value == {CONF_SERVICE: "turn_off"}
+        assert entities_choose_2[3].expected_value == {CONF_ACTION: "turn_off"}
         assert end_position == 7
 
         action_part_choose_2_input = ["on", "off"]
@@ -6899,13 +6934,13 @@ async def test_action_entities():
         assert entities_choose_3[2].parameter_role == OUTPUT
         assert entities_choose_3[2].integration == "light"
         assert entities_choose_3[2].entity_name == "light.kitchen"
-        assert entities_choose_3[2].expected_value == {CONF_SERVICE: "turn_on"}
+        assert entities_choose_3[2].expected_value == {CONF_ACTION: "turn_on"}
         assert entities_choose_3[3].parent == 5
         assert entities_choose_3[3].position == 7
         assert entities_choose_3[3].parameter_role == OUTPUT
         assert entities_choose_3[3].integration == "light"
         assert entities_choose_3[3].entity_name == "light.living_room"
-        assert entities_choose_3[3].expected_value == {CONF_SERVICE: "turn_off"}
+        assert entities_choose_3[3].expected_value == {CONF_ACTION: "turn_off"}
         assert entities_choose_3[4].parent == 8
         assert entities_choose_3[4].position == 9
         assert entities_choose_3[4].parameter_role == ACTION_INPUT
@@ -6923,13 +6958,13 @@ async def test_action_entities():
         assert entities_choose_3[6].parameter_role == OUTPUT
         assert entities_choose_3[6].integration == "light"
         assert entities_choose_3[6].entity_name == "light.kitchen"
-        assert entities_choose_3[6].expected_value == {CONF_SERVICE: "turn_off"}
+        assert entities_choose_3[6].expected_value == {CONF_ACTION: "turn_off"}
         assert entities_choose_3[7].parent == 11
         assert entities_choose_3[7].position == 13
         assert entities_choose_3[7].parameter_role == OUTPUT
         assert entities_choose_3[7].integration == "light"
         assert entities_choose_3[7].entity_name == "light.living_room"
-        assert entities_choose_3[7].expected_value == {CONF_SERVICE: "turn_on"}
+        assert entities_choose_3[7].expected_value == {CONF_ACTION: "turn_on"}
         assert end_position == 13
 
         # both conditions pairs are met so only the first sequence is executed
@@ -7017,7 +7052,7 @@ async def test_action_entities():
         assert entities_choose_4[1].parameter_role == OUTPUT
         assert entities_choose_4[1].integration == "light"
         assert entities_choose_4[1].entity_name == "light.kitchen"
-        assert entities_choose_4[1].expected_value == {CONF_SERVICE: "turn_on"}
+        assert entities_choose_4[1].expected_value == {CONF_ACTION: "turn_on"}
         assert entities_choose_4[2].parent == 1
         assert entities_choose_4[2].position == 4
         assert entities_choose_4[2].parameter_role == ACTION_INPUT
@@ -7029,13 +7064,13 @@ async def test_action_entities():
         assert entities_choose_4[3].parameter_role == OUTPUT
         assert entities_choose_4[3].integration == "light"
         assert entities_choose_4[3].entity_name == "light.kitchen"
-        assert entities_choose_4[3].expected_value == {CONF_SERVICE: "turn_off"}
+        assert entities_choose_4[3].expected_value == {CONF_ACTION: "turn_off"}
         assert entities_choose_4[4].parent == 1
         assert entities_choose_4[4].position == 6
         assert entities_choose_4[4].parameter_role == OUTPUT
         assert entities_choose_4[4].integration == "light"
         assert entities_choose_4[4].entity_name == "light.living_room"
-        assert entities_choose_4[4].expected_value == {CONF_SERVICE: "toggle"}
+        assert entities_choose_4[4].expected_value == {CONF_ACTION: "toggle"}
         assert end_position == 6
 
         # both conditions are met so only the first sequence is executed
@@ -7110,7 +7145,7 @@ async def test_action_entities():
         assert entities_choose_6[1].parameter_role == OUTPUT
         assert entities_choose_6[1].integration == "light"
         assert entities_choose_6[1].entity_name == "light.kitchen"
-        assert entities_choose_6[1].expected_value == {CONF_SERVICE: "turn_on"}
+        assert entities_choose_6[1].expected_value == {CONF_ACTION: "turn_on"}
         assert entities_choose_6[2].parent == 18
         assert entities_choose_6[2].position == 21
         assert entities_choose_6[2].parameter_role == ACTION_INPUT
@@ -7122,7 +7157,7 @@ async def test_action_entities():
         assert entities_choose_6[3].parameter_role == OUTPUT
         assert entities_choose_6[3].integration == "light"
         assert entities_choose_6[3].entity_name == "light.kitchen"
-        assert entities_choose_6[3].expected_value == {CONF_SERVICE: "turn_off"}
+        assert entities_choose_6[3].expected_value == {CONF_ACTION: "turn_off"}
         assert end_position == 22
 
         # both conditions are met so only the first sequence is executed
@@ -7172,13 +7207,13 @@ async def test_action_entities():
         assert entities_parallel_1[0].parameter_role == OUTPUT
         assert entities_parallel_1[0].integration == "light"
         assert entities_parallel_1[0].entity_name == "light.kitchen"
-        assert entities_parallel_1[0].expected_value == {CONF_SERVICE: "turn_on"}
+        assert entities_parallel_1[0].expected_value == {CONF_ACTION: "turn_on"}
         assert entities_parallel_1[1].parent == 1
         assert entities_parallel_1[1].position == 3
         assert entities_parallel_1[1].parameter_role == OUTPUT
         assert entities_parallel_1[1].integration == "light"
         assert entities_parallel_1[1].entity_name == "light.living_room"
-        assert entities_parallel_1[1].expected_value == {CONF_SERVICE: "turn_on"}
+        assert entities_parallel_1[1].expected_value == {CONF_ACTION: "turn_on"}
         assert end_position == 3
 
         assert (await run_automation(file_path, [], [])) == [
@@ -7214,13 +7249,13 @@ async def test_action_entities():
         assert entities_parallel_2[0].parameter_role == OUTPUT
         assert entities_parallel_2[0].integration == "light"
         assert entities_parallel_2[0].entity_name == "light.kitchen"
-        assert entities_parallel_2[0].expected_value == {CONF_SERVICE: "turn_on"}
+        assert entities_parallel_2[0].expected_value == {CONF_ACTION: "turn_on"}
         assert entities_parallel_2[1].parent == 20
         assert entities_parallel_2[1].position == 22
         assert entities_parallel_2[1].parameter_role == OUTPUT
         assert entities_parallel_2[1].integration == "light"
         assert entities_parallel_2[1].entity_name == "light.living_room"
-        assert entities_parallel_2[1].expected_value == {CONF_SERVICE: "turn_on"}
+        assert entities_parallel_2[1].expected_value == {CONF_ACTION: "turn_on"}
         assert end_position == 22
 
         assert (await run_automation(file_path, [], [])) == [
@@ -7256,7 +7291,7 @@ async def test_action_entities():
         assert entities_repeat_1[0].parameter_role == OUTPUT
         assert entities_repeat_1[0].integration == "light"
         assert entities_repeat_1[0].entity_name == "light.kitchen"
-        assert entities_repeat_1[0].expected_value == {CONF_SERVICE: "turn_on"}
+        assert entities_repeat_1[0].expected_value == {CONF_ACTION: "turn_on"}
         assert end_position == 1
 
         assert (await run_automation(file_path, [], [])) == [
@@ -7300,7 +7335,7 @@ async def test_action_entities():
         assert entities_repeat_2[1].parameter_role == OUTPUT
         assert entities_repeat_2[1].integration == "light"
         assert entities_repeat_2[1].entity_name == "light.kitchen"
-        assert entities_repeat_2[1].expected_value == {CONF_SERVICE: "turn_on"}
+        assert entities_repeat_2[1].expected_value == {CONF_ACTION: "turn_on"}
         assert end_position == 2
 
         action_part_repeat_2_input = ["off"]
@@ -7359,7 +7394,7 @@ async def test_action_entities():
         assert entities_repeat_3[1].parameter_role == OUTPUT
         assert entities_repeat_3[1].integration == "light"
         assert entities_repeat_3[1].entity_name == "light.kitchen"
-        assert entities_repeat_3[1].expected_value == {CONF_SERVICE: "turn_on"}
+        assert entities_repeat_3[1].expected_value == {CONF_ACTION: "turn_on"}
         assert end_position == 2
 
         action_part_repeat_3_input = ["off"]
@@ -7430,7 +7465,7 @@ async def test_action_entities():
         assert entities_repeat_4[2].parameter_role == OUTPUT
         assert entities_repeat_4[2].integration == "light"
         assert entities_repeat_4[2].entity_name == "light.kitchen"
-        assert entities_repeat_4[2].expected_value == {CONF_SERVICE: "turn_on"}
+        assert entities_repeat_4[2].expected_value == {CONF_ACTION: "turn_on"}
         assert end_position == 4
 
         action_part_repeat_4_input = ["off", "off"]
@@ -7510,7 +7545,7 @@ async def test_action_entities():
         assert entities_repeat_5[2].parameter_role == OUTPUT
         assert entities_repeat_5[2].integration == "light"
         assert entities_repeat_5[2].entity_name == "light.kitchen"
-        assert entities_repeat_5[2].expected_value == {CONF_SERVICE: "turn_on"}
+        assert entities_repeat_5[2].expected_value == {CONF_ACTION: "turn_on"}
         assert end_position == 4
 
         action_part_repeat_5_input = ["off", "off"]
@@ -7567,13 +7602,13 @@ async def test_action_entities():
         assert entities_repeat_6[0].parameter_role == OUTPUT
         assert entities_repeat_6[0].integration == "light"
         assert entities_repeat_6[0].entity_name == "light.kitchen"
-        assert entities_repeat_6[0].expected_value == {CONF_SERVICE: "turn_on"}
+        assert entities_repeat_6[0].expected_value == {CONF_ACTION: "turn_on"}
         assert entities_repeat_6[1].parent is None
         assert entities_repeat_6[1].position == 2
         assert entities_repeat_6[1].parameter_role == OUTPUT
         assert entities_repeat_6[1].integration == "light"
         assert entities_repeat_6[1].entity_name == "light.kitchen"
-        assert entities_repeat_6[1].expected_value == {CONF_SERVICE: "turn_off"}
+        assert entities_repeat_6[1].expected_value == {CONF_ACTION: "turn_off"}
         assert end_position == 2
 
         assert (await run_automation(file_path, [], [])) == [
@@ -7636,13 +7671,13 @@ async def test_action_entities():
         assert entities_repeat_7[2].parameter_role == OUTPUT
         assert entities_repeat_7[2].integration == "light"
         assert entities_repeat_7[2].entity_name == "light.kitchen"
-        assert entities_repeat_7[2].expected_value == {CONF_SERVICE: "turn_on"}
+        assert entities_repeat_7[2].expected_value == {CONF_ACTION: "turn_on"}
         assert entities_repeat_7[3].parent is None
         assert entities_repeat_7[3].position == 22
         assert entities_repeat_7[3].parameter_role == OUTPUT
         assert entities_repeat_7[3].integration == "light"
         assert entities_repeat_7[3].entity_name == "light.kitchen"
-        assert entities_repeat_7[3].expected_value == {CONF_SERVICE: "turn_off"}
+        assert entities_repeat_7[3].expected_value == {CONF_ACTION: "turn_off"}
         assert end_position == 22
 
         action_part_repeat_7_input = ["filler", "filler", "filler", "off", "off"]
@@ -7687,7 +7722,7 @@ async def test_action_entities():
         assert entities_sequence_1[0].parameter_role == OUTPUT
         assert entities_sequence_1[0].integration == "light"
         assert entities_sequence_1[0].entity_name == "light.kitchen"
-        assert entities_sequence_1[0].expected_value == {CONF_SERVICE: "turn_on"}
+        assert entities_sequence_1[0].expected_value == {CONF_ACTION: "turn_on"}
         assert end_position == 1
 
         assert (await run_automation(file_path, [], [])) == [
@@ -7726,19 +7761,19 @@ async def test_action_entities():
         assert entities_sequence_2[0].parameter_role == OUTPUT
         assert entities_sequence_2[0].integration == "light"
         assert entities_sequence_2[0].entity_name == "light.kitchen"
-        assert entities_sequence_2[0].expected_value == {CONF_SERVICE: "turn_on"}
+        assert entities_sequence_2[0].expected_value == {CONF_ACTION: "turn_on"}
         assert entities_sequence_2[1].parent is None
         assert entities_sequence_2[1].position == 2
         assert entities_sequence_2[1].parameter_role == OUTPUT
         assert entities_sequence_2[1].integration == "light"
         assert entities_sequence_2[1].entity_name == "light.kitchen"
-        assert entities_sequence_2[1].expected_value == {CONF_SERVICE: "turn_off"}
+        assert entities_sequence_2[1].expected_value == {CONF_ACTION: "turn_off"}
         assert entities_sequence_2[2].parent is None
         assert entities_sequence_2[2].position == 3
         assert entities_sequence_2[2].parameter_role == OUTPUT
         assert entities_sequence_2[2].integration == "light"
         assert entities_sequence_2[2].entity_name == "light.living_room"
-        assert entities_sequence_2[2].expected_value == {CONF_SERVICE: "toggle"}
+        assert entities_sequence_2[2].expected_value == {CONF_ACTION: "toggle"}
         assert end_position == 3
 
         assert (await run_automation(file_path, [], [])) == [
@@ -7776,13 +7811,13 @@ async def test_action_entities():
         assert entities_sequence_3[0].parameter_role == OUTPUT
         assert entities_sequence_3[0].integration == "light"
         assert entities_sequence_3[0].entity_name == "light.kitchen"
-        assert entities_sequence_3[0].expected_value == {CONF_SERVICE: "turn_on"}
+        assert entities_sequence_3[0].expected_value == {CONF_ACTION: "turn_on"}
         assert entities_sequence_3[1].parent is None
         assert entities_sequence_3[1].position == 558
         assert entities_sequence_3[1].parameter_role == OUTPUT
         assert entities_sequence_3[1].integration == "light"
         assert entities_sequence_3[1].entity_name == "light.kitchen"
-        assert entities_sequence_3[1].expected_value == {CONF_SERVICE: "turn_off"}
+        assert entities_sequence_3[1].expected_value == {CONF_ACTION: "turn_off"}
         assert end_position == 558
 
         assert (await run_automation(file_path, [], [])) == [
@@ -8485,7 +8520,7 @@ async def test_action_entities():
         assert entities_device_1[0].entity_name == "light.test_device"
         assert entities_device_1[0].expected_value == {
             CONF_ENTITY_ID: "light.kitchen",
-            CONF_SERVICE: "turn_on",
+            CONF_ACTION: "turn_on",
         }
         assert end_position == 1
 
@@ -8515,7 +8550,7 @@ async def test_action_entities():
         assert entities_device_2[0].parameter_role == OUTPUT
         assert entities_device_2[0].integration == "light"
         assert entities_device_2[0].entity_name == "light.test_device"
-        assert entities_device_2[0].expected_value == {CONF_SERVICE: "turn_on"}
+        assert entities_device_2[0].expected_value == {CONF_ACTION: "turn_on"}
         assert end_position == 1
 
         assert (await run_automation(file_path, [], [])) == [
@@ -8547,7 +8582,7 @@ async def test_action_entities():
         assert entities_device_3[0].entity_name == "light.test_device"
         assert entities_device_3[0].expected_value == {
             CONF_ENTITY_ID: "light.kitchen",
-            CONF_SERVICE: "turn_on",
+            CONF_ACTION: "turn_on",
         }
         assert end_position == 10
 

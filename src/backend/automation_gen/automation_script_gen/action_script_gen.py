@@ -7,11 +7,20 @@ from os import path
 from ...utils.env_helper_classes import Entity
 from ...utils.env_const import TEMPLATE_PATH
 
-from ...ha_automation_utils.home_assistant_const import CONF_DEVICE, CONF_EVENT, CONF_FOR, CONF_FOR_EACH, CONF_SERVICE, CONF_UNTIL, CONF_WHILE
+from ...ha_automation_utils.home_assistant_const import (
+    CONF_ACTION,
+    CONF_DEVICE,
+    CONF_EVENT,
+    CONF_FOR,
+    CONF_FOR_EACH,
+    CONF_UNTIL,
+    CONF_WHILE,
+)
 
 from .utils import append_script_context_to_script, close_script
 
 END_IF_TEMPLATE = "):\n"
+
 
 def init_action_part(filepath: str) -> None:
     """
@@ -46,7 +55,7 @@ def start_action_condition_block(
         int: The new indentation level for the conditions in the condition block and the actions afterwards.
     """
     indentation = "\t" * indentation_lvl
-    
+
     if first_element:
         if_level = "if"
     else:
@@ -77,7 +86,7 @@ def close_action_condition_block(
         no_condition (bool, optional): If no entity is given to the condition.
         timeout (bool): Is a timeout for the wait for trigger section in the automation.
     """
-    indentation = "\t" * (indentation_lvl-1)
+    indentation = "\t" * (indentation_lvl - 1)
     script_context = ""
 
     if no_condition:
@@ -91,7 +100,7 @@ def close_action_condition_block(
     append_script_context_to_script(filepath, script_context)
 
     if timeout is not None:
-        create_stopping_action(filepath, (indentation_lvl-1), timeout)
+        create_stopping_action(filepath, (indentation_lvl - 1), timeout)
 
 
 def create_stopping_action(
@@ -223,7 +232,7 @@ def close_action_loop_block(
 
     # if the loop is infinite, the loop is running to be stopped by the condition
     if is_infinite or loop_tpye == CONF_UNTIL or loop_tpye == CONF_WHILE:
-        script_context += f"{indentation}\t# The loop could continue infinitly.\n" 
+        script_context += f"{indentation}\t# The loop could continue infinitly.\n"
         script_context += f"{indentation}\t# Since no detection is built in, it stops after one iteration.\n"
         script_context += f"{indentation}\tif loop_is_running:\n"
         script_context += (
@@ -257,31 +266,27 @@ def create_action_script(
     Create the outputs for the action part of the automation script.
 
     Args:
-        action_type (str): The type of the action which is an output (CONF_EVENT, CONF_DEVICE, CONF_SERVICE).
+        action_type (str): The type of the action which is an output (CONF_EVENT, CONF_DEVICE, CONF_ACTION).
         entity (Entity): The entity which is the output of the action.
         filepath (str): The path to the automation script file.
         indentation_lvl (int, optional): The indentation level of the action part. Defaults to 1.
         loop_action (bool, optional): If the action is part of a loop it need special implementation for counting its calls.
                                       Defaults to False.
     """
-    
+
     indentation = "\t" * indentation_lvl
     script_context = ""
     result = ""
 
     if action_type == CONF_EVENT:
-        result =  f"{entity.expected_value}"
+        result = f"{entity.expected_value}"
     elif action_type == CONF_DEVICE:
         result = (
-            "{"
-            + f"'{entity.entity_name}':'{entity.expected_value[CONF_SERVICE]}'"
-            + "}"
+            "{" + f"'{entity.entity_name}':'{entity.expected_value[CONF_ACTION]}'" + "}"
         )
-    elif action_type == CONF_SERVICE:
+    elif action_type == CONF_ACTION:
         result = (
-            "{"
-            + f"'{entity.entity_name}':'{entity.expected_value[CONF_SERVICE]}'"
-            + "}"
+            "{" + f"'{entity.entity_name}':'{entity.expected_value[CONF_ACTION]}'" + "}"
         )
 
     if loop_action:

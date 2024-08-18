@@ -228,45 +228,50 @@ def test_create_all_example_automation() -> list:
     """
     automations = []
     yaml_dir = path.join("test_data", "yaml_files", "example_automations")
-    for file in listdir(yaml_dir):
-        if file.endswith(".yaml"):
-            # get the yaml file path
-            basis_file = path.join(yaml_dir, file)
-            # load the yaml file as a dictionary
-            automation_yaml = yaml_loader.load_yaml_dict(basis_file)
-            # validate the yaml dictionary
-            automation_config = asyncio.run(
-                ha_automation_config.async_validate_config_item(automation_yaml)
-            )
-
-            print(
-                f"{automation_config.automation_name} - validation status: {automation_config.validation_status}"
-            )
-
-            # check if the validation was not successful
-            if not (automation_config.validation_status == "ok") and not (
-                automation_config.validation_status == "unknown_template"
-            ):
-                print(
-                    automation_config.automation_name
-                    + " : \t "
-                    + automation_config.validation_status
-                    + " : \t"
-                    + str(automation_config.validation_error)
-                    + "\n"
+    for dir in listdir(yaml_dir):
+         dir_path = path.join("test_data", "yaml_files", "example_automations")
+    for dir in listdir(dir_path):
+        automation_dir = path.join(yaml_dir, dir)
+        print("--- " + dir + " ---")
+        for file in listdir(automation_dir):
+            if file.endswith(".yaml"):
+                # get the yaml file path
+                basis_file = path.join(automation_dir, file)
+                # load the yaml file as a dictionary
+                automation_yaml = yaml_loader.load_yaml_dict(basis_file)
+                # validate the yaml dictionary
+                automation_config = asyncio.run(
+                    ha_automation_config.async_validate_config_item(automation_yaml)
                 )
-            else:
-                # print the automation name and the validation status for automations with templates
-                if automation_config.validation_status == "unknown_template":
-                    print(
-                        "--- Template-Status ---\n"
-                        + str(automation_config.validation_error)
-                        + "-------------------"
-                    )
 
-                # create the automation and extract the entities
-                extract_information = create_automation(automation_config)
-                automations.append(extract_information)
+                print(
+                    f"{automation_config.automation_name} - validation status: {automation_config.validation_status}"
+                )
+
+                # check if the validation was not successful
+                if not (automation_config.validation_status == "ok") and not (
+                    automation_config.validation_status == "unknown_template"
+                ):
+                    print(
+                        automation_config.automation_name
+                        + " : \t "
+                        + automation_config.validation_status
+                        + " : \t"
+                        + str(automation_config.validation_error)
+                        + "\n"
+                    )
+                else:
+                    # print the automation name and the validation status for automations with templates
+                    if automation_config.validation_status == "unknown_template":
+                        print(
+                            "--- Template-Status ---\n"
+                            + str(automation_config.validation_error)
+                            + "-------------------"
+                        )
+
+                    # create the automation and extract the entities
+                    extract_information = create_automation(automation_config)
+                    automations.append(extract_information)
 
     print("--- All automations imported ---\n")
 
@@ -282,7 +287,7 @@ if __name__ == "__main__":
     # basis_file = path.join("test_data", "yaml_files", "test_yaml", "entity_extraction_test.yaml")
     basis_file = None
 
-    test_case = 1
+    test_case = 4
 
     # 1. Test the script initialization
     if test_case == 1:

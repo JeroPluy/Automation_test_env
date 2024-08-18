@@ -707,13 +707,17 @@ def _action_entities(
         )
 
     # processes a service action
-    elif CONF_SERVICE in action_part:
-        service = action_part[CONF_SERVICE]
+    elif CONF_SERVICE in action_part or CONF_ACTION in action_part:
+        if CONF_SERVICE in action_part:
+            service = action_part[CONF_SERVICE]
+        else:
+            service = action_part[CONF_ACTION]
+
         # TODO templates use could be more accurate
         integration = service.split(".")[0]
         entity_name = str(uuid.uuid4())
 
-        exp_value = {CONF_SERVICE: service.split(".")[1]}
+        exp_value = {CONF_ACTION: service.split(".")[1]}
 
         if CONF_TARGET in action_part:
             if isinstance(action_part[CONF_TARGET], dict):
@@ -758,7 +762,7 @@ def _action_entities(
         )
         entity_list.append(entity)
         asg.create_action_script(
-            action_type=CONF_SERVICE,
+            action_type=CONF_ACTION,
             entity=entity,
             filepath=script_path,
             indentation_lvl=indentation_level,
@@ -847,7 +851,7 @@ def _action_entities(
         exp_value = {}
         if CONF_ENTITY_ID in action_part:
             exp_value[CONF_ENTITY_ID] = action_part[CONF_ENTITY_ID]
-        exp_value[CONF_SERVICE] = action_part[CONF_TYPE]
+        exp_value[CONF_ACTION] = action_part[CONF_TYPE]
 
         # create the entity
         entity = Entity(
