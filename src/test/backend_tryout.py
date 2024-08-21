@@ -17,6 +17,7 @@ import json
 from os import path
 import subprocess
 
+from backend.utils.env_const import LATEST
 from backend.utils.env_helper_classes import Automation, Entity
 
 from backend import automation_gen as ag 
@@ -137,7 +138,7 @@ if __name__ == "__main__":
         print(f"File {autoamtion_file} does not exist")
         
         
-        yaml_path = path.join("test_data", "yaml_files", "example_automations", yaml_file)
+        yaml_path = path.join("test_data", "yaml_files", "example_automations", LATEST , yaml_file)
         
         automation_data = ag.load_new_automation_data(yaml_path)
         db.add_automation(automation_data)

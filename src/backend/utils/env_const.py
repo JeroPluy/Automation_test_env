@@ -17,6 +17,8 @@ RESTART = 1
 QUEUED = 2
 PARALLEL = 3
 
+LATEST = "2024.08.02"
+
 # automation script path
 # Load the settings.json file
 SETTINGS_FILE = path.join('src','frontend','settings', 'settings.json')

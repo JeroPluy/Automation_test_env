@@ -1,7 +1,9 @@
-alias: Deckenlicht ausschalten
+alias: Turn off living room main light
 description: >-
-  Das Deckenlicht wird nach dem Verlassen des Raumes automatisch ausgeschaltet
-  und die Musik pausiert.
+  This automation turns off the main light in the living room when there is no
+  movement in the living room for 7 minutes or when there is no person in the
+  living room for 7 minutes. If the media player is playing, it will pause the
+  media player and turn off the main light in the living room.
 trigger:
   - platform: state
     entity_id:
