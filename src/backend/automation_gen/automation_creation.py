@@ -22,7 +22,9 @@ def validate_automation_config(
     Returns:
         [ha_automation_config.AutomationConfig]: the automation configuration if the validation was successful
     """
-    automation_config = asyncio.run(ha_utils.async_validate_config_item(automation_yaml))
+    automation_config = asyncio.run(
+        ha_utils.async_validate_config_item(automation_yaml)
+    )
     if not (automation_config.validation_status == "ok") and not (
         automation_config.validation_status == "unknown_template"
     ):
@@ -59,12 +61,35 @@ def load_new_automation_data(test_file_path: str) -> dict:
         return create_automation(automation_config)
 
 
-def add_new_automation(test_file_path: str):
+def change_integration(automation_entities: list, new_integration_list) -> list:
     """
-    load the automation data from the test file and add it to the database
+    Change the integration of the entities in a automation
 
     Args:
-        test_file_path (str): the path to the test file
+        automation_entities (list): The entities of the automation
+        new_integration_list (_type_): The new integrations for the entities
+
+    Returns:
+        list: The new entities with the changed integrations
     """
-    automation_data = load_new_automation_data(test_file_path)
-    db.add_automation(automation_data)
+    new_entity_list = []
+    for i in range(len(automation_entities)):
+        # get the entity and change the integration
+        entity = automation_entities[i]
+        entity.integration_id = new_integration_list[i]
+
+        # add the entity to the new entity list
+        new_entity_list.append(entity)
+
+    return new_entity_list
+
+
+# def add_new_automation(test_file_path: str):
+#     """
+#     load the automation data from the test file and add it to the database
+
+#     Args:
+#         test_file_path (str): the path to the test file
+#     """
+#     automation_data = load_new_automation_data(test_file_path)
+#     db.add_automation(automation_data)

@@ -4,9 +4,13 @@ This module contains the functions to add automations, entities and integrations
 
 from backend.utils.env_const import DATABASE
 
-from backend.utils.env_helper_classes import Automation, Entity
+from backend.utils.env_helper_classes import Automation
 
-from .db_utils import get_automations_with_same_name, get_integration_id
+from .db_utils import (
+    get_automations_with_same_name,
+    get_integration_id,
+    validate_database_entity,
+)
 
 import sqlite3 as sqlite
 
@@ -25,7 +29,9 @@ def _create_automation_in_db(automation_info: Automation):
     max_instances: int = automation_info.max_instances
     script_path: str = automation_info.script
     version: int = 1
-    project: str = automation_info.project if automation_info.project else "uncategorized"
+    project: str = (
+        automation_info.project if automation_info.project else "uncategorized"
+    )
 
     same_automation_ids = get_automations_with_same_name(a_name)
 
@@ -33,21 +39,19 @@ def _create_automation_in_db(automation_info: Automation):
 
     with sqlite.connect(DATABASE) as con:
         cur = con.cursor()
-        
+
         # search for autoamtion with same name and get the version
         GET_VERSION = "SELECT add_info.info FROM additional_information AS add_info JOIN automation AS autom ON add_info.a_id == autom.a_id WHERE autom.a_id = ? AND info_type = 'version'"
-        autom_id: int  = None
+        autom_id: int = None
         for autom_id in same_automation_ids:
             cur.execute(GET_VERSION, (str(autom_id),))
             version = cur.fetchone()[0]
-        
+
         # insert the new automation
         cur.execute(INSERT_AUTOMATION, (a_name, autom_mode, max_instances, script_path))
         a_id = cur.lastrowid
         con.commit()
 
-
-        
         # Prepare the data for insertion
         infos = [
             (a_id, "project", project),
@@ -75,69 +79,52 @@ def _create_automation_entities_in_db(a_id, entities: list):
 
     automation_entities = []
 
-    def _check_for_same_entity(entity: Entity) -> int:
-        """
-        check if an entity with the same name already exists in the database
-
-        Args:
-            entity (Entity): the entity to be checked
-
-        Returns:
-            int: the id of the entity if it already exists, None otherwise
-        """
-
-        SELECT_ENTITY = "SELECT e_id FROM entity WHERE e_name = ?"
-        with sqlite.connect(DATABASE) as con:
-            cur = con.cursor()
-            cur.execute(SELECT_ENTITY, (entity.entity_name,))
-            result = cur.fetchone()
-            if result is None:
-                return None
-            else:
-                return result[0]
-
     # go through all entities and add them to the database
     for entity in entities:
-        if not isinstance(entity, Entity):
-            raise Exception("Entities must be a list of Entity objects")
+        # validate the entity and its integration
+        validated_entity = validate_database_entity(entity)
 
-        same_entity = _check_for_same_entity(entity)
-        if same_entity is not None:
+        # if the entity already exists in the database
+        if validated_entity["entity_id"] is not None:
             automation_entities.append((
                 a_id,
-                same_entity,
+                validated_entity["entity_id"],
                 entity.parameter_role,
                 entity.position,
                 str(entity.expected_value),
                 entity.parent,
             ))
+        # if check for the integration
         else:
-            # create the new entity in the database
-            with sqlite.connect(DATABASE) as con:
-                cur = con.cursor()
+            # if integration is part of the database
+            if validated_entity["integration_id"] is not None:
+                integration_id = validated_entity["integration_id"]
 
-                # get the integration id of the entity
-                integration_id = get_integration_id(entity.integration)
-                if integration_id is None:
-                    raise Exception(
-                        f"Integration {entity.integration} not found in the database"
+                # create the new entity in the database
+                with sqlite.connect(DATABASE) as con:
+                    cur = con.cursor()
+
+                    # insert the new entity into the database
+                    INSERT_NEW_ENTITY = (
+                        "INSERT INTO entity (e_name, i_id) VALUES (?, ?)"
                     )
 
-                # insert the new entity into the database
-                INSERT_NEW_ENTITY = "INSERT INTO entity (e_name, i_id) VALUES (?, ?)"
-                cur.execute(INSERT_NEW_ENTITY, (entity.entity_name, integration_id))
-                e_id = cur.lastrowid
-                con.commit()
-
-                # add the new entity to the list to connect it to the automation in automation_entity
-                automation_entities.append((
-                    a_id,
-                    e_id,
-                    entity.parameter_role,
-                    entity.position,
-                    str(entity.expected_value),
-                    entity.parent,
-                ))
+                    cur.execute(INSERT_NEW_ENTITY, (entity.entity_name, integration_id))
+                    e_id = cur.lastrowid
+                    con.commit()
+                    # add the new entity to the list to connect it to the automation in automation_entity
+                    automation_entities.append((
+                        a_id,
+                        e_id,
+                        entity.parameter_role,
+                        entity.position,
+                        str(entity.expected_value),
+                        entity.parent,
+                    ))
+            else:
+                raise ValueError(
+                    f"Integration: '{entity.integration}' not found in the database. Please add the integration first."
+                )
 
     # insert the entities as automation entities into the database
     CREATE_AUTOMATION_ENTITY = "INSERT INTO automation_entity (a_id, e_id, p_role, position, exp_val, parent) VALUES (?, ?, ?, ?, ?, ?)"
@@ -153,14 +140,14 @@ def add_automation(automation_data: dict) -> int:
 
     Args:
         automation: dict - the automation config to be added to the database
-    
+
     Returns:
         int - the id of the new automation in the database
     """
     a_id = _create_automation_in_db(automation_data["infos"])
     try:
         _create_automation_entities_in_db(a_id, automation_data["entities"])
-    except Exception as e:
+    except ValueError as e:
         raise e
     return a_id
 

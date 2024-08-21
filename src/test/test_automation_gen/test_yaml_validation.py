@@ -357,9 +357,9 @@ def test_preconfigured_yaml_files() -> None:
     The validation result is then printed to the console.
     """
 
-    dir_path = path.join("test_data", "yaml_files", "example_automations")
-    for dir in listdir(dir_path):
-        automation_dir = path.join(dir_path, dir)
+    yaml_path = path.join("test_data", "yaml_files", "example_automations")
+    for dir in listdir(yaml_path):
+        automation_dir = path.join(yaml_path, dir)
         print("--- " + dir + " ---")
         for file in listdir(automation_dir):
             if file.endswith(".yaml"):

@@ -480,13 +480,16 @@ def test_all_preconfigured_automations():
     validate the imported dictionaries by printing them to the console.
     """
 
-    dir_path = path.join("test_data", "yaml_files", "example_automations")
-    for file in listdir(dir_path):
-        if file.endswith(".yaml"):
-            automation_yaml = yaml_loader.load_yaml_dict(path.join(dir_path, file))
-            print("\n\nTest " + file)
-            assert automation_yaml is not None
-            print(automation_yaml)
+    yaml_path = path.join("test_data", "yaml_files", "example_automations")
+    for dir in listdir(yaml_path):
+        automation_dir = path.join(yaml_path, dir)
+        print("--- " + dir + " ---")
+        for file in listdir(automation_dir):
+            if file.endswith(".yaml"):
+                automation_yaml = yaml_loader.load_yaml_dict(path.join(automation_dir, file))
+                print("\n\nTest " + file)
+                assert automation_yaml is not None
+                print(automation_yaml)
 
 
 if __name__ == "__main__":

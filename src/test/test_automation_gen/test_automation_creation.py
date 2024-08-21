@@ -227,11 +227,9 @@ def test_create_all_example_automation() -> list:
         list: list of the automation data from the automations with their extracted entities and information
     """
     automations = []
-    yaml_dir = path.join("test_data", "yaml_files", "example_automations")
-    for dir in listdir(yaml_dir):
-         dir_path = path.join("test_data", "yaml_files", "example_automations")
-    for dir in listdir(dir_path):
-        automation_dir = path.join(yaml_dir, dir)
+    yaml_path = path.join("test_data", "yaml_files", "example_automations")
+    for dir in listdir(yaml_path):
+        automation_dir = path.join(yaml_path, dir)
         print("--- " + dir + " ---")
         for file in listdir(automation_dir):
             if file.endswith(".yaml"):

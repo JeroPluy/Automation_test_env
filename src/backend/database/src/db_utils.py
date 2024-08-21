@@ -2,6 +2,9 @@ from backend.utils.env_const import DATABASE, standard_integrations
 
 import sqlite3 as sqlite
 
+from backend.utils.env_helper_classes import Entity
+
+
 def get_automations_with_same_name(name: str) -> list:
     """
     Get the ids of the automations with the same name
@@ -29,7 +32,7 @@ def get_automations_with_same_name(name: str) -> list:
 def get_integration_id(integration_name: str) -> int:
     """
     Get the id of the integration by its name
-    
+
     Args:
         integration_name: str - the name of the integration
 
@@ -51,6 +54,43 @@ def get_integration_id(integration_name: str) -> int:
     return integration_id
 
 
+def validate_database_entity(entity: Entity) -> dict:
+    """
+    Validate the integrations of an automation
+
+    Args:
+        entities: list - the entities of the automation
+
+    Returns:
+        bool: True if all integrations are valid, False otherwise
+    """
+
+    SELECT_ENTITY = "SELECT e_id FROM entity WHERE e_name = ?"
+
+    with sqlite.connect(DATABASE) as con:
+        cur = con.cursor()
+        cur.execute(SELECT_ENTITY, (entity.entity_name,))
+        result = cur.fetchone()
+        if result is None:
+            same_entity = None
+        else:
+            same_entity = result[0]
+
+    if same_entity is not None:
+        return {"entity_id": same_entity}
+    else:
+        return_dict = {"entity_id": None}
+        
+        # create the new entity in the database
+        with sqlite.connect(DATABASE) as con:
+            cur = con.cursor()
+
+            # get the integration id of the entity
+            integration_id = get_integration_id(entity.integration)
+            return_dict["integration_id"] = integration_id
+            return return_dict
+
+
 def delete_automation(automation_id: int = None):
     """
     Delete an automation and its automation entities from the database
@@ -64,7 +104,7 @@ def delete_automation(automation_id: int = None):
     else:
         DELETE_AUTOMATION = "DELETE FROM automation WHERE a_id = ?;"
         DELETE_AUTOMATION_ENTITIES = "DELETE FROM automation_entity WHERE a_id = ?;"
-    
+
     with sqlite.connect(DATABASE) as con:
         cur = con.cursor()
         if automation_id is None:
@@ -74,7 +114,7 @@ def delete_automation(automation_id: int = None):
             cur.execute(DELETE_AUTOMATION, (automation_id,))
             cur.execute(DELETE_AUTOMATION_ENTITIES, (automation_id,))
         con.commit()
-    
+
     # remove the autoamtion script from the file system
     # if path.exists(file):
     #     remove(file)
@@ -96,7 +136,7 @@ def get_entities(automation_id: int = None, automation_name: str = None) -> list
     else:
         SELECT_ENTITIES = "SELECT ae.p_role, ae.parent, ae.position, entity.e_name, ae.exp_val FROM automation_entity AS ae JOIN automation ON automation.a_id = ae.a_id JOIN entity ON entity.e_id = ae.e_id WHERE automation.a_name = ?"
         search_param = (automation_name,)
-        
+
     with sqlite.connect(DATABASE) as con:
         cur = con.cursor()
         cur.execute(SELECT_ENTITIES, search_param)

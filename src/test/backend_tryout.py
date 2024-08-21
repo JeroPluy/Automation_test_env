@@ -19,7 +19,7 @@ import subprocess
 
 from backend.utils.env_helper_classes import Automation, Entity
 
-from backend.automation_gen import add_new_automation
+from backend import automation_gen as ag 
 from backend.database import src as db
 
 DATABASE = path.join("data", "automation_test_env.sqlite")
@@ -136,10 +136,11 @@ if __name__ == "__main__":
     if not path.isfile(autoamtion_file):
         print(f"File {autoamtion_file} does not exist")
         
+        
         yaml_path = path.join("test_data", "yaml_files", "example_automations", yaml_file)
         
-        # please add the automation.yaml file to the test_data/yaml_files/example_automations folder
-        add_new_automation(yaml_path)
+        automation_data = ag.load_new_automation_data(yaml_path)
+        db.add_automation(automation_data)
         
     entity_list = db.get_entities(automation_name=automation_name)
     for entity in entity_list:
