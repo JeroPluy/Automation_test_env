@@ -4,8 +4,6 @@ This module is responsible for the automation creation and the database insertio
 
 from backend import ha_automation_utils as ha_utils
 from backend.automation_gen.config_dissection import create_automation
-from backend.database import src as db
-
 
 import asyncio
 

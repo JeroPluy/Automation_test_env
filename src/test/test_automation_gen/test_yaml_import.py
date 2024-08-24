@@ -491,7 +491,80 @@ def test_all_preconfigured_automations():
                 assert automation_yaml is not None
                 print(automation_yaml)
 
+def test_save_automation():
+    """
+    Test the save_automation function from the home_assistant_yaml_loader.py module with the basis_automation.yaml file.
+    """
+
+    automation_txt = [
+        'alias: test automation alias\n',
+        'id: "1600000000000"\n',
+        'description: >-\n',
+        '  This automation just a test automation to test the yaml file validation.\n',
+        'initial_state: true\n',
+        'trace:\n',
+        '  stored_traces: 6\n',
+        'variables: \n',
+        '  testVar: "test"\n',
+        'trigger_variables:\n',
+        '  testVar: "test"\n',
+        'trigger:\n',
+        '  - alias: moving object\n',
+        '    platform: state\n',
+        '    entity_id:\n',
+        '      - binary_sensor.moving_living_room\n',
+        '    from: "off"\n',
+        '    to: "on"\n',
+        '    id: "trigger_1"\n',
+        '  - platform: state\n',
+        '    entity_id:\n',
+        '      - binary_sensor.person_living_room\n',
+        '    from: "off"\n',
+        '    to: "on"\n',
+        '    alias: person dectected\n',
+        '    enabled: false\n',
+        '    variables:\n',
+        '      testVar2: "test_2"\n',
+        'condition:\n',
+        '  - alias: sun is not shining\n',
+        '    condition: sun\n',
+        '    after: sunrise\n',
+        '  - condition: state\n',
+        '    entity_id: light.main_light_living_room\n',
+        '    state: "on"\n',
+        '    alias: light is off\n',
+        'action:\n',
+        '  - alias: turn on light\n',
+        '    service: input_boolean.turn_on\n',
+        '    data: {}\n',
+        '  - alias: is Krista in the room\n',
+        '    condition: state\n',
+        '    entity_id: sensor.whos_in_living_room\n',
+        '    state: Krista\n',
+        '  - alias: turn on music\n',
+        '    service: media_player.media_play\n',
+        '    target:\n',
+        '      entity_id: media_player.living_room\n',
+        '    data: {}\n',
+        'mode: single\n',
+        'max: 1\n',
+        'max_exceeded: warning',
+    ]
+
+    text_file_path = yaml_loader.save_automation(automation_txt)
+    yaml_file_path = path.join("test_data", "yaml_files", "test_yaml", "basis_automation.yaml")
+    
+    with open (text_file_path, "r") as file:
+        text_file = file.readlines()
+    
+    with open (yaml_file_path, "r") as file:
+        yaml_file = file.readlines()
+    
+    assert text_file == yaml_file
+       
+
 
 if __name__ == "__main__":
-    test_import_test_automations()
-    test_all_preconfigured_automations()
+    # test_import_test_automations()
+    # test_all_preconfigured_automations()
+    test_save_automation()

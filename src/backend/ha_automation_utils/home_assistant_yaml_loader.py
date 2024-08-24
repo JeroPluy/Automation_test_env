@@ -28,6 +28,7 @@ JSON_TYPE = list | dict | str
 _LOGGER = logging.getLogger(__name__)
 
 
+
 class FastSafeLoader(FastestAvailableSafeLoader):
     """The fastest available safe loader, either C or Python."""
 
@@ -55,6 +56,26 @@ class PythonSafeLoader(yaml.SafeLoader):
 
 
 type LoaderType = FastSafeLoader | PythonSafeLoader
+
+
+def save_automation(automation_txt: list) -> str:
+    """
+    Save the automation to a file to enable the validation and disssection of the automation
+    
+    Args:
+        automation_txt (list): the automation text as a list of strings
+        
+    Returns:
+        str: the path to the file
+    """
+    
+    yaml_file_path = os.path.join("data", "automation.yaml")
+    
+    with open (yaml_file_path, "w") as file:
+        for line in automation_txt:
+            file.write(line)
+            
+    return yaml_file_path
 
 
 def load_yaml_dict(fname: str | os.PathLike[str]) -> dict:
