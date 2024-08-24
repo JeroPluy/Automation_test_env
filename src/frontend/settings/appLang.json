@@ -7,5 +7,6 @@
     "PROJECT" : ["Projekt1", "Project1"],
     "AUTO_NAME" : ["Automation-Name", "automation name"],
     "NEW_A" : ["neue Automation", "new automation"],
-    "ACCEPT" : ["Bestätigen", "Accept"]
+    "ACCEPT" : ["Bestätigen", "Accept"],
+    "CHOOSE_FILE" : ["Automationskonfiguration importieren", "Import an automation configuration file"]
 }

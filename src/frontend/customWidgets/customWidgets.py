@@ -220,6 +220,109 @@ class deleteButton(CTkButton):
         )
 
 
+class neutralButton(CTkButton):
+    """
+    custom button for the application to accept all the changes to the form
+
+    Args:
+        CTkButton (_type_):  standard custom tkinter node for a ctk button
+    """
+
+    def __init__(
+        self,
+        master: Any,
+        width: int = 140,
+        height: int = 28,
+        corner_radius: int | None = None,
+        border_width: int | None = None,
+        border_spacing: int = 2,
+        bg_color: str | Tuple[str] = "transparent",
+        fg_color: str | Tuple[str] | None = "#1D91DA",
+        hover_color: str | Tuple[str] | None = "#0F73BA",
+        border_color: str | Tuple[str] | None = None,
+        text_color: str | Tuple[str] | None = None,
+        text_color_disabled: str | Tuple[str] | None = None,
+        background_corner_colors: Tuple[str | Tuple[str]] | None = None,
+        round_width_to_even_numbers: bool = True,
+        round_height_to_even_numbers: bool = True,
+        text: str = None,
+        font: Tuple | CTkFont | None = None,
+        textvariable: Variable | None = None,
+        image: CTkImage | Any | None = None,
+        state: str = "normal",
+        hover: bool = True,
+        command: Callable[[], Any] | None = None,
+        compound: str = "left",
+        anchor: str = "center",
+        kind: int = None,
+        **kwargs,
+    ):
+        """
+        Initialization of the custom button for the application to accept all the changes to the form
+
+        Args:
+            master (Any): master frame for the button
+            width (int, optional): width of the button. Defaults to 140.
+            height (int, optional): height of the button. Defaults to 28.
+            corner_radius (int | None, optional): corner radius of the button. Defaults to None so its taken from the theme. 
+            border_width (int | None, optional): border width of the button. Defaults to None so its taken from the theme.
+            border_spacing (int, optional): border spacing of the button. Defaults to 2.
+            bg_color (str | Tuple[str], optional): background color of the button. Defaults to "transparent".
+            fg_color (str | Tuple[str] | None, optional): foreground color of the button. Defaults to "#227F6D". (green) 
+            hover_color (str | Tuple[str] | None, optional): hover color of the button. Defaults to "#1D5249". (dark green)
+            border_color (str | Tuple[str] | None, optional): border color of the button. Defaults to None so its taken from the theme.
+            text_color (str | Tuple[str] | None, optional): text color of the button. Defaults to None so its taken from the theme.
+            text_color_disabled (str | Tuple[str] | None, optional): text color of the button when disabled. Defaults to None so its taken from the theme.
+            background_corner_colors (Tuple[str  |  Tuple[str]] | None, optional): background corner colors of the button. Defaults to None.
+            round_width_to_even_numbers (bool, optional): round width to even numbers of the button. Defaults to True.
+            round_height_to_even_numbers (bool, optional): round height to even numbers of the button. Defaults to True.
+            text (str, optional): text of the button. Defaults to None so its just an icon.
+            font (Tuple | CTkFont | None, optional): font of the button. Defaults to None so its taken from the theme.
+            textvariable (Variable | None, optional): textvariable of the button. Defaults to None.
+            image (CTkImage | Any | None, optional): image of the button. Defaults to None so its the default white checkmark.
+            state (str, optional): state of the button. Defaults to "normal".
+            hover (bool, optional): hover of the button. Defaults to True.
+            command (Callable[[], Any] | None, optional): command of the button. Defaults to None.
+            compound (str, optional): compound of the button. Defaults to "left".
+            anchor (str, optional): anchor of the button. Defaults to "center".
+            kind (int, optional): kind of the button. Defaults to None so its taken from the theme.
+        """
+        image_path = path.join(path.dirname(path.realpath(__file__)), "icons")
+        if kind == 0:
+            ICON = "undo_w.png"
+        else:
+            ICON = "check_white.png"
+
+        image = CTkImage(Image.open(path.join(image_path, ICON)), size=(24, 24))
+
+        super().__init__(
+            master,
+            width,
+            height,
+            corner_radius,
+            border_width,
+            border_spacing,
+            bg_color,
+            fg_color,
+            hover_color,
+            border_color,
+            text_color,
+            text_color_disabled,
+            background_corner_colors,
+            round_width_to_even_numbers,
+            round_height_to_even_numbers,
+            text,
+            font,
+            textvariable,
+            image,
+            state,
+            hover,
+            command,
+            compound,
+            anchor,
+            **kwargs,
+        )    
+
 class NavigationButtons(CTkFrame):
     """
     custom frame for the navigation buttons in the application
