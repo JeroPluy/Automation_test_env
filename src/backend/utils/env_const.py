@@ -27,7 +27,7 @@ with open(SETTINGS_FILE) as f:
 
 # path to the generated automation scripts
 # extracted from the settings
-AUTOMATION_SCRIPT = path.join(*settings['automation_script_path'])
+AUTOMATION_SCRIPT = path.join(*settings['AUTOMATION_SCRIPT_PATH'])
 
 # path to the database of the automation test environment
 DATABASE = path.join("data", "automation_test_env.sqlite")

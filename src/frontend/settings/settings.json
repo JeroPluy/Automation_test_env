@@ -1,6 +1,8 @@
 {
-    "mode": "light",
+    "MODE": "light",
     "LANG" : 1,
     "HA_VERSIONS" : ["HA 2024.5.4"],
-    "automation_script_path" : ["data","automation_scripts"]
+    "AUTOMATION_SCRIPT_PATH" : ["data","automation_scripts"],
+    "SCALE_FACTOR" : 1.0,
+    "WINDOW_SIZE": [800, 600]
 }

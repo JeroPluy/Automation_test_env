@@ -1,12 +1,78 @@
 {
-    "BACK" : ["Zurück", "Back"],
-    "ADD" : ["Hinzufügen", "Add"],
-    "NEXT" : ["Fortfahren", "Next"],
-    "IMPORT" : ["Hinzufügen", "Import"],
-    "DELETE" : ["Löschen", "Delete"],
-    "PROJECT" : ["Projekt1", "Project1"],
-    "AUTO_NAME" : ["Automation-Name", "automation name"],
-    "NEW_A" : ["neue Automation", "new automation"],
-    "ACCEPT" : ["Bestätigen", "Accept"],
-    "CHOOSE_FILE" : ["Automationskonfiguration importieren", "Import an automation configuration file"]
+    "APP_NAME": [
+        "Home Assistant - Automationstestumgebung",
+        "Home Assistant - Automation Test Environment"
+    ],
+    "BACK": [
+        "Zurück",
+        "Back"
+    ],
+    "ADD": [
+        "Hinzufügen",
+        "Add"
+    ],
+    "NEXT": [
+        "Fortfahren",
+        "Next"
+    ],
+    "IMPORT": [
+        "Hinzufügen",
+        "Import"
+    ],
+    "DELETE": [
+        "Löschen",
+        "Delete"
+    ],
+    "PROJECT": [
+        "Projekt1",
+        "Project1"
+    ],
+    "AUTO_NAME": [
+        "Automation-Name",
+        "automation name"
+    ],
+    "NEW_A": [
+        "neue Automation",
+        "new automation"
+    ],
+    "ACCEPT": [
+        "Bestätigen",
+        "Accept"
+    ],
+    "CHOOSE_FILE": [
+        "Automationskonfiguration importieren",
+        "Import an automation configuration file"
+    ],
+    "SAVE_FILE": [
+        "Automationskonfiguration speichern",
+        "Save an automation configuration file"
+    ],
+    "WARNING": [
+        "Warnung",
+        "Warning"
+    ],
+    "NOTHING_UNDO": [
+        "Nichts rückgängig zu machen",
+        "Nothing to undo"
+    ],
+    "NOTHING_REDO": [
+        "Nichts wiederherzustellen",
+        "Nothing to redo"
+    ],
+    "AUTOMATION_OVERVIEW": [
+        "Automationsübersicht",
+        "Automation overview"
+    ],
+    "TEST": [
+        "Test starten",
+        "Start test"
+    ],
+    "MORE": [
+        "Mehr",
+        "More"
+    ],
+    "VERSION": [
+        "Version",
+        "Version"
+    ]
 }
