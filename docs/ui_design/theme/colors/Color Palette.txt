@@ -1,7 +1,7 @@
 Dark Theme:
 background 1: 		#18181B - white
-background window: 	#212226 - white
-backgrond top_window:	#343446 - white
+background window: 	#252532- white
+backgrond top_window:	#343446- white
 text standard:		#F7F8F8 
 text subtext:		#D9DADE
 text disabled:		#7c7c7c

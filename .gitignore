@@ -125,3 +125,4 @@ test_data/basis_automation.info
 old_requirements.txt
 # old database schema files and related files
 src/backend/database/schema/old_schema/
+docs/frontend_mockups/.$MockUps.drawio.bkp

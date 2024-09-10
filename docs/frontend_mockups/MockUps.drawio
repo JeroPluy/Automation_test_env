@@ -1,6 +1,6 @@
-<mxfile host="Electron" modified="2024-08-12T00:23:14.877Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/24.6.4 Chrome/124.0.6367.207 Electron/30.0.6 Safari/537.36" etag="JwRq5UBcAAMx9BTKTzeT" version="24.6.4" type="device" pages="8">
+<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/24.7.5 Chrome/126.0.6478.183 Electron/31.3.0 Safari/537.36" version="24.7.5" pages="8">
   <diagram name="automation overview" id="z6VYmI4H-f4jJnhFH6ou">
-    <mxGraphModel dx="1793" dy="1105" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="330" dy="203" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -187,13 +187,13 @@
         <mxCell id="d5b1kfxUOSpNLlaKd8Ok-2" value="" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;strokeColor=none;fillColor=#EFEFEF;fontFamily=Roboto;" parent="sPdFcfvVaIzRneUWa9Hh-4" vertex="1">
           <mxGeometry x="34" y="124" width="12" height="12" as="geometry" />
         </mxCell>
-        <mxCell id="jjuUPfOgHAzyS6VAz7aP-2" value="&lt;font color=&quot;#292929&quot;&gt;&lt;span style=&quot;font-size: 16px;&quot;&gt;turn_on_living_room_main_light V1&lt;/span&gt;&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="sPdFcfvVaIzRneUWa9Hh-4">
+        <mxCell id="jjuUPfOgHAzyS6VAz7aP-2" value="&lt;font color=&quot;#292929&quot;&gt;&lt;span style=&quot;font-size: 16px;&quot;&gt;turn_on_living_room_main_light V1&lt;/span&gt;&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="sPdFcfvVaIzRneUWa9Hh-4" vertex="1">
           <mxGeometry x="65" y="14.999999999999945" width="270" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="jjuUPfOgHAzyS6VAz7aP-3" value="&lt;font color=&quot;#292929&quot;&gt;&lt;span style=&quot;font-size: 16px;&quot;&gt;turn_off_living_room_main_light&lt;/span&gt;&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="sPdFcfvVaIzRneUWa9Hh-4">
+        <mxCell id="jjuUPfOgHAzyS6VAz7aP-3" value="&lt;font color=&quot;#292929&quot;&gt;&lt;span style=&quot;font-size: 16px;&quot;&gt;turn_off_living_room_main_light&lt;/span&gt;&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="sPdFcfvVaIzRneUWa9Hh-4" vertex="1">
           <mxGeometry x="65" y="64.99999999999994" width="250" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="jjuUPfOgHAzyS6VAz7aP-4" value="&lt;font color=&quot;#292929&quot;&gt;&lt;span style=&quot;font-size: 16px;&quot;&gt;turn_on_living_room_main_light V2&lt;/span&gt;&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="sPdFcfvVaIzRneUWa9Hh-4">
+        <mxCell id="jjuUPfOgHAzyS6VAz7aP-4" value="&lt;font color=&quot;#292929&quot;&gt;&lt;span style=&quot;font-size: 16px;&quot;&gt;turn_on_living_room_main_light V2&lt;/span&gt;&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="sPdFcfvVaIzRneUWa9Hh-4" vertex="1">
           <mxGeometry x="65" y="115" width="270" height="30" as="geometry" />
         </mxCell>
         <mxCell id="sPdFcfvVaIzRneUWa9Hh-5" value="" style="group" parent="2fdYDgXzrUAW91fYpIf3-3" vertex="1" connectable="0">
