@@ -80,7 +80,7 @@ def validate_database_entity(entity: Entity) -> dict:
         return {"entity_id": same_entity}
     else:
         return_dict = {"entity_id": None}
-        
+
         # create the new entity in the database
         with sqlite.connect(DATABASE) as con:
             cur = con.cursor()
@@ -143,3 +143,48 @@ def get_entities(automation_id: int = None, automation_name: str = None) -> list
         result = cur.fetchall()
 
     return result
+
+
+def load_projects() -> list:
+    """
+    Load the projects from the database
+
+    Returns:
+        list - the projects
+    """
+    SELECT_PROJECTS = (
+        "SELECT DISTINCT info FROM additional_information WHERE info_type = 'project'"
+    )
+
+    with sqlite.connect(DATABASE) as con:
+        cur = con.cursor()
+        cur.execute(SELECT_PROJECTS)
+        result = cur.fetchall()
+
+    return [row[0] for row in result]
+
+
+def load_automations(project: str = None) -> list:
+    """
+    Load the automation ids and their names from the database
+    """
+
+    SELECT_AUTOMATIONS = """
+        SELECT automation.a_id, automation.a_name, aI2.info 
+        FROM automation 
+        JOIN additional_information AS aI ON automation.a_id = aI.a_id 
+        JOIN additional_information AS aI2 ON automation.a_id = aI2.a_id
+        WHERE aI.info = ? 
+        AND aI.info_type = 'project'
+        AND aI2.info_type = 'version'
+    """
+
+    with sqlite.connect(DATABASE) as con:
+        cur = con.cursor()
+        if project is not None:
+            cur.execute(SELECT_AUTOMATIONS, (project,))
+        else:
+            cur.execute(SELECT_AUTOMATIONS, ("uncategorized",))
+        result = cur.fetchall()
+
+    return [(row[0], row[1], row[2]) for row in result]
