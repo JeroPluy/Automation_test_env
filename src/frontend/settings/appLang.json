@@ -24,8 +24,8 @@
         "Delete"
     ],
     "PROJECT": [
-        "Projekt1",
-        "Project1"
+        "Projekt",
+        "Project"
     ],
     "AUTO_NAME": [
         "Automation-Name",
@@ -74,5 +74,13 @@
     "VERSION": [
         "Version",
         "Version"
+    ],
+    "OK": [
+        "OK",
+        "OK"
+    ],
+    "PROJECT_OVERVIEW": [
+        "Projektauswahl",
+        "Project overview"
     ]
 }

@@ -43,11 +43,11 @@ class BlankWindow(customtkinter.CTk):
     def __init__(self, fg_color: str | Tuple[str] | None = None, **kwargs):
         super().__init__(fg_color, **kwargs)
         self.title("title of the App")
-        self.geometry("1200x1200")
+        self.geometry("500x500")
         self.settings = load_settings()
         self.lang = load_language(self.settings["LANG"])
         customtkinter.set_default_color_theme(THEME_PATH)
-        customtkinter.set_appearance_mode(self.settings["mode"])
+        customtkinter.set_appearance_mode(self.settings["MODE"])
 
 
 class ToplevelWindow(customtkinter.CTkToplevel):
@@ -303,12 +303,12 @@ class TestWindow(BlankWindow):
         """
         Change the theme of the application
         """
-        self.current_theme = self.settings["mode"]
+        self.current_theme = self.settings["MODE"]
         if self.current_theme == "light":
-            self.settings["mode"] = "dark"
+            self.settings["MODE"] = "dark"
         else:
-            self.settings["mode"] = "light"
-        customtkinter.set_appearance_mode(self.settings["mode"])
+            self.settings["MODE"] = "light"
+        customtkinter.set_appearance_mode(self.settings["MODE"])
 
     def create_window(self):
         """
@@ -442,7 +442,39 @@ class TestWindow(BlankWindow):
         self.table.select_row(self.selected_tb_data.get("row"))
 
 
+class TestWindow2(BlankWindow):
+    def __init__(self):
+        super().__init__()
+        
+        self.btn = customtkinter.CTkButton(self, text="test")
+        self.btn.grid(row=0, column=0)
+        
+        self.columnconfigure(0, weight=1)
+        self.scrollable_frame = cW.BasisScrollFrame(self)
+        self.scrollable_frame.grid(row=1, column=0, sticky="news")
+        
+        self.text_box = customtkinter.CTkTextbox(
+            self.scrollable_frame.content, wrap="none", undo=True, maxundo=3
+        )
+        
+        self.text_box.grid(row=0, column=0, sticky="news")
+        
+        self.header_font = customtkinter.CTkFont(weight="bold")
+        self.label = customtkinter.CTkLabel(
+            self.scrollable_frame.content, text="Testlabe", font=self.header_font
+        )
+        self.label.grid(row=1, column=0, sticky="w")
+        
+        self.button = customtkinter.CTkButton(
+            self.scrollable_frame.content,
+            text="testbutton",
+            height=60,
+        )
+        self.button.grid(row=2, column=0, sticky="w")
+
+
+
 if __name__ == "__main__":
     # app = AutoamtionAdditon(self.lang["PROJECT"] + "/" + self.lang["NEW_A"])
-    app = TestWindow()
+    app = TestWindow2()
     app.mainloop()
