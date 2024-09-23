@@ -16,34 +16,19 @@ from typing import Any
 import voluptuous as vol
 from voluptuous.humanize import humanize_error
 
-from .home_assistant_config_validation import (
-    CONDITIONS_SCHEMA,
-    SCRIPT_SCHEMA,
-    SCRIPT_VARIABLES_SCHEMA,
-    TRIGGER_SCHEMA,
-    boolean,
-    string,
-)
-from .home_assistant_const import (
-    CONF_ACTION,
-    CONF_ALIAS,
-    CONF_CONDITION,
-    CONF_DESCRIPTION,
-    CONF_ID,
-    CONF_INITIAL_STATE,
-    CONF_MODE,
-    CONF_STORED_TRACES,
-    CONF_TRACE,
-    CONF_TRIGGER,
-    CONF_TRIGGER_VARIABLES,
-    CONF_VARIABLES,
-    DEFAULT_STORED_TRACES,
-    SCRIPT_MODE_CHOICES,
-    SCRIPT_MODE_SINGLE,
-    ConfigType,
-    make_script_schema,
-    positive_int,
-)
+from .home_assistant_config_validation import (CONDITIONS_SCHEMA,
+                                               SCRIPT_SCHEMA,
+                                               SCRIPT_VARIABLES_SCHEMA,
+                                               TRIGGER_SCHEMA, boolean, string)
+from .home_assistant_const import (CONF_ACTION, CONF_ALIAS, CONF_CONDITION,
+                                   CONF_DESCRIPTION, CONF_ID,
+                                   CONF_INITIAL_STATE, CONF_MODE,
+                                   CONF_STORED_TRACES, CONF_TRACE,
+                                   CONF_TRIGGER, CONF_TRIGGER_VARIABLES,
+                                   CONF_VARIABLES, DEFAULT_STORED_TRACES,
+                                   SCRIPT_MODE_CHOICES, SCRIPT_MODE_SINGLE,
+                                   ConfigType, make_script_schema,
+                                   positive_int)
 
 # schema for the automation mode configuration
 MODE_CONFIG_SCHEMA = {
@@ -118,7 +103,7 @@ class AutomationConfig(dict):
     validation_error: str | None = None
 
 
-async def _async_validate_config_item(config: ConfigType) -> AutomationConfig:
+async def _async_validate_config_item(config: ConfigType, name_given: bool) -> AutomationConfig:
     """
     Validate the different parts of automation configurations.
     
@@ -199,13 +184,14 @@ async def _async_validate_config_item(config: ConfigType) -> AutomationConfig:
     automation_config = AutomationConfig(validated_config)
     automation_config.raw_blueprint_inputs = raw_blueprint_inputs
     automation_config.raw_config = raw_config
-    automation_config.automation_name = _name_or_id(config)
+    if not name_given:
+        automation_config.automation_name = _name_or_id(config)
 
     return automation_config
 
 
 async def async_validate_config_item(
-    config: dict[str, Any], version: str = "latest" 
+    config: dict[str, Any], name_given: bool=False, version: str = "latest" 
 ) -> AutomationConfig:
     """
     Function to await the results of the validation function
@@ -213,5 +199,5 @@ async def async_validate_config_item(
     Returns:
         AutomationConfig: The automation configuration with the validation status and error.
     """
-    return await _async_validate_config_item(config)
+    return await _async_validate_config_item(config, name_given)
 

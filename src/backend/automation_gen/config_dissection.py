@@ -3,21 +3,15 @@ This module brings together all extraction modules and enables the extraction of
 as well as the creation of the complete automation script.
 """
 
-from . import automation_script_gen as asg
-
-from .trigger_dissection import extract_all_trigger
-from .condtion_dissection import extract_all_conditions
-from .action_dissection import extract_all_actions
-
+from ..ha_automation_utils.home_assistant_automation_validation import \
+    AutomationConfig
+from ..ha_automation_utils.home_assistant_const import CONF_MAX, CONF_MODE
 from ..utils.env_const import PARALLEL, QUEUED, RESTART, SINGLE
-
 from ..utils.env_helper_classes import Automation
-
-from ..ha_automation_utils.home_assistant_automation_validation import AutomationConfig
-from ..ha_automation_utils.home_assistant_const import (
-    CONF_MAX,
-    CONF_MODE,
-)
+from . import automation_script_gen as asg
+from .action_dissection import extract_all_actions
+from .condtion_dissection import extract_all_conditions
+from .trigger_dissection import extract_all_trigger
 
 
 def create_procedure_list(
@@ -41,7 +35,7 @@ def create_procedure_list(
     return entity_list
 
 
-def create_automation(automation_config: AutomationConfig) -> dict:
+def create_automation(automation_config: AutomationConfig, automation_name: str=None) -> dict:
     """
     Create an automation with all its information from the automation configuration.
 
@@ -53,7 +47,8 @@ def create_automation(automation_config: AutomationConfig) -> dict:
     """
     automation_data = {}
 
-    automation_name = automation_config.automation_name
+    if automation_name is None:
+        automation_name = automation_config.automation_name
     automation_script = asg.init_automation_script(automation_name)
 
     if CONF_MODE in automation_config:

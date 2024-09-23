@@ -2,14 +2,15 @@
 This module is responsible for the automation creation and the database insertion of the automation data.
 """
 
+import asyncio
+
 from backend import ha_automation_utils as ha_utils
 from backend.automation_gen.config_dissection import create_automation
-
-import asyncio
 
 
 def validate_automation_config(
     automation_yaml: dict,
+    automation_name: str = None,
 ) -> ha_utils.AutomationConfig:
     """
     Validate the automation configuration
@@ -19,10 +20,17 @@ def validate_automation_config(
 
     Returns:
         [ha_automation_config.AutomationConfig]: the automation configuration if the validation was successful
-    """
+    """    
+    
+    # set the automation name if it was given and validate the configuration
+    name_given = automation_name is not None
     automation_config = asyncio.run(
-        ha_utils.async_validate_config_item(automation_yaml)
+        ha_utils.async_validate_config_item(automation_yaml, name_given)
     )
+    if name_given:
+        automation_config.automation_name = automation_name
+    
+    # error handling if the validation was not successful
     if not (automation_config.validation_status == "ok") and not (
         automation_config.validation_status == "unknown_template"
     ):
@@ -39,7 +47,7 @@ def validate_automation_config(
         return automation_config
 
 
-def load_new_automation_data(test_file_path: str) -> dict:
+def load_new_automation_data(test_file_path: str, automation_name: str=None) -> dict:
     """
     Create the information for a automation from a test file
 
