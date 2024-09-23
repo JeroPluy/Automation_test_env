@@ -2,19 +2,16 @@
 This package is responsible for the database handling of the automation test environment.
 """
 
-from backend.utils.env_const import (
-    DATABASE,
-    INIT_FILE,
-    INTEG_DATA,
-    EXAMPLE_AUTOMATION_PATH,
-)
-# from backend.automation_gen.automation_creation import load_new_automation_data
-
-from os import path
 import sqlite3 as sqlite
+from os import path
+
+from backend.utils.env_const import (DATABASE, EXAMPLE_AUTOMATION_PATH,
+                                     INIT_FILE, INTEG_DATA)
 
 from .db_create_autom import add_automation
 from .db_utils import get_entities
+
+# from backend.automation_gen.automation_creation import load_new_automation_data
 
 
 def _load_data_foundation():
@@ -57,7 +54,7 @@ def init_db():
         -   ../schema/database_creation.spl
         -   ../schema/standard_integration.sql
     """
-    # if data base already exists
+    # init data base only if it does not exist
     if path.isfile(DATABASE):
         return
     else:

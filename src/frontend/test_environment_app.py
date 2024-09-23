@@ -2,10 +2,10 @@
 This module is the main module for the test environment application. It is the main module that is run to start the application.
 """
 
-from customtkinter import CTk, set_default_color_theme, set_appearance_mode
-from frontend.utils import load_language, load_settings, THEME_PATH
+from customtkinter import CTk, set_appearance_mode, set_default_color_theme
 
 from frontend.automation_overview.application_start import StartFrame
+from frontend.utils import THEME_PATH, load_language, load_settings
 
 
 class AppWindow(CTk):
@@ -55,6 +55,8 @@ class AppWindow(CTk):
         set_default_color_theme(THEME_PATH)
         set_appearance_mode(self.settings["MODE"])
         
+        # init the frame history stack and the start frame
+        self.frame_stack = []
         self.start_frame = StartFrame(self)
         # display the start frame with the logo
         self.load_new_frame(None, self.start_frame)
@@ -73,6 +75,26 @@ class AppWindow(CTk):
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
         new_frame.grid(row=0, column=0, sticky="news")
+        self.frame_stack.append(new_frame.__class__)
+        for frame in self.frame_stack:
+            print(frame)
+        print("-----------------")
+
+    def go_back(self, old_frame):
+        """
+        Function to go back to the previous frame
+
+        Args:
+            old_frame (customtkinter.CTk): the current frame before going back
+        """
+        if len(self.frame_stack) > 1:
+            self.frame_stack.pop()
+
+            new_frame_class = self.frame_stack[-1]
+            new_frame = new_frame_class(self)
+            self.load_new_frame(old_frame, new_frame)
+        else:
+            print("Error: No previous frame found")
 
 if __name__ == "__main__":
     app = AppWindow()

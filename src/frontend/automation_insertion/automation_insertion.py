@@ -3,11 +3,17 @@ This frontend module is responsible for the automation insertion windows.
 """
 
 from os import path
+from tkinter import TclError
+from tkinter import filedialog as fd
 from typing import Tuple
-from tkinter import TclError, filedialog as fd
+
 import customtkinter
 
+from backend import automation_gen as ag
 from frontend.customWidgets import customWidgets as cW
+
+from .automation_entities import AutomationEntityFrame
+
 
 class AutomationCreationFrame(cW.BasisFrame):
     """
@@ -17,24 +23,22 @@ class AutomationCreationFrame(cW.BasisFrame):
         cW.BlankWindow (class): custom blank basic window for the application
     """
 
-    def __init__(self, app, prev_frame, project=None):
+    def __init__(self, app):
         """
         Initialization of the automation insertion window with a entry for the name, textbox for the automation code and buttons to add and delete the code
-        
+
         Args:
             app (customtkinter.CTK): the parent window of the automation insertion frame
-            prev_frame (customtkinter.CTK): the previous frame before the automation insertion window
             project (str): the name of the project the automation is added to
         """
-        
-        # create the basis frame for the automation insertion window        
-        super().__init__(app=app, prev_frame=prev_frame, layer=0)
-        
 
-        if project is None:
+        # create the basis frame for the automation insertion window
+        super().__init__(app=app, layer=0)
+
+        if app.selected_project is None:
             nav_path = str(app.lang["NEW_A"])
         else:
-            nav_path = str(project + "/" + app.lang["NEW_A"])
+            nav_path = str(app.selected_project + "/" + app.lang["NEW_A"])
 
         self.grid_columnconfigure(0, weight=1)
 
@@ -69,7 +73,9 @@ class AutomationCreationFrame(cW.BasisFrame):
         )
 
         self.navigaton_buttons = CustomNavButtons(
-            self, objects=2, values=[app.lang["BACK"], app.lang["NEXT"]], 
+            self,
+            objects=2,
+            values=[app.lang["BACK"], app.lang["NEXT"]],
         )
         self.navigaton_buttons.grid(
             row=4, column=0, padx=(25, 25), pady=(0, 20), sticky="news"
@@ -95,7 +101,7 @@ class TextToolBtns(customtkinter.CTkFrame):
         super().__init__(root, fg_color="transparent", **kwargs)
 
         self.app = app
-        
+
         # create the buttons for the automation insertion window
         self.imp_btn = cW.AcceptButton(
             self,
@@ -105,7 +111,7 @@ class TextToolBtns(customtkinter.CTkFrame):
             kind=0,
             command=self.textbox_load,
         )
-        
+
         # TODO: add user defined path for loading the configuration files from the file system
         self.dir_path = path.join("data")
         self.imp_btn.grid(row=0, column=0, padx=(0, 15))
@@ -142,7 +148,6 @@ class TextToolBtns(customtkinter.CTkFrame):
         self.dir_path = path.join("data")
         self.save_btn.grid(row=0, column=3, padx=(0, 15))
 
-
     def textbox_load(self):
         """
         Loads the text from a yaml file into the textbox
@@ -155,22 +160,21 @@ class TextToolBtns(customtkinter.CTkFrame):
             title=self.app.lang["CHOOSE_FILE"],
             initialdir=self.dir_path,
         )
-        
+
         # if no file is selected, return
         if file_name == "":
             return
-        
+
         with open(file_name, "r") as file:
             # get the name of the automation from the file name
             self.master.entry.delete(0, "end")
             self.master.entry.insert(0, path.basename(file_name).split(".")[0])
-            
+
             # get the content of the file and insert it into the textbox
             self.master.textbox.delete("0.0", "end")
             self.master.textbox.insert("0.0", file.read())
-            
-        # TODO undo imports in the textbox with one undo step
 
+        # TODO undo imports in the textbox with one undo step
 
     def textbox_undo(self):
         """
@@ -199,7 +203,7 @@ class TextToolBtns(customtkinter.CTkFrame):
             self.master.textbox.edit_redo()
         except TclError:
             cW.PopupWarning(
-                app = self.app,
+                app=self.app,
                 title=self.app.lang["WARNING"],
                 message=self.app.lang["NOTHING_REDO"],
             )
@@ -252,12 +256,23 @@ class CustomNavButtons(cW.NavigationButtons):
         )
         self.version_option.grid(row=0, column=1, padx=(0, 15), sticky="we")
 
-    def nav_back(self):
-        print("go back")
+    def btn_1_func(self):
+        self.master.app.go_back(old_frame=self.master)
 
-    def nav_forwards(self):
-        print(self.master.winfo_width())
-        print(self.master.winfo_height())
+    def btn_2_func(self): 
+             
+        # automation validation call
+        with open("data/automation.yaml", "w") as file:
+            file.write(self.master.textbox.get("0.0", "end"))
+        self.curr_automation_config = ag.load_new_automation_data("data/automation.yaml")
+        
+        self.master.app.load_new_frame(
+            prev_frame=self.master,
+            new_frame=AutomationEntityFrame(
+                self.master.app, automation_name=self.master.entry.get(), 
+            ),
+        )
 
     def version_select(self, choice):
+        print("optionmenu dropdown clicked:", str(choice))
         print("optionmenu dropdown clicked:", str(choice))

@@ -1,6 +1,6 @@
 from backend.database.db_utils import load_automations
-
 from frontend.customWidgets import customWidgets as cW
+
 from .automation_selection import AutomationSelectionFrame
 
 
@@ -14,7 +14,7 @@ class ProjectSelectionFrame(cW.BasisFrame):
         app,
     ):
         super().__init__(
-            app, root=None, prev_frame = None, layer = 0,
+            app, root=None, layer = 0,
         )
         
         self.navigation_bar = cW.NavigationBar(

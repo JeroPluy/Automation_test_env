@@ -1,7 +1,7 @@
-from frontend.customWidgets import customWidgets as cW
-from frontend.automation_insertion import AutomationCreationFrame
+from customtkinter import CTkFont, CTkLabel, CTkRadioButton, StringVar
 
-from customtkinter import CTkRadioButton, StringVar, CTkLabel, CTkFont
+from frontend.automation_insertion import AutomationCreationFrame
+from frontend.customWidgets import customWidgets as cW
 
 
 class AutomationSelectionFrame(cW.BasisFrame):
@@ -9,12 +9,12 @@ class AutomationSelectionFrame(cW.BasisFrame):
     AutomationSelection is a frame class that allows the user to select the automation
     """
 
-    def __init__(self, app, prev_frame=None):
+    def __init__(self, app):
         """
         Initialization of the AutomationSelection frame
         """
 
-        super().__init__(app=app, prev_frame=prev_frame, layer=0)
+        super().__init__(app=app, layer=0)
 
         # create the navigation bar
         if app.selected_project is not None:
@@ -66,9 +66,7 @@ class AutomationSelectionFrame(cW.BasisFrame):
         """
         self.app.load_new_frame(
             self,
-            AutomationCreationFrame(
-                self.app, AutomationSelectionFrame, project=self.app.selected_project
-            ),
+            AutomationCreationFrame(self.app),
         )
 
     def enable_test_automation(self):
@@ -220,4 +218,4 @@ class NavBtns(cW.NavigationButtons):
         """
         Function to handle the back button press
         """
-        self.app.load_new_frame(self, self.prev_frame_class(self.app))
+        self.app.go_back(old_frame=self.master)

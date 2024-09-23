@@ -1,20 +1,12 @@
 from abc import abstractmethod
 from os import path
-from typing import Any, Callable, Tuple, Type
+from typing import Any, Callable, Tuple
 
-from customtkinter import (
-    CTkToplevel,
-    CTkButton,
-    CTkFrame,
-    CTkImage,
-    CTkLabel,
-    CTkScrollableFrame,
-    Variable,
-)
+from customtkinter import (CTkButton, CTkFrame, CTkImage, CTkLabel,
+                           CTkScrollableFrame, CTkToplevel, Variable)
+from PIL import Image
 
 from frontend.customWidgets.CTkXYFrame import CTkXYFrame
-
-from PIL import Image
 
 
 class BasisFrame(CTkFrame):
@@ -26,7 +18,6 @@ class BasisFrame(CTkFrame):
         self,
         app: Any,
         root: Any = None,
-        prev_frame: Type[Any] = None,
         layer: int = 0,
         fg_color: str | Tuple[str] | None = None,
         border_width: int | str | None = None,
@@ -40,7 +31,6 @@ class BasisFrame(CTkFrame):
         Args:
             app (AppWindow): the application object
             root (Any): root frame for the basic frame
-            prev_frame (Type[Any], optional): type of the previous frame. Defaults to None.
             layer (int, optional): layer of the basic frame. Defaults to 0.
             fg_color (str | Tuple[str] | None, optional): (Debugging purposes) foreground color of the basic frame. Defaults to None so its taken from the theme.
             border_width (int | str | None, optional): (Debugging purposes) border width of the basic frame. Defaults to None so its taken from the theme.
@@ -53,9 +43,6 @@ class BasisFrame(CTkFrame):
         # link the application settings and language texts to the frame instance
         self.settings = app.settings
         self.lang = app.lang
-
-        # type of the previous frame
-        self.prev_frame_class = prev_frame
 
         # if the root is not given then the root is the application window
         if root is None:
@@ -102,7 +89,7 @@ class BasisFrame(CTkFrame):
             corner_radius=round_corners,
             **kwargs,
         )
-        
+
 
 class BasisScrollFrame(BasisFrame):
     """
@@ -188,18 +175,18 @@ class BlankToplevelWindow(CTkToplevel):
     def __init__(self, app, title: str = ""):
         """
         Initialization of the basic top level window for warnings and errors.
-        
+
         Args:
             app (Any): the application object
             title (str, optional): title of the top level window. Defaults to "".
         """
-        
+
         # create the toplevel window
         super().__init__()
-        
+
         # set the title of the toplevel window
         self.title(title)
-        
+
         # set toplevel window properties
         self.resizable(False, False)
         self.attributes("-topmost", True)
@@ -216,7 +203,7 @@ class PopupWarning(BlankToplevelWindow):
     """
     Custom toplevel window for popup warnings in the application.
     """
-    
+
     # TODO the application window should not be usable when the popup is open
 
     def __init__(self, app, message: str, title: str = None):
@@ -231,10 +218,14 @@ class PopupWarning(BlankToplevelWindow):
 
         # create the toplevel window for the warning with the title
         super().__init__(app=app, title=title)
-        
+
         image = IconImage(
-            light_img_path=path.join(path.dirname(path.realpath(__file__)), "icons", "warning_black.png"),
-            dark_img_path=path.join(path.dirname(path.realpath(__file__)), "icons", "warning_white.png"),
+            light_img_path=path.join(
+                path.dirname(path.realpath(__file__)), "icons", "warning_black.png"
+            ),
+            dark_img_path=path.join(
+                path.dirname(path.realpath(__file__)), "icons", "warning_white.png"
+            ),
             size=(30, 30),
         )
 
