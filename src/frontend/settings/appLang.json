@@ -82,5 +82,17 @@
     "PROJECT_OVERVIEW": [
         "Projektauswahl",
         "Project overview"
+    ],
+    "LOADING_AUTOMATION": [
+        "Automationskonfiguration wird validiert und geladen",
+        "Loading and validating automation configuration"
+    ],
+    "CANCEL": [
+        "Abbrechen",
+        "Cancel"
+    ],
+    "INVALID_AUTOMATION": [
+        "Ungültige Automationskonfiguration",
+        "Invalid automation configuration"
     ]
 }
