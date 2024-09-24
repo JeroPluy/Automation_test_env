@@ -2,8 +2,15 @@ from abc import abstractmethod
 from os import path
 from typing import Any, Callable, Tuple
 
-from customtkinter import (CTkButton, CTkFrame, CTkImage, CTkLabel,
-                           CTkScrollableFrame, CTkToplevel, Variable)
+from customtkinter import (
+    CTkButton,
+    CTkFrame,
+    CTkImage,
+    CTkLabel,
+    CTkScrollableFrame,
+    CTkToplevel,
+    Variable,
+)
 from PIL import Image
 
 from frontend.customWidgets.CTkXYFrame import CTkXYFrame
@@ -30,7 +37,7 @@ class BasisFrame(CTkFrame):
 
         Args:
             app (AppWindow): the application object
-            root (Any): root frame for the basic frame
+            root (Any, optional): root frame for the basic frame
             layer (int, optional): layer of the basic frame. Defaults to 0.
             fg_color (str | Tuple[str] | None, optional): (Debugging purposes) foreground color of the basic frame. Defaults to None so its taken from the theme.
             border_width (int | str | None, optional): (Debugging purposes) border width of the basic frame. Defaults to None so its taken from the theme.
@@ -229,10 +236,13 @@ class PopupWarning(BlankToplevelWindow):
             size=(30, 30),
         )
 
+        self.image_label = CTkLabel(self, text="", image=image)
+
+        self.image_label.pack(pady=(15, 0))
+
         # create place the warning label with the message in the toplevel window
         self.warning_label = CTkLabel(
             self,
-            image=image,
             text=message,
             wraplength=400,
             compound="left",
