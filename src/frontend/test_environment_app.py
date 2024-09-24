@@ -80,6 +80,8 @@ class AppWindow(CTk):
             print(frame)
         print("-----------------")
 
+        return new_frame
+
     def go_back(self, old_frame):
         """
         Function to go back to the previous frame
@@ -92,7 +94,7 @@ class AppWindow(CTk):
 
             new_frame_class = self.frame_stack[-1]
             new_frame = new_frame_class(self)
-            self.load_new_frame(old_frame, new_frame)
+            return self.load_new_frame(old_frame, new_frame)
         else:
             print("Error: No previous frame found")
 
