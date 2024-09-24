@@ -13,8 +13,8 @@
 # extraction modules and enable the extraction of all automation entities as well as the creation of the complete automation script.
 
 from .automation_creation import (
-    load_new_automation_data,
     change_integration,
+    load_new_automation_data,
 )
 
 __all__ = [

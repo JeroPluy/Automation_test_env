@@ -4,13 +4,26 @@ This module generates the condition part of the automation script.
 
 from os import path
 
-from .utils import append_script_context_to_script
-from backend.utils.env_helper_classes import Entity
-from backend.utils.env_helper import is_jinja_template 
-from backend.utils.env_const import TEMPLATE_PATH
-
 from backend.ha_automation_utils.home_assistant_config_validation import valid_entity_id
-from backend.ha_automation_utils.home_assistant_const import CONF_ABOVE, CONF_AND, CONF_BELOW, CONF_DEVICE, CONF_ID, CONF_NOT, CONF_NUMERIC_STATE, CONF_OR, CONF_STATE, CONF_TRIGGER, CONF_TYPE, CONF_ZONE
+from backend.ha_automation_utils.home_assistant_const import (
+    CONF_ABOVE,
+    CONF_AND,
+    CONF_BELOW,
+    CONF_DEVICE,
+    CONF_ID,
+    CONF_NOT,
+    CONF_NUMERIC_STATE,
+    CONF_OR,
+    CONF_STATE,
+    CONF_TRIGGER,
+    CONF_TYPE,
+    CONF_ZONE,
+)
+from backend.utils.env_const import TEMPLATE_PATH
+from backend.utils.env_helper import is_jinja_template
+from backend.utils.env_helper_classes import Entity
+
+from .utils import append_script_context_to_script
 
 IF_TEMPLATE = "if ("
 END_IF_TEMPLATE = "):\n"

@@ -4,9 +4,6 @@ This module is used to generate the action part for the automation script.
 
 from os import path
 
-from ...utils.env_helper_classes import Entity
-from ...utils.env_const import TEMPLATE_PATH
-
 from ...ha_automation_utils.home_assistant_const import (
     CONF_ACTION,
     CONF_DEVICE,
@@ -16,7 +13,8 @@ from ...ha_automation_utils.home_assistant_const import (
     CONF_UNTIL,
     CONF_WHILE,
 )
-
+from ...utils.env_const import TEMPLATE_PATH
+from ...utils.env_helper_classes import Entity
 from .utils import append_script_context_to_script, close_script
 
 END_IF_TEMPLATE = "):\n"

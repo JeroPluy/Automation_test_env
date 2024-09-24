@@ -4,7 +4,7 @@
 # The environment_package contains the automation_script_gen, db, ha_automation, and utils subpackages.
 
 
-from os import path, makedirs
+from os import makedirs, path
 
 from .utils.env_const import AUTOMATION_SCRIPT
 

@@ -6,17 +6,15 @@ The information about the trigger functions are from:
 https://www.home-assistant.io/docs/automation/trigger/
 """
 
-from . import automation_script_gen as asg
+import re
+import uuid
 
-from ..utils.env_const import START
+import voluptuous as vol
 
-from ..utils.env_helper_classes import Entity
-from ..utils.env_helper import is_jinja_template
-
+from ..ha_automation_utils.home_assistant_automation_validation import AutomationConfig
 from ..ha_automation_utils.home_assistant_config_validation import (
     valid_entity_id,
 )
-from ..ha_automation_utils.home_assistant_automation_validation import AutomationConfig
 from ..ha_automation_utils.home_assistant_const import (
     CONF_ABOVE,
     CONF_ALLOWED_METHODS,
@@ -68,11 +66,10 @@ from ..ha_automation_utils.home_assistant_const import (
     TAG_ID,
     test_leading_zero,
 )
-
-
-import re
-import voluptuous as vol
-import uuid
+from ..utils.env_const import START
+from ..utils.env_helper import is_jinja_template
+from ..utils.env_helper_classes import Entity
+from . import automation_script_gen as asg
 
 
 def _trigger_entities(

@@ -3,8 +3,7 @@ This module brings together all extraction modules and enables the extraction of
 as well as the creation of the complete automation script.
 """
 
-from ..ha_automation_utils.home_assistant_automation_validation import \
-    AutomationConfig
+from ..ha_automation_utils.home_assistant_automation_validation import AutomationConfig
 from ..ha_automation_utils.home_assistant_const import CONF_MAX, CONF_MODE
 from ..utils.env_const import PARALLEL, QUEUED, RESTART, SINGLE
 from ..utils.env_helper_classes import Automation
@@ -44,6 +43,9 @@ def create_automation(automation_config: AutomationConfig, automation_name: str=
 
     Returns:
         dict: The automation data with all its information for inserting into the database.
+              The data is structured as follows: 
+                    "entities": list - list of entities
+                    "infos": Automation - the automation information
     """
     automation_data = {}
 

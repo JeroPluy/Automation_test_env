@@ -108,20 +108,23 @@ def parse_yaml(content: str | TextIO | StringIO) -> JSON_TYPE:
         return _parse_yaml_python(content)
     try:
         return _parse_yaml(FastSafeLoader, content)
-    except yaml.YAMLError:
+    except HomeAssistantError:
         # Loading failed, so we now load with the Python loader which has more
         # readable exceptions
         if isinstance(content, (StringIO, TextIO, TextIOWrapper)):
             # Rewind the stream so we can try again
             content.seek(0, 0)
-        return _parse_yaml_python(content)
+        try:
+            return _parse_yaml_python(content)
+        except HomeAssistantError:
+            return {}
 
 
 def _parse_yaml_python(content: str | TextIO | StringIO) -> JSON_TYPE:
     """Parse YAML with the python loader (this is very slow)."""
     try:
         return _parse_yaml(PythonSafeLoader, content)
-    except yaml.YAMLError as exc:
+    except Exception as exc:
         _LOGGER.error(str(exc))
         raise HomeAssistantError(exc) from exc
 
@@ -131,4 +134,7 @@ def _parse_yaml(
     content: str | TextIO,
 ) -> JSON_TYPE:
     """Load a YAML file."""
-    return yaml.load(content, Loader=lambda stream: loader(stream))  # type: ignore[arg-type]
+    try:
+        return yaml.load(content, Loader=loader)  # type: ignore[arg-type]
+    except Exception as exc:
+        raise HomeAssistantError(exc) from exc

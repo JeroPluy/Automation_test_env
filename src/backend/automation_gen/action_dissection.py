@@ -6,17 +6,9 @@ The information about the action functions are from:
 https://www.home-assistant.io/docs/scripts
 """
 
-from . import automation_script_gen as asg
+import uuid
 
-from .condtion_dissection import _condition_entities
-from .trigger_dissection import _trigger_entities
-
-from ..utils.env_const import (
-    ACTION_INPUT,
-    OUTPUT,
-)
-from ..utils.env_helper_classes import Entity
-from ..utils.env_helper import is_jinja_template
+import voluptuous as vol
 
 from ..ha_automation_utils.home_assistant_automation_validation import AutomationConfig
 from ..ha_automation_utils.home_assistant_const import (
@@ -57,9 +49,15 @@ from ..ha_automation_utils.home_assistant_const import (
     SCRIPT_ACTION_WAIT_FOR_TRIGGER,
     SCRIPT_ACTION_WAIT_TEMPLATE,
 )
-
-import voluptuous as vol
-import uuid
+from ..utils.env_const import (
+    ACTION_INPUT,
+    OUTPUT,
+)
+from ..utils.env_helper import is_jinja_template
+from ..utils.env_helper_classes import Entity
+from . import automation_script_gen as asg
+from .condtion_dissection import _condition_entities
+from .trigger_dissection import _trigger_entities
 
 
 def _action_entities(

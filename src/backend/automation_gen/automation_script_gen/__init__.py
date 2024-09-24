@@ -8,29 +8,6 @@
 # The `util.py` script is used to initialize the main script and provides a general function for writing to the created script.
 # This function can be used by other scripts in the package to write their respective automation code to the automation script.
 
-from .utils import (
-    init_automation_script,
-    create_locked_message,
-)
-
-# This module is used to generate the trigger section of the automation script.
-from .trigger_script_gen import (
-    close_trigger_section,
-    create_combination_trigger_script,
-    create_trigger_script,
-)
-
-# This module generates the condition part of the automation script.
-from .condition_script_gen import (
-    close_condition_section,
-    close_logic_function_block,
-    create_combination_condition_script,
-    create_condition_script,
-    create_next_logic_condition_part,
-    init_condition_part,
-    start_logic_function_block,
-)
-
 # This module is used to generate the action part for the automation script.
 from .action_script_gen import (
     close_action_condition_block,
@@ -44,6 +21,28 @@ from .action_script_gen import (
     init_action_part,
     start_action_condition_block,
     start_action_loop_block,
+)
+
+# This module generates the condition part of the automation script.
+from .condition_script_gen import (
+    close_condition_section,
+    close_logic_function_block,
+    create_combination_condition_script,
+    create_condition_script,
+    create_next_logic_condition_part,
+    init_condition_part,
+    start_logic_function_block,
+)
+
+# This module is used to generate the trigger section of the automation script.
+from .trigger_script_gen import (
+    close_trigger_section,
+    create_combination_trigger_script,
+    create_trigger_script,
+)
+from .utils import (
+    create_locked_message,
+    init_automation_script,
 )
 
 # The __all__ variable is used to define the public available functions of the package 
