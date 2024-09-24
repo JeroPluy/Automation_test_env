@@ -3,6 +3,7 @@ This frontend module is responsible for the automation insertion windows.
 """
 
 from os import path
+from threading import Thread
 from tkinter import TclError
 from tkinter import filedialog as fd
 from typing import Tuple
@@ -10,6 +11,7 @@ from typing import Tuple
 import customtkinter
 
 from backend import automation_gen as ag
+from backend.utils.env_helper_classes import Automation
 from frontend.customWidgets import customWidgets as cW
 
 from .automation_entities import AutomationEntityFrame
@@ -67,8 +69,8 @@ class AutomationCreationFrame(cW.BasisFrame):
         self.textbox.grid(row=3, column=0, sticky="news", padx=50, pady=(0, 23))
         self.grid_rowconfigure(3, weight=1)
 
-        self.insertion_frame = TextToolBtns(root=self, app=app)
-        self.insertion_frame.grid(
+        self.text_tool_btns = TextToolBtns(root=self, app=app)
+        self.text_tool_btns.grid(
             row=2, column=0, padx=(50, 50), pady=(10, 10), sticky="news"
         )
 
@@ -80,6 +82,26 @@ class AutomationCreationFrame(cW.BasisFrame):
         self.navigaton_buttons.grid(
             row=4, column=0, padx=(25, 25), pady=(0, 20), sticky="news"
         )
+
+    def load_automation(self, automation_path: str):
+        """
+        Load the automation data from the automation file
+
+        Args:
+            automation_path (str): the path to the automation file
+        """
+        # if no file is selected, return
+        if automation_path == "":
+            return
+
+        with open(automation_path, "r") as file:
+            # get the name of the automation from the file name
+            self.entry.delete(0, "end")
+            self.entry.insert(0, path.basename(automation_path).split(".")[0])
+
+            # get the content of the file and insert it into the textbox
+            self.textbox.delete("0.0", "end")
+            self.textbox.insert("0.0", file.read())
 
 
 class TextToolBtns(customtkinter.CTkFrame):
@@ -160,20 +182,7 @@ class TextToolBtns(customtkinter.CTkFrame):
             title=self.app.lang["CHOOSE_FILE"],
             initialdir=self.dir_path,
         )
-
-        # if no file is selected, return
-        if file_name == "":
-            return
-
-        with open(file_name, "r") as file:
-            # get the name of the automation from the file name
-            self.master.entry.delete(0, "end")
-            self.master.entry.insert(0, path.basename(file_name).split(".")[0])
-
-            # get the content of the file and insert it into the textbox
-            self.master.textbox.delete("0.0", "end")
-            self.master.textbox.insert("0.0", file.read())
-
+        self.master.load_automation(file_name)
         # TODO undo imports in the textbox with one undo step
 
     def textbox_undo(self):
@@ -259,20 +268,111 @@ class CustomNavButtons(cW.NavigationButtons):
     def btn_1_func(self):
         self.master.app.go_back(old_frame=self.master)
 
-    def btn_2_func(self): 
-             
-        # automation validation call
+    def btn_2_func(self):
+        # save the automation data to a yaml file
         with open("data/automation.yaml", "w") as file:
             file.write(self.master.textbox.get("0.0", "end"))
-        self.curr_automation_config = ag.load_new_automation_data("data/automation.yaml")
-        
+
+        def validate_and_load():
+            # validate and load the new automation data
+            self.master.app.curr_automation_config = ag.load_new_automation_data(
+                "data/automation.yaml"
+            )
+
+        def check_thread(thread):
+            if thread.is_alive():
+                self.master.app.after(100, check_thread, thread)
+            else:
+                after_loading()
+
+        def after_loading():
+            if self.master.app.curr_automation_config is None:
+                new_frame = self.master.app.go_back(old_frame=self.master)
+                new_frame.load_automation("data/automation.yaml")
+                cW.PopupWarning(
+                    app=self.master.app,
+                    title=self.master.app.lang["WARNING"],
+                    message=self.master.app.lang["INVALID_AUTOMATION"],
+                    # TODO: add the error / exception message to the popup
+                )
+            else:
+                # load the automation entity frame for selecting the integrations for the entities of the automation
+                automation: Automation =  self.master.app.curr_automation_config["infos"]
+                self.master.app.load_new_frame(
+                    prev_frame=self.master,
+                    
+                    new_frame=AutomationEntityFrame(
+                        self.master.app,
+                        automation_name=automation.a_name,
+                    ),
+                )
+
+        # Start the validation and loading thread to prevent the GUI from freezing
+        validate_thread = Thread(target=validate_and_load)
+        validate_thread.start()
+
+        # Run the loading screen on the main thread
         self.master.app.load_new_frame(
-            prev_frame=self.master,
-            new_frame=AutomationEntityFrame(
-                self.master.app, automation_name=self.master.entry.get(), 
-            ),
+            prev_frame=self.master, new_frame=LoadingFrame(self.master.app)
         )
+
+        # Check if the thread is still running
+        self.master.app.after(100, check_thread, validate_thread)
 
     def version_select(self, choice):
         print("optionmenu dropdown clicked:", str(choice))
         print("optionmenu dropdown clicked:", str(choice))
+
+
+class LoadingFrame(cW.BasisFrame):
+    def __init__(self, app):
+        super().__init__(app=app, layer=0)
+
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(0, weight=1)
+
+        self.loading_context = LoadingContext(app=self.app, root=self)
+
+        self.loading_context.grid(
+            row=0, column=0, pady=(50, 0), padx=(50, 50), sticky="news"
+        )
+
+        self.cancel_btn = cW.DeleteButton(
+            self,
+            text=self.app.lang["CANCEL"],
+            command=self.cancel_loading,
+        )
+
+        self.cancel_btn.grid(row=1, column=0, pady=(20, 50), padx=(50, 50), sticky="ns")
+
+    def cancel_loading(self):
+        automation_ins_frame = self.app.go_back(old_frame=self)
+        # reload the automation from before the loading screen
+        automation_ins_frame.load_automation("data/automation.yaml")
+
+
+class LoadingContext(cW.BasisFrame):
+    def __init__(self, app, root):
+        super().__init__(app=app, root=root, layer=1)
+
+        self.binding_frame = customtkinter.CTkFrame(self)
+        self.binding_frame.columnconfigure(0, weight=1)
+        self.binding_frame.grid(row=0, column=0, sticky="ew")
+
+        # TODO wrap the text in the label if the window is too small
+        self.loading_label = customtkinter.CTkLabel(
+            self.binding_frame,
+            text=app.lang["LOADING_AUTOMATION"],
+            font=("Roboto", 16),
+        )
+        self.loading_label.grid(row=1, column=0, sticky="we", padx=50, pady=(15, 5))
+
+        self.loading_bar = customtkinter.CTkProgressBar(
+            self.binding_frame, mode="indeterminate", determinate_speed=0.1
+        )
+        self.loading_bar.grid(row=2, column=0, sticky="we", padx=50, pady=(15, 5))
+        self.loading_bar.set(0)
+        self.loading_bar.start()
+
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(0, weight=1)
