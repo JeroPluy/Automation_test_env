@@ -1,5 +1,6 @@
 from abc import abstractmethod
 from os import path
+from tkinter import StringVar
 from typing import Any, Callable, Tuple
 
 from customtkinter import (
@@ -7,6 +8,7 @@ from customtkinter import (
     CTkFrame,
     CTkImage,
     CTkLabel,
+    CTkOptionMenu,
     CTkScrollableFrame,
     CTkToplevel,
     Variable,
@@ -603,3 +605,35 @@ class NavigationBar(CTkLabel):
             anchor="center",
             wraplength=wraplength,
         )
+
+
+class FramedOptionMenu(BasisFrame):
+    """
+    Custom option menu for the application with a frame around the menu for better visibility.
+    """
+
+    def __init__(self, root, values: list, default_value: str, command: Callable[[str], Any] | None = None):
+        """
+        Initialization of the custom option menu for the application with a frame around the menu for better visibility.
+
+        Args:
+            root (BasisFrame): root frame for the option menu
+            values (list): values of the option menu
+            default_variable (str): default value of the option menu and the variable
+            command (Callable[[str], Any]): command of the option menu
+        """
+        self.app = root.app
+        if self.app.settings["MODE"] == "light":
+            border_color = "#989898"
+        elif self.app.settings["MODE"] == "dark":
+            border_color = "#565B5E"
+        
+        super().__init__(app=self.app, root=root, layer=1, border_color=border_color, border_width=1)
+        self.rowconfigure(0, weight=1)
+        self.columnconfigure(0, weight=1)
+
+        self.variable = StringVar(value=default_value)
+        option_menu = CTkOptionMenu(self, values=values, variable=self.variable, command=command)
+        option_menu.grid(row=0, column=0, sticky="ew", padx=(2), pady=(2))
+
+
