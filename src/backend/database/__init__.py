@@ -5,9 +5,14 @@ This package is responsible for the database handling of the automation test env
 import sqlite3 as sqlite
 from os import path
 
-from backend.utils.env_const import DATABASE, INIT_FILE, INTEG_DATA
-
-# from backend.automation_gen.automation_creation import load_new_automation_data
+from backend.utils.env_const import (
+    AUTOMATION_SCRIPT,
+    DATABASE,
+    EXAMPLE_DATA,
+    EXAMPLE_SCRIPT,
+    INIT_FILE,
+    INTEG_DATA,
+)
 
 
 def _load_data_foundation():
@@ -17,8 +22,9 @@ def _load_data_foundation():
 
     needed sql-Files:
         -   schema/standard_integration.sql
-    needed yaml-Files:
-        -   test_data/yaml_files/example_automations/turn_off_living_room_main_light.yaml
+        -   schema/example_automation.sql
+    needed python-File:
+        -   schema/example_automation.py
     """
     with open(INTEG_DATA) as integration_data:
         standard_integration_data = integration_data.read()
@@ -35,11 +41,27 @@ def _load_data_foundation():
         print(str(e) + " - data already loaded")
 
     # add an example automation to the database not possible because of circular import
-    # add_automation(
-    #     load_new_automation_data(
-    #         path.join(EXAMPLE_AUTOMATION_PATH, "turn_off_living_room_main_light.yaml")
-    #     )
-    # )
+    with open(EXAMPLE_DATA) as automation_example:
+        example_data = automation_example.read()
+
+    try:
+        # con = connection to the db
+        with sqlite.connect(DATABASE) as con:
+            # create cursor to execute commands on db
+            cur = con.cursor()
+            cur.executescript(example_data)
+            # commit db actions, thus actually execute on the db
+            con.commit()
+    except sqlite.IntegrityError as e:
+        print(str(e) + " - data already loaded")
+
+    # copy the example automation script to the automation script folder
+    with open(EXAMPLE_SCRIPT, "r") as example_script:
+        script = example_script.read()
+        with open(
+            path.join(AUTOMATION_SCRIPT, "example_automation.py"), "w"
+        ) as script_file:
+            script_file.write(script)
 
 
 def init_db():

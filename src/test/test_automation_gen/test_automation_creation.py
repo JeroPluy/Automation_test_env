@@ -3,7 +3,7 @@ This test module is used to test the functionality of the create automation
 function and its sub functions on complete automations.
 """
 
-from backend.automation_gen import validate_automation_config
+from backend.automation_gen.automation_creation import validate_automation_config
  
 from backend.automation_gen.automation_script_gen import init_automation_script
 
@@ -194,7 +194,7 @@ def test_action_entities(basis_file: str = None):
 
 def test_create_single_automation(basis_file: str = None):
     """
-    Test the extraction of all entities in basis_file
+    Test the extraction of all entities and automation data in basis_file
 
     Args:
         basis_file (str, optional): the path to the yaml file.
@@ -212,11 +212,8 @@ def test_create_single_automation(basis_file: str = None):
     automation_config = validate_automation_config(automation_yaml)
     if automation_config is not None:
         print(" --- " + automation_config.automation_name + " --- ")
-        extracted_entities = create_procedure_list(automation_config, script_file)
-        entity: Entity = None
-        for entity in extracted_entities:
-            print_entity_data(entity)
-
+        extract_information = create_automation(automation_config)
+        print_automation_data(extract_information)
 
 def test_create_all_example_automation() -> list:
     """
