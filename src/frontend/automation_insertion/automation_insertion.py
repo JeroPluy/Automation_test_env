@@ -37,12 +37,13 @@ class AutomationCreationFrame(cW.BasisFrame):
         # create the basis frame for the automation insertion window
         super().__init__(app=app, layer=0)
 
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(1, weight=1)
+
         if app.selected_project is None:
             nav_path = str(app.lang["NEW_A"])
         else:
             nav_path = str(app.selected_project + "/" + app.lang["NEW_A"])
-
-        self.grid_columnconfigure(0, weight=1)
 
         self.nav_bar = cW.NavigationBar(
             self,
@@ -50,28 +51,42 @@ class AutomationCreationFrame(cW.BasisFrame):
             nav_path=nav_path,
         )
 
-        self.nav_bar.grid(row=0, column=0, sticky="ew")
+        self.nav_bar.grid(row=0, column=0, sticky="new")
+
+        self.content_frame = cW.BasisFrame(app, self, layer=1)
+        self.content_frame.grid(row=1, column=0, sticky="news", pady=(15, 20), padx=(28))
+        self.content_frame.columnconfigure(0, weight=1)
+        self.content_frame.rowconfigure(1, weight=1)
 
         self.entry = customtkinter.CTkEntry(
-            self, placeholder_text=app.lang["AUTO_NAME"], font=("Roboto", 16)
+            self.content_frame,
+            placeholder_text=app.lang["AUTO_NAME"],
+            font=("Roboto", 16),
+            height=40,
         )
-        self.entry.grid(row=1, column=0, sticky="we", padx=50, pady=(15, 5))
+        self.entry.grid(row=0, column=0, sticky="we", padx=(22), pady=(10, 0))
+
+        self.automation_input_frame = cW.BasisFrame(app, self.content_frame, layer=2)
+        self.automation_input_frame.grid(
+            row=1, column=0, sticky="news", padx=(10), pady=(10, 10)
+        )
+        self.automation_input_frame.columnconfigure(0, weight=1)
+        self.automation_input_frame.rowconfigure(1, weight=1)
 
         # the textbox for the automation code is below the text insertion tools but needs to be initialized first
         # to be able to reference it in the text insertion tools
         self.textbox = customtkinter.CTkTextbox(
-            self,
+            self.automation_input_frame,
             font=("Roboto", 16),
             wrap="none",
             undo=True,
             maxundo=3,
         )
-        self.textbox.grid(row=3, column=0, sticky="news", padx=50, pady=(0, 23))
-        self.grid_rowconfigure(3, weight=1)
+        self.textbox.grid(row=1, column=0, sticky="news", padx=(12), pady=(0, 23))
 
-        self.text_tool_btns = TextToolBtns(root=self, app=app)
+        self.text_tool_btns = TextToolBtns(root=self.automation_input_frame, app=app)
         self.text_tool_btns.grid(
-            row=2, column=0, padx=(50, 50), pady=(10, 10), sticky="news"
+            row=0, column=0, padx=(12), pady=(10, 10), sticky="news"
         )
 
         self.navigaton_buttons = CustomNavButtons(
@@ -80,7 +95,7 @@ class AutomationCreationFrame(cW.BasisFrame):
             values=[app.lang["BACK"], app.lang["NEXT"]],
         )
         self.navigaton_buttons.grid(
-            row=4, column=0, padx=(25, 25), pady=(0, 20), sticky="news"
+            row=2, column=0, padx=(25, 25), pady=(0, 20), sticky="news"
         )
 
     def load_automation(self, automation_path: str):
@@ -275,7 +290,7 @@ class CustomNavButtons(cW.NavigationButtons):
 
         def validate_and_load():
             # validate and load the new automation data
-            self.master.app.curr_automation_config = ag.load_new_automation_data(
+            self.master.app.new_automation_config = ag.load_new_automation_data(
                 "data/automation.yaml"
             )
 
@@ -286,7 +301,7 @@ class CustomNavButtons(cW.NavigationButtons):
                 after_loading()
 
         def after_loading():
-            if self.master.app.curr_automation_config is None:
+            if self.master.app.new_automation_config is None:
                 new_frame = self.master.app.go_back(old_frame=self.master)
                 new_frame.load_automation("data/automation.yaml")
                 cW.PopupWarning(
@@ -297,10 +312,9 @@ class CustomNavButtons(cW.NavigationButtons):
                 )
             else:
                 # load the automation entity frame for selecting the integrations for the entities of the automation
-                automation: Automation =  self.master.app.curr_automation_config["infos"]
+                automation: Automation = self.master.app.new_automation_config["infos"]
                 self.master.app.load_new_frame(
                     prev_frame=self.master,
-                    
                     new_frame=AutomationEntityFrame(
                         self.master.app,
                         automation_name=automation.a_name,

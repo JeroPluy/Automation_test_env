@@ -8,20 +8,17 @@ $env:PYTHONPATH = "..\\src"
 In some environments, the PYTHONPATH needs to be set to the src directory.
 """
 
-from os import path
 import tkinter
+from os import path
 from typing import Tuple
 
 import customtkinter
 from PIL import Image
 
-
 from frontend.customWidgets import customWidgets as cW
-
 from frontend.customWidgets.CTkTable import CTkTable
 from frontend.customWidgets.CTkXYFrame import CTkXYFrame
-
-from frontend.utils import load_settings, load_language, THEME_PATH, ICON_PATH
+from frontend.utils import ICON_PATH, THEME_PATH, load_language, load_settings
 
 # untested widgets which could be useful in the future
 # ctkmessagebox
@@ -173,11 +170,15 @@ class TestWindow(BlankWindow):
             values=["option 1", "option 2"],
             command=self.combobox_callback,
         )
+
+        self.option_menu_frame = cW.BasisFrame(self, self.scrollable_frame, border_width=10, border_color="red", fg_color="red")
         self.optionmenu = customtkinter.CTkOptionMenu(
-            self.scrollable_frame,
-            values=["option 1", "option 2"],
+            self.option_menu_frame,
+            values=["option 1", "option test"],
             command=self.optionmenu_callback,
         )
+        self.optionmenu.grid(row=0, column=0, sticky="w")
+
         self.progress_bar = customtkinter.CTkProgressBar(
             self, mode="determinate", determinate_speed=0.1
         )
@@ -266,8 +267,9 @@ class TestWindow(BlankWindow):
         self.radiobtn2.grid(row=12, column=0, sticky="wn")
         self.select_radio_btn.grid(row=13)
         self.select_radio_btn2.grid(row=14)
-        self.combo_box.grid(row=15)
-        self.optionmenu.grid(row=16)
+        # self.combo_box.grid(row=15)
+        self.option_menu_frame.grid(row=16)
+        self.scrollable_frame.rowconfigure(16, weight=1)
         self.table.grid(row=20, column=0)
         
         self.checkbox.grid(row=4, column=0, sticky="wn")
@@ -445,13 +447,21 @@ class TestWindow(BlankWindow):
 class TestWindow2(BlankWindow):
     def __init__(self):
         super().__init__()
+        self.rowconfigure(0, weight=1)
+        self.columnconfigure(0, weight=1)
+
+
+        self.base_frame = cW.BasisFrame(self, self, layer=0)
+        self.base_frame.grid(row=0, column=0, sticky="news")
+        self.base_frame.columnconfigure(0, weight=1)
         
-        self.btn = customtkinter.CTkButton(self, text="test")
+        self.btn = customtkinter.CTkButton(self.base_frame, text="test")
         self.btn.grid(row=0, column=0)
         
-        self.columnconfigure(0, weight=1)
-        self.scrollable_frame = cW.BasisScrollFrame(self)
+
+        self.scrollable_frame = cW.BasisScrollFrame(app=self, root=self.base_frame, layer=1)
         self.scrollable_frame.grid(row=1, column=0, sticky="news")
+        self.scrollable_frame.columnconfigure(0, weight=1)
         
         self.text_box = customtkinter.CTkTextbox(
             self.scrollable_frame.content, wrap="none", undo=True, maxundo=3
@@ -472,9 +482,27 @@ class TestWindow2(BlankWindow):
         )
         self.button.grid(row=2, column=0, sticky="w")
 
+        self.layer_3_frame = cW.BasisFrame(self, self.base_frame, layer=4)
+        self.layer_3_frame.grid(row=3, column=0, sticky="news")
+
+        self.optionmenu = customtkinter.CTkOptionMenu(
+            self.layer_3_frame,
+            values=["option 1", "option test"],
+        )
+        self.optionmenu.grid(row=0, column=0, sticky="news")
+
+        self.optionmenu2 = cW.FramedOptionMenu(
+            root=self.layer_3_frame,
+            values=["option 1", "option test"],
+            default_value="option 1",
+        )
+        self.optionmenu2.grid(row=1, column=0, sticky="news")
+
+
 
 
 if __name__ == "__main__":
+
     # app = AutoamtionAdditon(self.lang["PROJECT"] + "/" + self.lang["NEW_A"])
     app = TestWindow2()
     app.mainloop()
