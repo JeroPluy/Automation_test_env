@@ -61,7 +61,7 @@ class StartFrame(cW.BasisFrame):
             else: # only one other project
                 self.app.selected_project = self.app.projects[0]
                 # add the project selection frame to the frame stack
-                self.app.frame_stack.append(aS.ProjectSelectionFrame.__class__)
+                self.app.frame_stack.append(aS.ProjectSelectionFrame)
                 self.app.project_automations = load_automations(
                     project=self.app.selected_project
                 )

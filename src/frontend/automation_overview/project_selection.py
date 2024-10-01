@@ -1,6 +1,8 @@
 
+from os import path
 from backend.database.db_utils import load_automations
 from frontend.customWidgets import customWidgets as cW
+from frontend.utils import ICON_PATH
 
 from .automation_selection import AutomationSelectionFrame
 
@@ -78,7 +80,9 @@ class ProjectFrame(cW.BasisFrame):
         self.rowconfigure(1, weight=1)
 
         # white square icon button with the label below and blue hover effect 
-        self.project_button = cW.CTkButton()
+        self.project_button = ProjectButton(self, project_icon_white, project_icon_black)
+        self.project_button.grid(row=0, column=0, sticky="news", pady=(5, 5), padx=(5, 5))
+        
 
         # self.project_icon = cW.IconImage(
         #     root=self,
@@ -99,3 +103,27 @@ class ProjectFrame(cW.BasisFrame):
     def project_btn_press(self):
         pass
         # self.app.selected_project = self.project_name
+        
+
+class ProjectButton(cW.CTkButton):
+    """
+    ProjectButton is a button class that contains the project icon as a selectable button
+    """
+    
+    def __init__(self, root, project_icon_white: str = "home_48dpWhite.png", project_icon_black: str = "home_48dp_black.png"):
+        """
+        Initialization of the project button
+
+        Args:
+            root (customtkinter.CTk): the parent frame of the project button
+            project_icon_white (str): the name of the white project icon
+            project_icon_black (str): the name of the black project icon
+        """
+
+        image = cW.CTkImage(
+            light_image=cW.Image.open(path.join(ICON_PATH, project_icon_black)),
+            dark_image=cW.Image.open(path.join(ICON_PATH,project_icon_white)),
+            size=(54,54),
+        )
+        
+        super().__init__(master=root, image=image, text="", command=root.project_btn_press)

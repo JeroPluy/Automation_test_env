@@ -298,7 +298,7 @@ class IconImage(CTkLabel):
         if dark_theme_img_path is None:
             dark_theme_img_path = light_theme_img_path
 
-        image = CTkImage(
+        self.image = CTkImage(
             light_image=Image.open(light_theme_img_path),
             dark_image=Image.open(dark_theme_img_path),
             size=size,
@@ -307,7 +307,7 @@ class IconImage(CTkLabel):
         super().__init__(
             master=root,
             text="",
-            image=image,
+            image=self.image,
         )
 
 
