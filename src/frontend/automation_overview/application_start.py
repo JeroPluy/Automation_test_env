@@ -45,10 +45,10 @@ class StartFrame(cW.BasisFrame):
         # self.after(delay, self.next_frame)
         # # TODO debug -----
 
-        # self.after(100, self.next_frame)
+        self.after(100, self.next_frame)
 
         # TODO debug: skip to automation creation
-        self.after(100, self.skip_to_automation_creation)
+        # self.after(100, self.skip_to_automation_creation)
 
     def next_frame(self):
         if len(self.app.projects) <= 1:
@@ -57,6 +57,14 @@ class StartFrame(cW.BasisFrame):
                 self.app.project_automations = []
             if self.app.projects[0] == "uncategorized":
                 self.app.project_automations = load_automations()
+                self.app.load_new_frame(self, aS.AutomationSelectionFrame(self.app))
+            else: # only one other project
+                self.app.selected_project = self.app.projects[0]
+                # add the project selection frame to the frame stack
+                self.app.frame_stack.append(aS.ProjectSelectionFrame.__class__)
+                self.app.project_automations = load_automations(
+                    project=self.app.selected_project
+                )
                 self.app.load_new_frame(self, aS.AutomationSelectionFrame(self.app))
         else:
             self.app.load_new_frame(self, aS.ProjectSelectionFrame(self.app))

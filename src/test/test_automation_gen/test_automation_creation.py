@@ -12,8 +12,7 @@ from backend.automation_gen.condtion_dissection import extract_all_conditions
 from backend.automation_gen.trigger_dissection import extract_all_trigger
 
 from backend.automation_gen.config_dissection import (
-    create_automation,
-    create_procedure_list,
+    create_automation
 )
 
 from backend.ha_automation_utils import home_assistant_yaml_loader as yaml_loader
@@ -207,7 +206,7 @@ def test_create_single_automation(basis_file: str = None):
             "test_data", "yaml_files", "test_yaml", "entity_extraction_test.yaml"
         )
 
-    script_file = script_file = test_script_init(basis_file)
+    test_script_init(basis_file)
     automation_yaml = yaml_loader.load_yaml_dict(basis_file)
     automation_config = validate_automation_config(automation_yaml)
     if automation_config is not None:

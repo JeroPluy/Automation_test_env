@@ -41,7 +41,7 @@ class AutomationSelectionFrame(cW.BasisFrame):
         # create the navigation buttons for the window and set overwrite the functions
         if app.selected_project is not None:
             self.nav_btns = NavBtns(
-                self, objects=2, values=(app.lang["TEST"], app.lang["BACK"])
+                self, objects=2, pos="right", values=(app.lang["TEST"], app.lang["BACK"])
             )
         else:
             self.nav_btns = NavBtns(
@@ -218,4 +218,4 @@ class NavBtns(cW.NavigationButtons):
         """
         Function to handle the back button press
         """
-        self.app.go_back(old_frame=self.master)
+        self.master.app.go_back(old_frame=self.master)
