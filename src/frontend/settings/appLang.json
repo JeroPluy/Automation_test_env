@@ -94,5 +94,39 @@
     "INVALID_AUTOMATION": [
         "Ungültige Automationskonfiguration",
         "Invalid automation configuration"
+    ],
+    "AUTOMATION_MODE": [
+        "Automationsmodus",
+        "Automation mode"
+    ],
+    "SINGLE": [
+        "Einzeln",
+        "Single"
+    ],
+    "RESTART": [
+        "Neustart",
+        "Restart"
+    ],
+    "QUEUED": [
+        "Warteschlange",
+        "Queued"
+    ],
+    "PARALLEL": [
+        "Parallel",
+        "Parallel"
+    ],
+    "SCRIPT_INSTANCES":
+    [
+        "Maximale gleichzeitige Instanzen",
+        "Maximum concurrent instances"
+    ],
+    "UNCATEGORIZED": [
+        "Nicht zugeordnet",
+        "uncategorized"
+    ],
+    "OPEN": [
+        "Öffnen",
+        "Open"
     ]
+
 }

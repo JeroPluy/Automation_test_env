@@ -112,6 +112,7 @@ class BasisScrollFrame(BasisFrame):
         app,
         root: Any,
         layer: int = 1,
+        border: bool = False,
         scroll_direction: str = "both",
     ):
         """
@@ -124,8 +125,13 @@ class BasisScrollFrame(BasisFrame):
             scroll_direction (str, optional): direction of the scroll. Defaults to "both".
         """
 
+        if border:
+            border_width = 1
+        else:
+            border_width = 0
+
         # create the basic frame for the scroll frame base
-        super().__init__(app, root, layer=layer)
+        super().__init__(app, root, layer=layer, border_width=border_width)
 
         # set the basic frame as wide as the root frame allows
         self.columnconfigure(0, weight=1)
@@ -228,8 +234,9 @@ class PopupWarning(BlankToplevelWindow):
         # create the toplevel window for the warning with the title
         super().__init__(app=app, title=title)
 
-        image = IconImage(
-            light_img_path=path.join(
+        self.image = IconImage(
+            root=self,
+            light_theme_img_path=path.join(
                 path.dirname(path.realpath(__file__)), "icons", "warning_black.png"
             ),
             dark_img_path=path.join(
@@ -237,10 +244,7 @@ class PopupWarning(BlankToplevelWindow):
             ),
             size=(30, 30),
         )
-
-        self.image_label = CTkLabel(self, text="", image=image)
-
-        self.image_label.pack(pady=(15, 0))
+        self.image.pack(pady=(15, 0))
 
         # create place the warning label with the message in the toplevel window
         self.warning_label = CTkLabel(
@@ -269,34 +273,41 @@ class PopupWarning(BlankToplevelWindow):
         )
 
 
-class IconImage(CTkImage):
+class IconImage(CTkLabel):
     """
     Custom image class for icons in the application which has a light and dark form
     """
 
     def __init__(
         self,
-        light_img_path: str,
-        dark_img_path: str = None,
+        root: Any,
+        light_theme_img_path: str,
+        dark_theme_img_path: str = None,
         size: Tuple[int] = (30, 30),
     ):
         """
         Initialization of the custom image icon for the application
 
         Args:
-            light_img_path (str): path to the light image
-            dark_img_path (str, optional): path to the dark image. Defaults to None.
+            light_theme_img_path (str): path to the dark image
+            dark_theme_img_path (str, optional): path to the bright image. Defaults to None.
             size (Tuple[int], optional): size of the image. Defaults to (30, 30).
         """
 
         # if the dark image path is not given then the dark image is the same as the light image
-        if dark_img_path is None:
-            dark_img_path = light_img_path
+        if dark_theme_img_path is None:
+            dark_theme_img_path = light_theme_img_path
+
+        image = CTkImage(
+            light_image=Image.open(light_theme_img_path),
+            dark_image=Image.open(dark_theme_img_path),
+            size=size,
+        )
 
         super().__init__(
-            light_image=Image.open(light_img_path),
-            dark_image=Image.open(dark_img_path),
-            size=size,
+            master=root,
+            text="",
+            image=image,
         )
 
 
@@ -612,7 +623,13 @@ class FramedOptionMenu(BasisFrame):
     Custom option menu for the application with a frame around the menu for better visibility.
     """
 
-    def __init__(self, root, values: list, default_value: str, command: Callable[[str], Any] | None = None):
+    def __init__(
+        self,
+        root,
+        values: list,
+        default_value: str,
+        command: Callable[[str], Any] | None = None,
+    ):
         """
         Initialization of the custom option menu for the application with a frame around the menu for better visibility.
 
@@ -627,13 +644,15 @@ class FramedOptionMenu(BasisFrame):
             border_color = "#989898"
         elif self.app.settings["MODE"] == "dark":
             border_color = "#565B5E"
-        
-        super().__init__(app=self.app, root=root, layer=1, border_color=border_color, border_width=1)
+
+        super().__init__(
+            app=self.app, root=root, layer=1, border_color=border_color, border_width=1
+        )
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
 
         self.variable = StringVar(value=default_value)
-        option_menu = CTkOptionMenu(self, values=values, variable=self.variable, command=command)
+        option_menu = CTkOptionMenu(
+            self, values=values, variable=self.variable, command=command
+        )
         option_menu.grid(row=0, column=0, sticky="ew", padx=(2), pady=(2))
-
-

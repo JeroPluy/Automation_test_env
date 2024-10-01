@@ -4,8 +4,6 @@ This module is the entry point for the application. It displays the start screen
 
 from os import path
 
-from customtkinter import CTkLabel
-
 from backend.database.db_utils import load_automations, load_projects
 from frontend import automation_insertion as aI
 from frontend import automation_overview as aS
@@ -31,10 +29,12 @@ class StartFrame(cW.BasisFrame):
         dark_logo = path.join(image_path, "logo_inverted_w_txt.png")
 
         self.logo_img = cW.IconImage(
-            light_img_path=light_logo, dark_img_path=dark_logo, size=(600, 256)
+            root=self,
+            light_theme_img_path=light_logo,
+            dark_theme_img_path=dark_logo,
+            size=(600, 256),
         )
-        self.image_label = CTkLabel(self, image=self.logo_img, text="")
-        self.image_label.pack(fill="both", expand=True, pady=(0, 20))
+        self.logo_img.pack(fill="both", expand=True, pady=(0, 20))
 
         app.selected_project = None
         app.projects = load_projects()
@@ -45,10 +45,10 @@ class StartFrame(cW.BasisFrame):
         # self.after(delay, self.next_frame)
         # # TODO debug -----
 
-        # self.after(100, self.next_frame)
+        self.after(100, self.next_frame)
 
         # TODO debug: skip to automation creation
-        self.after(100, self.skip_to_automation_creation)
+        # self.after(100, self.skip_to_automation_creation)
 
     def next_frame(self):
         if len(self.app.projects) <= 1:
@@ -58,6 +58,9 @@ class StartFrame(cW.BasisFrame):
             if self.app.projects[0] == "uncategorized":
                 self.app.project_automations = load_automations()
                 self.app.load_new_frame(self, aS.AutomationSelectionFrame(self.app))
+            else:  # only one project
+                self.app.selected_project = self.app.projects[0]
+                self.app.load_new_frame(self, aS.ProjectSelectionFrame(self.app))
         else:
             self.app.load_new_frame(self, aS.ProjectSelectionFrame(self.app))
 
