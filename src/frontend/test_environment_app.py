@@ -76,6 +76,7 @@ class AppWindow(CTk):
         self.columnconfigure(0, weight=1)
         new_frame.grid(row=0, column=0, sticky="news")
         self.frame_stack.append(new_frame.__class__)
+        #TODO debug
         for frame in self.frame_stack:
             print(frame)
         print("-----------------")

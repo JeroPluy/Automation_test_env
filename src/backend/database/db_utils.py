@@ -188,3 +188,20 @@ def load_automations(project: str = None) -> list:
         result = cur.fetchall()
 
     return [(row[0], row[1], row[2]) for row in result]
+
+
+def load_integrations() -> list:
+    """
+    Load the integrations from the database
+
+    Returns:
+        list - the integrations
+    """
+    SELECT_INTEGRATIONS = "SELECT i_name FROM integration"
+
+    with sqlite.connect(DATABASE) as con:
+        cur = con.cursor()
+        cur.execute(SELECT_INTEGRATIONS)
+        result = cur.fetchall()
+
+    return [row[0] for row in result]

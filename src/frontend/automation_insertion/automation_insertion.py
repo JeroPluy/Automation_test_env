@@ -37,9 +37,6 @@ class AutomationCreationFrame(cW.BasisFrame):
         # create the basis frame for the automation insertion window
         super().__init__(app=app, layer=0)
 
-        self.columnconfigure(0, weight=1)
-        self.rowconfigure(1, weight=1)
-
         if app.selected_project is None:
             nav_path = str(app.lang["NEW_A"])
         else:
@@ -51,12 +48,10 @@ class AutomationCreationFrame(cW.BasisFrame):
             nav_path=nav_path,
         )
 
-        self.nav_bar.grid(row=0, column=0, sticky="new")
-
         self.content_frame = cW.BasisFrame(app, self, layer=1)
-        self.content_frame.grid(row=1, column=0, sticky="news", pady=(15, 20), padx=(28))
-        self.content_frame.columnconfigure(0, weight=1)
-        self.content_frame.rowconfigure(1, weight=1)
+        # make the content frame resizable depending on the window size
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(1, weight=1)
 
         self.entry = customtkinter.CTkEntry(
             self.content_frame,
@@ -64,14 +59,11 @@ class AutomationCreationFrame(cW.BasisFrame):
             font=("Roboto", 16),
             height=40,
         )
-        self.entry.grid(row=0, column=0, sticky="we", padx=(22), pady=(10, 0))
 
         self.automation_input_frame = cW.BasisFrame(app, self.content_frame, layer=2)
-        self.automation_input_frame.grid(
-            row=1, column=0, sticky="news", padx=(10), pady=(10, 10)
-        )
-        self.automation_input_frame.columnconfigure(0, weight=1)
-        self.automation_input_frame.rowconfigure(1, weight=1)
+        # make the automation input frame inside the content frame resizable
+        self.content_frame.columnconfigure(0, weight=1)
+        self.content_frame.rowconfigure(1, weight=1)
 
         # the textbox for the automation code is below the text insertion tools but needs to be initialized first
         # to be able to reference it in the text insertion tools
@@ -82,21 +74,36 @@ class AutomationCreationFrame(cW.BasisFrame):
             undo=True,
             maxundo=3,
         )
-        self.textbox.grid(row=1, column=0, sticky="news", padx=(12), pady=(0, 23))
+        # make the textbox inside the automation input frame resizable
+        self.automation_input_frame.columnconfigure(0, weight=1)
+        self.automation_input_frame.rowconfigure(1, weight=1)
 
         self.text_tool_btns = TextToolBtns(root=self.automation_input_frame, app=app)
-        self.text_tool_btns.grid(
-            row=0, column=0, padx=(12), pady=(10, 10), sticky="news"
-        )
 
         self.navigaton_buttons = CustomNavButtons(
             self,
             objects=2,
-            values=[app.lang["BACK"], app.lang["NEXT"]],
+            values=[app.lang["BACK"], app.lang["CONTINUE"]],
         )
-        self.navigaton_buttons.grid(
-            row=2, column=0, padx=(25, 25), pady=(0, 20), sticky="news"
+
+        # grid the main elements
+        self.nav_bar.grid(row=0, column=0, sticky="new")
+        self.content_frame.grid(
+            row=1, column=0, sticky="news", pady=(15, 20), padx=(25)
         )
+        self.navigaton_buttons.grid(row=2, column=0, sticky="news")
+
+        # grid the elements inside the content frame
+        self.entry.grid(row=0, column=0, sticky="we", padx=(22), pady=(10, 0))
+        self.automation_input_frame.grid(
+            row=1, column=0, sticky="news", padx=(10), pady=(10, 10)
+        )
+
+        # grid the elements inside the automation input frame
+        self.text_tool_btns.grid(
+            row=0, column=0, padx=(12), pady=(10, 10), sticky="news"
+        )
+        self.textbox.grid(row=1, column=0, sticky="news", padx=(12), pady=(0, 23))
 
     def load_automation(self, automation_path: str):
         """
@@ -151,7 +158,6 @@ class TextToolBtns(customtkinter.CTkFrame):
 
         # TODO: add user defined path for loading the configuration files from the file system
         self.dir_path = path.join("data")
-        self.imp_btn.grid(row=0, column=0, padx=(0, 15))
 
         self.undo_btn = cW.NeutralButton(
             self,
@@ -161,7 +167,6 @@ class TextToolBtns(customtkinter.CTkFrame):
             kind=0,
             command=self.textbox_undo,
         )
-        self.undo_btn.grid(row=0, column=1, padx=(0, 15))
 
         self.redo_btn = cW.NeutralButton(
             self,
@@ -171,7 +176,6 @@ class TextToolBtns(customtkinter.CTkFrame):
             kind=1,
             command=self.textbox_redo,
         )
-        self.redo_btn.grid(row=0, column=2, padx=(0, 15))
 
         self.save_btn = cW.AcceptButton(
             self,
@@ -183,6 +187,11 @@ class TextToolBtns(customtkinter.CTkFrame):
         )
         # TODO: add user defined path for saving the configuration files
         self.dir_path = path.join("data")
+
+        # grid the buttons
+        self.imp_btn.grid(row=0, column=0, padx=(0, 15))
+        self.undo_btn.grid(row=0, column=1, padx=(0, 15))
+        self.redo_btn.grid(row=0, column=2, padx=(0, 15))
         self.save_btn.grid(row=0, column=3, padx=(0, 15))
 
     def textbox_load(self):
@@ -278,7 +287,7 @@ class CustomNavButtons(cW.NavigationButtons):
             height=30,
             command=self.version_select,
         )
-        self.version_option.grid(row=0, column=1, padx=(0, 15), sticky="we")
+        self.version_option.grid(row=0, column=1, pady=(0, 20), sticky="we")
 
     def btn_1_func(self):
         self.master.app.go_back(old_frame=self.master)
@@ -342,21 +351,21 @@ class LoadingFrame(cW.BasisFrame):
     def __init__(self, app):
         super().__init__(app=app, layer=0)
 
+        self.loading_context = LoadingContext(app=self.app, root=self)
+        # make the loading context resizable
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
-
-        self.loading_context = LoadingContext(app=self.app, root=self)
-
-        self.loading_context.grid(
-            row=0, column=0, pady=(50, 0), padx=(50, 50), sticky="news"
-        )
 
         self.cancel_btn = cW.DeleteButton(
             self,
             text=self.app.lang["CANCEL"],
             command=self.cancel_loading,
         )
-
+        
+        # grid the loading frame
+        self.loading_context.grid(
+            row=0, column=0, pady=(50, 0), padx=(50, 50), sticky="news"
+        )
         self.cancel_btn.grid(row=1, column=0, pady=(20, 50), padx=(50, 50), sticky="ns")
 
     def cancel_loading(self):
@@ -369,24 +378,30 @@ class LoadingContext(cW.BasisFrame):
     def __init__(self, app, root):
         super().__init__(app=app, root=root, layer=1)
 
+        # create the binding frame for the loading text and the loading bar
         self.binding_frame = customtkinter.CTkFrame(self)
+        # make the binding frame resizable
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(0, weight=1)
+        
+        # making the content of the binding frame resizable in the x direction
         self.binding_frame.columnconfigure(0, weight=1)
-        self.binding_frame.grid(row=0, column=0, sticky="ew")
 
         # TODO wrap the text in the label if the window is too small
         self.loading_label = customtkinter.CTkLabel(
-            self.binding_frame,
-            text=app.lang["LOADING_AUTOMATION"],
-            font=("Roboto", 16),
+            self.binding_frame, text=app.lang["LOADING_AUTOMATION"]
         )
-        self.loading_label.grid(row=1, column=0, sticky="we", padx=50, pady=(15, 5))
-
+    
         self.loading_bar = customtkinter.CTkProgressBar(
             self.binding_frame, mode="indeterminate", determinate_speed=0.1
         )
-        self.loading_bar.grid(row=2, column=0, sticky="we", padx=50, pady=(15, 5))
+        
         self.loading_bar.set(0)
         self.loading_bar.start()
-
-        self.columnconfigure(0, weight=1)
-        self.rowconfigure(0, weight=1)
+ 
+        # grid the Loading Context 
+        self.binding_frame.grid(row=0, column=0, sticky="ew")
+        
+        # grid the elements inside the binding frame
+        self.loading_label.grid(row=0, column=0, sticky="we", padx=50, pady=(15, 5))
+        self.loading_bar.grid(row=1, column=0, sticky="we", padx=50, pady=(15, 5))

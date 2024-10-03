@@ -11,9 +11,9 @@
         "Hinzufügen",
         "Add"
     ],
-    "NEXT": [
+    "CONTINUE": [
         "Fortfahren",
-        "Next"
+        "Continue"
     ],
     "IMPORT": [
         "Hinzufügen",
@@ -127,6 +127,10 @@
     "OPEN": [
         "Öffnen",
         "Open"
+    ],
+    "NEW_INTEGRATION": [
+        "Neue Integration",
+        "New integration"
     ]
 
 }

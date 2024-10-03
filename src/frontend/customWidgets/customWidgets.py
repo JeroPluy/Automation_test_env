@@ -126,12 +126,13 @@ class BasisScrollFrame(BasisFrame):
         """
 
         if border:
-            border_width = 1
+            border_width = 2
+            border_color = ["#989898", "#565B5E"]
         else:
             border_width = 0
 
         # create the basic frame for the scroll frame base
-        super().__init__(app, root, layer=layer, border_width=border_width)
+        super().__init__(app, root, layer=layer,border_width=border_width, border_color=border_color)
 
         # set the basic frame as wide as the root frame allows
         self.columnconfigure(0, weight=1)
@@ -153,7 +154,7 @@ class BasisScrollFrame(BasisFrame):
         self.content.lang = app.lang
 
         # set the scroll frame as wide as the basic frame allows
-        self.content.grid(row=0, column=0, sticky="news")
+        self.content.grid(row=0, column=0, sticky="news", pady=(2,2), padx=(2,2))
 
     def add_content_frame(self, row: int = 0, column: int = 0):
         """
@@ -537,7 +538,7 @@ class NavigationButtons(CTkFrame):
         """
         super().__init__(root, fg_color="transparent")
         self.values = values
-        self.grid_columnconfigure((0, 1, 2), weight=1)  # make all columns expandable
+        self.columnconfigure((0, 1, 2), weight=1)  # make all columns expandable
         if objects >= 1:
             self.btn_1 = CTkButton(
                 self,
@@ -548,11 +549,11 @@ class NavigationButtons(CTkFrame):
                 command=self.btn_1_func,
             )
             if pos == "left":
-                self.btn_1.grid(row=0, column=0, sticky="nw")
+                self.btn_1.grid(row=0, column=0, sticky="nw", padx=(25,0), pady=(0, 20))
             elif pos == "center":
                 self.btn_1.grid(row=0, column=1)
             else:
-                self.btn_1.grid(row=0, column=2, sticky="ne")
+                self.btn_1.grid(row=0, column=2, sticky="ne", padx=(0,25), pady=(0, 20))
         if objects >= 2:
             self.btn_2 = CTkButton(
                 self,
@@ -562,9 +563,9 @@ class NavigationButtons(CTkFrame):
                 command=self.btn_2_func,
             )
             if pos == "left":
-                self.btn_2.grid(row=0, column=2, sticky="ne")
+                self.btn_2.grid(row=0, column=2, sticky="ne", padx=(0,25), pady=(0, 20))
             else:
-                self.btn_2.grid(row=0, column=0, sticky="nw")
+                self.btn_2.grid(row=0, column=0, sticky="nw", padx=(25,0), pady=(0, 20))
 
     @abstractmethod
     def btn_1_func(self):

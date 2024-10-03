@@ -44,10 +44,10 @@ class StartFrame(cW.BasisFrame):
         # self.after(delay, self.next_frame)
         # # TODO debug -----
 
-        self.after(100, self.next_frame)
+        # self.after(100, self.next_frame)
 
         # TODO debug: skip to automation creation
-        # self.after(100, self.skip_to_automation_creation)
+        self.after(100, self.skip_to_automation_creation)
 
     def next_frame(self):
         projects = load_projects()

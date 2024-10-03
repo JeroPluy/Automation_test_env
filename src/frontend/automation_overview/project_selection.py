@@ -29,23 +29,23 @@ class ProjectSelectionFrame(cW.BasisFrame):
             layer=0,
         )
 
-        self.columnconfigure(0, weight=1)
-        self.rowconfigure(1, weight=1)
-
         self.navigation_bar = cW.NavigationBar(
             self, nav_path=app.lang["PROJECT_OVERVIEW"], mode=app.settings["MODE"]
         )
-        self.navigation_bar.grid(row=0, column=0, sticky="we")
 
         self.project_list_frame = ProjectListFrame(app, self, projects)
+        # make the project list frame resizable depending on the window size
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(1, weight=1)
+
+        self.navigation_btn = NavBtn(root=self, value=(app.lang["OPEN"],))
+
+        # grid the main elements
+        self.navigation_bar.grid(row=0, column=0, sticky="we")
         self.project_list_frame.grid(
             row=1, column=0, sticky="news", pady=(15, 15), padx=(15, 15)
         )
-
-        self.navigation_btn = NavBtn(root=self, value=(app.lang["OPEN"],))
-        self.navigation_btn.grid(
-            row=2, column=0, sticky="news", pady=(0, 20), padx=(25, 25)
-        )
+        self.navigation_btn.grid(row=2, column=0, sticky="news")
 
 
 class ProjectListFrame(cW.BasisScrollFrame):
@@ -111,22 +111,23 @@ class ProjectFrame(cW.BasisFrame):
 
         super().__init__(app=app, root=root, layer=1)
 
-        self.columnconfigure(0, weight=1)
-        self.rowconfigure(0, weight=1)
-
         # white square icon button with the label below and blue hover effect
         self.project_button = ProjectButton(
             self, project_icon_white, project_icon_black
         )
-        self.project_button.grid(
-            row=0, column=0, sticky="news", pady=(5, 5), padx=(5, 5)
-        )
+        # make the project button resizable depending on the window size
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(0, weight=1)
 
         self.project_name = cW.CTkLabel(
             self,
             text=project_name,
-            font=("Roboto", 16),
             wraplength=100,
+        )
+        
+        # grid the elements of the project frame
+        self.project_button.grid(
+            row=0, column=0, sticky="news", pady=(5, 5), padx=(5, 5)
         )
         self.project_name.grid(row=1, column=0, sticky="ew", pady=(5, 5), padx=(5, 5))
 

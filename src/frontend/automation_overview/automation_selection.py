@@ -12,11 +12,14 @@ class AutomationSelectionFrame(cW.BasisFrame):
     def __init__(self, app, automations: list):
         """
         Initialization of the AutomationSelection frame
+        
+        Args:
+            app (customtkinter.CTK): the parent window of the automation selection frame
+            automations (list): the list of automations to display
         """
 
         super().__init__(app=app, layer=0)
 
-        # create the navigation bar
         if app.selected_project is not None:
             navigation_text = str(
                 app.selected_project + "/" + app.lang["AUTOMATION_OVERVIEW"]
@@ -28,17 +31,17 @@ class AutomationSelectionFrame(cW.BasisFrame):
             self, nav_path=navigation_text, mode=app.settings["MODE"]
         )
 
-        # create the automation list frame with the automation selection
         self.automation_list_frame = AutomationSelectionList(
             selection_frame=self, app=app, automations=automations
         )
+        # make the selection frame resizable depending on the window size
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(1, weight=1)
 
-        # create the button to add a new automation
         self.add_automation_btn = cW.AcceptButton(
             self, text=app.lang["NEW_A"], kind=2, command=self.new_automation, width=260
         )
 
-        # create the navigation buttons for the window and set overwrite the functions
         if app.selected_project is not None:
             self.nav_btns = NavBtns(
                 self, objects=2, pos="right", values=(app.lang["TEST"], app.lang["BACK"])
@@ -48,17 +51,13 @@ class AutomationSelectionFrame(cW.BasisFrame):
                 self, objects=1, values=(app.lang["TEST"],), pos="center"
             )
 
-        # make the selection frame resizable depending on the window size
-        self.columnconfigure(0, weight=1)
-        self.rowconfigure(1, weight=1)
-
-        # grid the elements
+        # grid the main elements
         self.navigation_bar.grid(row=0, column=0, sticky="we")
         self.automation_list_frame.grid(
             row=1, column=0, sticky="news", padx=(15), pady=(15, 15)
         )
         self.add_automation_btn.grid(row=2, column=0, pady=(0, 20))
-        self.nav_btns.grid(row=3, column=0, sticky="news", pady=(0, 20), padx=(25, 25))
+        self.nav_btns.grid(row=3, column=0, sticky="news")
 
     def new_automation(self):
         """
@@ -116,6 +115,8 @@ class AutomationSelectionList(cW.BasisScrollFrame):
                 value=a_id,
                 command=self.radiobtn_event,
             )
+            # make the automation name expandable
+            self.element_frame.columnconfigure(0, weight=1)
 
             automation_version = CTkLabel(
                 self.element_frame,
@@ -130,9 +131,8 @@ class AutomationSelectionList(cW.BasisScrollFrame):
                 text=selection_frame.master.lang["MORE"],
             )
 
-            # make the automation name expandable
-            self.element_frame.columnconfigure(0, weight=1)
 
+            # grid the elements inside the selection frame
             automation_element.grid(
                 row=0,
                 column=0,
