@@ -9,7 +9,7 @@ class AutomationSelectionFrame(cW.BasisFrame):
     AutomationSelection is a frame class that allows the user to select the automation
     """
 
-    def __init__(self, app):
+    def __init__(self, app, automations: list):
         """
         Initialization of the AutomationSelection frame
         """
@@ -30,7 +30,7 @@ class AutomationSelectionFrame(cW.BasisFrame):
 
         # create the automation list frame with the automation selection
         self.automation_list_frame = AutomationSelectionList(
-            selection_frame=self, app=app, automations=app.project_automations
+            selection_frame=self, app=app, automations=automations
         )
 
         # create the button to add a new automation

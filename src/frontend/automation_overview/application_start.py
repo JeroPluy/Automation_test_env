@@ -37,7 +37,6 @@ class StartFrame(cW.BasisFrame):
         self.logo_img.pack(fill="both", expand=True, pady=(0, 20))
 
         app.selected_project = None
-        app.projects = load_projects()
 
         # # TODO debug -----
         # print(app.projects)
@@ -51,23 +50,24 @@ class StartFrame(cW.BasisFrame):
         # self.after(100, self.skip_to_automation_creation)
 
     def next_frame(self):
-        if len(self.app.projects) <= 1:
-            if len(self.app.projects) == 0:
-                self.app.projects.append("uncategorized")
-                self.app.project_automations = []
-            if self.app.projects[0] == "uncategorized":
-                self.app.project_automations = load_automations()
-                self.app.load_new_frame(self, aS.AutomationSelectionFrame(self.app))
+        projects = load_projects()
+        if len(projects) <= 1:
+            if len(projects) == 0:
+                projects.append("uncategorized")
+                project_automations = []
+            if projects[0] == "uncategorized":
+                project_automations = load_automations()
+                self.app.load_new_frame(self, aS.AutomationSelectionFrame(self.app, automations=project_automations))
             else: # only one other project
-                self.app.selected_project = self.app.projects[0]
+                self.app.selected_project = projects[0]
                 # add the project selection frame to the frame stack
                 self.app.frame_stack.append(aS.ProjectSelectionFrame)
-                self.app.project_automations = load_automations(
+                project_automations = load_automations(
                     project=self.app.selected_project
                 )
-                self.app.load_new_frame(self, aS.AutomationSelectionFrame(self.app))
+                self.app.load_new_frame(self, aS.AutomationSelectionFrame(self.app, automations=project_automations))
         else:
-            self.app.load_new_frame(self, aS.ProjectSelectionFrame(self.app))
+            self.app.load_new_frame(self, aS.ProjectSelectionFrame(self.app, projects))
 
     def skip_to_automation_creation(self):
         create_frame = self.app.load_new_frame(
