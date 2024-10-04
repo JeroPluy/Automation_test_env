@@ -45,19 +45,19 @@ def validate_automation_config(
         return automation_config
 
 
-def load_new_automation_data(test_file_path: str, automation_name: str=None) -> dict:
+def load_new_automation_data(automation_file_path: str, automation_name: str=None) -> dict:
     """
-    Create the information for a automation from a test file
+    Create the information for a automation from a automation yaml file
 
     Args:
-        test_file_path (str): the path to the test file
+        automation_file_path (str): the path to the automation yaml file
 
     Returns:
         dict: the information of the test automation as a dictionary split into entities and infos
     """
 
-    # load the test file
-    automation_yaml = ha_utils.load_yaml_dict(test_file_path)
+    # load the automation file
+    automation_yaml = ha_utils.load_yaml_dict(automation_file_path)
     if automation_yaml == {}:
         # validation failed
         return None
@@ -68,36 +68,3 @@ def load_new_automation_data(test_file_path: str, automation_name: str=None) -> 
         # create the automation and return it
         return create_automation(automation_config)
 
-
-def change_integration(automation_entities: list, new_integration_list) -> list:
-    """
-    Change the integration of the entities in a automation
-
-    Args:
-        automation_entities (list): The entities of the automation
-        new_integration_list (_type_): The new integrations for the entities
-
-    Returns:
-        list: The new entities with the changed integrations
-    """
-    new_entity_list = []
-    for i in range(len(automation_entities)):
-        # get the entity and change the integration
-        entity = automation_entities[i]
-        entity.integration_id = new_integration_list[i]
-
-        # add the entity to the new entity list
-        new_entity_list.append(entity)
-
-    return new_entity_list
-
-
-# def add_new_automation(test_file_path: str):
-#     """
-#     load the automation data from the test file and add it to the database
-
-#     Args:
-#         test_file_path (str): the path to the test file
-#     """
-#     automation_data = load_new_automation_data(test_file_path)
-#     db.add_automation(automation_data)

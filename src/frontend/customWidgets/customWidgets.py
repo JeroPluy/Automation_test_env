@@ -84,7 +84,11 @@ class BasisFrame(CTkFrame):
                 fg_color = "#FCFCFC"
             else:
                 fg_color = "#343446"
-
+        
+        # third frame color on top of a secondary frame
+        elif self.layer == 3:
+            fg_color = "transparent"
+            
         else:
             # debug coloring
             fg_color = fg_color

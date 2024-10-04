@@ -70,10 +70,10 @@ class StartFrame(cW.BasisFrame):
             self.app.load_new_frame(self, aS.ProjectSelectionFrame(self.app, projects))
 
     def skip_to_automation_creation(self):
-        create_frame = self.app.load_new_frame(
+        create_autom_frame = self.app.load_new_frame(
             self, aI.AutomationCreationFrame(self.app)
         )
-        create_frame.load_automation(
+        create_autom_frame.load_automation(
             automation_path=path.join(
                 "test_data",
                 "yaml_files",
