@@ -1,4 +1,5 @@
 from os import path
+
 from backend.database.db_utils import load_automations, load_projects
 from frontend.customWidgets import customWidgets as cW
 from frontend.utils import ICON_PATH

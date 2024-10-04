@@ -127,9 +127,10 @@ class BasisScrollFrame(BasisFrame):
 
         if border:
             border_width = 2
-            border_color = ["#989898", "#565B5E"]
         else:
             border_width = 0
+        # only applied if border width is not 0
+        border_color = ["#989898", "#565B5E"]
 
         # create the basic frame for the scroll frame base
         super().__init__(app, root, layer=layer,border_width=border_width, border_color=border_color)
@@ -240,7 +241,7 @@ class PopupWarning(BlankToplevelWindow):
             light_theme_img_path=path.join(
                 path.dirname(path.realpath(__file__)), "icons", "warning_black.png"
             ),
-            dark_img_path=path.join(
+            dark_theme_img_path=path.join(
                 path.dirname(path.realpath(__file__)), "icons", "warning_white.png"
             ),
             size=(30, 30),

@@ -59,10 +59,10 @@ class AppWindow(CTk):
         self.frame_stack = []
         self.start_frame = StartFrame(self)
         # display the start frame with the logo
-        self.load_new_frame(None, self.start_frame)
+        self.load_new_frame(None, self.start_frame, returnable=False)
      
      
-    def load_new_frame(self, prev_frame, new_frame):
+    def load_new_frame(self, prev_frame, new_frame, returnable=True):
         """
         Function to load a new frame into the main window
         
@@ -75,7 +75,8 @@ class AppWindow(CTk):
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
         new_frame.grid(row=0, column=0, sticky="news")
-        self.frame_stack.append(new_frame.__class__)
+        if returnable:
+            self.frame_stack.append(new_frame.__class__)
         #TODO debug
         for frame in self.frame_stack:
             print(frame)

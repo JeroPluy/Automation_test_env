@@ -56,7 +56,6 @@ class AutomationCreationFrame(cW.BasisFrame):
         self.entry = customtkinter.CTkEntry(
             self.content_frame,
             placeholder_text=app.lang["AUTO_NAME"],
-            font=("Roboto", 16),
             height=40,
         )
 
@@ -69,7 +68,6 @@ class AutomationCreationFrame(cW.BasisFrame):
         # to be able to reference it in the text insertion tools
         self.textbox = customtkinter.CTkTextbox(
             self.automation_input_frame,
-            font=("Roboto", 16),
             wrap="none",
             undo=True,
             maxundo=3,
@@ -145,6 +143,7 @@ class TextToolBtns(customtkinter.CTkFrame):
         super().__init__(root, fg_color="transparent", **kwargs)
 
         self.app = app
+        self.base_frame = root.master.master
 
         # create the buttons for the automation insertion window
         self.imp_btn = cW.AcceptButton(
@@ -206,7 +205,7 @@ class TextToolBtns(customtkinter.CTkFrame):
             title=self.app.lang["CHOOSE_FILE"],
             initialdir=self.dir_path,
         )
-        self.master.load_automation(file_name)
+        self.base_frame.load_automation(file_name)
         # TODO undo imports in the textbox with one undo step
 
     def textbox_undo(self):
@@ -217,7 +216,7 @@ class TextToolBtns(customtkinter.CTkFrame):
             self (TextToolBtns): the frame with the buttons for the textbox manipulation
         """
         try:
-            self.master.textbox.edit_undo()
+            self.base_frame.textbox.edit_undo()
         except TclError:
             cW.PopupWarning(
                 app=self.app,
@@ -233,7 +232,7 @@ class TextToolBtns(customtkinter.CTkFrame):
             self (TextToolBtns): the frame with the buttons for the textbox manipulation
         """
         try:
-            self.master.textbox.edit_redo()
+            self.base_frame.textbox.edit_redo()
         except TclError:
             cW.PopupWarning(
                 app=self.app,
@@ -250,10 +249,10 @@ class TextToolBtns(customtkinter.CTkFrame):
         """
 
         # get text from line 0 character 0 till the end
-        self.text = self.master.textbox.get("0.0", "end")
+        self.text = self.base_frame.textbox.get("0.0", "end")
 
         # get the name of the automation
-        self.auto_name = self.master.entry.get()
+        self.auto_name = self.base_frame.entry.get()
 
         file_name = fd.asksaveasfilename(
             filetypes=[("YAML files", "*.yaml"), ("All files", "*.*")],
@@ -336,7 +335,9 @@ class CustomNavButtons(cW.NavigationButtons):
 
         # Run the loading screen on the main thread
         self.master.app.load_new_frame(
-            prev_frame=self.master, new_frame=LoadingFrame(self.master.app)
+            prev_frame=self.master,
+            new_frame=LoadingFrame(self.master.app),
+            returnable=False,
         )
 
         # Check if the thread is still running
@@ -361,7 +362,7 @@ class LoadingFrame(cW.BasisFrame):
             text=self.app.lang["CANCEL"],
             command=self.cancel_loading,
         )
-        
+
         # grid the loading frame
         self.loading_context.grid(
             row=0, column=0, pady=(50, 0), padx=(50, 50), sticky="news"
@@ -383,7 +384,7 @@ class LoadingContext(cW.BasisFrame):
         # make the binding frame resizable
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
-        
+
         # making the content of the binding frame resizable in the x direction
         self.binding_frame.columnconfigure(0, weight=1)
 
@@ -391,17 +392,17 @@ class LoadingContext(cW.BasisFrame):
         self.loading_label = customtkinter.CTkLabel(
             self.binding_frame, text=app.lang["LOADING_AUTOMATION"]
         )
-    
+
         self.loading_bar = customtkinter.CTkProgressBar(
             self.binding_frame, mode="indeterminate", determinate_speed=0.1
         )
-        
+
         self.loading_bar.set(0)
         self.loading_bar.start()
- 
-        # grid the Loading Context 
+
+        # grid the Loading Context
         self.binding_frame.grid(row=0, column=0, sticky="ew")
-        
+
         # grid the elements inside the binding frame
         self.loading_label.grid(row=0, column=0, sticky="we", padx=50, pady=(15, 5))
         self.loading_bar.grid(row=1, column=0, sticky="we", padx=50, pady=(15, 5))
