@@ -28,7 +28,7 @@ def _create_automation_in_db(automation_info: Automation):
     autom_mode: int = automation_info.autom_mode
     max_instances: int = automation_info.max_instances
     script_path: str = automation_info.script
-    version: int = 1
+    version: int = 0
     project: str = (
         automation_info.project if automation_info.project else "uncategorized"
     )
@@ -40,13 +40,17 @@ def _create_automation_in_db(automation_info: Automation):
     with sqlite.connect(DATABASE) as con:
         cur = con.cursor()
 
-        # search for autoamtion with same name and get the version
+        # get the versions of the automations with the same name
         GET_VERSION = "SELECT add_info.info FROM additional_information AS add_info JOIN automation AS autom ON add_info.a_id == autom.a_id WHERE autom.a_id = ? AND info_type = 'version'"
         autom_id: int = None
         for autom_id in same_automation_ids:
             cur.execute(GET_VERSION, (str(autom_id),))
-            version = cur.fetchone()[0]
+            aut_version = int(cur.fetchone()[0])
+            if aut_version >= version:
+                version = aut_version
 
+        version += 1
+        
         # insert the new automation
         cur.execute(INSERT_AUTOMATION, (a_name, autom_mode, max_instances, script_path))
         a_id = cur.lastrowid
