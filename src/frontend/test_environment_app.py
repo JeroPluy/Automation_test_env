@@ -54,18 +54,17 @@ class AppWindow(CTk):
         self.title(self.lang["APP_NAME"])
         set_default_color_theme(THEME_PATH)
         set_appearance_mode(self.settings["MODE"])
-        
+
         # init the frame history stack and the start frame
         self.frame_stack = []
         self.start_frame = StartFrame(self)
         # display the start frame with the logo
         self.load_new_frame(None, self.start_frame, returnable=False)
-     
-     
+
     def load_new_frame(self, prev_frame, new_frame, returnable=True):
         """
         Function to load a new frame into the main window
-        
+
         Args:
             prev_frame (customtkinter.CTk): the previous frame before the new frame
             new_frame (customtkinter.CTk): the new frame to be displayed
@@ -77,7 +76,8 @@ class AppWindow(CTk):
         new_frame.grid(row=0, column=0, sticky="news")
         if returnable:
             self.frame_stack.append(new_frame.__class__)
-        #TODO debug
+
+        # TODO debug
         for frame in self.frame_stack:
             print(frame)
         print("-----------------")
@@ -99,6 +99,7 @@ class AppWindow(CTk):
             return self.load_new_frame(old_frame, new_frame)
         else:
             print("Error: No previous frame found")
+
 
 if __name__ == "__main__":
     app = AppWindow()

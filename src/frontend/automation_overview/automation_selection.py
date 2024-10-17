@@ -12,7 +12,7 @@ class AutomationSelectionFrame(cW.BasisFrame):
     def __init__(self, app, automations: list):
         """
         Initialization of the AutomationSelection frame
-        
+
         Args:
             app (customtkinter.CTK): the parent window of the automation selection frame
             automations (list): the list of automations to display
@@ -44,7 +44,10 @@ class AutomationSelectionFrame(cW.BasisFrame):
 
         if app.selected_project is not None:
             self.nav_btns = NavBtns(
-                self, objects=2, pos="right", values=(app.lang["TEST"], app.lang["BACK"])
+                self,
+                objects=2,
+                pos="right",
+                values=(app.lang["TEST"], app.lang["BACK"]),
             )
         else:
             self.nav_btns = NavBtns(
@@ -130,7 +133,6 @@ class AutomationSelectionList(cW.BasisScrollFrame):
                 automation_id=a_id,
                 text=selection_frame.master.lang["MORE"],
             )
-
 
             # grid the elements inside the selection frame
             automation_element.grid(

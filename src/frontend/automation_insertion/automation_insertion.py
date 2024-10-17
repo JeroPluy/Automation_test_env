@@ -4,11 +4,18 @@ This frontend module is responsible for the automation insertion windows.
 
 from os import path
 from threading import Thread
-from tkinter import TclError
-from tkinter import filedialog as fd
+from tkinter import TclError, filedialog as fd
+from types import SimpleNamespace
 from typing import Tuple
 
-import customtkinter
+from customtkinter import (
+    CTkEntry,
+    CTkTextbox,
+    CTkFrame,
+    CTkLabel,
+    CTkOptionMenu,
+    CTkProgressBar,
+)
 
 from backend import automation_gen as ag
 from backend.utils.env_helper_classes import Automation
@@ -36,7 +43,8 @@ class AutomationCreationFrame(cW.BasisFrame):
 
         # create the basis frame for the automation insertion window
         super().__init__(app=app, layer=0)
-
+        
+        app.new_automation = SimpleNamespace(config=None, a_id=None)
         if app.selected_project is None:
             nav_path = str(app.lang["NEW_A"])
         else:
@@ -53,7 +61,7 @@ class AutomationCreationFrame(cW.BasisFrame):
         self.columnconfigure(0, weight=1)
         self.rowconfigure(1, weight=1)
 
-        self.entry = customtkinter.CTkEntry(
+        self.entry = CTkEntry(
             self.content_frame,
             placeholder_text=app.lang["AUTO_NAME"],
             height=40,
@@ -66,7 +74,7 @@ class AutomationCreationFrame(cW.BasisFrame):
 
         # the textbox for the automation code is below the text insertion tools but needs to be initialized first
         # to be able to reference it in the text insertion tools
-        self.textbox = customtkinter.CTkTextbox(
+        self.textbox = CTkTextbox(
             self.automation_input_frame,
             wrap="none",
             undo=True,
@@ -124,7 +132,7 @@ class AutomationCreationFrame(cW.BasisFrame):
             self.textbox.insert("0.0", file.read())
 
 
-class TextToolBtns(customtkinter.CTkFrame):
+class TextToolBtns(CTkFrame):
     """
     Frame for the automation insertion window with all the buttons for the textbox manipulation.
     Contains buttons for importing, undoing, redoing and saving the automation code.
@@ -279,7 +287,7 @@ class CustomNavButtons(cW.NavigationButtons):
     def __init__(self, root, objects: int = 2, values: Tuple[str] = None):
         super().__init__(root, objects, values)
 
-        self.version_option = customtkinter.CTkOptionMenu(
+        self.version_option = CTkOptionMenu(
             self,
             values=root.app.settings["HA_VERSIONS"],
             width=130,
@@ -298,7 +306,7 @@ class CustomNavButtons(cW.NavigationButtons):
 
         def validate_and_load():
             # validate and load the new automation data
-            self.master.app.new_automation_config = ag.load_new_automation_data(
+            self.master.app.new_automation.config = ag.load_new_automation_data(
                 "data/automation.yaml"
             )
 
@@ -309,7 +317,7 @@ class CustomNavButtons(cW.NavigationButtons):
                 after_loading()
 
         def after_loading():
-            if self.master.app.new_automation_config is None:
+            if self.master.app.new_automation.config is None:
                 new_frame = self.master.app.go_back(old_frame=self.master)
                 new_frame.load_automation("data/automation.yaml")
                 cW.PopupWarning(
@@ -320,7 +328,7 @@ class CustomNavButtons(cW.NavigationButtons):
                 )
             else:
                 # load the automation entity frame for selecting the integrations for the entities of the automation
-                automation: Automation = self.master.app.new_automation_config["infos"]
+                automation: Automation = self.master.app.new_automation.config["infos"]
                 self.master.app.load_new_frame(
                     prev_frame=self.master,
                     new_frame=AutomationEntityFrame(
@@ -380,7 +388,7 @@ class LoadingContext(cW.BasisFrame):
         super().__init__(app=app, root=root, layer=1)
 
         # create the binding frame for the loading text and the loading bar
-        self.binding_frame = customtkinter.CTkFrame(self)
+        self.binding_frame = CTkFrame(self)
         # make the binding frame resizable
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
@@ -389,11 +397,11 @@ class LoadingContext(cW.BasisFrame):
         self.binding_frame.columnconfigure(0, weight=1)
 
         # TODO wrap the text in the label if the window is too small
-        self.loading_label = customtkinter.CTkLabel(
+        self.loading_label = CTkLabel(
             self.binding_frame, text=app.lang["LOADING_AUTOMATION"]
         )
 
-        self.loading_bar = customtkinter.CTkProgressBar(
+        self.loading_bar = CTkProgressBar(
             self.binding_frame, mode="indeterminate", determinate_speed=0.1
         )
 
