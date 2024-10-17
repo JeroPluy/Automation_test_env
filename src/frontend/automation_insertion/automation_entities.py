@@ -4,6 +4,9 @@ from customtkinter import CTkEntry, CTkLabel
 
 from backend.database.db_utils import load_integrations
 from frontend.customWidgets import customWidgets as cW
+from .antomation_script import AutomationScriptFrame
+
+from backend import database as db
 
 
 class AutomationEntityFrame(cW.BasisFrame):
@@ -55,7 +58,7 @@ class AutomationEntityFrame(cW.BasisFrame):
         # make the automation mode label inside a_mode_frame resizable
         self.a_mode_frame.columnconfigure(0, weight=1)
 
-        autom_mode = app.new_automation_config["infos"].autom_mode
+        autom_mode = app.new_automation.config["infos"].autom_mode
         autom_mode_str = app.lang["SINGLE"]
 
         if autom_mode == 1:
@@ -86,7 +89,7 @@ class AutomationEntityFrame(cW.BasisFrame):
         self.script_instance_frame.columnconfigure(0, weight=1)
 
         self.script_instances = StringVar(
-            value=app.new_automation_config["infos"].max_instances
+            value=app.new_automation.config["infos"].max_instances
         )
 
         self.script_instance_entry = CTkEntry(
@@ -141,7 +144,7 @@ class EntityListFrame(cW.BasisScrollFrame):
     def __init__(self, app, root):
         super().__init__(app, root, layer=1, border=True, scroll_direction="y")
 
-        self.entity_list: list = app.new_automation_config["entities"]
+        self.entity_list: list = app.new_automation.config["entities"]
         integration_list = load_integrations()
         integration_list.sort()
 
@@ -150,10 +153,9 @@ class EntityListFrame(cW.BasisScrollFrame):
         self.entity_frame_list: list = []
 
         for entity in self.entity_list:
-            
             entity_name = entity.entity_name
             preselect_type = entity.integration
-            
+
             self.add_content_frame(row=len(self.entity_frame_list), column=0)
             entity_frame = EntityFrame(
                 app=app,
@@ -225,12 +227,30 @@ class EntityFrame(cW.BasisFrame):
             # TODO open mask for creating a new integration and add it to the database
             print("new integration selected")
         else:
-            print("Entity " + str(self.entity_num) + " integration changed  form: " + self.app.new_automation_config["entities"][self.entity_num].integration + " to: " + value)
-            self.app.new_automation_config["entities"][self.entity_num].integration = value
+            print(
+                "Entity "
+                + str(self.entity_num)
+                + " integration changed  form: "
+                + self.app.new_automation.config["entities"][
+                    self.entity_num
+                ].integration
+                + " to: "
+                + value
+            )
+            self.app.new_automation.config["entities"][
+                self.entity_num
+            ].integration = value
 
 
 class NavBtns(cW.NavigationButtons):
     def __init__(self, root, values):
+        """
+        Initialization of the navigation buttons for the automation entity frame
+        
+        Args:
+            root (BasisFrame): root frame for the navigation buttons
+            values (Tuple[str]): values of the navigation buttons
+        """
         self.root = root
         super().__init__(root=root, values=values)
 
@@ -245,6 +265,19 @@ class NavBtns(cW.NavigationButtons):
         """
         Function to handle the continue button
         """
+        # TODO apply the integration changes to the script creation and the entity structure
+
+        self.root.app.new_automation.a_id = db.add_automation(
+            self.root.app.new_automation.config
+        )
         
-        # TODO create the automation script based on the entity list of the frames
-        print("continue button pressed")
+        automation = self.master.app.new_automation.config["infos"]
+        
+        self.root.app.load_new_frame(
+            self.root,
+            new_frame=AutomationScriptFrame(
+                self.root.app,
+                automation_name=automation.a_name,
+            ),
+            returnable=True,
+        )

@@ -131,6 +131,36 @@
     "NEW_INTEGRATION": [
         "Neue Integration",
         "New integration"
-    ]
+    ],
+    "SCRIPT_PATH": [
+        "Skriptpfad",
+        "Script path"
+    ],
+    "FINISH": [
+        "Fertig",
+        "Finish"
+    ],
+    "ADD_INFO": [
+        "Informationen hinzufügen",
+        "Add information"
+    ],
+    "SAVE":
+    [
+        "Speichern",
+        "Save"
+    ],
+    "DISCARD": [
+        "Verwerfen",
+        "Discard"
+    ],
 
+    "INFO_TYPE": [
+        "Informationstyp",
+        "Info type"
+    ],
+
+    "INFO_CONTENT": [
+        "Information",
+        "Content"
+    ]
 }
