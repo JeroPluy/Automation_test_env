@@ -205,3 +205,43 @@ def load_integrations() -> list:
         result = cur.fetchall()
 
     return [row[0] for row in result]
+
+
+def get_version(automation_id: int) -> int:
+    """
+    Get the version of the automation
+
+    Args:
+        automation_id: int - the id of the automation
+
+    Returns:
+        int - the version of the automation
+    """
+    GET_VERSION = "SELECT info FROM additional_information WHERE a_id = ? AND info_type = 'version'"
+
+    with sqlite.connect(DATABASE) as con:
+        cur = con.cursor()
+        cur.execute(GET_VERSION, (automation_id,))
+        result = cur.fetchone()
+
+    return int(result[0])
+
+
+def get_automation_name(automation_id: int) -> str:
+    """
+    Get the name of the automation
+
+    Args:
+        automation_id: int - the id of the automation
+
+    Returns:
+        str - the name of the automation
+    """
+    GET_NAME = "SELECT a_name FROM automation WHERE a_id = ?"
+
+    with sqlite.connect(DATABASE) as con:
+        cur = con.cursor()
+        cur.execute(GET_NAME, (automation_id,))
+        result = cur.fetchone()
+
+    return result[0]

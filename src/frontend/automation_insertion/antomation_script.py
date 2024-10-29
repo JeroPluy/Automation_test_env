@@ -38,12 +38,12 @@ class AutomationScriptFrame(cW.BasisFrame):
             nav_path=self.nav_path,
         )
 
-        self.content_frame = cW.BasisFrame(app, self, layer=1)
+        self.main_content_frame = cW.BasisFrame(app, self, layer=1)
         # make the content frame resizable depending on the window size
         self.columnconfigure(0, weight=1)
         self.rowconfigure(1, weight=1)
 
-        self.path_label_frame = cW.BasisFrame(app, self.content_frame, layer=2)
+        self.path_label_frame = cW.BasisFrame(app, self.main_content_frame, layer=2)
 
         self.script_path_label = cW.CTkLabel(
             self.path_label_frame,
@@ -60,14 +60,14 @@ class AutomationScriptFrame(cW.BasisFrame):
         self.path_label_frame.columnconfigure(1, weight=1)
 
         self.script_content = CTkTextbox(
-            master=self.content_frame, font=("Lucida Console", 16)
+            master=self.main_content_frame, font=("Lucida Console", 16)
         )
         self.load_automation_script(
             app.new_automation.config["infos"].script, self.script_content
         )
         # make the script textbox inside the content frame resizable
-        self.content_frame.columnconfigure(0, weight=1)
-        self.content_frame.rowconfigure(1, weight=1)
+        self.main_content_frame.columnconfigure(0, weight=1)
+        self.main_content_frame.rowconfigure(1, weight=1)
 
         self.nav_btns = self.navigation_buttons = NavBtns(
             root=self, values=(app.lang["FINISH"], app.lang["ADD_INFO"])
@@ -75,7 +75,7 @@ class AutomationScriptFrame(cW.BasisFrame):
 
         # grid the main elements
         self.nav_bar.grid(row=0, column=0, sticky="ew")
-        self.content_frame.grid(
+        self.main_content_frame.grid(
             row=1, column=0, sticky="news", pady=(15, 10), padx=(25)
         )
         self.navigation_buttons.grid(row=2, column=0, sticky="ew")

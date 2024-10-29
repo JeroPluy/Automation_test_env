@@ -14,9 +14,9 @@ from backend.utils.env_const import (
     INTEG_DATA,
 )
 
-from .db_create_autom import add_automation
+from .db_create_autom import add_automation, add_additional_info, add_integration
 
-__all__ = ["add_automation"]
+__all__ = ["add_automation", "add_additional_info", "add_integration"]
 
 
 def _load_data_foundation():

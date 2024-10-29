@@ -58,6 +58,7 @@ class AutomationEntityFrame(cW.BasisFrame):
         # make the automation mode label inside a_mode_frame resizable
         self.a_mode_frame.columnconfigure(0, weight=1)
 
+        # get the automation mode from the config
         autom_mode = app.new_automation.config["infos"].autom_mode
         autom_mode_str = app.lang["SINGLE"]
 
@@ -246,7 +247,7 @@ class NavBtns(cW.NavigationButtons):
     def __init__(self, root, values):
         """
         Initialization of the navigation buttons for the automation entity frame
-        
+
         Args:
             root (BasisFrame): root frame for the navigation buttons
             values (Tuple[str]): values of the navigation buttons
@@ -267,12 +268,12 @@ class NavBtns(cW.NavigationButtons):
         """
         # TODO apply the integration changes to the script creation and the entity structure
 
-        self.root.app.new_automation.a_id = db.add_automation(
-            self.root.app.new_automation.config
+        self.root.app.new_automation.a_id, self.root.app.new_automation.version = (
+            db.add_automation(self.root.app.new_automation.config)
         )
-        
+
         automation = self.master.app.new_automation.config["infos"]
-        
+
         self.root.app.load_new_frame(
             self.root,
             new_frame=AutomationScriptFrame(

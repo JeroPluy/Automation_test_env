@@ -56,6 +56,8 @@ class BasisFrame(CTkFrame):
         # if the root is not given then the root is the application window
         if root is None:
             self.root = app
+        else:
+            self.root = root
 
         self.layer = layer
         color_mode = self.settings["MODE"]
@@ -84,18 +86,18 @@ class BasisFrame(CTkFrame):
                 fg_color = "#FCFCFC"
             else:
                 fg_color = "#343446"
-        
+
         # third frame color on top of a secondary frame
         elif self.layer == 3:
             fg_color = "transparent"
-            
+
         else:
             # debug coloring
             fg_color = fg_color
             round_corners = 0
 
         super().__init__(
-            master=root,
+            master=self.root,
             border_width=border_width,
             fg_color=fg_color,
             border_color=border_color,
@@ -137,7 +139,9 @@ class BasisScrollFrame(BasisFrame):
         border_color = ["#989898", "#565B5E"]
 
         # create the basic frame for the scroll frame base
-        super().__init__(app, root, layer=layer,border_width=border_width, border_color=border_color)
+        super().__init__(
+            app, root, layer=layer, border_width=border_width, border_color=border_color
+        )
 
         # set the basic frame as wide as the root frame allows
         self.columnconfigure(0, weight=1)
@@ -157,9 +161,11 @@ class BasisScrollFrame(BasisFrame):
         self.content.layer = layer
         self.content.settings = app.settings
         self.content.lang = app.lang
+        self.content.root = self
+        self.content.element_frames = []
 
         # set the scroll frame as wide as the basic frame allows
-        self.content.grid(row=0, column=0, sticky="news", pady=(2,2), padx=(2,2))
+        self.content.grid(row=0, column=0, sticky="news", pady=(2, 2), padx=(2, 2))
 
     def add_content_frame(self, row: int = 0, column: int = 0):
         """
@@ -186,6 +192,28 @@ class BasisScrollFrame(BasisFrame):
             pady=(5, 5),
             padx=(15, 15),
         )
+        
+        self.content.element_frames.append(self.element_frame)
+
+    def delete_content_frame(self, element_frame: BasisFrame, row: int = 0, column: int = 0):
+        """
+        Function to delete a content frame from the scroll frame.
+
+        Args:
+            content_frame (Any): the content frame to be deleted
+        """
+
+        self.content.element_frames.remove(element_frame)
+        element_frame.destroy()
+        
+        for element_frame in range(row, len(self.content.element_frames)):
+            self.content.element_frames[element_frame].grid(
+                row=element_frame,
+                column=column,
+                sticky="we",
+                pady=(5, 5),
+                padx=(15, 15),
+            )
 
 
 class BlankToplevelWindow(CTkToplevel):
@@ -327,7 +355,7 @@ class AcceptButton(CTkButton):
         self,
         root: Any,
         width: int = 140,
-        height: int = 28,
+        height: int = 30,
         text: str = None,
         textvariable: Variable | None = None,
         state: str = "normal",
@@ -397,7 +425,7 @@ class DeleteButton(CTkButton):
         self,
         root: Any,
         width: int = 140,
-        height: int = 28,
+        height: int = 30,
         text: str = None,
         textvariable: Variable | None = None,
         state: str = "normal",
@@ -435,6 +463,8 @@ class DeleteButton(CTkButton):
             image = CTkImage(Image.open(path.join(image_path, icon)), size=(24, 24))
         else:
             image = None
+            
+        # TODO change the background color to a gray color if the button is disabled (state="disabled") maybe depending on the theme
 
         super().__init__(
             root,
@@ -462,7 +492,7 @@ class NeutralButton(CTkButton):
         self,
         root: Any,
         width: int = 140,
-        height: int = 28,
+        height: int = 30,
         text: str = None,
         textvariable: Variable | None = None,
         state: str = "normal",
@@ -529,7 +559,12 @@ class NavigationButtons(CTkFrame):
     """
 
     def __init__(
-        self, root, objects: int = 2, values: Tuple[str] = None, pos: str = "left"
+        self,
+        root,
+        objects: int = 2,
+        values: Tuple[str] = None,
+        pos: str = "left",
+        options: dict = {"btn_1_type": "neutral", "btn_2_type": "neutral"},
     ):
         """
         Initialization of the custom frame and the two navigation buttons in the application
@@ -540,37 +575,73 @@ class NavigationButtons(CTkFrame):
             values (Tuple[str], optional): Values / Text of the buttons. Defaults to None.
             pos (str, optional): Variable to determine the position of the first button.
                                  Defaults to left meaning the first button is in the bottom left corner.
+            options (dict, optional): Options for the buttons. Defaults to {"btn_1_type": "neutral", "btn_2_type": "neutral"}.
         """
         super().__init__(root, fg_color="transparent")
         self.values = values
+
         self.columnconfigure((0, 1, 2), weight=1)  # make all columns expandable
         if objects >= 1:
-            self.btn_1 = CTkButton(
-                self,
-                text=self.values[0],
-                width=130,
-                height=30,
-                compound="left",
-                command=self.btn_1_func,
-            )
+            self.btn_1_type = options.get("btn_1_type")
+            if self.btn_1_type == "accept":
+                self.btn_1 = AcceptButton(
+                    self,
+                    text=self.values[0],
+                    command=self.btn_1_func,
+                )
+            elif self.btn_1_type == "delete":
+                self.btn_1 = DeleteButton(
+                    self,
+                    text=self.values[0],
+                    command=self.btn_1_func,
+                )
+            else:
+                self.btn_1 = NeutralButton(
+                    self,
+                    text=self.values[0],
+                    command=self.btn_1_func,
+                )
+
             if pos == "left":
-                self.btn_1.grid(row=0, column=0, sticky="nw", padx=(25,0), pady=(0, 20))
+                self.btn_1.grid(
+                    row=0, column=0, sticky="nw", padx=(25, 0), pady=(0, 20)
+                )
             elif pos == "center":
-                self.btn_1.grid(row=0, column=1)
+                self.btn_1.grid(row=0, column=1, pady=(0, 20))
             else:
-                self.btn_1.grid(row=0, column=2, sticky="ne", padx=(0,25), pady=(0, 20))
+                self.btn_1.grid(
+                    row=0, column=2, sticky="ne", padx=(0, 25), pady=(0, 20)
+                )
+
         if objects >= 2:
-            self.btn_2 = CTkButton(
-                self,
-                text=self.values[1],
-                width=130,
-                height=30,
-                command=self.btn_2_func,
-            )
-            if pos == "left":
-                self.btn_2.grid(row=0, column=2, sticky="ne", padx=(0,25), pady=(0, 20))
+            self.btn_2_type = options.get("btn_2_type")
+            if self.btn_2_type == "accept":
+                self.btn_2 = AcceptButton(
+                    self,
+                    text=self.values[1],
+                    command=self.btn_2_func,
+                )
+            elif self.btn_2_type == "delete":
+                self.btn_2 = DeleteButton(
+                    self,
+                    text=self.values[1],
+                    command=self.btn_2_func,
+                )
             else:
-                self.btn_2.grid(row=0, column=0, sticky="nw", padx=(25,0), pady=(0, 20))
+                self.btn_2 = NeutralButton(
+                    self,
+                    text=self.values[1],
+                    command=self.btn_2_func,
+                )
+
+            if pos == "left":
+                self.btn_2.grid(
+                    row=0, column=2, sticky="ne", padx=(0, 25), pady=(0, 20)
+                )
+            else:
+                self.btn_2.grid(
+                    row=0, column=0, sticky="nw", padx=(25, 0), pady=(0, 20)
+                )
 
     @abstractmethod
     def btn_1_func(self):

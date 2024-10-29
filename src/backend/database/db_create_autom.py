@@ -29,9 +29,6 @@ def _create_automation_in_db(automation_info: Automation):
     max_instances: int = automation_info.max_instances
     script_path: str = automation_info.script
     version: int = 0
-    project: str = (
-        automation_info.project if automation_info.project else "uncategorized"
-    )
 
     same_automation_ids = get_automations_with_same_name(a_name)
 
@@ -45,9 +42,11 @@ def _create_automation_in_db(automation_info: Automation):
         autom_id: int = None
         for autom_id in same_automation_ids:
             cur.execute(GET_VERSION, (str(autom_id),))
-            aut_version = int(cur.fetchone()[0])
-            if aut_version >= version:
-                version = aut_version
+            answer = cur.fetchone()
+            if answer is not None:
+                curr_version = int(answer[0])
+                if curr_version >= version:
+                    version = curr_version
 
         version += 1
         
@@ -56,20 +55,7 @@ def _create_automation_in_db(automation_info: Automation):
         a_id = cur.lastrowid
         con.commit()
 
-        # Prepare the data for insertion
-        infos = [
-            (a_id, "project", project),
-            (a_id, "version", version),
-        ]
-
-        # Define the SQL statement for inserting data
-        ADD_INFOS = "INSERT INTO additional_information (a_id, info_type, info) VALUES (?, ?, ?)"
-
-        # Execute the insert statement with multiple values
-        cur.executemany(ADD_INFOS, infos)
-        con.commit()
-
-        return a_id
+        return a_id, version
 
 
 def _create_automation_entities_in_db(a_id, entities: list):
@@ -148,12 +134,43 @@ def add_automation(automation_data: dict) -> int:
     Returns:
         int - the id of the new automation in the database
     """
-    a_id = _create_automation_in_db(automation_data["infos"])
+    a_id, version = _create_automation_in_db(automation_data["infos"])
     try:
         _create_automation_entities_in_db(a_id, automation_data["entities"])
     except ValueError as e:
         raise e
-    return a_id
+    return a_id, version
+
+
+def add_additional_info(a_id: int, infos: list):
+    """
+    add additional information to the automation
+
+    Args:
+        a_id: int - the id of the automation
+        infos: list - the additional information to be added to the database as a list of tuples (info_type, info)
+    """
+    with sqlite.connect(DATABASE) as con:
+        cur = con.cursor()
+
+        # Prepare the data for insertion
+        info_tuples = []
+        for info in infos:
+            
+            # Check if the info is a project and has a name
+            if info["info_type"] == "project" and info["info_content"] == "":
+                info["info_content"] = "uncategorized"
+                
+            info_tuples.append((a_id, info["info_type"], info["info_content"])) 
+
+        # Define the SQL statement for inserting data
+        ADD_INFOS = "INSERT INTO additional_information (a_id, info_type, info) VALUES (?, ?, ?)"
+
+        # Execute the insert statement with multiple values
+        cur.executemany(ADD_INFOS, info_tuples)
+        con.commit()
+        
+        # TODO ensure that the project and version info is added to the database regardless of the user input
 
 
 def add_integration(
