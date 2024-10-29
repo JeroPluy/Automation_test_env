@@ -74,7 +74,7 @@ class AppWindow(CTk):
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
         new_frame.grid(row=0, column=0, sticky="news")
-        if returnable:
+        if returnable: 
             self.frame_stack.append(new_frame.__class__)
 
         # TODO debug
@@ -96,7 +96,8 @@ class AppWindow(CTk):
 
             new_frame_class = self.frame_stack[-1]
             new_frame = new_frame_class(self)
-            return self.load_new_frame(old_frame, new_frame)
+            self.load_new_frame(old_frame, new_frame)
+            self.frame_stack.pop()
         else:
             print("Error: No previous frame found")
 

@@ -218,7 +218,6 @@ class NavBtn(cW.NavigationButtons):
         if project is None:
             project = "uncategorized"
         app.selected_project = project
-        app.project_automations = load_automations(app.selected_project)
         app.load_new_frame(
-            self, AutomationSelectionFrame(app, automations=app.project_automations)
+            self, AutomationSelectionFrame(app)
         )

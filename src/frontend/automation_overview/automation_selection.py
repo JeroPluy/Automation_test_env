@@ -2,6 +2,11 @@ from customtkinter import CTkFont, CTkLabel, CTkRadioButton, StringVar
 
 from frontend.automation_insertion import AutomationCreationFrame
 from frontend.customWidgets import customWidgets as cW
+from frontend.automation_details import automation_details_main as aD
+
+from backend.database.db_utils import load_automations
+
+from backend.database import db_utils
 
 
 class AutomationSelectionFrame(cW.BasisFrame):
@@ -9,13 +14,12 @@ class AutomationSelectionFrame(cW.BasisFrame):
     AutomationSelection is a frame class that allows the user to select the automation
     """
 
-    def __init__(self, app, automations: list):
+    def __init__(self, app):
         """
         Initialization of the AutomationSelection frame
 
         Args:
             app (customtkinter.CTK): the parent window of the automation selection frame
-            automations (list): the list of automations to display
         """
 
         super().__init__(app=app, layer=0)
@@ -23,6 +27,9 @@ class AutomationSelectionFrame(cW.BasisFrame):
         if app.selected_project is not None:
             navigation_text = str(
                 app.selected_project + "/" + app.lang["AUTOMATION_OVERVIEW"]
+            )
+            automations = load_automations(
+                    project=self.app.selected_project
             )
         else:
             navigation_text = str(app.lang["AUTOMATION_OVERVIEW"])
@@ -194,8 +201,18 @@ class MoreBtns(cW.NeutralButton):
         self.automation_id = automation_id
 
     def open_automation_infos(self):
-        # TODO open the automation infos window
-        print("open automation infos for automation id:" + str(self.automation_id))
+        
+        automation_name = db_utils.get_automation_name(self.automation_id)
+        
+        self.root.app.load_new_frame(
+            prev_frame=self.root,
+            new_frame=aD.AutomationDetailsFrame(
+                app=self.root.app,
+                a_id=self.root.app.new_automation.a_id,
+                automation_name=automation_name,
+            ),
+            returnable=True,
+        )
 
 
 class NavBtns(cW.NavigationButtons):
