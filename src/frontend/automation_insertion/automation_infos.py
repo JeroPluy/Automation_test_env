@@ -105,7 +105,7 @@ class AutomationInfosFrame(cW.BasisFrame):
         """
         list_frame = self.info_list_frame
 
-        list_frame.add_content_frame(row=len(list_frame.content_children), column=0)
+        list_frame.add_element_frame(row=len(list_frame.content_children), column=0)
         info_content = InformationFrame(app=self.app, root=list_frame.element_frame, removeable=removeable)
         list_frame.element_frame.columnconfigure(0, weight=1)
         list_frame.element_frame.rowconfigure(0, weight=1)

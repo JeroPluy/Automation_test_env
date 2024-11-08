@@ -140,19 +140,21 @@ class BasisScrollFrame(BasisFrame):
 
         # create the basic frame for the scroll frame base
         super().__init__(
-            app, root, layer=layer, border_width=border_width, border_color=border_color
+            app, root, layer=layer, border_width=border_width, border_color=border_color, fg_color="red"
         )
 
         # set the basic frame as wide as the root frame allows
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
+        
+        scroll_frame_color = self.cget("fg_color")
 
         # create the scroll frame inside of the basic frame as a container for the content
         if scroll_direction == "y":
-            self.content = CTkScrollableFrame(self, orientation="vertical")
+            self.content = CTkScrollableFrame(self, fg_color=scroll_frame_color, orientation="vertical")
             self.content.columnconfigure(0, weight=1)
         elif scroll_direction == "x":
-            self.content = CTkScrollableFrame(self, orientation="horizontal")
+            self.content = CTkScrollableFrame(self, fg_color=scroll_frame_color, orientation="horizontal")
             self.content.rowconfigure(0, weight=1)
         else:
             self.content = CTkXYFrame(self)
@@ -167,9 +169,9 @@ class BasisScrollFrame(BasisFrame):
         # set the scroll frame as wide as the basic frame allows
         self.content.grid(row=0, column=0, sticky="news", pady=(2, 2), padx=(2, 2))
 
-    def add_content_frame(self, row: int = 0, column: int = 0):
+    def add_element_frame(self, row: int = 0, column: int = 0, layer: int = None):
         """
-        Function to add a content frame to the scroll frame to hold the widgets and elements of the application.
+        Function to add a element frame to the scroll frame (self.content) to hold the widgets and elements of the application.
 
         Args:
             row (int, optional): row position of the content. Defaults to 0.
@@ -178,11 +180,13 @@ class BasisScrollFrame(BasisFrame):
 
         # NOTE: if the scroll frame is an XYFrame the content frame is only as wide as its content plus padding
         #       the expansion through the columnconfigure or pack(fill="both", expand=True) is not possible as far as I tested it
+        
+        element_layer = self.layer + 1 if layer is None else layer
 
         self.element_frame = BasisFrame(
             app=self.app,
             root=self.content,
-            layer=self.layer + 1,
+            layer=element_layer
         )
 
         self.element_frame.grid(
@@ -706,6 +710,7 @@ class FramedOptionMenu(BasisFrame):
         values: list,
         default_value: str,
         command: Callable[[str], Any] | None = None,
+        state: str = "normal",
     ):
         """
         Initialization of the custom option menu for the application with a frame around the menu for better visibility.
@@ -729,7 +734,8 @@ class FramedOptionMenu(BasisFrame):
         self.columnconfigure(0, weight=1)
 
         self.variable = StringVar(value=default_value)
+        # TODO gray out the option menu if the state is disabled
         option_menu = CTkOptionMenu(
-            self, values=values, variable=self.variable, command=command
+            self, values=values, variable=self.variable, command=command, state=state
         )
         option_menu.grid(row=0, column=0, sticky="ew", padx=(2), pady=(2))

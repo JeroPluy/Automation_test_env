@@ -157,7 +157,7 @@ class EntityListFrame(cW.BasisScrollFrame):
             entity_name = entity.entity_name
             preselect_type = entity.integration
 
-            self.add_content_frame(row=len(self.entity_frame_list), column=0)
+            self.add_element_frame(row=len(self.entity_frame_list), column=0)
             entity_frame = EntityFrame(
                 app=app,
                 root=self.element_frame,

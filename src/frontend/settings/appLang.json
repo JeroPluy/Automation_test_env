@@ -162,5 +162,25 @@
     "INFO_CONTENT": [
         "Information",
         "Content"
+    ],
+    "TEST_CASE_COLLECTION": [
+        "Testfall-Sammlung",
+        "Test case collection"
+    ],
+    "TEST_RESULTS": [
+        "Testergebnisse",
+        "Test results"
+    ],
+     "CREATED": [
+        "Erstellt",
+        "Created"
+    ],
+    "ERROR_DETECT": [
+        "Fehler erkannt",
+        "Error detected"
+    ],
+    "MAX_INSTANCES":[
+        "max. Instanzen",
+        "max. Instances"
     ]
 }

@@ -2,7 +2,7 @@ from backend.utils.env_const import DATABASE, standard_integrations
 
 import sqlite3 as sqlite
 
-from backend.utils.env_helper_classes import Entity
+from backend.utils.env_helper_classes import Automation, Entity
 
 
 def get_automations_with_same_name(name: str) -> list:
@@ -245,3 +245,32 @@ def get_automation_name(automation_id: int) -> str:
         result = cur.fetchone()
 
     return result[0]
+
+
+def get_automation_data(automation_id: int) -> Automation:
+    """
+    Get the data of the automation
+
+    Args:
+        automation_id: int - the id of the automation
+
+    Returns:
+        Automation - the automation object
+    """
+    GET_AUTOMATION_DATA = "SELECT * FROM automation WHERE a_id = ?"
+
+    with sqlite.connect(DATABASE) as con:
+        cur = con.cursor()
+        cur.execute(GET_AUTOMATION_DATA, (automation_id,))
+        result = cur.fetchone()
+        if result is not None:
+            automation = Automation(
+                automation_name=result[1],
+                created=result[2],
+                automation_mode=result[3],
+                max_instances=result[4],
+                automation_script=result[5],
+                error=result[6],
+            )
+
+    return automation

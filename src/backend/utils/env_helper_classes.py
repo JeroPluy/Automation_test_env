@@ -2,12 +2,19 @@
 This module contains the classes Automation and Entity, which are used to represent an automation and an entity, respectively.
 """
 
+from datetime import datetime
 from .env_const import SINGLE
 
 
 class Automation:
     """
     Class to represent an automation.
+    
+    a_name: str = None
+    autom_mode: int = None
+    max_instances: int = None
+    script: str = None
+    project: str = None
     """
 
     a_name: str = None
@@ -15,6 +22,8 @@ class Automation:
     max_instances: int = None
     script: str = None
     project: str = None
+    created: datetime = None
+    error: str = None
 
     def __init__(
         self,
@@ -23,6 +32,8 @@ class Automation:
         project=None,
         automation_mode=SINGLE,
         max_instances=10,
+        created: datetime = None,
+        error: str = None
     ):
         """
         Create an automation from the automation part.
@@ -43,6 +54,8 @@ class Automation:
         self.max_instances = max_instances
         self.script = automation_script
         self.project = project
+        self.created = created
+        self.error = error
 
     def serialize(self)->dict:
         """

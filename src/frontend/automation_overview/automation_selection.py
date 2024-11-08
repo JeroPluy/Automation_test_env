@@ -113,7 +113,7 @@ class AutomationSelectionList(cW.BasisScrollFrame):
             # TODO: handle long automation names as wrapping text, cutting off the text or using xyframes
 
             # TODO: add color if tested positive or negative to the element frame
-            self.add_content_frame(
+            self.add_element_frame(
                 row=automations.index(automation),
                 column=0,
             )
@@ -204,11 +204,11 @@ class MoreBtns(cW.NeutralButton):
         
         automation_name = db_utils.get_automation_name(self.automation_id)
         
-        self.root.app.load_new_frame(
-            prev_frame=self.root,
+        self.master.app.load_new_frame(
+            prev_frame=self.master,
             new_frame=aD.AutomationDetailsFrame(
-                app=self.root.app,
-                a_id=self.root.app.new_automation.a_id,
+                app=self.master.app,
+                a_id=self.automation_id,
                 automation_name=automation_name,
             ),
             returnable=True,
