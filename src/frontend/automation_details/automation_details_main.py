@@ -1,7 +1,8 @@
 from ..customWidgets import customWidgets as cW
+from ..automation_insertion import automation_insertion_utils as ai_utils
 
 from tkinter import StringVar
-from customtkinter import CTkLabel, CTkCheckBox, CTkEntry
+from customtkinter import CTkLabel, CTkCheckBox, CTkEntry, CTkFont
 
 from backend.database import db_utils
 
@@ -10,56 +11,119 @@ class AutomationDetailsFrame(cW.BasisFrame):
     def __init__(self, app, a_id, automation_name):
         super().__init__(app=app, layer=0)
 
-        self.automation = db_utils.get_automation_data(a_id)
-
         self.nav_bar = cW.NavigationBar(
             self, mode=app.settings["MODE"], nav_path=automation_name
         )
 
-        self.main_frame = cW.BasisScrollFrame(app, self, scroll_direction="y", layer=0)
-
-        self.nav_btns = NavBtns(self, values=(app.lang["DISCARD"], app.lang["SAVE"]))
-
-        # add the menu btns to the main frame
-        self.main_frame.add_element_frame(row=0, column=0, layer=0)
-        self.main_frame.element_frame.columnconfigure(0, weight=1)
-
-        self.menu_btns_frame = MenuBtns(app, self.main_frame.element_frame)
-
-        # add the main content frame to the main frame
-        self.main_frame.add_element_frame(row=1, column=0, layer=1)
-        self.main_frame.element_frame.columnconfigure(0, weight=1)
-
-        self.main_content_frame = cW.BasisFrame(
-            app, self.main_frame.element_frame, layer=1
+        self.main_frame = AutomationDetailsContent(
+            app=app,
+            root=self,
+            a_id=a_id,
         )
 
-        self.info_labels = InfoLabels(
-            app=app, root=self.main_content_frame, automation=self.automation
+        self.nav_btns = NavBtns(
+            self, a_id=a_id, values=(app.lang["DISCARD"], app.lang["SAVE"])
         )
 
         # grid the main elements
         self.nav_bar.grid(row=0, column=0, sticky="ew")
         self.main_frame.grid(row=1, column=0, sticky="news", pady=(0, 10), padx=(0))
-        self.nav_btns.grid(row=2, column=0, sticky="ew")
+        self.nav_btns.grid(row=2, column=0, sticky="news")
 
-        self.columnconfigure(0, weight=1)
-        # make the content frame resizable depending on the window size
+        # make the main frame (content) resizable depending on the window size
         self.rowconfigure(1, weight=1)
+        self.columnconfigure(0, weight=1)
+
+
+class AutomationDetailsContent(cW.BasisScrollFrame):
+    """
+    The class defines the main content frame for the automation details window
+    between the navigation bar and the navigation buttons
+    """
+
+    def __init__(self, app, root, a_id: int):
+        """
+        Initialization of the AutomationDetailsContent frame
+
+        Args:
+        app (customtkinter.CTK): the parent window of the automation details content frame
+        root (customtkinter.CTK): the parent frame of the automation details content frame
+        a_id (int): the id of the automation which details are displayed
+        """
+
+        self.automation = db_utils.get_automation_data(a_id)
+
+        super().__init__(app, root, scroll_direction="y", layer=0)
+
+        # add the menu btns to the main frame
+        self.add_element_frame(row=0, column=0, layer=0)
+        self.element_frame.columnconfigure(0, weight=1)
+
+        self.menu_btns_frame = MenuBtns(app, self.element_frame)
+
+        # add the main content frame to the main frame
+        self.add_element_frame(row=1, column=0, layer=1)
+        self.element_frame.columnconfigure(0, weight=1)
+
+        self.data_frame = cW.BasisFrame(app, self.element_frame, layer=1)
+
+        self.info_labels = InfoLabels(
+            app=app, root=self.data_frame, automation=self.automation
+        )
+
+        self.entity_params = EntityParamsFrame(app=app, root=self.data_frame, a_id=a_id)
+
+        self.script_path_frame = cW.BasisFrame(app, self.data_frame, layer=2)
+        self.script_path_label = CTkLabel(
+            master=self.script_path_frame,
+            text=app.lang["SCRIPT_PATH"] + ":",
+            width=100,
+            anchor="w",
+        )
+        self.script_path_val = CTkLabel(
+            master=self.script_path_frame,
+            text=self.automation.script,
+            anchor="e",
+            font=CTkFont(underline=True),
+        )
+
+        self.add_info_frame = AddInfoFrame(app, self.data_frame, a_id)
+
+        self.delete_autmation_btn = cW.DeleteButton(
+            root=self.data_frame,
+            text=app.lang["DELETE_AUTOMATION"],
+            height=40,
+            width=75,
+            kind=0,
+            command=self.delete_automation,
+        )
 
         # grid the main frame elements
         self.menu_btns_frame.grid(row=0, column=0, sticky="news")
-        self.main_content_frame.grid(
-            row=1, column=0, sticky="news", padx=(0), pady=(15, 0)
-        )
-
-        self.main_frame.columnconfigure(0, weight=1)
-        self.main_frame.rowconfigure(1, weight=1)
+        self.data_frame.grid(row=1, column=0, sticky="news", padx=(0), pady=(15, 0))
 
         # grid the main content frame elements
         self.info_labels.grid(row=0, column=0, sticky="news", padx=(15), pady=(0, 15))
+        self.entity_params.grid(row=1, column=0, sticky="news", padx=(15), pady=(0, 15))
+        self.script_path_frame.grid(
+            row=2, column=0, sticky="news", padx=(15), pady=(0, 15)
+        )
+        self.add_info_frame.grid(
+            row=3, column=0, sticky="news", padx=(15), pady=(0, 15)
+        )
+        self.delete_autmation_btn.grid(row=4, column=0, sticky="ns", pady=(0, 15))
 
-        self.main_content_frame.columnconfigure(0, weight=1)
+        self.data_frame.columnconfigure(0, weight=1)
+
+        # grid the script path elements
+        self.script_path_label.grid(
+            row=0, column=0, sticky="w", pady=(2, 2), padx=(10, 0)
+        )
+        self.script_path_val.grid(row=0, column=1, sticky="e", pady=(2, 2), padx=(0, 5))
+
+    def delete_automation(self):
+        # TODO delete the automation
+        print("Delete automation")
 
 
 class MenuBtns(cW.BasisFrame):
@@ -82,11 +146,11 @@ class MenuBtns(cW.BasisFrame):
             command=self.open_test_results,
         )
 
-        self.columnconfigure(0, weight=1)
-        self.columnconfigure(1, weight=1)
-
         self.test_case_coll_btn.grid(row=0, column=0, sticky="w", padx=(15, 5))
         self.test_results_btn.grid(row=0, column=1, sticky="e", padx=(5, 15))
+
+        self.columnconfigure(0, weight=1)
+        self.columnconfigure(1, weight=1)
 
     def open_test_case_coll(self):
         # TODO open the test case collection
@@ -109,7 +173,6 @@ class InfoLabels(cW.BasisFrame):
         self.created_label = CTkLabel(
             master=self.created_frame,
             text=app.lang["CREATED"] + ":",
-            width=100,
             anchor="w",
         )
 
@@ -124,7 +187,6 @@ class InfoLabels(cW.BasisFrame):
         self.a_mode_label = CTkLabel(
             master=self.a_mode_frame,
             text=app.lang["AUTOMATION_MODE"] + ":",
-            width=100,
             anchor="w",
         )
 
@@ -166,7 +228,6 @@ class InfoLabels(cW.BasisFrame):
         self.error_label = CTkLabel(
             master=self.error_frame,
             text=app.lang["ERROR_DETECT"] + ":",
-            width=100,
         )
 
         # TODO change Checkbox to a framed icon with ❌, ✔️ and ❓
@@ -177,12 +238,12 @@ class InfoLabels(cW.BasisFrame):
             state="disabled",  # should not be changed
         )
 
+        # max instances frame
         self.max_inst_frame = cW.BasisFrame(app, self, layer=2)
 
         self.max_instances_label = CTkLabel(
             master=self.max_inst_frame,
             text=app.lang["MAX_INSTANCES"] + ":",
-            width=100,
         )
 
         max_inst_value_str = StringVar(value=automation.max_instances)
@@ -206,40 +267,122 @@ class InfoLabels(cW.BasisFrame):
         self.columnconfigure(1, weight=1)
 
         # grid the created elements
-        self.created_label.grid(row=0, column=0, sticky="w", pady=(2, 2), padx=(10, 0))
+        self.created_label.grid(row=0, column=0, sticky="w", pady=(2, 2), padx=(10, 2))
         self.created_date.grid(row=0, column=1, sticky="e", pady=(2, 2), padx=(0, 5))
+
         self.created_frame.columnconfigure(1, weight=1)
 
         # grid the error elements
-        self.error_label.grid(row=0, column=0, sticky="w", pady=(2, 2), padx=(10, 0))
+        self.error_label.grid(row=0, column=0, sticky="w", pady=(2, 2), padx=(10, 2))
         self.error_checkbox.grid(row=0, column=1, sticky="e", pady=(2, 2), padx=(0, 5))
+
         self.error_frame.columnconfigure(1, weight=1)
 
         # grid the automation mode elements
-        self.a_mode_label.grid(row=0, column=0, sticky="w", pady=(2, 2), padx=(10, 0))
+        self.a_mode_label.grid(row=0, column=0, sticky="w", pady=(2, 2), padx=(10, 2))
         self.a_mode_dropdown.grid(row=0, column=1, sticky="e", pady=(2, 2), padx=(0, 5))
+
         self.a_mode_frame.columnconfigure(1, weight=1)
 
         # grid the max instances elements
         self.max_instances_label.grid(
-            row=0, column=0, sticky="w", pady=(2, 2), padx=(10, 0)
+            row=0, column=0, sticky="w", pady=(2, 2), padx=(10, 2)
         )
         self.max_instances_value.grid(
             row=0, column=1, sticky="e", pady=(2, 2), padx=(0, 5)
         )
+        
         self.max_inst_frame.columnconfigure(1, weight=1)
+
+
+class EntityParamsFrame(cW.BasisFrame):
+    def __init__(self, app, root, a_id, locked=False):
+        super().__init__(app, root, layer=1)
+
+        autoamtion_entities = db_utils.get_automation_entities(a_id)
+
+        self.param_header_label = CTkLabel(
+            master=self,
+            text=app.lang["ENTITY_PARAMS"] + ":",
+            font=CTkFont(weight="bold"),
+        )
+
+        self.param_list = ai_utils.EntityListFrame(
+            app, self, autoamtion_entities, locked, height=200
+        )
+
+        # grid the Entity Params Frame
+        self.param_header_label.grid(
+            row=0,
+            column=0,
+            sticky="ew",
+            pady=(0, 10),
+        )
+        self.param_list.grid(row=1, column=0, sticky="news")
+
+        self.columnconfigure(0, weight=1)
+
+    def get_entity_params(self) -> list:
+        return self.param_list.get_entity_integrations()
+
+
+class AddInfoFrame(cW.BasisFrame):
+    """
+    Frame class to display the additional information of the automation
+    """
+
+    def __init__(self, app, root, a_id):
+        additional_infos = db_utils.get_additional_inforamtion(a_id)
+
+        super().__init__(app, root, layer=1)
+
+        self.add_info_header_label = CTkLabel(
+            master=self,
+            text=app.lang["ADDITIONAL_INFORMATION"] + ":",
+            font=CTkFont(weight="bold"),
+        )
+
+        self.add_info_list = ai_utils.AdditionalInfoListFrame(
+            app, self, add_infos=additional_infos
+        )
+
+        # grid the Add Info Frame
+        self.add_info_header_label.grid(
+            row=0,
+            column=0,
+            sticky="ew",
+            pady=(0, 10),
+        )
+        self.add_info_list.grid(row=1, column=0, sticky="news")
+
+        self.columnconfigure(0, weight=1)
+
+    def get_additional_info(self) -> list:
+        return self.add_info_list.get_infos()
 
 
 class NavBtns(cW.NavigationButtons):
     def __init__(
-        self, root, values, options={"btn_1_type": "delete", "btn_2_type": "accept"}
+        self,
+        root,
+        a_id,
+        values,
+        options={"btn_1_type": "delete", "btn_2_type": "accept"},
     ):
         self.root = root
+        self.a_id = a_id
         super().__init__(root=root, values=values, options=options)
 
     def btn_1_func(self):
         self.root.app.go_back(self.root)
 
     def btn_2_func(self):
-        # TODO save the automation changes
+        # save the automation details changes to the database and go back
+
+        entity_config = self.root.main_frame.entity_params.get_entity_params()
+        # TODO change the integration and the script depending on the new entity config
+
+        additional_info = self.root.main_frame.add_info_frame.get_additional_info()
+        db_utils.update_additional_infos(self.a_id, additional_info)
+
         self.btn_1_func()

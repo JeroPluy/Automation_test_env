@@ -31,6 +31,8 @@ class BasisFrame(CTkFrame):
         fg_color: str | Tuple[str] | None = None,
         border_width: int | str | None = None,
         border_color: str | Tuple[str] | None = None,
+        width: int | None = 200,
+        height: int | None = 200,
         **kwargs,
     ):
         """
@@ -44,6 +46,8 @@ class BasisFrame(CTkFrame):
             fg_color (str | Tuple[str] | None, optional): (Debugging purposes) foreground color of the basic frame. Defaults to None so its taken from the theme.
             border_width (int | str | None, optional): (Debugging purposes) border width of the basic frame. Defaults to None so its taken from the theme.
             border_color (str | Tuple[str] | None, optional): (Debugging purposes) border color of the basic frame. Defaults to None so its taken from the theme.
+            width (int, optional): width of the basic frame. Defaults to 200.
+            height (int, optional): height of the basic frame. Defaults to 200.
         """
 
         # provide the link to application instance for the frame
@@ -105,6 +109,9 @@ class BasisFrame(CTkFrame):
             **kwargs,
         )
 
+        self.configure(f"height={height}")
+        self.configure(f"width={width}")
+
 
 class BasisScrollFrame(BasisFrame):
     """
@@ -119,6 +126,8 @@ class BasisScrollFrame(BasisFrame):
         root: Any,
         layer: int = 1,
         border: bool = False,
+        width: int = 200,
+        height: int = 200,
         scroll_direction: str = "both",
     ):
         """
@@ -128,6 +137,9 @@ class BasisScrollFrame(BasisFrame):
             app (Any): the application object
             root (Any): root frame for the basic scroll frame
             layer (int, optional): layer of the basic scroll frame. Defaults to 1.
+            border (bool, optional): border of the basic scroll frame. Defaults to False.
+            width (int, optional): width of the basic scroll frame. Defaults to 200.
+            height (int, optional): height of the basic scroll frame. Defaults to 200.
             scroll_direction (str, optional): direction of the scroll. Defaults to "both".
         """
 
@@ -140,24 +152,39 @@ class BasisScrollFrame(BasisFrame):
 
         # create the basic frame for the scroll frame base
         super().__init__(
-            app, root, layer=layer, border_width=border_width, border_color=border_color, fg_color="red"
+            app,
+            root,
+            layer=layer,
+            border_width=border_width,
+            border_color=border_color,
+            height=height,
+            width=width,
+            fg_color="red",
         )
 
-        # set the basic frame as wide as the root frame allows
-        self.columnconfigure(0, weight=1)
-        self.rowconfigure(0, weight=1)
-        
         scroll_frame_color = self.cget("fg_color")
 
         # create the scroll frame inside of the basic frame as a container for the content
         if scroll_direction == "y":
-            self.content = CTkScrollableFrame(self, fg_color=scroll_frame_color, orientation="vertical")
+            self.content = CTkScrollableFrame(
+                self,
+                height=height,
+                width=width,
+                fg_color=scroll_frame_color,
+                orientation="vertical",
+            )
             self.content.columnconfigure(0, weight=1)
         elif scroll_direction == "x":
-            self.content = CTkScrollableFrame(self, fg_color=scroll_frame_color, orientation="horizontal")
+            self.content = CTkScrollableFrame(
+                self,
+                height=height,
+                width=width,
+                fg_color=scroll_frame_color,
+                orientation="horizontal",
+            )
             self.content.rowconfigure(0, weight=1)
         else:
-            self.content = CTkXYFrame(self)
+            self.content = CTkXYFrame(self, height=height, width=width)
 
         # add the basis variables for the scroll frame
         self.content.layer = layer
@@ -168,6 +195,10 @@ class BasisScrollFrame(BasisFrame):
 
         # set the scroll frame as wide as the basic frame allows
         self.content.grid(row=0, column=0, sticky="news", pady=(2, 2), padx=(2, 2))
+
+        # set the scroll frame as wide as the basic frame allows
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(0, weight=1)
 
     def add_element_frame(self, row: int = 0, column: int = 0, layer: int = None):
         """
@@ -180,13 +211,11 @@ class BasisScrollFrame(BasisFrame):
 
         # NOTE: if the scroll frame is an XYFrame the content frame is only as wide as its content plus padding
         #       the expansion through the columnconfigure or pack(fill="both", expand=True) is not possible as far as I tested it
-        
+
         element_layer = self.layer + 1 if layer is None else layer
 
         self.element_frame = BasisFrame(
-            app=self.app,
-            root=self.content,
-            layer=element_layer
+            app=self.app, root=self.content, layer=element_layer
         )
 
         self.element_frame.grid(
@@ -196,10 +225,12 @@ class BasisScrollFrame(BasisFrame):
             pady=(5, 5),
             padx=(15, 15),
         )
-        
+
         self.content.element_frames.append(self.element_frame)
 
-    def delete_content_frame(self, element_frame: BasisFrame, row: int = 0, column: int = 0):
+    def delete_content_frame(
+        self, element_frame: BasisFrame, row: int = 0, column: int = 0
+    ):
         """
         Function to delete a content frame from the scroll frame.
 
@@ -209,7 +240,7 @@ class BasisScrollFrame(BasisFrame):
 
         self.content.element_frames.remove(element_frame)
         element_frame.destroy()
-        
+
         for element_frame in range(row, len(self.content.element_frames)):
             self.content.element_frames[element_frame].grid(
                 row=element_frame,
@@ -467,7 +498,7 @@ class DeleteButton(CTkButton):
             image = CTkImage(Image.open(path.join(image_path, icon)), size=(24, 24))
         else:
             image = None
-            
+
         # TODO change the background color to a gray color if the button is disabled (state="disabled") maybe depending on the theme
 
         super().__init__(
