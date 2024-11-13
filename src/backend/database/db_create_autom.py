@@ -10,6 +10,7 @@ from .db_utils import (
     get_automations_with_same_name,
     get_integration_id,
     validate_database_entity,
+    update_additional_infos,
 )
 
 import sqlite3 as sqlite
@@ -142,7 +143,7 @@ def add_automation(automation_data: dict) -> int:
     return a_id, version
 
 
-def add_additional_info(a_id: int, infos: list):
+def add_additional_info(a_id: int, infos: list = []):
     """
     add additional information to the automation
 
@@ -150,27 +151,30 @@ def add_additional_info(a_id: int, infos: list):
         a_id: int - the id of the automation
         infos: list - the additional information to be added to the database as a list of tuples (info_type, info)
     """
+
+    # add the additional information to the database if it is not already there or update it if it is
+    if infos != []:
+        update_additional_infos(automation_id=a_id, add_infos=infos)
+    
+    # ensure that the project and version info is added to the database regardless of the user input
     with sqlite.connect(DATABASE) as con:
         cur = con.cursor()
-
-        # Prepare the data for insertion
-        info_tuples = []
-        for info in infos:
-            
-            # Check if the info is a project and has a name
-            if info["info_type"] == "project" and info["info_content"] == "":
-                info["info_content"] = "uncategorized"
-                
-            info_tuples.append((a_id, info["info_type"], info["info_content"])) 
-
-        # Define the SQL statement for inserting data
-        ADD_INFOS = "INSERT INTO additional_information (a_id, info_type, info) VALUES (?, ?, ?)"
-
-        # Execute the insert statement with multiple values
-        cur.executemany(ADD_INFOS, info_tuples)
-        con.commit()
         
-        # TODO ensure that the project and version info is added to the database regardless of the user input
+        CHECK_INFOS = "SELECT info_type FROM additional_information WHERE a_id = ?"
+        
+        cur.execute(CHECK_INFOS, (a_id,))
+        result = cur.fetchall()
+        
+        # inserting statement for missing data
+        ADD_INFOS = "INSERT INTO additional_information (a_id, info_type, info) VALUES (?, ?, ?)"
+        
+        if ("project",) not in result:
+            cur.execute(ADD_INFOS, (a_id, "project", "uncategorized"))
+            con.commit()
+            
+        if ("version",) not in result:
+            cur.execute(ADD_INFOS, (a_id, "version", "unknown"))
+            con.commit()
 
 
 def add_integration(

@@ -177,6 +177,7 @@ def load_automations(project: str = None) -> list:
         WHERE aI.info = ? 
         AND aI.info_type = 'project'
         AND aI2.info_type = 'version'
+        ORDER BY automation.created DESC
     """
 
     with sqlite.connect(DATABASE) as con:
@@ -274,3 +275,126 @@ def get_automation_data(automation_id: int) -> Automation:
             )
 
     return automation
+
+
+def get_automation_entities(automation_id: int) -> list:
+    """
+    Get the entities of the automation
+
+    Args:
+        automation_id: int - the id of the automation
+
+    Returns:
+        list - the entities of the automation (Entity objects)
+    """
+    GET_ENTITIES = "SELECT integration.i_name, entity.e_name, ae.p_role, ae.parent, ae.position, ae.exp_val FROM automation_entity AS ae JOIN entity ON entity.e_id = ae.e_id JOIN integration ON integration.i_id = entity.i_id WHERE ae.a_id = ?"
+
+    with sqlite.connect(DATABASE) as con:
+        cur = con.cursor()
+        cur.execute(GET_ENTITIES, (automation_id,))
+        result = cur.fetchall()
+
+    if result is not None:
+        entities = []
+        for entity in result:
+            entities.append(
+                Entity(
+                    integration=entity[0],
+                    entity_name=entity[1],
+                    param_role=entity[2],
+                    parent=entity[3],
+                    position=entity[4],
+                    expected_value=entity[5],
+                )
+            )
+    return entities
+
+
+def get_additional_inforamtion(automation_id: int) -> list:
+    """
+    Get the additional information of the automation
+
+    Args:
+        automation_id: int - the id of the automation
+
+    Returns:
+        list - the additional information of the automation as tuples (info_type, info, removable)
+    """
+    GET_ADDITIONAL_INFORMATION = (
+        "SELECT info_type, info FROM additional_information WHERE a_id = ?"
+    )
+
+    with sqlite.connect(DATABASE) as con:
+        cur = con.cursor()
+        cur.execute(GET_ADDITIONAL_INFORMATION, (automation_id,))
+        result = cur.fetchall()
+
+    add_infos = []
+
+    for info in result:
+        # check if the info is the project or the version and mark them as not removable
+        if info[0] == "project":
+            add_infos.append(("project", info[1], False))
+        elif info[0] == "version":
+            add_infos.append(("version", info[1], False))
+        else:
+            add_infos.append((info[0], info[1], True))
+
+    return add_infos
+
+
+def update_additional_infos(automation_id: int, add_infos: list):
+    """
+    Update the additional information of the automation
+
+    Args:
+        automation_id: int - the id of the automation
+        add_infos: list - the additional information as dictionaries with keys "info_type" and "info_content"
+    """
+
+    with sqlite.connect(DATABASE) as con:
+        cur = con.cursor()
+
+        # Get the existing additional information of the automation
+        GET_INFOS = "SELECT info_type FROM additional_information WHERE a_id = ?"
+
+        cur.execute(GET_INFOS, (automation_id,))
+        result = cur.fetchall()
+
+        existing_infos = [row[0] for row in result]
+
+        # Prepare the data for insertion
+
+        new_info_tuples = []
+
+        update_info_tuples = []
+
+        for info in add_infos:
+            # Check if the info is 'project' and has a name
+            if info["info_type"] == "project" and info["info_content"] == "":
+                info["info_content"] = "uncategorized"
+
+            # Check if the info is new or needs to be updated
+            if info["info_type"] in existing_infos:
+                update_info_tuples.append(
+                    (info["info_content"], automation_id, info["info_type"])
+                )
+                existing_infos.remove(info["info_type"])
+            else:
+                new_info_tuples.append(
+                    (info["info_content"], automation_id, info["info_type"])
+                )
+
+        # Define the SQL statement for updating existing additional information
+        UPDATE_INFOS = "UPDATE additional_information SET info = ? WHERE a_id = ? AND info_type = ?"
+
+        # Update the existing additional information
+        cur.executemany(UPDATE_INFOS, update_info_tuples)
+        con.commit()
+
+        # Define the SQL statement for inserting not existing additional information
+        ADD_INFOS = "INSERT INTO additional_information (info, a_id, info_type) VALUES (?, ?, ?)"
+
+        # Execute the insert statement with multiple values
+        cur.executemany(ADD_INFOS, new_info_tuples)
+        con.commit()
