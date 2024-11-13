@@ -2,8 +2,8 @@ from tkinter import StringVar
 
 from customtkinter import CTkEntry, CTkLabel
 
-from backend.database.db_utils import load_integrations
 from frontend.customWidgets import customWidgets as cW
+from .automation_insertion_utils import EntityListFrame
 from .antomation_script import AutomationScriptFrame
 
 from backend import database as db
@@ -44,7 +44,9 @@ class AutomationEntityFrame(cW.BasisFrame):
         self.rowconfigure(1, weight=1)
 
         # entity list frame
-        self.entity_list_frame = EntityListFrame(app, self.content_frame)
+        self.entity_list_frame = EntityListFrame(
+            app, self.content_frame, app.new_automation.config["entities"]
+        )
         # make the entity list frame inside the content frame resizable
         self.content_frame.columnconfigure(0, weight=1)
         self.content_frame.rowconfigure(0, weight=1)
@@ -137,112 +139,6 @@ class AutomationEntityFrame(cW.BasisFrame):
         )
 
 
-class EntityListFrame(cW.BasisScrollFrame):
-    """
-    Class to display the list of entities in the automation entity frame
-    """
-
-    def __init__(self, app, root):
-        super().__init__(app, root, layer=1, border=True, scroll_direction="y")
-
-        self.entity_list: list = app.new_automation.config["entities"]
-        integration_list = load_integrations()
-        integration_list.sort()
-
-        integration_list.append(app.lang["NEW_INTEGRATION"])
-
-        self.entity_frame_list: list = []
-
-        for entity in self.entity_list:
-            entity_name = entity.entity_name
-            preselect_type = entity.integration
-
-            self.add_element_frame(row=len(self.entity_frame_list), column=0)
-            entity_frame = EntityFrame(
-                app=app,
-                root=self.element_frame,
-                entity_num=len(self.entity_frame_list),
-                entity_name=entity_name,
-                integration_list=integration_list,
-                preselect_type=preselect_type,
-            )
-            self.element_frame.columnconfigure(0, weight=1)
-            self.element_frame.rowconfigure(0, weight=1)
-
-            self.entity_frame_list.append(entity_frame)
-
-            entity_frame.grid(
-                row=len(self.entity_frame_list),
-                column=0,
-                sticky="news",
-                padx=(5, 5),
-                pady=(2, 2),
-            )
-
-
-class EntityFrame(cW.BasisFrame):
-    """
-    Class for to display a single entity in the entity list frame
-    """
-
-    def __init__(
-        self, app, root, entity_num, entity_name, integration_list, preselect_type
-    ):
-        """
-        Initialization of the entity frame
-
-        Args:
-        """
-
-        super().__init__(app=app, root=root, layer=3)
-
-        self.entity_num = entity_num
-
-        self.entity_name_label = CTkLabel(self, text=entity_name)
-        # the entity name is expandable with the window size
-        self.columnconfigure(0, weight=1)
-
-        self.entity_integration_select = cW.FramedOptionMenu(
-            root=self,
-            values=integration_list,
-            default_value=preselect_type,
-            command=self.change_integration,
-        )
-
-        # grid the elements inside the entity frame
-        self.entity_name_label.grid(
-            row=0, column=0, sticky="w", pady=(8, 8), padx=(10, 0)
-        )
-        self.entity_integration_select.grid(
-            row=0, column=1, sticky="e", pady=(8, 8), padx=(0, 10)
-        )
-
-    def change_integration(self, value):
-        """
-        Function to handle the changing of the integration of an entity
-
-        Args:
-            value (str): the value of the dropdown menu
-        """
-        if value == self.app.lang["NEW_INTEGRATION"]:
-            # TODO open mask for creating a new integration and add it to the database
-            print("new integration selected")
-        else:
-            print(
-                "Entity "
-                + str(self.entity_num)
-                + " integration changed  form: "
-                + self.app.new_automation.config["entities"][
-                    self.entity_num
-                ].integration
-                + " to: "
-                + value
-            )
-            self.app.new_automation.config["entities"][
-                self.entity_num
-            ].integration = value
-
-
 class NavBtns(cW.NavigationButtons):
     def __init__(self, root, values):
         """
@@ -280,5 +176,5 @@ class NavBtns(cW.NavigationButtons):
                 self.root.app,
                 automation_name=automation.a_name,
             ),
-            returnable=True,
+            returnable=False,
         )

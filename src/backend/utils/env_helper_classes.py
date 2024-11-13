@@ -77,11 +77,11 @@ class Entity:
     Class to represent an entity.
     """
 
+    parameter_role: int = None 
+    position: int = None
     integration: str = None
     entity_name: str | list = None
-    parameter_role: int = None
     parent: int = None
-    position: int = None
     expected_value: dict = None
 
     def __init__(
@@ -97,23 +97,32 @@ class Entity:
         Create an entity from the automation part.
 
         Args:
+            param_role (int): The role of the parameter
+            position (int): The position of the entity in the parameter role
             integration (str): The integration of the entity
             entity_name (str): The name of the entity
-            expected_value (int | str | dict): The possible value of the entity
+            expected_value (str | dict): The possible value of the entity
 
         Returns:
             dict: The entity as a dictionary
         """
 
-        self.parent = parent
-        self.position = position
+        
         self.parameter_role = param_role
+        self.position = position
         self.integration = integration
-        self.entity_name = integration + "." + entity_name
+        if '.' in entity_name:
+            self.entity_name = entity_name
+        else:
+            self.entity_name = integration + "." + entity_name
+        self.parent = parent
         if expected_value == {} or expected_value is None:
             self.expected_value = None
         else:
-            self.expected_value = expected_value.copy()
+            if isinstance(expected_value, str):
+                self.expected_value = expected_value
+            else:
+                self.expected_value = expected_value.copy()
 
     def serialize(self)->dict:
         """

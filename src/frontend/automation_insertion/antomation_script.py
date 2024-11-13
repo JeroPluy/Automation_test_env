@@ -2,7 +2,10 @@ from frontend.customWidgets import customWidgets as cW
 
 from frontend.automation_details import automation_details_main as aD
 
+from backend import database as db
+
 from .automation_infos import AutomationInfosFrame
+from .automation_insertion_utils import clear_automation_insertion_frames
 
 from customtkinter import CTkTextbox, CTkFont
 
@@ -127,8 +130,12 @@ class NavBtns(cW.NavigationButtons):
         """
         Functionality of the first navigation button (finish the automation creation)
         """
-        
+
         automation = self.master.app.new_automation.config["infos"]
+
+        db.add_additional_info(self.root.app.new_automation.a_id)
+
+        clear_automation_insertion_frames(stack=self.master.app.frame_stack)
 
         self.root.app.load_new_frame(
             prev_frame=self.root,
@@ -137,7 +144,7 @@ class NavBtns(cW.NavigationButtons):
                 a_id=self.root.app.new_automation.a_id,
                 automation_name=automation.a_name,
             ),
-            returnable=False,
+            returnable=True,
         )
 
     def btn_2_func(self):
@@ -145,11 +152,13 @@ class NavBtns(cW.NavigationButtons):
         Functionality of the second navigation button (add more information to the automation)
         """
         automation = self.master.app.new_automation.config["infos"]
-        
+
         self.root.app.load_new_frame(
             prev_frame=self.root,
             new_frame=AutomationInfosFrame(
-                app=self.root.app, automation_name= automation.a_name, a_id=self.root.app.new_automation.a_id
+                app=self.root.app,
+                automation_name=automation.a_name,
+                a_id=self.root.app.new_automation.a_id,
             ),
             returnable=False,
         )
