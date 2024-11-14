@@ -16,7 +16,7 @@ class AppWindow(CTk):
         BlankWindow (class): the blank window class for the application
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self):
         """
         Initialization of the start window of the application
 
@@ -58,6 +58,7 @@ class AppWindow(CTk):
         # init the frame history stack and the start frame
         self.frame_stack = []
         self.start_frame = StartFrame(self)
+        
         # display the start frame with the logo
         self.load_new_frame(None, self.start_frame, returnable=False)
 
@@ -66,17 +67,26 @@ class AppWindow(CTk):
         Function to load a new frame into the main window
 
         Args:
-            prev_frame (customtkinter.CTk): the previous frame before the new frame
-            new_frame (customtkinter.CTk): the new frame to be displayed
+            prev_frame (cW.BasisFrame): the previous frame before the new frame
+            new_frame (cW.BasisFrame): the new frame to be displayed
+            returnable (bool): determines if the frame can be returned to
+            
+        Returns:
+            cW.BasisFrame: the new frame that is displayed
         """
         if prev_frame is not None:
             prev_frame.destroy()
+            
+        if returnable:
+            self.frame_stack.append(new_frame.__class__)
+            
+        # display the new frame
+        
+        new_frame.grid(row=0, column=0, sticky="news")
+        
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
-        new_frame.grid(row=0, column=0, sticky="news")
-        if returnable:  
-            self.frame_stack.append(new_frame.__class__)
-
+        
         # TODO debug
         for frame in self.frame_stack:
             print(frame)
@@ -89,7 +99,7 @@ class AppWindow(CTk):
         Function to go back to the previous frame
 
         Args:
-            old_frame (customtkinter.CTk): the current frame before going back
+            old_frame (cW.BasisFrame): the current frame before going back
         """
         if len(self.frame_stack) > 1:
             self.frame_stack.pop()

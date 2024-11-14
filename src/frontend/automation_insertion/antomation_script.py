@@ -42,9 +42,6 @@ class AutomationScriptFrame(cW.BasisFrame):
         )
 
         self.main_content_frame = cW.BasisFrame(app, self, layer=1)
-        # make the content frame resizable depending on the window size
-        self.columnconfigure(0, weight=1)
-        self.rowconfigure(1, weight=1)
 
         self.path_label_frame = cW.BasisFrame(app, self.main_content_frame, layer=2)
 
@@ -59,8 +56,6 @@ class AutomationScriptFrame(cW.BasisFrame):
             font=underline_font,
             wraplength=600,
         )
-        # make the path inside the path label frame resizable
-        self.path_label_frame.columnconfigure(1, weight=1)
 
         self.script_content = CTkTextbox(
             master=self.main_content_frame, font=("Lucida Console", 16)
@@ -68,13 +63,12 @@ class AutomationScriptFrame(cW.BasisFrame):
         self.load_automation_script(
             app.new_automation.config["infos"].script, self.script_content
         )
-        # make the script textbox inside the content frame resizable
-        self.main_content_frame.columnconfigure(0, weight=1)
-        self.main_content_frame.rowconfigure(1, weight=1)
 
         self.nav_btns = self.navigation_buttons = NavBtns(
             root=self, values=(app.lang["FINISH"], app.lang["ADD_INFO"])
         )
+        
+        # --- grid the elements ---
 
         # grid the main elements
         self.nav_bar.grid(row=0, column=0, sticky="ew")
@@ -82,18 +76,32 @@ class AutomationScriptFrame(cW.BasisFrame):
             row=1, column=0, sticky="news", pady=(15, 10), padx=(25)
         )
         self.navigation_buttons.grid(row=2, column=0, sticky="ew")
+        
+        # make the content frame resizable depending on the window size
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(1, weight=1)
 
-        # grid the elements inside the content frame
+        ## grid the elements inside the content frame
         self.path_label_frame.grid(row=0, column=0, sticky="ew", padx=(10), pady=(10))
         self.script_content.grid(
             row=1, column=0, sticky="news", padx=(10), pady=(0, 10)
         )
+        
+        ## make the script textbox inside the content frame resizable
+        self.main_content_frame.columnconfigure(0, weight=1)
+        self.main_content_frame.rowconfigure(1, weight=1)
 
-        # grid the elements inside the path label frame
+        
+        ## grid the elements inside the path label frame
         self.script_path_label.grid(
             row=0, column=0, sticky="w", padx=(10, 0), pady=(10)
         )
         self.path_label.grid(row=0, column=1, sticky="ew", padx=(5, 10), pady=(10))
+        
+        ## make the path inside the path label frame resizable
+        self.path_label_frame.columnconfigure(1, weight=1)
+
+
 
     def load_automation_script(self, script_path: str, textbox: CTkTextbox):
         """

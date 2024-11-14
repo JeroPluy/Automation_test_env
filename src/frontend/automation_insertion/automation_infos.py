@@ -56,12 +56,13 @@ class AutomationInfosFrame(cW.BasisFrame):
 
         self.nav_btn = Nav_btn(app, self)
 
+        # --- grid the elements ---
+
         # grid the main elements
         self.nav_bar.grid(row=0, column=0, sticky="we")
         self.main_content_frame.grid(
             row=1, column=0, sticky="news", pady=(15, 10), padx=(25)
         )
-
         self.nav_btn.grid(row=2, column=0, sticky="we")
 
         # make the content frame resizable depending on the window size

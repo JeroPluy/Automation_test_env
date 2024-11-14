@@ -5,10 +5,24 @@ from tkinter import StringVar
 from customtkinter import CTkLabel, CTkCheckBox, CTkEntry, CTkFont
 
 from backend.database import db_utils
+from backend.utils.env_helper_classes import Automation
 
 
 class AutomationDetailsFrame(cW.BasisFrame):
+    """
+    Main frame class for the automation details window
+    """
+
     def __init__(self, app, a_id, automation_name):
+        """
+        Initialization of the AutomationDetailsFrame
+
+        Args:
+            app (customtkinter.CTK): the parent window of the automation details frame
+            a_id (int): the id of the automation which details are displayed
+            automation_name (str): the name of the automation
+        """
+
         super().__init__(app=app, layer=0)
 
         self.nav_bar = cW.NavigationBar(
@@ -21,9 +35,9 @@ class AutomationDetailsFrame(cW.BasisFrame):
             a_id=a_id,
         )
 
-        self.nav_btns = NavBtns(
-            self, a_id=a_id, values=(app.lang["DISCARD"], app.lang["SAVE"])
-        )
+        self.nav_btns = NavBtns(app=app, root=self, a_id=a_id)
+
+        # --- grid the elements ---
 
         # grid the main elements
         self.nav_bar.grid(row=0, column=0, sticky="ew")
@@ -46,9 +60,9 @@ class AutomationDetailsContent(cW.BasisScrollFrame):
         Initialization of the AutomationDetailsContent frame
 
         Args:
-        app (customtkinter.CTK): the parent window of the automation details content frame
-        root (customtkinter.CTK): the parent frame of the automation details content frame
-        a_id (int): the id of the automation which details are displayed
+            app (customtkinter.CTK): the parent window of the automation details content frame
+            root (cW.BasisFrame): the parent frame of the automation details content frame
+            a_id (int): the id of the automation which details are displayed
         """
 
         self.automation = db_utils.get_automation_data(a_id)
@@ -98,11 +112,13 @@ class AutomationDetailsContent(cW.BasisScrollFrame):
             command=self.delete_automation,
         )
 
+        # --- grid the elements ---
+
         # grid the main frame elements
         self.menu_btns_frame.grid(row=0, column=0, sticky="news")
         self.data_frame.grid(row=1, column=0, sticky="news", padx=(0), pady=(15, 0))
 
-        # grid the main content frame elements
+        ## grid the main data frame elements
         self.info_labels.grid(row=0, column=0, sticky="news", padx=(15), pady=(0, 15))
         self.entity_params.grid(row=1, column=0, sticky="news", padx=(15), pady=(0, 15))
         self.script_path_frame.grid(
@@ -115,19 +131,37 @@ class AutomationDetailsContent(cW.BasisScrollFrame):
 
         self.data_frame.columnconfigure(0, weight=1)
 
-        # grid the script path elements
+        ### grid the script path elements
         self.script_path_label.grid(
             row=0, column=0, sticky="w", pady=(2, 2), padx=(10, 0)
         )
         self.script_path_val.grid(row=0, column=1, sticky="e", pady=(2, 2), padx=(0, 5))
 
+        self.script_path_frame.columnconfigure(1, weight=1)
+
     def delete_automation(self):
+        """
+        Delete the automation from the database
+        """
+
         # TODO delete the automation
         print("Delete automation")
 
 
 class MenuBtns(cW.BasisFrame):
+    """
+    Class to display the menu buttons for navigating to the test case collection and the test results
+    """
+
     def __init__(self, app, root):
+        """
+        Initialization of the MenuBtns frame
+
+        Args:
+            app (customtkinter.CTK): the parent window of the menu buttons frame
+            root (cW.BasisFrame): the parent frame of the menu buttons frame
+        """
+
         super().__init__(app, root, layer=0)
 
         self.test_case_coll_btn = cW.NeutralButton(
@@ -146,6 +180,8 @@ class MenuBtns(cW.BasisFrame):
             command=self.open_test_results,
         )
 
+        # --- grid the elements ---
+
         self.test_case_coll_btn.grid(row=0, column=0, sticky="w", padx=(15, 5))
         self.test_results_btn.grid(row=0, column=1, sticky="e", padx=(5, 15))
 
@@ -162,7 +198,20 @@ class MenuBtns(cW.BasisFrame):
 
 
 class InfoLabels(cW.BasisFrame):
-    def __init__(self, app, root, automation):
+    """
+    Class to display the information labels block of the automation details window
+    """
+
+    def __init__(self, app, root, automation: Automation):
+        """
+        Initialization of the InfoLabels frame
+
+        Args:
+            app (customtkinter.CTK): the parent window of the info labels frame
+            root (cW.BasisFrame): the parent frame of the info labels frame
+            automation (Automation): the automation data to display
+        """
+
         super().__init__(app, root, layer=1)
 
         locked_state = "disabled" if automation.error is not None else "normal"
@@ -257,6 +306,8 @@ class InfoLabels(cW.BasisFrame):
             justify="right",
         )
 
+        # --- grid the elements ---
+
         # grid the label frames
         self.created_frame.grid(row=0, column=0, sticky="we", padx=(0, 5), pady=(0, 5))
         self.a_mode_frame.grid(row=0, column=1, sticky="we", padx=(5, 0), pady=(0, 5))
@@ -266,37 +317,51 @@ class InfoLabels(cW.BasisFrame):
         self.columnconfigure(0, weight=1)
         self.columnconfigure(1, weight=1)
 
-        # grid the created elements
+        ## grid the created elements
         self.created_label.grid(row=0, column=0, sticky="w", pady=(2, 2), padx=(10, 2))
         self.created_date.grid(row=0, column=1, sticky="e", pady=(2, 2), padx=(0, 5))
 
         self.created_frame.columnconfigure(1, weight=1)
 
-        # grid the error elements
+        ## grid the error elements
         self.error_label.grid(row=0, column=0, sticky="w", pady=(2, 2), padx=(10, 2))
         self.error_checkbox.grid(row=0, column=1, sticky="e", pady=(2, 2), padx=(0, 5))
 
         self.error_frame.columnconfigure(1, weight=1)
 
-        # grid the automation mode elements
+        ## grid the automation mode elements
         self.a_mode_label.grid(row=0, column=0, sticky="w", pady=(2, 2), padx=(10, 2))
         self.a_mode_dropdown.grid(row=0, column=1, sticky="e", pady=(2, 2), padx=(0, 5))
 
         self.a_mode_frame.columnconfigure(1, weight=1)
 
-        # grid the max instances elements
+        ## grid the max instances elements
         self.max_instances_label.grid(
             row=0, column=0, sticky="w", pady=(2, 2), padx=(10, 2)
         )
         self.max_instances_value.grid(
             row=0, column=1, sticky="e", pady=(2, 2), padx=(0, 5)
         )
-        
+
         self.max_inst_frame.columnconfigure(1, weight=1)
 
 
 class EntityParamsFrame(cW.BasisFrame):
+    """
+    Class to display the entity parameter list of the automation
+    """
+
     def __init__(self, app, root, a_id, locked=False):
+        """
+        Initialization of the EntityParamsFrame by loading the entity parameters from the database
+
+        Args:
+            app (customtkinter.CTK): the parent window of the entity params frame
+            root (cW.BasisFrame): the parent frame of the entity params frame
+            a_id (int): the id of the automation which entity parameters are displayed
+            locked (bool): determines if the entity parameters are locked
+        """
+
         super().__init__(app, root, layer=1)
 
         autoamtion_entities = db_utils.get_automation_entities(a_id)
@@ -311,6 +376,8 @@ class EntityParamsFrame(cW.BasisFrame):
             app, self, autoamtion_entities, locked, height=200
         )
 
+        # --- grid the elements ---
+
         # grid the Entity Params Frame
         self.param_header_label.grid(
             row=0,
@@ -323,6 +390,13 @@ class EntityParamsFrame(cW.BasisFrame):
         self.columnconfigure(0, weight=1)
 
     def get_entity_params(self) -> list:
+        """
+        Function to get the entity parameters from the entity list frame
+
+        Returns:
+            list: the entity parameters as a list of dictionaries
+        """
+
         return self.param_list.get_entity_integrations()
 
 
@@ -332,6 +406,15 @@ class AddInfoFrame(cW.BasisFrame):
     """
 
     def __init__(self, app, root, a_id):
+        """
+        Initialization of the AddInfoFrame by loading the additional information from the database
+
+        Args:
+            app (customtkinter.CTK): the parent window of the add info frame
+            root (cW.BasisFrame): the parent frame of the add info frame
+            a_id (int): the id of the automation which additional information is displayed
+        """
+
         additional_infos = db_utils.get_additional_inforamtion(a_id)
 
         super().__init__(app, root, layer=1)
@@ -346,6 +429,8 @@ class AddInfoFrame(cW.BasisFrame):
             app, self, add_infos=additional_infos
         )
 
+        # --- grid the elements ---
+
         # grid the Add Info Frame
         self.add_info_header_label.grid(
             row=0,
@@ -358,26 +443,48 @@ class AddInfoFrame(cW.BasisFrame):
         self.columnconfigure(0, weight=1)
 
     def get_additional_info(self) -> list:
+        """
+        Function to get the additional information from the additional info list frame as a list of dictionaries
+        """
+
         return self.add_info_list.get_infos()
 
 
 class NavBtns(cW.NavigationButtons):
-    def __init__(
-        self,
-        root,
-        a_id,
-        values,
-        options={"btn_1_type": "delete", "btn_2_type": "accept"},
-    ):
+    """
+    Class to display the navigation buttons for the automation details window
+    """
+
+    def __init__(self, app, root, a_id):
+        """
+        Initialization of the NavBtns frame with the delete and save buttons for the automation details window
+
+        Args:
+            app (customtkinter.CTK): the parent window of the navigation buttons
+            root (cW.BasisFrame): the parent frame of the navigation buttons
+            a_id (int): the id of the automation which details are displayed
+        """
+
         self.root = root
         self.a_id = a_id
-        super().__init__(root=root, values=values, options=options)
+
+        super().__init__(
+            root=root,
+            values=(app.lang["DISCARD"], app.lang["SAVE"]),
+            options={"btn_1_type": "delete", "btn_2_type": "accept"},
+        )
 
     def btn_1_func(self):
+        """
+        Button 1 function to discard the changes and go back to the automation selection overview
+        """
         self.root.app.go_back(self.root)
 
     def btn_2_func(self):
-        # save the automation details changes to the database and go back
+        """
+        Button 2 function to save the changes to the automation details in the database
+        and go back to the automation selection overview
+        """
 
         entity_config = self.root.main_frame.entity_params.get_entity_params()
         # TODO change the integration and the script depending on the new entity config

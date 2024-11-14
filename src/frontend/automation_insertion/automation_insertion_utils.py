@@ -51,6 +51,8 @@ class EntityListFrame(cW.BasisScrollFrame):
             self.element_frame.rowconfigure(0, weight=1)
 
             self.entity_frame_list.append(entity_frame)
+            
+            # --- grid the elements ---
 
             entity_frame.grid(
                 row=len(self.entity_frame_list),
@@ -112,8 +114,6 @@ class EntityFrame(cW.BasisFrame):
         self.integration = preselect_type
 
         self.entity_name_label = CTkLabel(self, text=entity_name)
-        # the entity name is expandable with the window size
-        self.columnconfigure(0, weight=1)
 
         self.entity_integration_select = cW.FramedOptionMenu(
             root=self,
@@ -122,6 +122,8 @@ class EntityFrame(cW.BasisFrame):
             command=self.change_integration,
             state="disabled" if locked else "normal",
         )
+        
+        # --- grid the elements ---
 
         # grid the elements inside the entity frame
         self.entity_name_label.grid(
@@ -130,6 +132,9 @@ class EntityFrame(cW.BasisFrame):
         self.entity_integration_select.grid(
             row=0, column=1, sticky="e", pady=(8, 8), padx=(0, 10)
         )
+        
+        # the entity name is expandable with the window size
+        self.columnconfigure(0, weight=1)
 
     def change_integration(self, value):
         """
@@ -221,8 +226,9 @@ class AdditionalInfoListFrame(cW.BasisFrame):
             command=self.add_info,
             width=260,
         )
+        
+        # --- grid the elements ---
 
-        # grid the content frame elements
         self.info_type_label.grid(
             row=0, column=0, sticky="w", padx=(15, 0), pady=(5, 0)
         )
@@ -321,8 +327,9 @@ class InformationFrame(cW.BasisFrame):
 
         if removeable is False:
             self.delete_btn.configure(state="disabled")
+            
+        # --- grid the elements ---
 
-        # grid the elements
         self.info_type_entry.grid(row=0, column=0, sticky="we", padx=(0, 10))
         self.info_content_entry.grid(row=0, column=1, sticky="we", padx=(0, 5))
         self.delete_btn.grid(row=0, column=2, sticky="e")

@@ -27,9 +27,6 @@ from .automation_entities import AutomationEntityFrame
 class AutomationCreationFrame(cW.BasisFrame):
     """
     The window class which combines all the widgets for the automation insertion window
-
-    Args:
-        cW.BlankWindow (class): custom blank basic window for the application
     """
 
     def __init__(self, app):
@@ -38,12 +35,11 @@ class AutomationCreationFrame(cW.BasisFrame):
 
         Args:
             app (customtkinter.CTK): the parent window of the automation insertion frame
-            project (str): the name of the project the automation is added to
         """
 
         # create the basis frame for the automation insertion window
         super().__init__(app=app, layer=0)
-        
+
         app.new_automation = SimpleNamespace(config=None, a_id=None)
         if app.selected_project is None:
             nav_path = str(app.lang["NEW_A"])
@@ -57,9 +53,6 @@ class AutomationCreationFrame(cW.BasisFrame):
         )
 
         self.content_frame = cW.BasisFrame(app, self, layer=1)
-        # make the content frame resizable depending on the window size
-        self.columnconfigure(0, weight=1)
-        self.rowconfigure(1, weight=1)
 
         self.entry = CTkEntry(
             self.content_frame,
@@ -68,9 +61,6 @@ class AutomationCreationFrame(cW.BasisFrame):
         )
 
         self.automation_input_frame = cW.BasisFrame(app, self.content_frame, layer=2)
-        # make the automation input frame inside the content frame resizable
-        self.content_frame.columnconfigure(0, weight=1)
-        self.content_frame.rowconfigure(1, weight=1)
 
         # the textbox for the automation code is below the text insertion tools but needs to be initialized first
         # to be able to reference it in the text insertion tools
@@ -80,9 +70,6 @@ class AutomationCreationFrame(cW.BasisFrame):
             undo=True,
             maxundo=3,
         )
-        # make the textbox inside the automation input frame resizable
-        self.automation_input_frame.columnconfigure(0, weight=1)
-        self.automation_input_frame.rowconfigure(1, weight=1)
 
         self.text_tool_btns = TextToolBtns(root=self.automation_input_frame, app=app)
 
@@ -92,6 +79,8 @@ class AutomationCreationFrame(cW.BasisFrame):
             values=[app.lang["BACK"], app.lang["CONTINUE"]],
         )
 
+        # --- grid the elements ---
+
         # grid the main elements
         self.nav_bar.grid(row=0, column=0, sticky="new")
         self.content_frame.grid(
@@ -99,17 +88,29 @@ class AutomationCreationFrame(cW.BasisFrame):
         )
         self.navigaton_buttons.grid(row=2, column=0, sticky="news")
 
-        # grid the elements inside the content frame
+        # make the content frame resizable depending on the window size
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(1, weight=1)
+
+        ## grid the elements inside the content frame
         self.entry.grid(row=0, column=0, sticky="we", padx=(22), pady=(10, 0))
         self.automation_input_frame.grid(
             row=1, column=0, sticky="news", padx=(10), pady=(10, 10)
         )
 
-        # grid the elements inside the automation input frame
+        ## make the automation input frame inside the content frame resizable
+        self.content_frame.columnconfigure(0, weight=1)
+        self.content_frame.rowconfigure(1, weight=1)
+
+        ## grid the elements inside the automation input frame
         self.text_tool_btns.grid(
             row=0, column=0, padx=(12), pady=(10, 10), sticky="news"
         )
         self.textbox.grid(row=1, column=0, sticky="news", padx=(12), pady=(0, 23))
+
+        ## make the textbox inside the automation input frame resizable
+        self.automation_input_frame.columnconfigure(0, weight=1)
+        self.automation_input_frame.rowconfigure(1, weight=1)
 
     def load_automation(self, automation_path: str):
         """
@@ -136,9 +137,6 @@ class TextToolBtns(CTkFrame):
     """
     Frame for the automation insertion window with all the buttons for the textbox manipulation.
     Contains buttons for importing, undoing, redoing and saving the automation code.
-
-    Args:
-        customtkinter.CTkFrame (class): extended custom tkinter node for a ctk frame
     """
 
     def __init__(self, app, root, **kwargs):
@@ -146,7 +144,9 @@ class TextToolBtns(CTkFrame):
         Initialization of the frame for the automation insertion window with a entry for the name, textbox for the automation code and buttons to add and delete the code
 
         Args:
-            root (customtkinter.CTKFrame): the parent frame is the automation insertion window
+            app (customtkinter.CTK): the parent window of the automation insertion frame
+            root (cW.BasisFrame): the parent frame of the text tool buttons
+
         """
         super().__init__(root, fg_color="transparent", **kwargs)
 
@@ -194,6 +194,8 @@ class TextToolBtns(CTkFrame):
         )
         # TODO: add user defined path for saving the configuration files
         self.dir_path = path.join("data")
+        
+        # --- grid the elements ---
 
         # grid the buttons
         self.imp_btn.grid(row=0, column=0, padx=(0, 15))
@@ -361,21 +363,24 @@ class LoadingFrame(cW.BasisFrame):
         super().__init__(app=app, layer=0)
 
         self.loading_context = LoadingContext(app=self.app, root=self)
-        # make the loading context resizable
-        self.columnconfigure(0, weight=1)
-        self.rowconfigure(0, weight=1)
 
         self.cancel_btn = cW.DeleteButton(
             self,
             text=self.app.lang["CANCEL"],
             command=self.cancel_loading,
         )
+        
+        # --- grid the elements ---
 
         # grid the loading frame
         self.loading_context.grid(
             row=0, column=0, pady=(50, 0), padx=(50, 50), sticky="news"
         )
         self.cancel_btn.grid(row=1, column=0, pady=(20, 50), padx=(50, 50), sticky="ns")
+
+        # make the loading context resizable
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(0, weight=1)
 
     def cancel_loading(self):
         automation_ins_frame = self.app.go_back(old_frame=self)
@@ -389,12 +394,6 @@ class LoadingContext(cW.BasisFrame):
 
         # create the binding frame for the loading text and the loading bar
         self.binding_frame = CTkFrame(self)
-        # make the binding frame resizable
-        self.columnconfigure(0, weight=1)
-        self.rowconfigure(0, weight=1)
-
-        # making the content of the binding frame resizable in the x direction
-        self.binding_frame.columnconfigure(0, weight=1)
 
         # TODO wrap the text in the label if the window is too small
         self.loading_label = CTkLabel(
@@ -407,10 +406,19 @@ class LoadingContext(cW.BasisFrame):
 
         self.loading_bar.set(0)
         self.loading_bar.start()
+        
+        # --- grid the elements ---
 
         # grid the Loading Context
         self.binding_frame.grid(row=0, column=0, sticky="ew")
 
-        # grid the elements inside the binding frame
+        # make the binding frame resizable
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(0, weight=1)
+
+        ## grid the elements inside the binding frame
         self.loading_label.grid(row=0, column=0, sticky="we", padx=50, pady=(15, 5))
         self.loading_bar.grid(row=1, column=0, sticky="we", padx=50, pady=(15, 5))
+
+        # making the content of the binding frame resizable in the x direction
+        self.binding_frame.columnconfigure(0, weight=1)

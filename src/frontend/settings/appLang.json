@@ -1,75 +1,75 @@
 {
     "APP_NAME": [
-        "Home Assistant - Automationstestumgebung",
-        "Home Assistant - Automation Test Environment"
+        "Home Assistant - Automation Test Environment",
+        "Home Assistant - Automationstestumgebung"
     ],
     "BACK": [
-        "Zurück",
-        "Back"
+        "Back",
+        "Zurück"        
     ],
     "ADD": [
-        "Hinzufügen",
-        "Add"
+        "Add",
+        "Hinzufügen"
     ],
     "CONTINUE": [
-        "Fortfahren",
-        "Continue"
+        "Continue",
+        "Fortfahren"
     ],
     "IMPORT": [
-        "Hinzufügen",
-        "Import"
+        "Import",
+        "Hinzufügen"
     ],
     "DELETE": [
-        "Löschen",
-        "Delete"
+        "Delete",
+        "Löschen"
     ],
     "PROJECT": [
-        "Projekt",
-        "Project"
+        "Project",
+        "Projekt"
     ],
     "AUTO_NAME": [
-        "Automation-Name",
-        "automation name"
+        "Automation name",
+        "Automation-Name"
     ],
     "NEW_A": [
-        "neue Automation",
-        "new automation"
+        "New Automation",
+        "neue Automation"
     ],
     "ACCEPT": [
-        "Bestätigen",
-        "Accept"
+        "Accept",
+        "Bestätigen"
     ],
     "CHOOSE_FILE": [
-        "Automationskonfiguration importieren",
-        "Import an automation configuration file"
+        "Import an automation configuration file",
+        "Automationskonfiguration importieren"
     ],
     "SAVE_FILE": [
-        "Automationskonfiguration speichern",
-        "Save an automation configuration file"
+        "Save an automation configuration file",
+        "Automationskonfiguration speichern"        
     ],
     "WARNING": [
-        "Warnung",
-        "Warning"
+        "Warning",
+        "Warnung"
     ],
     "NOTHING_UNDO": [
-        "Nichts rückgängig zu machen",
-        "Nothing to undo"
+        "Nothing to undo",
+        "Nichts rückgängig zu machen"
     ],
     "NOTHING_REDO": [
-        "Nichts wiederherzustellen",
-        "Nothing to redo"
+        "Nothing to redo",
+        "Nichts wiederherzustellen"
     ],
     "AUTOMATION_OVERVIEW": [
-        "Automationsübersicht",
-        "Automation overview"
+        "Automation overview",
+        "Automationsübersicht"
     ],
     "TEST": [
-        "Test starten",
-        "Start test"
+        "Start test",
+        "Test starten"
     ],
     "MORE": [
-        "Mehr",
-        "More"
+        "More",
+        "Mehr"
     ],
     "VERSION": [
         "Version",
@@ -80,107 +80,115 @@
         "OK"
     ],
     "PROJECT_OVERVIEW": [
-        "Projektauswahl",
-        "Project overview"
+        "Project overview",
+        "Projektauswahl"
     ],
     "LOADING_AUTOMATION": [
-        "Automationskonfiguration wird validiert und geladen",
-        "Loading and validating automation configuration"
+        "Loading and validating automation configuration",
+        "Automationskonfiguration wird validiert und geladen"
     ],
     "CANCEL": [
-        "Abbrechen",
-        "Cancel"
+        "Cancel",
+        "Abbrechen"
     ],
     "INVALID_AUTOMATION": [
-        "Ungültige Automationskonfiguration",
-        "Invalid automation configuration"
+        "Invalid automation configuration",
+        "Ungültige Automationskonfiguration"
     ],
     "AUTOMATION_MODE": [
-        "Automationsmodus",
-        "Automation mode"
+        "Automation mode",
+        "Automationsmodus"
     ],
     "SINGLE": [
-        "Einzeln",
-        "Single"
+        "Single",
+        "Einzeln"
     ],
     "RESTART": [
-        "Neustart",
-        "Restart"
+        "Restart",
+        "Neustart"
     ],
     "QUEUED": [
-        "Warteschlange",
-        "Queued"
+        "Queued",
+        "Warteschlange"        
     ],
     "PARALLEL": [
         "Parallel",
         "Parallel"
     ],
-    "SCRIPT_INSTANCES":
-    [
-        "Maximale gleichzeitige Instanzen",
-        "Maximum concurrent instances"
+    "SCRIPT_INSTANCES": [
+        "Maximum concurrent instances",
+        "Maximale gleichzeitige Instanzen"
     ],
     "UNCATEGORIZED": [
-        "Nicht zugeordnet",
-        "uncategorized"
+        "uncategorized",
+        "Nicht zugeordnet"
     ],
     "OPEN": [
-        "Öffnen",
-        "Open"
+        "Open",
+        "Öffnen"
     ],
     "NEW_INTEGRATION": [
-        "Neue Integration",
-        "New integration"
+        "New integration",
+        "Neue Integration"
     ],
     "SCRIPT_PATH": [
-        "Skriptpfad",
-        "Script path"
+        "Script path",
+        "Skriptpfad"
     ],
     "FINISH": [
-        "Fertig",
-        "Finish"
+        "Finish",
+        "Fertig"
     ],
     "ADD_INFO": [
-        "Informationen hinzufügen",
-        "Add information"
+        "Add information",
+        "Informationen hinzufügen"
     ],
-    "SAVE":
-    [
-        "Speichern",
-        "Save"
+    "SAVE": [
+        "Save",
+        "Speichern"
     ],
     "DISCARD": [
-        "Verwerfen",
-        "Discard"
+        "Discard",
+        "Verwerfen"
     ],
-
     "INFO_TYPE": [
-        "Informationstyp",
-        "Info type"
+        "Info type",
+        "Informationstyp"
     ],
-
     "INFO_CONTENT": [
-        "Information",
-        "Content"
+        "Info content",
+        "Information"
     ],
     "TEST_CASE_COLLECTION": [
-        "Testfall-Sammlung",
-        "Test case collection"
+        "Test case collection",
+        "Testfall-Sammlung"        
     ],
     "TEST_RESULTS": [
-        "Testergebnisse",
-        "Test results"
+        "Test results",
+        "Testergebnisse"
     ],
-     "CREATED": [
-        "Erstellt",
-        "Created"
+    "CREATED": [
+        "Created",
+        "Erstellt"
     ],
     "ERROR_DETECT": [
-        "Fehler erkannt",
-        "Error detected"
+        "Error detected",
+        "Fehler erkannt"
     ],
-    "MAX_INSTANCES":[
-        "max. Instanzen",
-        "max. Instances"
+    "MAX_INSTANCES": [
+        "max. instances",
+        "max. Instanzen"
+    ],
+    "ENTITY_PARAMS": [
+        "Entity parameters",
+        "Parameter"
+    ],
+    "ADDITIONAL_INFORMATION": [
+        "Additional information",
+        "Zusätzliche Informationen"        
+    ],
+    "DELETE_AUTOMATION": [
+        "Delete automation",
+        "Automation löschen"
     ]
 }

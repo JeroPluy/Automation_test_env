@@ -1,6 +1,6 @@
 from os import path
 
-from backend.database.db_utils import load_automations, load_projects
+from backend.database.db_utils import load_projects
 from frontend.customWidgets import customWidgets as cW
 from frontend.utils import ICON_PATH
 
@@ -35,11 +35,10 @@ class ProjectSelectionFrame(cW.BasisFrame):
         )
 
         self.project_list_frame = ProjectListFrame(app, self, projects)
-        # make the project list frame resizable depending on the window size
-        self.columnconfigure(0, weight=1)
-        self.rowconfigure(1, weight=1)
 
         self.navigation_btn = NavBtn(root=self, value=(app.lang["OPEN"],))
+
+        # --- grid the elements ---
 
         # grid the main elements
         self.navigation_bar.grid(row=0, column=0, sticky="we")
@@ -47,6 +46,10 @@ class ProjectSelectionFrame(cW.BasisFrame):
             row=1, column=0, sticky="news", pady=(15, 15), padx=(15, 15)
         )
         self.navigation_btn.grid(row=2, column=0, sticky="news")
+
+        # make the project list frame resizable depending on the window size
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(1, weight=1)
 
 
 class ProjectListFrame(cW.BasisScrollFrame):
@@ -77,6 +80,8 @@ class ProjectListFrame(cW.BasisScrollFrame):
             projects = load_projects()
 
         for project in projects:
+            if project == "uncategorized":
+                continue
             project_frame = ProjectFrame(app, self.content, project)
             project_frame.grid(
                 row=0,
@@ -116,21 +121,24 @@ class ProjectFrame(cW.BasisFrame):
         self.project_button = ProjectButton(
             self, project_icon_white, project_icon_black
         )
-        # make the project button resizable depending on the window size
-        self.columnconfigure(0, weight=1)
-        self.rowconfigure(0, weight=1)
 
         self.project_name = cW.CTkLabel(
             self,
             text=project_name,
             wraplength=100,
         )
-        
+
+        # --- grid the elements ---
+
         # grid the elements of the project frame
         self.project_button.grid(
             row=0, column=0, sticky="news", pady=(5, 5), padx=(5, 5)
         )
         self.project_name.grid(row=1, column=0, sticky="ew", pady=(5, 5), padx=(5, 5))
+
+        # make the project button resizable depending on the window size
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(0, weight=1)
 
 
 class ProjectButton(cW.CTkButton):
@@ -218,6 +226,4 @@ class NavBtn(cW.NavigationButtons):
         if project is None:
             project = "uncategorized"
         app.selected_project = project
-        app.load_new_frame(
-            self, AutomationSelectionFrame(app)
-        )
+        app.load_new_frame(self, AutomationSelectionFrame(app))

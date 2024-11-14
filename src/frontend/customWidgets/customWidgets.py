@@ -193,6 +193,8 @@ class BasisScrollFrame(BasisFrame):
         self.content.root = self
         self.content.element_frames = []
 
+        # --- grid the elements ---
+
         # set the scroll frame as wide as the basic frame allows
         self.content.grid(row=0, column=0, sticky="news", pady=(2, 2), padx=(2, 2))
 
@@ -207,6 +209,7 @@ class BasisScrollFrame(BasisFrame):
         Args:
             row (int, optional): row position of the content. Defaults to 0.
             column (int, optional): column position of the content. Defaults to 0.
+            layer (int, optional): layer of the element frame. Defaults to None.
         """
 
         # NOTE: if the scroll frame is an XYFrame the content frame is only as wide as its content plus padding
@@ -235,15 +238,18 @@ class BasisScrollFrame(BasisFrame):
         Function to delete a content frame from the scroll frame.
 
         Args:
-            content_frame (Any): the content frame to be deleted
+            element_frame (BasisFrame): the frame to be deleted
+            row (int, optional): row position of the content. Defaults to 0.
+            column (int, optional): column position of the content. Defaults to 0.
         """
 
         self.content.element_frames.remove(element_frame)
         element_frame.destroy()
 
-        for element_frame in range(row, len(self.content.element_frames)):
-            self.content.element_frames[element_frame].grid(
-                row=element_frame,
+        # regrid the remaining content frames
+        for element_frame_num in range(row, len(self.content.element_frames)):
+            self.content.element_frames[element_frame_num].grid(
+                row=element_frame_num,
                 column=column,
                 sticky="we",
                 pady=(5, 5),
@@ -313,7 +319,6 @@ class PopupWarning(BlankToplevelWindow):
             ),
             size=(30, 30),
         )
-        self.image.pack(pady=(15, 0))
 
         # create place the warning label with the message in the toplevel window
         self.warning_label = CTkLabel(
@@ -323,9 +328,6 @@ class PopupWarning(BlankToplevelWindow):
             compound="left",
             anchor="center",
         )
-
-        self.warning_label.pack(padx=15, pady=15, fill="both", expand=True)
-        self.warning_label.rowconfigure(0, weight=1)
 
         # create and place the ok button to close the warning
         self.back_btn = NeutralButton(
@@ -337,6 +339,10 @@ class PopupWarning(BlankToplevelWindow):
             command=self.destroy,
         )
 
+        # --- pack the elements ---
+
+        self.image.pack(pady=(15, 0))
+        self.warning_label.pack(padx=15, pady=15, fill="both", expand=True)
         self.back_btn.pack(
             pady=15,
         )
@@ -358,6 +364,7 @@ class IconImage(CTkLabel):
         Initialization of the custom image icon for the application
 
         Args:
+            root (Any): root frame for the image
             light_theme_img_path (str): path to the dark image
             dark_theme_img_path (str, optional): path to the bright image. Defaults to None.
             size (Tuple[int], optional): size of the image. Defaults to (30, 30).
@@ -414,7 +421,7 @@ class AcceptButton(CTkButton):
             corner_radius (int, optional): corner radius of the button. Defaults to None so its taken from the theme.
             command (Callable[[], Any] | None, optional): command of the button. Defaults to None.
             kind (int, optional): kind of the button.
-            Defaults to None = check icon, 0 = import icon, 1 = save icon, 2 = add icon, -1 = no icon.
+                                  Defaults to None = check icon, 0 = import icon, 1 = save icon, 2 = add icon, -1 = no icon.
         """
 
         image_path = path.join(path.dirname(path.realpath(__file__)), "icons")
@@ -551,7 +558,7 @@ class NeutralButton(CTkButton):
             corner_radius (int, optional): corner radius of the button. Defaults to None so its taken from the theme.
             command (Callable[[], Any] | None, optional): command of the button. Defaults to None.
             kind (int, optional): kind of the button.
-            Defaults to None = no icon, 0 = white undo icon, 1 = white redoicon, 2 = white info icon.
+                                  Defaults to None = no icon, 0 = white undo icon, 1 = white redoicon, 2 = white info icon.
         """
 
         # select the icon for the button based on the kind
@@ -751,6 +758,7 @@ class FramedOptionMenu(BasisFrame):
             values (list): values of the option menu
             default_variable (str): default value of the option menu and the variable
             command (Callable[[str], Any]): command of the option menu
+            state (str, optional): state of the option menu. Defaults to "normal".
         """
         self.app = root.app
         if self.app.settings["MODE"] == "light":
@@ -761,12 +769,16 @@ class FramedOptionMenu(BasisFrame):
         super().__init__(
             app=self.app, root=root, layer=1, border_color=border_color, border_width=1
         )
-        self.rowconfigure(0, weight=1)
-        self.columnconfigure(0, weight=1)
 
         self.variable = StringVar(value=default_value)
         # TODO gray out the option menu if the state is disabled
         option_menu = CTkOptionMenu(
             self, values=values, variable=self.variable, command=command, state=state
         )
+
+        # --- grid the elements ---
+
         option_menu.grid(row=0, column=0, sticky="ew", padx=(2), pady=(2))
+
+        self.rowconfigure(0, weight=1)
+        self.columnconfigure(0, weight=1)

@@ -28,9 +28,7 @@ class AutomationSelectionFrame(cW.BasisFrame):
             navigation_text = str(
                 app.selected_project + "/" + app.lang["AUTOMATION_OVERVIEW"]
             )
-            automations = load_automations(
-                    project=self.app.selected_project
-            )
+            automations = load_automations(project=self.app.selected_project)
         else:
             navigation_text = str(app.lang["AUTOMATION_OVERVIEW"])
 
@@ -41,9 +39,6 @@ class AutomationSelectionFrame(cW.BasisFrame):
         self.automation_list_frame = AutomationSelectionList(
             selection_frame=self, app=app, automations=automations
         )
-        # make the selection frame resizable depending on the window size
-        self.columnconfigure(0, weight=1)
-        self.rowconfigure(1, weight=1)
 
         self.add_automation_btn = cW.AcceptButton(
             self, text=app.lang["NEW_A"], kind=2, command=self.new_automation, width=260
@@ -61,6 +56,8 @@ class AutomationSelectionFrame(cW.BasisFrame):
                 self, objects=1, values=(app.lang["TEST"],), pos="center"
             )
 
+        # --- grid the elements ---
+
         # grid the main elements
         self.navigation_bar.grid(row=0, column=0, sticky="we")
         self.automation_list_frame.grid(
@@ -68,6 +65,10 @@ class AutomationSelectionFrame(cW.BasisFrame):
         )
         self.add_automation_btn.grid(row=2, column=0, pady=(0, 20))
         self.nav_btns.grid(row=3, column=0, sticky="news")
+
+        # make the selection frame resizable depending on the window size
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(1, weight=1)
 
     def new_automation(self):
         """
@@ -93,6 +94,11 @@ class AutomationSelectionList(cW.BasisScrollFrame):
     def __init__(self, app, selection_frame, automations: list):
         """
         Initialization of the AutomationSelectionList frame
+
+        Args:
+            app (customtkinter.CTK): the parent window of the automation selection frame
+            selection_frame (customtkinter.CTK): the parent frame of the automation selection list
+            automations (list): the list of automations to be displayed
         """
 
         # Define the italic font
@@ -125,12 +131,12 @@ class AutomationSelectionList(cW.BasisScrollFrame):
                 value=a_id,
                 command=self.radiobtn_event,
             )
-            # make the automation name expandable
-            self.element_frame.columnconfigure(0, weight=1)
 
             automation_version = CTkLabel(
                 self.element_frame,
-                text=selection_frame.master.lang["VERSION"] + " " + a_version,
+                text=selection_frame.master.lang["VERSION"]
+                + " "
+                + a_version,  # TODO apply language settings to the version text if "unknown"
                 font=italic_font,
                 text_color="#bdbdbd",
             )
@@ -140,6 +146,8 @@ class AutomationSelectionList(cW.BasisScrollFrame):
                 automation_id=a_id,
                 text=selection_frame.master.lang["MORE"],
             )
+
+            # --- grid the elements ---
 
             # grid the elements inside the selection frame
             automation_element.grid(
@@ -164,6 +172,9 @@ class AutomationSelectionList(cW.BasisScrollFrame):
                 pady=(10, 10),
                 padx=(5, 15),
             )
+
+            # make the automation name expandable
+            self.element_frame.columnconfigure(0, weight=1)
 
     def get(self):
         """
@@ -201,9 +212,8 @@ class MoreBtns(cW.NeutralButton):
         self.automation_id = automation_id
 
     def open_automation_infos(self):
-        
         automation_name = db_utils.get_automation_name(self.automation_id)
-        
+
         self.master.app.load_new_frame(
             prev_frame=self.master,
             new_frame=aD.AutomationDetailsFrame(

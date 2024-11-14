@@ -39,17 +39,11 @@ class AutomationEntityFrame(cW.BasisFrame):
         )
 
         self.content_frame = cW.BasisFrame(app, self, layer=1)
-        # make the content frame resizable depending on the window size
-        self.columnconfigure(0, weight=1)
-        self.rowconfigure(1, weight=1)
 
         # entity list frame
         self.entity_list_frame = EntityListFrame(
             app, self.content_frame, app.new_automation.config["entities"]
         )
-        # make the entity list frame inside the content frame resizable
-        self.content_frame.columnconfigure(0, weight=1)
-        self.content_frame.rowconfigure(0, weight=1)
 
         # automation mode frame
         self.a_mode_frame = cW.BasisFrame(app, self.content_frame, layer=2)
@@ -57,8 +51,6 @@ class AutomationEntityFrame(cW.BasisFrame):
         self.a_mode_label = CTkLabel(
             self.a_mode_frame, text=app.lang["AUTOMATION_MODE"]
         )
-        # make the automation mode label inside a_mode_frame resizable
-        self.a_mode_frame.columnconfigure(0, weight=1)
 
         # get the automation mode from the config
         autom_mode = app.new_automation.config["infos"].autom_mode
@@ -88,8 +80,6 @@ class AutomationEntityFrame(cW.BasisFrame):
         self.script_instance_label = CTkLabel(
             self.script_instance_frame, text=app.lang["SCRIPT_INSTANCES"]
         )
-        # make the script instance label inside script_instance_frame resizable
-        self.script_instance_frame.columnconfigure(0, weight=1)
 
         self.script_instances = StringVar(
             value=app.new_automation.config["infos"].max_instances
@@ -106,6 +96,8 @@ class AutomationEntityFrame(cW.BasisFrame):
             root=self, values=(app.lang["BACK"], app.lang["CONTINUE"])
         )
 
+        # --- grid the elements ---
+
         # grid the main elements
         self.nav_bar.grid(row=0, column=0, sticky="ew")
         self.content_frame.grid(
@@ -113,7 +105,11 @@ class AutomationEntityFrame(cW.BasisFrame):
         )
         self.navigation_buttons.grid(row=2, column=0, sticky="ew")
 
-        # grid the elements inside the content frame
+        # make the content frame resizable depending on the window size
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(1, weight=1)
+
+        ## grid the elements inside the content frame
         self.entity_list_frame.grid(
             row=0, column=0, sticky="news", padx=(10), pady=(10)
         )
@@ -124,19 +120,29 @@ class AutomationEntityFrame(cW.BasisFrame):
             row=2, column=0, sticky="ew", padx=(10), pady=(0, 10)
         )
 
-        # grid the elements inside the automation mode frame
+        ## make the entity list frame inside the content frame resizable
+        self.content_frame.columnconfigure(0, weight=1)
+        self.content_frame.rowconfigure(0, weight=1)
+
+        ### grid the elements inside the automation mode frame
         self.a_mode_label.grid(row=0, column=0, sticky="w", pady=(5, 5), padx=(10, 0))
         self.a_mode_dropdown.grid(
             row=0, column=1, sticky="e", pady=(5, 5), padx=(0, 10)
         )
 
-        # grid the elements inside the script instance frame
+        ### make the automation mode label inside a_mode_frame resizable
+        self.a_mode_frame.columnconfigure(0, weight=1)
+
+        ### grid the elements inside the script instance frame
         self.script_instance_label.grid(
             row=0, column=0, sticky="w", pady=(5, 5), padx=(10, 0)
         )
         self.script_instance_entry.grid(
             row=0, column=1, sticky="e", pady=(5, 5), padx=(0, 10)
         )
+
+        ### make the script instance label inside script_instance_frame resizable
+        self.script_instance_frame.columnconfigure(0, weight=1)
 
 
 class NavBtns(cW.NavigationButtons):
