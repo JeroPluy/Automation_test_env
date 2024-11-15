@@ -1,12 +1,10 @@
 from customtkinter import CTkFont, CTkLabel, CTkRadioButton, StringVar
 
+from backend.database import db_utils
+from backend.database.db_utils import load_automations
+from frontend.automation_details import automation_details_main as aD
 from frontend.automation_insertion import AutomationCreationFrame
 from frontend.customWidgets import customWidgets as cW
-from frontend.automation_details import automation_details_main as aD
-
-from backend.database.db_utils import load_automations
-
-from backend.database import db_utils
 
 
 class AutomationSelectionFrame(cW.BasisFrame):
@@ -97,7 +95,7 @@ class AutomationSelectionList(cW.BasisScrollFrame):
 
         Args:
             app (customtkinter.CTK): the parent window of the automation selection frame
-            selection_frame (customtkinter.CTK): the parent frame of the automation selection list
+            selection_frame (cW.BasisFrame): the parent frame of the automation selection list
             automations (list): the list of automations to be displayed
         """
 
@@ -196,14 +194,19 @@ class AutomationSelectionList(cW.BasisScrollFrame):
 class MoreBtns(cW.NeutralButton):
     """
     A button class to open the automation infos
-
-    Args:
-        cW.NeutralButton: the basic button class for blue buttons for more information or other actions
     """
 
-    def __init__(self, master, automation_id, text):
+    def __init__(self, root, automation_id, text):
+        """
+        Initialization of the MoreBtns button
+        
+        Args:
+            root (cW.BasisFrame): the parent frame of the button
+            automation_id (int): the id of the automation
+            text (str): the text of the button
+        """
         super().__init__(
-            master,
+            root,
             width=50,
             text=text,
             kind=2,
@@ -212,6 +215,11 @@ class MoreBtns(cW.NeutralButton):
         self.automation_id = automation_id
 
     def open_automation_infos(self):
+        """
+        Function to handle the More button press and open the automation infos
+        for the selected automation
+        """
+        
         automation_name = db_utils.get_automation_name(self.automation_id)
 
         self.master.app.load_new_frame(
@@ -230,9 +238,18 @@ class NavBtns(cW.NavigationButtons):
     The child class of NavigationButtons to overwrite the functions
     """
 
-    def __init__(self, master, pos, objects: int = 2, values: cW.Tuple[str] = None):
+    def __init__(self, root, pos, objects: int = 2, values: cW.Tuple[str] = None):
+        """
+        Initialization of the NavBtns class for the AutomationSelection frame
+        
+        Args:
+            root (cW.BasisFrame): the parent frame of the navigation buttons
+            pos (str): the position of the navigation buttons
+            objects (int): the number of buttons to be displayed
+            values (cW.Tuple[str]): the text values of the buttons
+        """
         self.objects = objects
-        super().__init__(master, objects, values, pos)
+        super().__init__(root, objects, values, pos)
 
         self.btn_1.configure(state="disabled")
 
