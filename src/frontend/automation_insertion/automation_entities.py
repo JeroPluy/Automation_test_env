@@ -166,8 +166,28 @@ class NavBtns(cW.NavigationButtons):
 
     def btn_2_func(self):
         """
-        Function to handle the continue button
+        Function to handle the continue button by saving the automation and loading the script frame
         """
+        
+        # save the automation instance from the entry field
+        self.root.app.new_automation.config["infos"].max_instances = int(
+            self.root.script_instances.get()
+        )
+        
+        # save the automation mode from the dropdown
+        autom_value = self.root.a_mode_dropdown.get()
+        if autom_value == self.root.app.lang["SINGLE"]:
+            autom_mode = 0 
+        elif autom_value == self.root.app.lang["RESTART"]:
+            autom_mode = 1
+        elif autom_value == self.root.app.lang["QUEUED"]:
+            autom_mode = 2
+        elif autom_value == self.root.app.lang["PARALLEL"]:
+            autom_mode = 3
+        
+        self.root.app.new_automation.config["infos"].autom_mode = autom_mode
+        
+        
         # TODO apply the integration changes to the script creation and the entity structure
 
         self.root.app.new_automation.a_id, self.root.app.new_automation.version = (

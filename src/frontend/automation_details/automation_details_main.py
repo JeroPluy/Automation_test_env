@@ -24,9 +24,14 @@ class AutomationDetailsFrame(cW.BasisFrame):
         """
 
         super().__init__(app=app, layer=0)
+        
+        if app.selected_project is None:
+            nav_path = automation_name
+        else:
+            nav_path = str(app.selected_project) + "/" + automation_name
 
         self.nav_bar = cW.NavigationBar(
-            self, mode=app.settings["MODE"], nav_path=automation_name
+            self, mode=app.settings["MODE"], nav_path=nav_path
         )
 
         self.main_frame = AutomationDetailsContent(
@@ -345,6 +350,30 @@ class InfoLabels(cW.BasisFrame):
 
         self.max_inst_frame.columnconfigure(1, weight=1)
 
+    def get_changable_infos(self) -> dict:
+        """
+        Function to get the changeable information from the info labels
+
+        Returns:
+            dict: the changeable information as a dictionary
+        """
+        
+        autom_value = self.a_mode_dropdown.get()
+        
+        if autom_value == self.app.lang["SINGLE"]:
+            autom_mode = 0 
+        elif autom_value == self.app.lang["RESTART"]:
+            autom_mode = 1
+        elif autom_value == self.app.lang["QUEUED"]:
+            autom_mode = 2
+        elif autom_value == self.app.lang["PARALLEL"]:
+            autom_mode = 3
+
+        return {
+            "autom_mode": autom_mode,
+            "max_instances": self.max_instances_value.get(),
+            "error": None, 
+        }
 
 class EntityParamsFrame(cW.BasisFrame):
     """
@@ -485,6 +514,9 @@ class NavBtns(cW.NavigationButtons):
         Button 2 function to save the changes to the automation details in the database
         and go back to the automation selection overview
         """
+        
+        automation_infos = self.root.main_frame.info_labels.get_changable_infos()
+        db_utils.update_automation_data(self.a_id, automation_infos)
 
         entity_config = self.root.main_frame.entity_params.get_entity_params()
         # TODO change the integration and the script depending on the new entity config

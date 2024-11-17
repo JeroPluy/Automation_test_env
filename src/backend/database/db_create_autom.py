@@ -45,6 +45,8 @@ def _create_automation_in_db(automation_info: Automation):
             cur.execute(GET_VERSION, (str(autom_id),))
             answer = cur.fetchone()
             if answer is not None:
+                if isinstance(answer[0], str):
+                    continue 
                 curr_version = int(answer[0])
                 if curr_version >= version:
                     version = curr_version

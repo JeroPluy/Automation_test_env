@@ -782,3 +782,6 @@ class FramedOptionMenu(BasisFrame):
 
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
+        
+    def get(self):
+        return self.variable.get()

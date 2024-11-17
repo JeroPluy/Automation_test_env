@@ -41,6 +41,7 @@ class AutomationCreationFrame(cW.BasisFrame):
         super().__init__(app=app, layer=0)
 
         app.new_automation = SimpleNamespace(config=None, a_id=None)
+        
         if app.selected_project is None:
             nav_path = str(app.lang["NEW_A"])
         else:
