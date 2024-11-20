@@ -735,6 +735,9 @@ class NavigationBar(CTkLabel):
             anchor="center",
             wraplength=wraplength,
         )
+        
+    def get_nav_path(self):
+        return self.cget("text")
 
 
 class FramedOptionMenu(BasisFrame):

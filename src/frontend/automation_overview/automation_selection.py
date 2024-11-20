@@ -44,14 +44,15 @@ class AutomationSelectionFrame(cW.BasisFrame):
 
         if app.selected_project is not None:
             self.nav_btns = NavBtns(
-                self,
+                app=app,
+                root=self,
                 objects=2,
                 pos="right",
                 values=(app.lang["TEST"], app.lang["BACK"]),
             )
         else:
             self.nav_btns = NavBtns(
-                self, objects=1, values=(app.lang["TEST"],), pos="center"
+                app=app, root=self, objects=1, values=(app.lang["TEST"],), pos="center"
             )
 
         # --- grid the elements ---
@@ -199,7 +200,7 @@ class MoreBtns(cW.NeutralButton):
     def __init__(self, root, automation_id, text):
         """
         Initialization of the MoreBtns button
-        
+
         Args:
             root (cW.BasisFrame): the parent frame of the button
             automation_id (int): the id of the automation
@@ -219,7 +220,7 @@ class MoreBtns(cW.NeutralButton):
         Function to handle the More button press and open the automation infos
         for the selected automation
         """
-        
+
         automation_name = db_utils.get_automation_name(self.automation_id)
 
         self.master.app.load_new_frame(
@@ -229,7 +230,7 @@ class MoreBtns(cW.NeutralButton):
                 a_id=self.automation_id,
                 automation_name=automation_name,
             ),
-            returnable=True,
+            return_btn=True,
         )
 
 
@@ -238,17 +239,21 @@ class NavBtns(cW.NavigationButtons):
     The child class of NavigationButtons to overwrite the functions
     """
 
-    def __init__(self, root, pos, objects: int = 2, values: cW.Tuple[str] = None):
+    def __init__(self, app, root, pos, objects: int = 2, values: cW.Tuple[str] = None):
         """
         Initialization of the NavBtns class for the AutomationSelection frame
-        
+
         Args:
+            app (test_environment_app.AppWindow): the application window
             root (cW.BasisFrame): the parent frame of the navigation buttons
             pos (str): the position of the navigation buttons
             objects (int): the number of buttons to be displayed
             values (cW.Tuple[str]): the text values of the buttons
         """
         self.objects = objects
+
+        self.app = app
+
         super().__init__(root, objects, values, pos)
 
         self.btn_1.configure(state="disabled")

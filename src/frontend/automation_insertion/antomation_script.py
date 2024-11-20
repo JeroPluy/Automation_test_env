@@ -152,7 +152,7 @@ class NavBtns(cW.NavigationButtons):
                 a_id=self.root.app.new_automation.a_id,
                 automation_name=automation.a_name,
             ),
-            returnable=True,
+            return_btn=True,
         )
 
     def btn_2_func(self):
@@ -168,5 +168,5 @@ class NavBtns(cW.NavigationButtons):
                 automation_name=automation.a_name,
                 a_id=self.root.app.new_automation.a_id,
             ),
-            returnable=False,
+            return_btn=False,
         )

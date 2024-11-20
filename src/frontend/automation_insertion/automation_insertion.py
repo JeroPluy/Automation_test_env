@@ -348,7 +348,7 @@ class CustomNavButtons(cW.NavigationButtons):
         self.master.app.load_new_frame(
             prev_frame=self.master,
             new_frame=LoadingFrame(self.master.app),
-            returnable=False,
+            return_btn=True,
         )
 
         # Check if the thread is still running

@@ -60,16 +60,16 @@ class AppWindow(CTk):
         self.start_frame = StartFrame(self)
         
         # display the start frame with the logo
-        self.load_new_frame(None, self.start_frame, returnable=False)
+        self.load_new_frame(None, self.start_frame, return_btn=False)
 
-    def load_new_frame(self, prev_frame, new_frame, returnable=True):
+    def load_new_frame(self, prev_frame, new_frame, return_btn=True):
         """
         Function to load a new frame into the main window
 
         Args:
             prev_frame (cW.BasisFrame): the previous frame before the new frame
             new_frame (cW.BasisFrame): the new frame to be displayed
-            returnable (bool): determines if the frame can be returned to
+            return_btn (bool): determines if the frame has a return button to go back to the previous frame
             
         Returns:
             cW.BasisFrame: the new frame that is displayed
@@ -77,7 +77,7 @@ class AppWindow(CTk):
         if prev_frame is not None:
             prev_frame.destroy()
             
-        if returnable:
+        if return_btn:
             self.frame_stack.append(new_frame.__class__)
             
         # display the new frame

@@ -202,5 +202,5 @@ class NavBtns(cW.NavigationButtons):
                 self.root.app,
                 automation_name=automation.a_name,
             ),
-            returnable=False,
+            return_btn=False,
         )

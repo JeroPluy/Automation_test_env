@@ -277,21 +277,64 @@ def get_automation_data(automation_id: int) -> Automation:
     return automation
 
 
-def get_automation_entities(automation_id: int) -> list:
+def update_automation_data(automation_id: int, automation_data: dict):
+    """
+    Update the data of the automation in the automation table in the database
+
+    Args:
+        automation_id: int - the id of the automation
+        automation_data: dict - the data of the automation
+    """
+
+    UPDATE_AUTOMATION = "UPDATE automation SET autom_mode = ?, max_instances = ?, error = ? WHERE a_id = ?"
+
+    with sqlite.connect(DATABASE) as con:
+        cur = con.cursor()
+        cur.execute(
+            UPDATE_AUTOMATION,
+            (
+                automation_data["autom_mode"],
+                automation_data["max_instances"],
+                automation_data["error"],
+                automation_id,
+            ),
+        )
+        con.commit()
+
+
+def get_automation_entities(automation_id: int, only_inputs: bool = False) -> list:
     """
     Get the entities of the automation
 
     Args:
         automation_id: int - the id of the automation
+        only_inputs: bool - if True, only the input entities are returned
 
     Returns:
         list - the entities of the automation (Entity objects)
     """
-    GET_ENTITIES = "SELECT integration.i_name, entity.e_name, ae.p_role, ae.parent, ae.position, ae.exp_val FROM automation_entity AS ae JOIN entity ON entity.e_id = ae.e_id JOIN integration ON integration.i_id = entity.i_id WHERE ae.a_id = ?"
+    GET_ENTITIES = """SELECT integration.i_name, entity.e_name, ae.p_role, ae.parent, ae.position, ae.exp_val, entity.e_id
+                      FROM automation_entity AS ae 
+                      JOIN entity ON entity.e_id = ae.e_id 
+                      JOIN integration ON integration.i_id = entity.i_id 
+                      WHERE ae.a_id = ?
+                      ORDER BY ae.p_role, ae.position
+                   """
+
+    GET_ONLY_INPUTS = """SELECT integration.i_name, entity.e_name, ae.p_role, ae.parent, ae.position, ae.exp_val, entity.e_id
+                         FROM automation_entity AS ae 
+                         JOIN entity ON entity.e_id = ae.e_id 
+                         JOIN integration ON integration.i_id = entity.i_id 
+                         WHERE ae.a_id = ? AND ae.p_role != 3
+                         ORDER BY ae.p_role, ae.position
+                      """
 
     with sqlite.connect(DATABASE) as con:
         cur = con.cursor()
-        cur.execute(GET_ENTITIES, (automation_id,))
+        if only_inputs:
+            cur.execute(GET_ONLY_INPUTS, (automation_id,))
+        else:
+            cur.execute(GET_ENTITIES, (automation_id,))
         result = cur.fetchall()
 
     if result is not None:
@@ -305,6 +348,7 @@ def get_automation_entities(automation_id: int) -> list:
                     parent=entity[3],
                     position=entity[4],
                     expected_value=entity[5],
+                    entity_id=entity[6],
                 )
             )
     return entities

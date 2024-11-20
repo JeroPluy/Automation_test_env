@@ -102,7 +102,7 @@ class Nav_btn(cW.NavigationButtons):
                 a_id=self.master.app.new_automation.a_id,
                 automation_name=automation.a_name,
             ),
-            returnable=True,
+            return_btn=True,
         )
 
         # reset the new automation object

@@ -1,4 +1,4 @@
-""" 
+"""
 This module contains the classes Automation and Entity, which are used to represent an automation and an entity, respectively.
 """
 
@@ -9,7 +9,7 @@ from .env_const import SINGLE
 class Automation:
     """
     Class to represent an automation.
-    
+
     a_name: str = None
     autom_mode: int = None
     max_instances: int = None
@@ -33,7 +33,7 @@ class Automation:
         automation_mode=SINGLE,
         max_instances=10,
         created: datetime = None,
-        error: str = None
+        error: str = None,
     ):
         """
         Create an automation from the automation part.
@@ -57,7 +57,7 @@ class Automation:
         self.created = created
         self.error = error
 
-    def serialize(self)->dict:
+    def serialize(self) -> dict:
         """
         Serialize the automation into a dictionary.
 
@@ -72,17 +72,19 @@ class Automation:
             "project": self.project,
         }
 
+
 class Entity:
     """
     Class to represent an entity.
     """
 
-    parameter_role: int = None 
+    parameter_role: int = None
     position: int = None
     integration: str = None
     entity_name: str | list = None
     parent: int = None
     expected_value: dict = None
+    entity_id: int = None
 
     def __init__(
         self,
@@ -92,6 +94,7 @@ class Entity:
         entity_name,
         parent=None,
         expected_value=None,
+        entity_id=None,
     ):
         """
         Create an entity from the automation part.
@@ -102,16 +105,17 @@ class Entity:
             integration (str): The integration of the entity
             entity_name (str): The name of the entity
             expected_value (str | dict): The possible value of the entity
+            entity_id (int): The id of the entity
 
         Returns:
             dict: The entity as a dictionary
         """
 
-        
+        self.entity_id = entity_id
         self.parameter_role = param_role
         self.position = position
         self.integration = integration
-        if '.' in entity_name:
+        if "." in entity_name:
             self.entity_name = entity_name
         else:
             self.entity_name = integration + "." + entity_name
@@ -124,7 +128,7 @@ class Entity:
             else:
                 self.expected_value = expected_value.copy()
 
-    def serialize(self)->dict:
+    def serialize(self) -> dict:
         """
         Serialize the entity into a dictionary
 
