@@ -190,5 +190,110 @@
     "DELETE_AUTOMATION": [
         "Delete automation",
         "Automation löschen"
+    ],
+    "IMPORT_TC":
+    [
+        "Import test case",
+        "Testfall importieren"
+    ],
+    "REQUIREMENT":
+    [
+        "Requirement",
+        "Anforderung"
+    ],
+    "PRIORITY":
+    [
+        "Priority",
+        "Priorität"
+    ],
+    "CREATE":
+    [
+        "Create",
+        "Erstellen"
+    ],
+    "TRIGGER":
+    [
+        "Trigger",
+        "Auslöser"
+    ],
+    "CONDITION":
+    [
+        "Condition",
+        "Bedingung"
+    ],
+    "ACTION":
+    [
+        "Action",
+        "Aktion"
+    ],
+    "MULTIPLE_VALS":
+    [
+        "Multiple values",
+        "Mehrere Werte"
+    ],
+    "ALL_POS":
+    [
+        "All possible values",
+        "Alle möglichen Werte"
+    ],
+    "START_VAL":
+    [
+        "Start value",
+        "Startwert"
+    ],
+    "END_VAL":
+    [
+        "End value",
+        "Endwert"
+    ],
+    "STEP_SIZE":
+    [
+        "Step size",
+        "Schrittweite"
+    ],
+    "DAY":
+    [
+        "day",
+        "Tag"
+    ],
+    "HOUR":
+    [
+        "hour",
+        "Stunde"
+    ],
+    "MINUTE":
+    [
+        "minute",
+        "Minute"
+    ],
+    "SECOND":
+    [
+        "second",
+        "Sekunde"
+    ],
+    "INVALID_DATETIME_FORMAT":
+    [
+        "Invalid datetime format. Please use one of the following formats: dd.mm.YYYY, dd.mm.YYYY HH:MM:SS, HH:MM:SS",
+        "Ungültiges Datumsformat. Bitte verwenden Sie eines der folgenden Formate: dd.mm.YYYY, dd.mm.YYYY HH:MM:SS, HH:MM:SS"
+    ],
+    "INVALID_INT_FORMAT":
+    [
+        "Invalid integer format. Please use a valid integer.",
+        "Ungültiges Integer-Format. Bitte verwenden Sie eine gültige Ganzzahl."
+    ],
+    "INVALID_FLOAT_FORMAT":
+    [
+        "Invalid float format. Please use a valid float. (Decimal separator is '.')",
+        "Ungültiges Fließkommazahlen-Format. Bitte verwenden Sie eine gültige Fließkommazahl. (Trennzeichen ist ein '.')"
+    ],
+    "INVALID_DT_STEP_SIZE":
+    [
+        "Invalid step size format. Please use one of the following formats: X days, X hours, X minutes, X seconds",
+        "Ungültiges Schrittweitenformat. Bitte verwenden Sie eines der folgenden Formate: X Tage, X Stunden, X Minuten, X Sekunden"
+    ],
+    "INVALID_STEP_SIZE":
+    [
+        "Invalid step size format. Please use a valid number bigger than 0.",
+        "Ungültiges Schrittweitenformat. Bitte verwenden Sie eine gültige Zahl größer als 0."
     ]
 }

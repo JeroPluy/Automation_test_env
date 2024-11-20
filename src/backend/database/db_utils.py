@@ -4,6 +4,21 @@ import sqlite3 as sqlite
 
 from backend.utils.env_helper_classes import Automation, Entity
 
+# possible values for the entities which need further specification for testing
+specification_p_values = [
+    "string",
+    "int",
+    "float",
+    "bool",
+    "dict",
+    "list[string]",
+    "tuple[float, float]",
+    "tuple[int, int, int]",
+    "tuple[int, int, int, int]",
+    "tuple[int, int, int, int, int]",
+    "datetime",
+]
+
 
 def get_automations_with_same_name(name: str) -> list:
     """
@@ -442,3 +457,47 @@ def update_additional_infos(automation_id: int, add_infos: list):
         # Execute the insert statement with multiple values
         cur.executemany(ADD_INFOS, new_info_tuples)
         con.commit()
+
+
+def get_entity_possible_values(entity_id: int) -> dict:
+    """
+    Get the possible values of an entity
+
+    Args:
+        entity_id: int - the id of the entity
+    """
+    # TODO remove property = 'main' filter from the query
+    GET_POSSIBLE_INTEGRATION_VALUES = """SELECT pv.p_value, pv.property 
+                             FROM entity AS e 
+                             JOIN integration_values AS iv ON e.i_id = iv.i_id
+                             JOIN possible_values AS pv ON iv.pv_id = pv.pv_id
+                             WHERE e.e_id = ? AND pv.property = 'main'"""
+
+    # add the manual created possible values of the entity itself
+    GET_POSSIBLE_AUTOMATION_ENTITY_VALUES = """SELECT tci.test_value 
+                                               FROM test_case_input AS tci 
+                                               WHERE tci.e_id = ?"""
+
+    with sqlite.connect(DATABASE) as con:
+        cur = con.cursor()
+        cur.execute(GET_POSSIBLE_INTEGRATION_VALUES, (entity_id,))
+
+        integration_results = cur.fetchall()
+
+        cur.execute(GET_POSSIBLE_AUTOMATION_ENTITY_VALUES, (entity_id,))
+
+        autom_entity_results = cur.fetchall()
+
+    possible_values = {}
+
+    # add the possible values of the entity from the integrations
+    for value_pair in integration_results:
+        possible_values[value_pair[0]] = value_pair[1]
+
+    # add the possible values of the entity from the automation entities
+    # if they are not already in the possible values
+    for value in autom_entity_results:
+        if value[0] not in possible_values:
+            possible_values[value[0]] = "manual input"
+
+    return possible_values

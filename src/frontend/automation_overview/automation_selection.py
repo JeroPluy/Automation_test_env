@@ -4,6 +4,7 @@ from backend.database import db_utils
 from backend.database.db_utils import load_automations
 from frontend.automation_details import automation_details_main as aD
 from frontend.automation_insertion import AutomationCreationFrame
+from frontend.automation_test_case_creation import CaseCreationFrame
 from frontend.customWidgets import customWidgets as cW
 
 
@@ -262,8 +263,17 @@ class NavBtns(cW.NavigationButtons):
         """
         Function to handle the test button press
         """
-        # TODO open the test case selection window
-        print(self.master.automation_list_frame.selected_automation.get())
+
+        self.app.selected_automation = (
+            self.master.automation_list_frame.selected_automation.get()
+        )
+        self.app.load_new_frame(
+            prev_frame=self.master,
+            new_frame=CaseCreationFrame(
+                app=self.app,
+            ),
+            return_btn=True,
+        )
 
     def btn_2_func(self):
         """

@@ -12,6 +12,7 @@ from customtkinter import (
     CTkScrollableFrame,
     CTkToplevel,
     Variable,
+    CTkComboBox,
 )
 from PIL import Image
 
@@ -785,6 +786,60 @@ class FramedOptionMenu(BasisFrame):
 
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
-        
+
     def get(self):
         return self.variable.get()
+
+
+class FramendComboBox(CTkComboBox):
+    """
+    Custom ComboBox for the application with a frame around the widget for better visibility.
+    """
+
+    def __init__(
+        self,
+        root,
+        values: list,
+        default_value: str,
+        command: Callable[[str], Any],
+        state: str = "normal",
+    ):
+        """
+        Initialization of the custom ComboBox for the application with a frame around the widget for better visibility.
+
+        Args:
+            root (BasisFrame): root frame for the ComboBox
+            values (list): values of the ComboBox
+            default_value (str): default value of the ComboBox
+            command (Callable[[str], Any]): command of the ComboBox
+            state (str, optional): state of the ComboBox. Defaults to "normal".
+        """
+
+        self.app = root.app
+
+        self.variable = StringVar(value=default_value)
+
+        # TODO gray out the option menu if the state is disabled
+
+        if self.app.settings["MODE"] == "light":
+            border_color = "#989898"
+        elif self.app.settings["MODE"] == "dark":
+            border_color = "#565B5E"
+
+        super().__init__(
+            master=root,
+            border_width=1,
+            border_color=border_color,
+            values=values,
+            variable=self.variable,
+            command=command,
+            state=state,
+        )
+        
+        self.set(default_value)
+    
+    def get(self):
+        return self.variable.get()
+    
+    def set(self, value: str):
+        self.variable.set(value)
