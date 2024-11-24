@@ -146,10 +146,21 @@ def get_entities(automation_id: int = None, automation_name: str = None) -> list
         list - the entities of the automation
     """
     if automation_id is not None:
-        SELECT_ENTITIES = "SELECT ae.p_role, ae.parent, ae.position, entity.e_name, ae.exp_val FROM automation_entity AS ae JOIN entity ON entity.e_id == ae.e_id WHERE a_id = ?"
+        SELECT_ENTITIES = """
+            SELECT ae.p_role, ae.parent, ae.position, entity.e_name, ae.exp_val 
+            FROM automation_entity AS ae 
+            JOIN entity ON entity.e_id == ae.e_id 
+            WHERE a_id = ?
+            """
         search_param = (automation_id,)
     else:
-        SELECT_ENTITIES = "SELECT ae.p_role, ae.parent, ae.position, entity.e_name, ae.exp_val FROM automation_entity AS ae JOIN automation ON automation.a_id = ae.a_id JOIN entity ON entity.e_id = ae.e_id WHERE automation.a_name = ?"
+        SELECT_ENTITIES = """
+            SELECT ae.p_role, ae.parent, ae.position, entity.e_name, ae.exp_val 
+            FROM automation_entity AS ae 
+            JOIN automation ON automation.a_id = ae.a_id 
+            JOIN entity ON entity.e_id = ae.e_id 
+            WHERE automation.a_name = ?
+            """
         search_param = (automation_name,)
 
     with sqlite.connect(DATABASE) as con:
@@ -167,9 +178,11 @@ def load_projects() -> list:
     Returns:
         list - the projects
     """
-    SELECT_PROJECTS = (
-        "SELECT DISTINCT info FROM additional_information WHERE info_type = 'project'"
-    )
+    SELECT_PROJECTS = """
+        SELECT DISTINCT info 
+        FROM additional_information 
+        WHERE info_type = 'project'
+        """
 
     with sqlite.connect(DATABASE) as con:
         cur = con.cursor()
@@ -193,7 +206,7 @@ def load_automations(project: str = None) -> list:
         AND aI.info_type = 'project'
         AND aI2.info_type = 'version'
         ORDER BY automation.created DESC
-    """
+        """
 
     with sqlite.connect(DATABASE) as con:
         cur = con.cursor()
@@ -233,7 +246,11 @@ def get_version(automation_id: int) -> int:
     Returns:
         int - the version of the automation
     """
-    GET_VERSION = "SELECT info FROM additional_information WHERE a_id = ? AND info_type = 'version'"
+    GET_VERSION = """
+        SELECT info 
+        FROM additional_information 
+        WHERE a_id = ? AND info_type = 'version'
+        """
 
     with sqlite.connect(DATABASE) as con:
         cur = con.cursor()
@@ -301,7 +318,11 @@ def update_automation_data(automation_id: int, automation_data: dict):
         automation_data: dict - the data of the automation
     """
 
-    UPDATE_AUTOMATION = "UPDATE automation SET autom_mode = ?, max_instances = ?, error = ? WHERE a_id = ?"
+    UPDATE_AUTOMATION = """
+        UPDATE automation 
+        SET autom_mode = ?, max_instances = ?, error = ? 
+        WHERE a_id = ?
+        """
 
     with sqlite.connect(DATABASE) as con:
         cur = con.cursor()
@@ -328,21 +349,23 @@ def get_automation_entities(automation_id: int, only_inputs: bool = False) -> li
     Returns:
         list - the entities of the automation (Entity objects)
     """
-    GET_ENTITIES = """SELECT integration.i_name, entity.e_name, ae.p_role, ae.parent, ae.position, ae.exp_val, entity.e_id
-                      FROM automation_entity AS ae 
-                      JOIN entity ON entity.e_id = ae.e_id 
-                      JOIN integration ON integration.i_id = entity.i_id 
-                      WHERE ae.a_id = ?
-                      ORDER BY ae.p_role, ae.position
-                   """
+    GET_ENTITIES = """
+        SELECT integration.i_name, entity.e_name, ae.p_role, ae.parent, ae.position, ae.exp_val, entity.e_id
+        FROM automation_entity AS ae 
+        JOIN entity ON entity.e_id = ae.e_id 
+        JOIN integration ON integration.i_id = entity.i_id 
+        WHERE ae.a_id = ?
+        ORDER BY ae.p_role, ae.position
+        """
 
-    GET_ONLY_INPUTS = """SELECT integration.i_name, entity.e_name, ae.p_role, ae.parent, ae.position, ae.exp_val, entity.e_id
-                         FROM automation_entity AS ae 
-                         JOIN entity ON entity.e_id = ae.e_id 
-                         JOIN integration ON integration.i_id = entity.i_id 
-                         WHERE ae.a_id = ? AND ae.p_role != 3
-                         ORDER BY ae.p_role, ae.position
-                      """
+    GET_ONLY_INPUTS = """
+        SELECT integration.i_name, entity.e_name, ae.p_role, ae.parent, ae.position, ae.exp_val, entity.e_id
+        FROM automation_entity AS ae 
+        JOIN entity ON entity.e_id = ae.e_id 
+        JOIN integration ON integration.i_id = entity.i_id 
+        WHERE ae.a_id = ? AND ae.p_role != 3
+        ORDER BY ae.p_role, ae.position
+        """
 
     with sqlite.connect(DATABASE) as con:
         cur = con.cursor()
@@ -379,9 +402,11 @@ def get_additional_inforamtion(automation_id: int) -> list:
     Returns:
         list - the additional information of the automation as tuples (info_type, info, removable)
     """
-    GET_ADDITIONAL_INFORMATION = (
-        "SELECT info_type, info FROM additional_information WHERE a_id = ?"
-    )
+    GET_ADDITIONAL_INFORMATION = """
+        SELECT info_type, info 
+        FROM additional_information 
+        WHERE a_id = ?
+        """
 
     with sqlite.connect(DATABASE) as con:
         cur = con.cursor()
@@ -467,16 +492,20 @@ def get_entity_possible_values(entity_id: int) -> dict:
         entity_id: int - the id of the entity
     """
     # TODO remove property = 'main' filter from the query
-    GET_POSSIBLE_INTEGRATION_VALUES = """SELECT pv.p_value, pv.property 
-                             FROM entity AS e 
-                             JOIN integration_values AS iv ON e.i_id = iv.i_id
-                             JOIN possible_values AS pv ON iv.pv_id = pv.pv_id
-                             WHERE e.e_id = ? AND pv.property = 'main'"""
+    GET_POSSIBLE_INTEGRATION_VALUES = """
+        SELECT pv.p_value, pv.property 
+        FROM entity AS e 
+        JOIN integration_values AS iv ON e.i_id = iv.i_id
+        JOIN possible_values AS pv ON iv.pv_id = pv.pv_id
+        WHERE e.e_id = ? AND pv.property = 'main'
+        """
 
     # add the manual created possible values of the entity itself
-    GET_POSSIBLE_AUTOMATION_ENTITY_VALUES = """SELECT tci.test_value 
-                                               FROM test_case_input AS tci 
-                                               WHERE tci.e_id = ?"""
+    GET_POSSIBLE_AUTOMATION_ENTITY_VALUES = """
+        SELECT tci.test_value 
+        FROM test_case_input AS tci 
+        WHERE tci.e_id = ?
+        """
 
     with sqlite.connect(DATABASE) as con:
         cur = con.cursor()

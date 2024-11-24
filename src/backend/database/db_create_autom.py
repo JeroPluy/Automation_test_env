@@ -13,6 +13,8 @@ from .db_utils import (
     update_additional_infos,
 )
 
+from backend.utils.env_helper import is_float_or_int
+
 import sqlite3 as sqlite
 
 
@@ -33,26 +35,33 @@ def _create_automation_in_db(automation_info: Automation):
 
     same_automation_ids = get_automations_with_same_name(a_name)
 
-    INSERT_AUTOMATION = "INSERT INTO automation (a_name, autom_mode, max_instances, script) VALUES (?, ?, ?, ?)"
+    INSERT_AUTOMATION = """
+        INSERT INTO automation (a_name, autom_mode, max_instances, script) 
+        VALUES (?, ?, ?, ?)
+        """
 
     with sqlite.connect(DATABASE) as con:
         cur = con.cursor()
 
         # get the versions of the automations with the same name
-        GET_VERSION = "SELECT add_info.info FROM additional_information AS add_info JOIN automation AS autom ON add_info.a_id == autom.a_id WHERE autom.a_id = ? AND info_type = 'version'"
+        GET_VERSION = """
+            SELECT add_info.info 
+            FROM additional_information AS add_info 
+            JOIN automation AS autom ON add_info.a_id == autom.a_id 
+            WHERE autom.a_id = ? AND info_type = 'version'
+            """
+
         autom_id: int = None
         for autom_id in same_automation_ids:
             cur.execute(GET_VERSION, (str(autom_id),))
             answer = cur.fetchone()
             if answer is not None:
-                if isinstance(answer[0], str):
-                    continue 
-                curr_version = int(answer[0])
+                curr_version = is_float_or_int(answer[0])
                 if curr_version >= version:
                     version = curr_version
 
         version += 1
-        
+
         # insert the new automation
         cur.execute(INSERT_AUTOMATION, (a_name, autom_mode, max_instances, script_path))
         a_id = cur.lastrowid
@@ -79,14 +88,16 @@ def _create_automation_entities_in_db(a_id, entities: list):
 
         # if the entity already exists in the database
         if validated_entity["entity_id"] is not None:
-            automation_entities.append((
-                a_id,
-                validated_entity["entity_id"],
-                entity.parameter_role,
-                entity.position,
-                str(entity.expected_value),
-                entity.parent,
-            ))
+            automation_entities.append(
+                (
+                    a_id,
+                    validated_entity["entity_id"],
+                    entity.parameter_role,
+                    entity.position,
+                    str(entity.expected_value),
+                    entity.parent,
+                )
+            )
         # if check for the integration
         else:
             # if integration is part of the database
@@ -106,21 +117,27 @@ def _create_automation_entities_in_db(a_id, entities: list):
                     e_id = cur.lastrowid
                     con.commit()
                     # add the new entity to the list to connect it to the automation in automation_entity
-                    automation_entities.append((
-                        a_id,
-                        e_id,
-                        entity.parameter_role,
-                        entity.position,
-                        str(entity.expected_value),
-                        entity.parent,
-                    ))
+                    automation_entities.append(
+                        (
+                            a_id,
+                            e_id,
+                            entity.parameter_role,
+                            entity.position,
+                            str(entity.expected_value),
+                            entity.parent,
+                        )
+                    )
             else:
                 raise ValueError(
                     f"Integration: '{entity.integration}' not found in the database. Please add the integration first."
                 )
 
     # insert the entities as automation entities into the database
-    CREATE_AUTOMATION_ENTITY = "INSERT INTO automation_entity (a_id, e_id, p_role, position, exp_val, parent) VALUES (?, ?, ?, ?, ?, ?)"
+    CREATE_AUTOMATION_ENTITY = """
+        INSERT INTO automation_entity (a_id, e_id, p_role, position, exp_val, parent) 
+        VALUES (?, ?, ?, ?, ?, ?)
+        """
+
     with sqlite.connect(DATABASE) as con:
         cur = con.cursor()
         cur.executemany(CREATE_AUTOMATION_ENTITY, automation_entities)
@@ -157,23 +174,26 @@ def add_additional_info(a_id: int, infos: list = []):
     # add the additional information to the database if it is not already there or update it if it is
     if infos != []:
         update_additional_infos(automation_id=a_id, add_infos=infos)
-    
+
     # ensure that the project and version info is added to the database regardless of the user input
     with sqlite.connect(DATABASE) as con:
         cur = con.cursor()
-        
+
         CHECK_INFOS = "SELECT info_type FROM additional_information WHERE a_id = ?"
-        
+
         cur.execute(CHECK_INFOS, (a_id,))
         result = cur.fetchall()
-        
+
         # inserting statement for missing data
-        ADD_INFOS = "INSERT INTO additional_information (a_id, info_type, info) VALUES (?, ?, ?)"
-        
+        ADD_INFOS = """
+            INSERT INTO additional_information (a_id, info_type, info) 
+            VALUES (?, ?, ?)
+            """
+
         if ("project",) not in result:
             cur.execute(ADD_INFOS, (a_id, "project", "uncategorized"))
             con.commit()
-            
+
         if ("version",) not in result:
             cur.execute(ADD_INFOS, (a_id, "version", "unknown"))
             con.commit()
@@ -196,9 +216,12 @@ def add_integration(
     def _check_for_same_pos_vals(property: str, pos_val: str) -> int:
         """check if a possible value type with the same property already exists in the databases"""
 
-        SELECT_POS_VAL = (
-            "SELECT pv_id FROM automation WHERE property = ? AND p_value = ?"
-        )
+        SELECT_POS_VAL = """
+            SELECT pv_id 
+            FROM automation 
+            WHERE property = ? AND p_value = ?
+            """
+
         with sqlite.connect(DATABASE) as con:
             cur = con.cursor()
             cur.execute(SELECT_POS_VAL, (property, pos_val))
@@ -223,9 +246,11 @@ def add_integration(
             possible_value_ids.append(id)
         else:
             # add the new possible value to the database
-            INSERT_POS_VAL = (
-                "INSERT INTO possible_values (property, p_value) VALUES (?, ?)"
-            )
+            INSERT_POS_VAL = """
+                INSERT INTO possible_values (property, p_value) 
+                VALUES (?, ?)
+                """
+
             with sqlite.connect(DATABASE) as con:
                 cur = con.cursor()
                 cur.execute(INSERT_POS_VAL, (value[0], value[1]))
@@ -244,9 +269,10 @@ def add_integration(
         con.commit()
 
     # connect the new integration with its possible values
-    INSERT_INTEGRATION_VALUES = (
-        "INSERT INTO integration_values (i_id, pv_id) VALUES (?, ?)"
-    )
+    INSERT_INTEGRATION_VALUES = """
+        INSERT INTO integration_values (i_id, pv_id) 
+        VALUES (?, ?)
+    """
     integration_values = [(i_id, pv_id) for pv_id in possible_value_ids]
     with sqlite.connect(DATABASE) as con:
         cur = con.cursor()
