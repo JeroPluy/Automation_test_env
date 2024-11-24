@@ -3,7 +3,7 @@ VALUES (
         'example_automation',
         0,
         1,
-        'AUTOMATION_SCRIPT_PATH\example_automation.py'
+        'data\automation_scripts\example_automation.py'
     );
 INSERT INTO additional_information (a_id, info_type, info)
 VALUES (1, "project", "example_project");

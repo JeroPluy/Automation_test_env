@@ -311,7 +311,7 @@ class EntityValueFrame(cW.BasisFrame):
 
         super().__init__(app=app, root=root, layer=2)
 
-        self.entity = entity
+        self.entity: Entity = entity
 
         self.test_value = default_value
 
@@ -331,9 +331,11 @@ class EntityValueFrame(cW.BasisFrame):
         self.changed = False
 
         self.list_frame = self.root.root.root
+        
+        label_text = entity_type + " " + str(entity_pos) + " " + str(self.entity.expected_value)
 
         self.entity_position_label = CTkLabel(
-            self, text=entity_type + " " + str(entity_pos), font=CTkFont(weight="bold")
+            self, text=label_text, font=CTkFont(weight="bold")
         )
 
         self.entity_name_label = CTkLabel(self, text=entity_name)

@@ -141,6 +141,7 @@ def get_entities(automation_id: int = None, automation_name: str = None) -> list
 
     Args:
         automation_id: int - the id of the automation
+        automation_name: str - the name of the automation
 
     Returns:
         list - the entities of the automation

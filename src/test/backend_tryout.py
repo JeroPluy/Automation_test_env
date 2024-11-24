@@ -16,6 +16,7 @@ from backend.utils.env_const import LATEST
 
 from backend import automation_gen as ag 
 from backend.database import db_utils as db
+from backend.database import db_create_autom as db_add
 
 DATABASE = path.join("data", "automation_test_env.sqlite")
 TEST_SCRIPT_DIR = path.join("src", "test", "test_automation_gen", "test_scripts")
@@ -58,7 +59,7 @@ def print_entity_data(entity):
 if __name__ == "__main__":
     
     # path to the automation script file which is to be tested
-    automation_name = "TV-Lighting-Living-Room"
+    automation_name = "Turn_off_living_room_main_light"
     
     # please add the automation.yaml file to the test_data/yaml_files/example_automations folder
     yaml_file = "turn_off_living_room_main_light.yaml"
@@ -68,15 +69,15 @@ if __name__ == "__main__":
     )
 
     # check if the file exists and look for the yaml file if it does not
-    # if not path.isfile(autoamtion_file):
-    #     print(f"File {autoamtion_file} does not exist")
+    if not path.isfile(autoamtion_file):
+        print(f"File {autoamtion_file} does not exist")
         
         
-    #     yaml_path = path.join("test_data", "yaml_files", "example_automations", LATEST , yaml_file)
+        yaml_path = path.join("test_data", "yaml_files", "example_automations", LATEST , yaml_file)
         
-    #     automation_data = ag.load_new_automation_data(yaml_path)
-    #     db.add_automation(automation_data)
-        
+        automation_data = ag.load_new_automation_data(yaml_path)
+        a_id = db_add.add_automation(automation_data)
+
     entity_list = db.get_entities(automation_name=automation_name)
     for entity in entity_list:
         print_entity_data(entity)

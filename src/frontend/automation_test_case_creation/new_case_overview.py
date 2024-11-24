@@ -183,6 +183,8 @@ class NavBtns(cW.NavigationButtons):
             case_priorities=priorities,
         )
         
+        self.root.app.entity_value_frame_dict = {}
+        
         # remove the current frame from the frame stack to go back to the previous frame 
         # before the test case creation after the test cases are added to the database
         self.root.app.frame_stack.pop()

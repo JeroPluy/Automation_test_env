@@ -39,8 +39,13 @@ def action_execution(input_vals) -> None:
 
 
 	# The end of the action section
-	print(json.dumps(action_results))
+	if action_results != []:
+		print(json.dumps(action_results))
+	else:
+		print(json.dumps({"AutomationResult": "No action results"}))
 
 if __name__ == "__main__":
 	if trigger_check(input_vals):
 		action_execution(input_vals)
+	else:
+		print(json.dumps({"AutomationResult":"No trigger detected"}))

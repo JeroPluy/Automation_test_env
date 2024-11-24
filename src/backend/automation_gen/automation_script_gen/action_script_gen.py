@@ -309,9 +309,13 @@ def close_action_section(filepath: str) -> None:
     Args:
         filepath (str): The path to the automation script file.
     """
-    script_context = (
-        "\n\t# The end of the action section\n\tprint(json.dumps(action_results))\n\n"
-    )
+    script_context = """
+\t# The end of the action section
+\tif action_results != []:
+\t\tprint(json.dumps(action_results))
+\telse:
+\t\tprint(json.dumps({"AutomationResult":"No action results"}))\n\n"""
+
     append_script_context_to_script(filepath, script_context)
 
     close_script(filepath)
