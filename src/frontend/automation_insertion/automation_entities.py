@@ -6,8 +6,8 @@ from frontend.customWidgets import customWidgets as cW
 from .automation_insertion_utils import EntityListFrame
 from .antomation_script import AutomationScriptFrame
 
-from backend import database as db
-
+from backend.database import db_create_autom as db_create
+ 
 
 class AutomationEntityFrame(cW.BasisFrame):
     """
@@ -190,9 +190,17 @@ class NavBtns(cW.NavigationButtons):
         
         # TODO apply the integration changes to the script creation and the entity structure
 
-        self.root.app.new_automation.a_id, self.root.app.new_automation.version = (
-            db.add_automation(self.root.app.new_automation.config)
-        )
+        try:
+            self.root.app.new_automation.a_id, self.root.app.new_automation.version = (
+                db_create.add_automation(self.root.app.new_automation.config)
+            )
+        except ValueError as e:
+            self.warning_popup = cW.PopupWarning(
+                self.root,
+                title=self.root.app.lang["ERROR_DETECT"],
+                message=e,
+            )
+            return
 
         automation = self.master.app.new_automation.config["infos"]
 

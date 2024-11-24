@@ -224,11 +224,12 @@ class MoreBtns(cW.NeutralButton):
 
         automation_name = db_utils.get_automation_name(self.automation_id)
 
+        self.master.app.selected_automation = self.automation_id
+
         self.master.app.load_new_frame(
             prev_frame=self.master,
             new_frame=aD.AutomationDetailsFrame(
                 app=self.master.app,
-                a_id=self.automation_id,
                 automation_name=automation_name,
             ),
             return_btn=True,

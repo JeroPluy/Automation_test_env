@@ -14,14 +14,13 @@ class AutomationInfosFrame(cW.BasisFrame):
     providing the user with the possibility to change them or add new ones
     """
 
-    def __init__(self, app, automation_name, a_id):
+    def __init__(self, app, automation_name):
         """
         Initialization of the automation information frame
 
         Args:
             app (customtkinter.CTK): the parent window of the automation information frame
             automation_name (str): the name of the new automation
-            a_id (str): the id of the new automation
         """
         super().__init__(app=app, layer=0)
 
@@ -94,12 +93,13 @@ class Nav_btn(cW.NavigationButtons):
         automation = self.master.app.new_automation.config["infos"]
 
         clear_automation_insertion_frames(self.master.app.frame_stack)
+        
+        self.master.app.selected_automation = self.master.app.new_automation.a_id
 
         self.master.app.load_new_frame(
             prev_frame=self.master,
             new_frame=aD.AutomationDetailsFrame(
                 app=self.master.app,
-                a_id=self.master.app.new_automation.a_id,
                 automation_name=automation.a_name,
             ),
             return_btn=True,

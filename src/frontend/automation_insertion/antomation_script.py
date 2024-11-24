@@ -67,7 +67,7 @@ class AutomationScriptFrame(cW.BasisFrame):
         self.nav_btns = self.navigation_buttons = NavBtns(
             root=self, values=(app.lang["FINISH"], app.lang["ADD_INFO"])
         )
-        
+
         # --- grid the elements ---
 
         # grid the main elements
@@ -76,7 +76,7 @@ class AutomationScriptFrame(cW.BasisFrame):
             row=1, column=0, sticky="news", pady=(15, 10), padx=(25)
         )
         self.navigation_buttons.grid(row=2, column=0, sticky="ew")
-        
+
         # make the content frame resizable depending on the window size
         self.columnconfigure(0, weight=1)
         self.rowconfigure(1, weight=1)
@@ -86,22 +86,19 @@ class AutomationScriptFrame(cW.BasisFrame):
         self.script_content.grid(
             row=1, column=0, sticky="news", padx=(10), pady=(0, 10)
         )
-        
+
         ## make the script textbox inside the content frame resizable
         self.main_content_frame.columnconfigure(0, weight=1)
         self.main_content_frame.rowconfigure(1, weight=1)
 
-        
         ## grid the elements inside the path label frame
         self.script_path_label.grid(
             row=0, column=0, sticky="w", padx=(10, 0), pady=(10)
         )
         self.path_label.grid(row=0, column=1, sticky="ew", padx=(5, 10), pady=(10))
-        
+
         ## make the path inside the path label frame resizable
         self.path_label_frame.columnconfigure(1, weight=1)
-
-
 
     def load_automation_script(self, script_path: str, textbox: CTkTextbox):
         """
@@ -145,11 +142,12 @@ class NavBtns(cW.NavigationButtons):
 
         clear_automation_insertion_frames(stack=self.master.app.frame_stack)
 
+        self.root.app.selected_automation = self.root.app.new_automation.a_id
+
         self.root.app.load_new_frame(
             prev_frame=self.root,
             new_frame=aD.AutomationDetailsFrame(
                 app=self.root.app,
-                a_id=self.root.app.new_automation.a_id,
                 automation_name=automation.a_name,
             ),
             return_btn=True,
@@ -166,7 +164,6 @@ class NavBtns(cW.NavigationButtons):
             new_frame=AutomationInfosFrame(
                 app=self.root.app,
                 automation_name=automation.a_name,
-                a_id=self.root.app.new_automation.a_id,
             ),
             return_btn=False,
         )

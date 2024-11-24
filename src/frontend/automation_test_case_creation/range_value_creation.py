@@ -366,9 +366,7 @@ class RangeFrame(cW.BasisFrame):
             self.end_val.grid(row=1, column=1, pady=(2, 0), padx=(0, 5), sticky="we")
             self.step_val.grid(row=1, column=2, pady=(2, 0), sticky="we")
 
-        self.columnconfigure(0, weight=1)
-        self.columnconfigure(1, weight=1)
-        self.columnconfigure(2, weight=1)
+        self.columnconfigure((0, 1, 2), weight=1)
         self.rowconfigure(0, weight=1)
 
     def get_int_range(self) -> list:
@@ -738,7 +736,7 @@ class NavBtns(cW.NavigationButtons):
             if len(value) < 5:
                 self.root.app.entity_value_frame_dict[
                     self.root.entity_id
-                ].entity_value_selection.set(str(value))
+                ].visible_value = (str(value))
             else:
                 showed_values: str = (
                     [str(val) for val in value[:3]]
@@ -747,7 +745,7 @@ class NavBtns(cW.NavigationButtons):
                 )
                 self.root.app.entity_value_frame_dict[
                     self.root.entity_id
-                ].entity_value_selection.set(str(showed_values))
+                ].visible_value = str(showed_values)
 
             self.root.app.entity_value_frame_dict[
                 self.root.entity_id

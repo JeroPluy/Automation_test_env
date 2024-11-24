@@ -13,18 +13,17 @@ class AutomationDetailsFrame(cW.BasisFrame):
     Main frame class for the automation details window
     """
 
-    def __init__(self, app, a_id, automation_name):
+    def __init__(self, app, automation_name):
         """
         Initialization of the AutomationDetailsFrame
 
         Args:
             app (customtkinter.CTK): the parent window of the automation details frame
-            a_id (int): the id of the automation which details are displayed
             automation_name (str): the name of the automation
         """
 
         super().__init__(app=app, layer=0)
-        
+
         if app.selected_project is None:
             nav_path = automation_name
         else:
@@ -37,10 +36,10 @@ class AutomationDetailsFrame(cW.BasisFrame):
         self.main_frame = AutomationDetailsContent(
             app=app,
             root=self,
-            a_id=a_id,
+            a_id=app.selected_automation,
         )
 
-        self.nav_btns = NavBtns(app=app, root=self, a_id=a_id)
+        self.nav_btns = NavBtns(app=app, root=self, a_id=app.selected_automation)
 
         # --- grid the elements ---
 
@@ -190,8 +189,7 @@ class MenuBtns(cW.BasisFrame):
         self.test_case_coll_btn.grid(row=0, column=0, sticky="w", padx=(15, 5))
         self.test_results_btn.grid(row=0, column=1, sticky="e", padx=(5, 15))
 
-        self.columnconfigure(0, weight=1)
-        self.columnconfigure(1, weight=1)
+        self.columnconfigure((0, 1), weight=1)
 
     def open_test_case_coll(self):
         # TODO open the test case collection
@@ -319,8 +317,7 @@ class InfoLabels(cW.BasisFrame):
         self.error_frame.grid(row=1, column=0, sticky="we", padx=(0, 5), pady=(5))
         self.max_inst_frame.grid(row=1, column=1, sticky="we", padx=(5, 0), pady=(5))
 
-        self.columnconfigure(0, weight=1)
-        self.columnconfigure(1, weight=1)
+        self.columnconfigure((0, 1), weight=1)
 
         ## grid the created elements
         self.created_label.grid(row=0, column=0, sticky="w", pady=(2, 2), padx=(10, 2))
@@ -357,11 +354,11 @@ class InfoLabels(cW.BasisFrame):
         Returns:
             dict: the changeable information as a dictionary
         """
-        
+
         autom_value = self.a_mode_dropdown.get()
-        
+
         if autom_value == self.app.lang["SINGLE"]:
-            autom_mode = 0 
+            autom_mode = 0
         elif autom_value == self.app.lang["RESTART"]:
             autom_mode = 1
         elif autom_value == self.app.lang["QUEUED"]:
@@ -372,8 +369,9 @@ class InfoLabels(cW.BasisFrame):
         return {
             "autom_mode": autom_mode,
             "max_instances": self.max_instances_value.get(),
-            "error": None, 
+            "error": None,
         }
+
 
 class EntityParamsFrame(cW.BasisFrame):
     """
@@ -514,7 +512,7 @@ class NavBtns(cW.NavigationButtons):
         Button 2 function to save the changes to the automation details in the database
         and go back to the automation selection overview
         """
-        
+
         automation_infos = self.root.main_frame.info_labels.get_changable_infos()
         db_utils.update_automation_data(self.a_id, automation_infos)
 

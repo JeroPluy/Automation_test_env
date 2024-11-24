@@ -19,16 +19,13 @@ class CaseCreationFrame(cW.BasisFrame):
         Initialization of the test case creation frame
         Args:
             app (test_environment_app.AppWindow): the application window
-            a_id (int): the id of the automation
         """
 
         super().__init__(app=app)
 
         self.app = app
 
-        a_id = app.selected_automation
-
-        automation_name = db_utils.get_automation_name(a_id)
+        automation_name = db_utils.get_automation_name(app.selected_automation)
 
         if app.selected_project is None:
             nav_path = automation_name
@@ -39,13 +36,12 @@ class CaseCreationFrame(cW.BasisFrame):
             self, mode=app.settings["MODE"], nav_path=nav_path
         )
 
-        self.nav_btns = NavBtns(app=app, root=self, automation_id=a_id)
+        self.nav_btns = NavBtns(app=app, root=self)
 
         # needs to be initialized here to be able to access the nav_btns from the test case settings frame
         self.main_frame = TestCaseSettings(
             app=app,
             root=self,
-            a_id=a_id,
         )
 
         # --- grid the elements ---
@@ -67,21 +63,20 @@ class TestCaseSettings(cW.BasisFrame):
     Subframe for the test case settings like entity values, requirements and priority
     """
 
-    def __init__(self, app, root, a_id):
+    def __init__(self, app, root):
         """
         Initialization of the test case settings frame
 
         Args:
             app (test_environment_app.AppWindow): the application window
             root (cW.BasisFrame): the parent frame
-            a_id (int): the id of the automation
         """
 
         super().__init__(app=app, root=root, layer=1)
 
         self.app = app
 
-        self.entity_value_list = EntityValueList(app=app, root=self, a_id=a_id)
+        self.entity_value_list = EntityValueList(app=app, root=self)
 
         # TODO: disable the import button if the automation has no other versions available in the database to import from
         self.import_test_case_btn = cW.NeutralButton(
@@ -133,32 +128,39 @@ class TestCaseSettings(cW.BasisFrame):
 
         return self.entity_value_list.get_selected_values()
 
+    def get_add_settings_infos(self) -> dict:
+        """
+        Function to get the additional settings (requirement and priority) of the test case
+
+        Returns:
+            dict: containing the requirement and priority of the test case
+        """
+
+        return self.add_settings_frame.get_requirement_and_priority()
+
 
 class EntityValueList(cW.BasisScrollFrame):
     """
     Subframe for the list of entity values
     """
 
-    def __init__(self, app, root, a_id):
+    def __init__(self, app, root):
         """
         Initialization of the entity value list frame
 
         Args:
             app (test_environment_app.AppWindow): the application window
             root (cW.BasisFrame): the parent frame
-            a_id (int): the id of the automation
         """
 
         super().__init__(app=app, root=root, scroll_direction="y")
 
         self.app = app
 
-        self.a_id = a_id
-
         self.selected_options: int = 0
 
         self.entities: list = db_utils.get_automation_entities(
-            automation_id=a_id, only_inputs=True
+            automation_id=self.app.selected_automation, only_inputs=True
         )
 
         if not hasattr(self.app, "entity_value_frame_dict"):
@@ -184,9 +186,9 @@ class EntityValueList(cW.BasisScrollFrame):
                     entity.entity_id
                 )
 
-                possible_values = [app.lang["MULTIPLE_VALS"]] + list(
-                    possible_values_dict.keys()
-                )
+                possible_values_list = [str(key) for key in possible_values_dict.keys()]
+
+                possible_values = [app.lang["MULTIPLE_VALS"]] + possible_values_list
 
                 entity_value_frame = EntityValueFrame(
                     app=app,
@@ -202,9 +204,7 @@ class EntityValueList(cW.BasisScrollFrame):
                 old_entity_value_frame = self.app.entity_value_frame_dict[
                     entity.entity_id
                 ]
-                selected_value: str = old_entity_value_frame.get_selected_value()[
-                    "shown_value"
-                ]
+                selected_value: str = old_entity_value_frame.visible_value
 
                 if selected_value == self.app.lang["MULTIPLE_VALS"]:
                     selected_value = "-"
@@ -268,6 +268,25 @@ class EntityValueList(cW.BasisScrollFrame):
 
         return selected_values
 
+    def save_test_values(self):
+        """
+        Function to save the typed values in the entity value frames before switching to the range value frame
+        """
+
+        for entity_id in self.app.entity_value_frame_dict:
+            entity_value_frame = self.app.entity_value_frame_dict[entity_id]
+
+            if entity_value_frame.specified_value:
+                entity_value_frame.visible_value = entity_value_frame.specify_edit.get()
+                if entity_value_frame.visible_value == "":
+                    entity_value_frame.visible_value = "-"
+                else:
+                    entity_value_frame.test_value = entity_value_frame.visible_value
+            else:
+                entity_value_frame.visible_value = (
+                    entity_value_frame.entity_value_selection.get()
+                )
+
 
 class EntityValueFrame(cW.BasisFrame):
     """
@@ -317,6 +336,8 @@ class EntityValueFrame(cW.BasisFrame):
 
         self.entity_name_label = CTkLabel(self, text=entity_name)
 
+        # TODO save typed inputs in test_value
+
         self.entity_value_selection = cW.FramendComboBox(
             root=self,
             values=possible_values,
@@ -351,6 +372,9 @@ class EntityValueFrame(cW.BasisFrame):
         """
 
         if value == self.app.lang["MULTIPLE_VALS"]:
+            # save entry values before switching to the range value frame
+            self.list_frame.save_test_values()
+
             # load the range value frame
             self.app.load_new_frame(
                 prev_frame=self.list_frame.root.root,
@@ -374,6 +398,13 @@ class EntityValueFrame(cW.BasisFrame):
                     justify="right",
                 )
 
+                # shortening the name label to make space for the entry field
+                self.entity_name_label.configure(
+                    text=self.entity.entity_name
+                    if len(self.entity.entity_name.split(".")[1]) < 30
+                    else self.entity.entity_name[:30] + "...",
+                )
+
                 self.specify_edit.grid(
                     row=1, column=3, sticky="ew", pady=(0, 8), padx=(10, 10)
                 )
@@ -384,6 +415,7 @@ class EntityValueFrame(cW.BasisFrame):
 
                 if hasattr(self, "specify_edit"):
                     self.specify_edit.destroy()
+                    self.entity_name_label.configure(text=self.entity.entity_name)
 
             if not self.changed:
                 self.changed = True
@@ -396,18 +428,23 @@ class EntityValueFrame(cW.BasisFrame):
         Function to get the selected value of the entity
 
         Returns:
-            dict: containing the entity id and the selected value
+            dict: containing the autoamtion entity and the test value
+                  if form of the variable value and the shown string value (for reloading the frame)
         """
 
         if self.specified_value:
             return {
-                "entity_id": self.entity.entity_id,
-                "value": self.specify_edit.get(),
+                "entity": self.entity,
+                "a_id": self.app.selected_automation,
+                "test_value": self.specify_edit.get(),
+                "shown_value": self.entity_value_selection.get(),
             }
+
         else:
             return {
-                "entity_id": self.entity.entity_id,
-                "value": self.test_value,
+                "entity": self.entity,
+                "a_id": self.app.selected_automation,
+                "test_value": self.test_value,
                 "shown_value": self.entity_value_selection.get(),
             }
 
@@ -467,20 +504,32 @@ class AddSettingsFrame(cW.BasisFrame):
 
         self.columnconfigure(0, weight=1)
 
+    def get_requirement_and_priority(self) -> dict:
+        """
+        Function to get the additional settings (requirement and priority) of the test case
+
+        Returns:
+            dict: containing the requirement and priority of the test case
+        """
+
+        return {
+            "requirement": self.req_string.get(),
+            "priority": self.prio_value.get(),
+        }
+
 
 class NavBtns(cW.NavigationButtons):
     """
     Class for the navigation buttons of the test case creation frame
     """
 
-    def __init__(self, app, root, automation_id):
+    def __init__(self, app, root):
         """
         Initialization of the navigation buttons
 
         Args:
             app (test_environment_app.AppWindow): the application window
             root (cW.BasisFrame): the parent frame
-            automation_id (int): the id of the automation
         """
 
         super().__init__(
@@ -493,8 +542,6 @@ class NavBtns(cW.NavigationButtons):
         self.btn_2.configure(state="disabled")
 
         self.root = root
-
-        self.automation_id = automation_id
 
     def btn_1_func(self):
         self.root.app.go_back(self.root)

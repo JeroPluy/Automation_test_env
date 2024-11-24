@@ -339,6 +339,8 @@ class CustomNavButtons(cW.NavigationButtons):
                         automation_name=automation.a_name,
                     ),
                 )
+                # remove the loading frame from the frame stack
+                self.master.app.frame_stack.pop()
 
         # Start the validation and loading thread to prevent the GUI from freezing
         validate_thread = Thread(target=validate_and_load)

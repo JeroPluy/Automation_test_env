@@ -51,7 +51,7 @@ class EntityListFrame(cW.BasisScrollFrame):
             self.element_frame.rowconfigure(0, weight=1)
 
             self.entity_frame_list.append(entity_frame)
-            
+
             # --- grid the elements ---
 
             entity_frame.grid(
@@ -122,7 +122,7 @@ class EntityFrame(cW.BasisFrame):
             command=self.change_integration,
             state="disabled" if locked else "normal",
         )
-        
+
         # --- grid the elements ---
 
         # grid the elements inside the entity frame
@@ -132,7 +132,7 @@ class EntityFrame(cW.BasisFrame):
         self.entity_integration_select.grid(
             row=0, column=1, sticky="e", pady=(8, 8), padx=(0, 10)
         )
-        
+
         # the entity name is expandable with the window size
         self.columnconfigure(0, weight=1)
 
@@ -226,7 +226,7 @@ class AdditionalInfoListFrame(cW.BasisFrame):
             command=self.add_info,
             width=260,
         )
-        
+
         # --- grid the elements ---
 
         self.info_type_label.grid(
@@ -242,8 +242,7 @@ class AdditionalInfoListFrame(cW.BasisFrame):
         )
 
         # make the info list frame inside the content frame resizable
-        self.columnconfigure(0, weight=1)
-        self.columnconfigure(1, weight=1)
+        self.columnconfigure((0, 1), weight=1)
         self.rowconfigure(1, weight=1)
 
     def add_info(self, removeable=True):
@@ -327,7 +326,7 @@ class InformationFrame(cW.BasisFrame):
 
         if removeable is False:
             self.delete_btn.configure(state="disabled")
-            
+
         # --- grid the elements ---
 
         self.info_type_entry.grid(row=0, column=0, sticky="we", padx=(0, 10))
@@ -335,8 +334,7 @@ class InformationFrame(cW.BasisFrame):
         self.delete_btn.grid(row=0, column=2, sticky="e")
 
         self.rowconfigure(0, weight=1)
-        self.columnconfigure(0, weight=1)
-        self.columnconfigure(1, weight=1)
+        self.columnconfigure((0, 1), weight=1)
 
     def delete_info(self):
         """
@@ -349,11 +347,17 @@ class InformationFrame(cW.BasisFrame):
         Returns the information contained in the information frame
 
         Returns:
-            dict: the information as dictionary {"info_type": str, "info_content": str}
+            dict: the information as dictionary {"info_type": str, "info_content": str | int | float}
         """
+
+        content = self.info_content_entry.get()
+
+        if content == "":
+            content = None
+
         return {
             "info_type": self.info_type_entry.get(),
-            "info_content": self.info_content_entry.get(),
+            "info_content": content,
         }
 
 

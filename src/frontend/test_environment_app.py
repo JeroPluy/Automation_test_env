@@ -100,14 +100,18 @@ class AppWindow(CTk):
 
         Args:
             old_frame (cW.BasisFrame): the current frame before going back
+            
+        Returns:
+            cW.BasisFrame: the new frame that is displayed
         """
         if len(self.frame_stack) > 1:
             self.frame_stack.pop()
 
             new_frame_class = self.frame_stack[-1]
             new_frame = new_frame_class(self)
-            self.load_new_frame(old_frame, new_frame)
+            new_frame = self.load_new_frame(old_frame, new_frame)
             self.frame_stack.pop()
+            return new_frame
         else:
             print("Error: No previous frame found")
 
