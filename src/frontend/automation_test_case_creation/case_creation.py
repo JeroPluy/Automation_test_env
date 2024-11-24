@@ -6,6 +6,8 @@ from backend.utils.env_helper_classes import Entity
 
 from customtkinter import CTkEntry, CTkFont, CTkLabel
 
+from .new_case_overview import NewCaseOverview
+
 from .range_value_creation import RangeValueFrame
 
 
@@ -548,6 +550,15 @@ class NavBtns(cW.NavigationButtons):
         del self.root.app.entity_value_frame_dict
 
     def btn_2_func(self):
-        # TODO create test case and hand over the values to the table overview frame
-        print("Create test case for automation: " + str(self.automation_id))
-        print(self.root.main_frame.get_inputs())
+        self.root.main_frame.entity_value_list.save_test_values()
+
+        self.root.app.load_new_frame(
+            prev_frame=self.root,
+            new_frame=NewCaseOverview(
+                app=self.root.app,
+                navigation_path=self.root.nav_bar.get_nav_path(),
+                test_case_value_list=self.root.main_frame.get_inputs(),
+                test_case_infos=self.root.main_frame.get_add_settings_infos(),
+            ),
+            return_btn=True,
+        )

@@ -199,11 +199,11 @@ class BasisScrollFrame(BasisFrame):
         # set the scroll frame as wide as the basic frame allows
         self.content.grid(row=0, column=0, sticky="news", pady=(2, 2), padx=(2, 2))
 
-        # set the scroll frame as wide as the basic frame allows
+        # make the scroll frame expandable
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
 
-    def add_element_frame(self, row: int = 0, column: int = 0, layer: int = None):
+    def add_element_frame(self, row: int = 0, column: int = 0, layer: int = None, expand: bool = False):
         """
         Function to add a element frame to the scroll frame (self.content) to hold the widgets and elements of the application.
 
@@ -219,7 +219,7 @@ class BasisScrollFrame(BasisFrame):
         element_layer = self.layer + 1 if layer is None else layer
 
         self.element_frame = BasisFrame(
-            app=self.app, root=self.content, layer=element_layer
+            app=self.app, root=self.content, layer=element_layer,
         )
 
         self.element_frame.grid(
@@ -229,8 +229,14 @@ class BasisScrollFrame(BasisFrame):
             pady=(5, 5),
             padx=(15, 15),
         )
+        
+        if expand:
+            self.content.columnconfigure(column, weight=1)
+            self.content.rowconfigure(row, weight=1)
 
         self.content.element_frames.append(self.element_frame)
+        
+        return self.element_frame
 
     def delete_content_frame(
         self, element_frame: BasisFrame, row: int = 0, column: int = 0

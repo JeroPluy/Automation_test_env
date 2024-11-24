@@ -201,10 +201,20 @@
         "Requirement",
         "Anforderung"
     ],
+    "REQUIREMENT_SHORT":
+    [
+        "Req.",
+        "Anf."
+    ],
     "PRIORITY":
     [
         "Priority",
         "Priorität"
+    ],
+    "PRIORITY_SHORT":
+    [
+        "Prio.",
+        "Prio."
     ],
     "CREATE":
     [

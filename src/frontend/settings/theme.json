@@ -139,6 +139,10 @@
     "hover_color": ["gray75", "gray28"],
     "text_color": ["gray10", "gray90"]
   },
+  "CTkTable":{
+    "header_color": ["#1D91DA", "#1D91DA"],
+    "hover_color": ["#86C8F3", "#86c8f3"]
+  },
   "CTkFont": {
     "macOS": {
       "family": "SF Display",
