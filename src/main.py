@@ -1,6 +1,14 @@
-# Description: This is the main file of the project
-# At the moment the project is not fully implemented yet.
+"""
+Description: This is the main file of the project (work in progress).
 
-# Please use the /test/*_tryout.py to test the projects functionalities.
+This file is used to start the application.
 
-print("\n\n!!! The project is not fully implemented yet. Please use the test/*_tryout.py files to test the project. !!!\n\n")
+Please use the /test/*_tryout.py to test the projects functionalities.
+"""
+
+from frontend.test_environment_app import AppWindow
+
+
+if __name__ == "__main__":
+    app = AppWindow()
+    app.mainloop()

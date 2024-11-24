@@ -129,7 +129,8 @@ class TestWindow(BlankWindow):
         self.frame_into_frame = customtkinter.CTkFrame(self.frame)
         self.window_btn = customtkinter.CTkButton(
             self.scrollable_frame, text="new window", command=self.create_window
-        )
+        )        
+        
         self.entry = customtkinter.CTkEntry(
             self.scrollable_frame, placeholder_text="placeholderText"
         )
@@ -239,16 +240,16 @@ class TestWindow(BlankWindow):
             corner_radius=0,
             wraplength=200,
             values=table_data,
-            header_color="#1D91DA",
             write=False,
             hover=True,
+            multi_select=True,
             command=self.select_row_and_data,
         )
         self.selected_tb_data = None
 
-        self.navigation_btns = cW.NavigationButtons(
-            self, values=[self.lang["BACK"], self.lang["NEXT"]]
-        )
+        self.navigation_btns = TestNavBtns(self, ("Button 1", "Button 2"))  
+        
+
 
         # grid the widgets
         
@@ -298,8 +299,7 @@ class TestWindow(BlankWindow):
 
         self.navigation_btns.grid(row=0, column=2)
 
-        self.grid_columnconfigure(0, weight=1)
-        self.grid_columnconfigure(1, weight=1)
+        self.columnconfigure((0, 1), weight=1)
 
     def change_theme(self):
         """
@@ -437,12 +437,23 @@ class TestWindow(BlankWindow):
                         contains: {"row": i, "column" : j, "value" : value, "args": args}
         """
         # self.data[i,j] = {"row": i, "column" : j, "value" : value, "args": args}
-        if self.selected_tb_data is not None:
-            self.table.deselect_row(self.selected_tb_data["row"])
-        self.selected_tb_data = data
-        print(self.selected_tb_data)
-        self.table.select_row(self.selected_tb_data.get("row"))
+        # if self.selected_tb_data is not None:
+        #     self.table.deselect_row(row)
+        self.table.select_row(data.get("row"))
+    
 
+
+class TestNavBtns(cW.NavigationButtons):
+    def __init__(self, root, values):
+        super().__init__(root=root, values=values)
+        self.root = root
+
+    def btn_1_func(self):
+        print("Button 1 clicked")
+        print(self.root.table.get_selected_rows())
+        
+    def btn_2_func(self):
+        print("Button 2 clicked")
 
 class TestWindow2(BlankWindow):
     def __init__(self):
@@ -504,5 +515,5 @@ class TestWindow2(BlankWindow):
 if __name__ == "__main__":
 
     # app = AutoamtionAdditon(self.lang["PROJECT"] + "/" + self.lang["NEW_A"])
-    app = TestWindow2()
+    app = TestWindow()
     app.mainloop()

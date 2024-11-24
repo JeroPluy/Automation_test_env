@@ -115,7 +115,3 @@ class AppWindow(CTk):
         else:
             print("Error: No previous frame found")
 
-
-if __name__ == "__main__":
-    app = AppWindow()
-    app.mainloop()

@@ -11,11 +11,11 @@ In some environments, the PYTHONPATH needs to be set to the src directory.
 from asyncio import run as async_run
 from os import path
 
-from backend.automation_testing.test_execution import run_async_automation, run_sync_automation
+from backend.automation_testing.test_execution import _run_async_automation, _run_sync_automation
 from backend.utils.env_const import LATEST
 
 from backend import automation_gen as ag 
-from backend.database import src as db
+from backend.database import db_utils as db
 
 DATABASE = path.join("data", "automation_test_env.sqlite")
 TEST_SCRIPT_DIR = path.join("src", "test", "test_automation_gen", "test_scripts")
@@ -58,7 +58,7 @@ def print_entity_data(entity):
 if __name__ == "__main__":
     
     # path to the automation script file which is to be tested
-    automation_name = "Turn_off_living_room_main_light"
+    automation_name = "TV-Lighting-Living-Room"
     
     # please add the automation.yaml file to the test_data/yaml_files/example_automations folder
     yaml_file = "turn_off_living_room_main_light.yaml"
@@ -68,14 +68,14 @@ if __name__ == "__main__":
     )
 
     # check if the file exists and look for the yaml file if it does not
-    if not path.isfile(autoamtion_file):
-        print(f"File {autoamtion_file} does not exist")
+    # if not path.isfile(autoamtion_file):
+    #     print(f"File {autoamtion_file} does not exist")
         
         
-        yaml_path = path.join("test_data", "yaml_files", "example_automations", LATEST , yaml_file)
+    #     yaml_path = path.join("test_data", "yaml_files", "example_automations", LATEST , yaml_file)
         
-        automation_data = ag.load_new_automation_data(yaml_path)
-        db.add_automation(automation_data)
+    #     automation_data = ag.load_new_automation_data(yaml_path)
+    #     db.add_automation(automation_data)
         
     entity_list = db.get_entities(automation_name=automation_name)
     for entity in entity_list:
@@ -87,16 +87,16 @@ if __name__ == "__main__":
     # con:            None:   0:      light.main_light_living_room :  {'state': 'on'}
     # action-con:     None:   1:      media_player.living_room :      {'state': 'playing'}
 
-    trigger_input_vals = [None, "off"]
+    trigger_input_vals = [None, "on"]
     condition_input_vals = ["on"]
     action_input_vals = ["paused"]
     
 
     input_vals = [trigger_input_vals, condition_input_vals, action_input_vals]
 
-    sync_result = run_sync_automation(autoamtion_file, input_vals)
+    sync_result = _run_sync_automation(autoamtion_file, input_vals)
 
-    async_result = async_run(run_async_automation(autoamtion_file, input_vals))
+    async_result = async_run(_run_async_automation(autoamtion_file, input_vals))
 
     print(sync_result)
     print(async_result)

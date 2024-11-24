@@ -1,0 +1,23 @@
+alias: Hintergrundlicht einschalten
+description: Test-Automation
+triggers:
+  - trigger: state
+    entity_id:
+      - cover.living_room_window
+    from: open
+    to: closing
+conditions:
+  - condition: state
+    entity_id: sun.sun
+    state: below_horizon
+actions:
+  - condition: state
+    entity_id: light.atmo_lights_living_room
+    state: "off"
+  - action: light.turn_on
+    metadata: {}
+    data:
+      brightness_pct: 10
+    target:
+      entity_id: light.atmo_lights_living_room
+mode: single

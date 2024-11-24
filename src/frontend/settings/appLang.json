@@ -305,5 +305,30 @@
     [
         "Invalid step size format. Please use a valid number bigger than 0.",
         "Ungültiges Schrittweitenformat. Bitte verwenden Sie eine gültige Zahl größer als 0."
+    ],
+    "NEW_TC":
+    [
+        "add new test case",
+        "Neuen Testfall erstellen"
+    ],
+    "PRESELECT":
+    [
+        "Preselect",
+        "Vorauswahl"
+    ],
+    "SAVE_COLLECTION":
+    [
+        "Save collection",
+        "Sammlung speichern"
+    ],
+    "SIMULTAN":
+    [
+        "Simultaneous execution",
+        "Gleichzeitige Ausführung"
+    ],
+    "START_TEST":
+    [
+        "Start test",
+        "Test starten"
     ]
 }

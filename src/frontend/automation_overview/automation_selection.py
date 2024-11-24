@@ -4,8 +4,10 @@ from backend.database import db_utils
 from backend.database.db_utils import load_automations
 from frontend.automation_details import automation_details_main as aD
 from frontend.automation_insertion import AutomationCreationFrame
-from frontend.automation_test_case_creation import CaseCreationFrame
 from frontend.customWidgets import customWidgets as cW
+from frontend.automation_test_case_creation import CaseCreationFrame
+
+from ..automation_test_case_selection.test_case_overview import TestCaseSelectionFrame
 
 
 class AutomationSelectionFrame(cW.BasisFrame):
@@ -268,13 +270,26 @@ class NavBtns(cW.NavigationButtons):
         self.app.selected_automation = (
             self.master.automation_list_frame.selected_automation.get()
         )
-        self.app.load_new_frame(
-            prev_frame=self.master,
-            new_frame=CaseCreationFrame(
-                app=self.app,
-            ),
-            return_btn=True,
-        )
+
+        # if there are no test cases, go to the test case creation frame
+        if db_utils.has_test_cases(self.app.selected_automation):          
+            self.app.load_new_frame(
+                prev_frame=self.master,
+                new_frame=TestCaseSelectionFrame(
+                    app=self.app,
+                ),
+                return_btn=True,
+            )
+        else:
+            # if there are no test cases, go to the test case creation frame 
+            
+            self.app.load_new_frame(
+                prev_frame=self,
+                new_frame=CaseCreationFrame(
+                    app=self.app,
+                ),
+                return_btn=True,
+            )
 
     def btn_2_func(self):
         """

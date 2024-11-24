@@ -530,3 +530,103 @@ def get_entity_possible_values(entity_id: int) -> dict:
             possible_values[value[0]] = "manual input"
 
     return possible_values
+
+
+def has_test_cases(automation_id: int) -> bool:
+    """
+    Check if the automation has test cases
+
+    Args:
+        automation_id: int - the id of the automation
+
+    Returns:
+        bool - True if the automation has test cases, False otherwise
+    """
+    GET_TEST_CASES = "SELECT case_id FROM test_case WHERE a_id = ?"
+
+    with sqlite.connect(DATABASE) as con:
+        cur = con.cursor()
+        cur.execute(GET_TEST_CASES, (automation_id,))
+        result = cur.fetchone()
+
+    return result is not None
+
+
+def load_test_cases(automation_id: int) -> list:
+    """
+    Load the test cases of the automation
+
+    Args:
+        automation_id: int - the id of the automation
+
+    Returns:
+        list - the test cases of the automation as dictionaries with keys "case_id", "timestamp", "case_inputs"
+    """
+    GET_TEST_CASES_INFOS = """
+        SELECT tc.case_id, tc.c_timestamp, tc.requirement, tc.case_priority
+        FROM test_case AS tc 
+        WHERE tc.a_id = ?
+        """
+
+    GET_TEST_CASE_INPUTS = """
+        SELECT tci.test_value, tci.e_id, tci.p_role, tci.position, e.e_name
+        FROM test_case_input AS tci
+        JOIN entity AS e ON tci.e_id = e.e_id
+        WHERE tci.case_id = ?
+        """
+
+    with sqlite.connect(DATABASE) as con:
+        cur = con.cursor()
+        cur.execute(GET_TEST_CASES_INFOS, (automation_id,))
+        result = cur.fetchall()
+
+        cases = []
+        for case in result:
+            cur.execute(GET_TEST_CASE_INPUTS, (case[0],))
+            case_inputs = cur.fetchall()
+
+            input_list = []
+            for input in case_inputs:
+                case_input = {
+                    "test_value": input[0],
+                    "e_id": input[1],
+                    "p_role": input[2],
+                    "position": input[3],
+                    "e_name": input[4],
+                }
+                input_list.append(case_input)
+
+            cases.append(
+                {
+                    "case_id": case[0],
+                    "timestamp": case[1],
+                    "case_inputs": input_list,
+                    "requirement": case[2],
+                    "priority": case[3],
+                }
+            )
+
+    return cases
+
+
+def get_entity_names(entity_ids: list) -> list:
+    """
+    Get the names of the entities
+
+    Args:
+        entity_ids: list - the ids of the entities
+
+    Returns:
+        list - the names of the entities
+    """
+    GET_ENTITY_NAMES = "SELECT e_name FROM entity WHERE e_id = ?"
+
+    with sqlite.connect(DATABASE) as con:
+        cur = con.cursor()
+        entity_names = []
+        for entity_id in entity_ids:
+            cur.execute(GET_ENTITY_NAMES, (entity_id,))
+            result = cur.fetchone()
+            entity_names.append(result[0])
+
+    return entity_names
