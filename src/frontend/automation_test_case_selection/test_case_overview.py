@@ -397,4 +397,5 @@ class NavBtns(cW.NavigationButtons):
                 self.root.content_frame.autom_mode,
             )
 
-        print("results: ", results)
+        for result in results:
+            print(result)
