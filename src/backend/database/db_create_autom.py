@@ -57,7 +57,7 @@ def _create_automation_in_db(automation_info: Automation):
             answer = cur.fetchone()
             if answer is not None:
                 curr_version = is_float_or_int(answer[0])
-                if curr_version >= version:
+                if not isinstance(curr_version, str) and curr_version >= version:
                     version = curr_version
 
         version += 1
