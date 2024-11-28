@@ -114,6 +114,8 @@ class ProjectFrame(cW.BasisFrame):
             project_icon_black (str): the name of the black project icon
         """
         self.root = root
+        
+        self.project = project_name
 
         super().__init__(app=app, root=root, layer=1)
 
@@ -121,6 +123,19 @@ class ProjectFrame(cW.BasisFrame):
         self.project_button = ProjectButton(
             self, project_icon_white, project_icon_black
         )
+        
+        project_name_str = project_name.replace("_", " ").split()
+        word_len = 0
+        for i, word in enumerate(project_name_str):
+            if i == 0:
+                project_name = word
+                word_len = len(word)
+            elif word_len < 100:
+                project_name += " " + word
+                word_len += len(word) + 1
+            else:
+                project_name += "\n" + word
+                word_len = 0
 
         self.project_name = cW.CTkLabel(
             self,
@@ -134,7 +149,7 @@ class ProjectFrame(cW.BasisFrame):
         self.project_button.grid(
             row=0, column=0, sticky="news", pady=(5, 5), padx=(5, 5)
         )
-        self.project_name.grid(row=1, column=0, sticky="ew", pady=(5, 5), padx=(5, 5))
+        self.project_name.grid(row=1, column=0, sticky="ews", pady=(5, 5), padx=(5, 5))
 
         # make the project button resizable depending on the window size
         self.columnconfigure(0, weight=1)
@@ -194,7 +209,7 @@ class ProjectButton(cW.CTkButton):
 
         if self.selected:
             self.configure(fg_color="#1D91DA")
-            self.master.root.choosen_project = self.master.project_name.cget("text")
+            self.master.root.choosen_project = self.master.project
             self.master.root.selected_frame = self.master
 
 
