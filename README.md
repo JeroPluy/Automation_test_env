@@ -3,6 +3,7 @@
 ## Introduction
 
 This repository contains the application and its individual components of the test environment for Home Assistant automations.
+The project is still in developement and currently on hold until I find time to continue working on it.
 
 ## Structure
 
